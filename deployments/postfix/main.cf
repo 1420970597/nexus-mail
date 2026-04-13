@@ -1,0 +1,25 @@
+# Nexus-Mail Postfix ingress sample
+# 目标：宿主机监听 25 端口，收到的邮件统一转发到 docker 网络中的 mail-ingest:2525
+
+myhostname = mx.nexus-mail.local
+myorigin = $myhostname
+mydestination = localhost
+inet_interfaces = all
+inet_protocols = ipv4
+relay_domains = *
+local_recipient_maps =
+transport_maps =
+virtual_transport = smtp:[mail-ingest]:2525
+relay_transport = smtp:[mail-ingest]:2525
+smtp_host_lookup = dns, native
+smtp_dns_support_level = enabled
+smtp_tls_security_level = may
+smtpd_tls_security_level = may
+smtpd_banner = Nexus-Mail Postfix Ingress
+message_size_limit = 10485760
+mailbox_size_limit = 0
+recipient_delimiter = +
+unknown_local_recipient_reject_code = 550
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    reject_unauth_destination
