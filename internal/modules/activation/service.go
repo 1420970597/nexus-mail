@@ -149,6 +149,8 @@ func (s *Service) CreateProviderAccount(ctx context.Context, supplierID int64, i
 	input.Host = strings.TrimSpace(strings.ToLower(input.Host))
 	input.AccessToken = strings.TrimSpace(input.AccessToken)
 	input.RefreshToken = strings.TrimSpace(input.RefreshToken)
+	input.CredentialSecret = strings.TrimSpace(input.CredentialSecret)
+	input.SecretRef = strings.TrimSpace(input.SecretRef)
 	input.BridgeEndpoint = strings.TrimSpace(strings.ToLower(input.BridgeEndpoint))
 	input.BridgeLabel = strings.TrimSpace(input.BridgeLabel)
 	if input.Provider == "" || input.Identifier == "" {
@@ -171,6 +173,12 @@ func (s *Service) CreateProviderAccount(ctx context.Context, supplierID int64, i
 	}
 	if input.Port == 0 {
 		input.Port = defaultProviderPort(input.ProtocolMode, input.AuthMode)
+	}
+	if requiresSecretCredential(input.AuthMode) && input.CredentialSecret == "" && input.SecretRef == "" {
+		return ProviderAccount{}, fmt.Errorf("当前认证方式要求 credential_secret 或 secret_ref")
+	}
+	if input.AuthMode == "oauth2" && input.RefreshToken == "" {
+		return ProviderAccount{}, fmt.Errorf("oauth2 模式要求 refresh_token")
 	}
 	if input.AuthMode == "bridge_local_credential" {
 		if input.Provider != "proton" && input.Provider != "protonmail" {
@@ -259,6 +267,15 @@ func defaultProviderPort(protocolMode, authMode string) int {
 		return 995
 	default:
 		return 993
+	}
+}
+
+func requiresSecretCredential(authMode string) bool {
+	switch authMode {
+	case "authorization_code", "app_password", "password", "bridge_local_credential":
+		return true
+	default:
+		return false
 	}
 }
 

@@ -72,6 +72,7 @@ export interface SupplierAccount {
   status: string
   host?: string
   port?: number
+  secret_ref?: string
   health_status?: string
   health_reason?: string
   bridge_endpoint?: string
@@ -150,6 +151,8 @@ export async function createSupplierAccount(payload: {
   port?: number
   access_token?: string
   refresh_token?: string
+  credential_secret?: string
+  secret_ref?: string
   bridge_endpoint?: string
   bridge_label?: string
 }) {

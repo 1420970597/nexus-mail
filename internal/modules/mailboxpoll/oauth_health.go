@@ -137,6 +137,9 @@ func EvaluateCredentialHealth(account AccountConfig) HealthStatus {
 		}
 		return HealthStatus{Provider: provider, Mode: mode, Healthy: true, Reason: "OAuth2 refresh_token 可用"}
 	case "authorization_code", "app_password", "password":
+		if strings.TrimSpace(account.CredentialSecret) == "" && strings.TrimSpace(account.SecretRef) == "" {
+			return HealthStatus{Provider: provider, Mode: mode, Healthy: false, Reason: "credential_secret / secret_ref 缺失"}
+		}
 		return HealthStatus{Provider: provider, Mode: mode, Healthy: true, Reason: "账号凭证配置格式有效"}
 	case "bridge_local_credential":
 		if provider != "proton" {

@@ -86,19 +86,21 @@ func main() {
 				continue
 			}
 			if err := pollSync.SyncAccount(ctx, mailboxpoll.AccountConfig{
-				AccountID:      account.ID,
-				Provider:       account.Provider,
-				SourceType:     account.SourceType,
-				AuthMode:       account.AuthMode,
-				ProtocolMode:   account.ProtocolMode,
-				Identifier:     account.Identifier,
-				Host:           account.Host,
-				Port:           account.Port,
-				AccessToken:    account.AccessToken,
-				RefreshToken:   account.RefreshToken,
-				TokenExpiresAt: account.TokenExpiresAt,
-				BridgeEndpoint: account.BridgeEndpoint,
-				BridgeLabel:    account.BridgeLabel,
+				AccountID:        account.ID,
+				Provider:         account.Provider,
+				SourceType:       account.SourceType,
+				AuthMode:         account.AuthMode,
+				ProtocolMode:     account.ProtocolMode,
+				Identifier:       account.Identifier,
+				Host:             account.Host,
+				Port:             account.Port,
+				AccessToken:      account.AccessToken,
+				RefreshToken:     account.RefreshToken,
+				CredentialSecret: account.CredentialSecret,
+				SecretRef:        account.SecretRef,
+				TokenExpiresAt:   account.TokenExpiresAt,
+				BridgeEndpoint:   account.BridgeEndpoint,
+				BridgeLabel:      account.BridgeLabel,
 			}); err != nil {
 				log.Printf("sync provider account health failed: account=%d err=%v", account.ID, err)
 			}

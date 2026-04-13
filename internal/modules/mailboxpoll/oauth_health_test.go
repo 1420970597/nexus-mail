@@ -80,6 +80,17 @@ func TestEvaluateCredentialHealthValidatesMode(t *testing.T) {
 	}
 }
 
+func TestEvaluateCredentialHealthRequiresCredentialSecretForAppPassword(t *testing.T) {
+	status := EvaluateCredentialHealth(AccountConfig{Provider: "qq", AuthMode: "app_password", ProtocolMode: "imap_pull", Identifier: "x"})
+	if status.Healthy {
+		t.Fatalf("expected unhealthy status without credential secret, got %#v", status)
+	}
+	status = EvaluateCredentialHealth(AccountConfig{Provider: "qq", AuthMode: "app_password", ProtocolMode: "imap_pull", Identifier: "x", CredentialSecret: "abc123"})
+	if !status.Healthy {
+		t.Fatalf("expected healthy status with credential secret, got %#v", status)
+	}
+}
+
 func TestValidateBridgeEndpointForProton(t *testing.T) {
 	endpoint, err := ValidateBridgeEndpoint(AccountConfig{Provider: "proton", AuthMode: "bridge_local_credential", ProtocolMode: "imap_pull", Identifier: "acc", Host: "127.0.0.1", Port: 1143})
 	if err != nil {

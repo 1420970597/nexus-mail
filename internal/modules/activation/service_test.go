@@ -135,7 +135,7 @@ func TestCreateProviderAccountNormalizesDefaults(t *testing.T) {
 	repo := &stubRepo{providerAccountResp: ProviderAccount{ID: 1}}
 	service := NewService(repo)
 
-	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "  Outlook  ", Identifier: " foo@example.com "})
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "  Outlook  ", Identifier: " foo@example.com ", RefreshToken: "refresh-demo-token"})
 	if err != nil {
 		t.Fatalf("CreateProviderAccount() error = %v", err)
 	}
@@ -163,7 +163,7 @@ func TestCreateProviderAccountBuildsProtonBridgeDefaults(t *testing.T) {
 	repo := &stubRepo{providerAccountResp: ProviderAccount{ID: 2}}
 	service := NewService(repo)
 
-	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "ProtonMail", AuthMode: "bridge_local_credential", Identifier: " proton@example.com "})
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "ProtonMail", AuthMode: "bridge_local_credential", Identifier: " proton@example.com ", CredentialSecret: "bridge-pass"})
 	if err != nil {
 		t.Fatalf("CreateProviderAccount() error = %v", err)
 	}
@@ -175,6 +175,26 @@ func TestCreateProviderAccountBuildsProtonBridgeDefaults(t *testing.T) {
 	}
 	if repo.providerAccountIn.BridgeEndpoint != "127.0.0.1:1143" {
 		t.Fatalf("expected bridge endpoint default, got %q", repo.providerAccountIn.BridgeEndpoint)
+	}
+}
+
+func TestCreateProviderAccountRequiresCredentialSecretForAppPassword(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "qq", AuthMode: "app_password", ProtocolMode: "imap_pull", Identifier: "qq@example.com"})
+	if err == nil || err.Error() != "当前认证方式要求 credential_secret 或 secret_ref" {
+		t.Fatalf("expected credential secret validation error, got %v", err)
+	}
+}
+
+func TestCreateProviderAccountAcceptsSecretRefForAuthorizationCode(t *testing.T) {
+	repo := &stubRepo{providerAccountResp: ProviderAccount{ID: 3}}
+	service := NewService(repo)
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "qq", AuthMode: "authorization_code", ProtocolMode: "imap_pull", Identifier: "qq@example.com", SecretRef: "vault://mail/qq-auth-code"})
+	if err != nil {
+		t.Fatalf("CreateProviderAccount() error = %v", err)
+	}
+	if repo.providerAccountIn.SecretRef != "vault://mail/qq-auth-code" {
+		t.Fatalf("expected secret ref to propagate, got %q", repo.providerAccountIn.SecretRef)
 	}
 }
 

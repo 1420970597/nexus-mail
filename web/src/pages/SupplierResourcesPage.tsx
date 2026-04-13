@@ -134,6 +134,8 @@ export function SupplierResourcesPage() {
           <Form.Input field="host" label="主机" placeholder="imap.gmail.com / 127.0.0.1" />
           <Form.InputNumber field="port" label="端口" placeholder="993 / 995 / 1143" style={{ width: '100%' }} />
           <Form.Input field="refresh_token" label="Refresh Token" placeholder="OAuth2 必填，授权码/App Password 可留空" />
+          <Form.Input field="credential_secret" label="凭证密文" placeholder="App Password / 授权码 / Bridge 密码" />
+          <Form.Input field="secret_ref" label="Secret Ref" placeholder="vault://mail/qq-auth-code" />
           <Form.Input field="bridge_endpoint" label="Bridge Endpoint" placeholder="127.0.0.1:1143" />
           <Form.Input field="bridge_label" label="Bridge Label" placeholder="proton-bridge" />
           <Form.Input field="status" label="状态" />
@@ -195,6 +197,7 @@ export function SupplierResourcesPage() {
             { title: '协议', dataIndex: 'protocol_mode', key: 'protocol_mode' },
             { title: '标识', dataIndex: 'identifier', key: 'identifier' },
             { title: '主机', dataIndex: 'host', key: 'host', render: (value, record) => value ? `${value}:${record.port ?? ''}` : '-' },
+            { title: 'Secret Ref', dataIndex: 'secret_ref', key: 'secret_ref', render: (value) => value || '-' },
             { title: '健康状态', dataIndex: 'health_status', key: 'health_status', render: (value) => <Tag color={value === 'healthy' ? 'green' : 'red'}>{String(value || 'unknown')}</Tag> },
             { title: 'Bridge', dataIndex: 'bridge_endpoint', key: 'bridge_endpoint', render: (value) => value || '-' },
             { title: '状态', dataIndex: 'status', key: 'status', render: (value) => <Tag color="orange">{String(value)}</Tag> },

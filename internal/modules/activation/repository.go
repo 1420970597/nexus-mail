@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS provider_accounts (
   port INTEGER NOT NULL DEFAULT 0,
   access_token TEXT NOT NULL DEFAULT '',
   refresh_token TEXT NOT NULL DEFAULT '',
+  credential_secret TEXT NOT NULL DEFAULT '',
+  secret_ref TEXT NOT NULL DEFAULT '',
   token_expires_at TIMESTAMPTZ,
   health_status TEXT NOT NULL DEFAULT 'unknown',
   health_reason TEXT NOT NULL DEFAULT '',
@@ -64,6 +66,8 @@ ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS host TEXT NOT NULL DEFAUL
 ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS port INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS access_token TEXT NOT NULL DEFAULT '';
 ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS refresh_token TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS credential_secret TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS secret_ref TEXT NOT NULL DEFAULT '';
 ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS token_expires_at TIMESTAMPTZ;
 ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS health_status TEXT NOT NULL DEFAULT 'unknown';
 ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS health_reason TEXT NOT NULL DEFAULT '';
@@ -170,14 +174,15 @@ SELECT 1
 WITH supplier AS (
   SELECT id FROM users WHERE email = 'supplier@nexus-mail.local' LIMIT 1
 )
-INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, refresh_token, bridge_endpoint, bridge_label)
-SELECT supplier.id, x.provider, x.source_type, x.auth_mode, x.protocol_mode, x.identifier, 'active', x.host, x.port, x.refresh_token, x.bridge_endpoint, x.bridge_label
+INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label)
+SELECT supplier.id, x.provider, x.source_type, x.auth_mode, x.protocol_mode, x.identifier, 'active', x.host, x.port, x.refresh_token, x.credential_secret, x.secret_ref, x.bridge_endpoint, x.bridge_label
 FROM supplier,
      (VALUES
-       ('gmail', 'public_mailbox_account', 'oauth2', 'imap_pull', 'gmail-demo@nexus-mail.local', 'imap.gmail.com', 993, 'gmail-refresh-demo', '', ''),
-       ('outlook', 'public_mailbox_account', 'app_password', 'pop3_pull', 'outlook-demo@nexus-mail.local', 'outlook.office365.com', 995, '', '', ''),
-       ('proton', 'bridge_mailbox', 'bridge_local_credential', 'imap_pull', 'proton-demo@nexus-mail.local', '127.0.0.1', 1143, '', '127.0.0.1:1143', 'proton-bridge')
-     ) AS x(provider, source_type, auth_mode, protocol_mode, identifier, host, port, refresh_token, bridge_endpoint, bridge_label)
+       ('gmail', 'public_mailbox_account', 'oauth2', 'imap_pull', 'gmail-demo@nexus-mail.local', 'imap.gmail.com', 993, 'gmail-refresh-demo', '', '', '', ''),
+       ('outlook', 'public_mailbox_account', 'app_password', 'pop3_pull', 'outlook-demo@nexus-mail.local', 'outlook.office365.com', 995, '', 'outlook-app-password-demo', '', '', ''),
+       ('qq', 'public_mailbox_account', 'authorization_code', 'imap_pull', 'qq-demo@nexus-mail.local', 'imap.qq.com', 993, '', '', 'vault://mailbox/qq-demo-auth-code', '', ''),
+       ('proton', 'bridge_mailbox', 'bridge_local_credential', 'imap_pull', 'proton-demo@nexus-mail.local', '127.0.0.1', 1143, '', 'bridge-pass-demo', '', '127.0.0.1:1143', 'proton-bridge')
+     ) AS x(provider, source_type, auth_mode, protocol_mode, identifier, host, port, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label)
 ON CONFLICT DO NOTHING
 `); err != nil {
 		return err
@@ -725,11 +730,11 @@ func (r *Repository) CreateProviderAccount(ctx context.Context, supplierID int64
 	err := r.pool.QueryRow(ctx, `
 INSERT INTO provider_accounts (
   supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status,
-  host, port, access_token, refresh_token, bridge_endpoint, bridge_label
+  host, port, access_token, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-RETURNING id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, token_expires_at, health_status, health_reason, health_checked_at, bridge_endpoint, bridge_label, created_at
-`, supplierID, input.Provider, input.SourceType, input.AuthMode, input.ProtocolMode, input.Identifier, input.Status, input.Host, input.Port, input.AccessToken, input.RefreshToken, input.BridgeEndpoint, input.BridgeLabel).Scan(
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+RETURNING id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, credential_secret, secret_ref, token_expires_at, health_status, health_reason, health_checked_at, bridge_endpoint, bridge_label, created_at
+`, supplierID, input.Provider, input.SourceType, input.AuthMode, input.ProtocolMode, input.Identifier, input.Status, input.Host, input.Port, input.AccessToken, input.RefreshToken, input.CredentialSecret, input.SecretRef, input.BridgeEndpoint, input.BridgeLabel).Scan(
 		&item.ID,
 		&item.SupplierID,
 		&item.Provider,
@@ -742,6 +747,8 @@ RETURNING id, supplier_id, provider, source_type, auth_mode, protocol_mode, iden
 		&item.Port,
 		&item.AccessToken,
 		&item.RefreshToken,
+		&item.CredentialSecret,
+		&item.SecretRef,
 		&item.TokenExpiresAt,
 		&item.HealthStatus,
 		&item.HealthReason,
@@ -1004,7 +1011,7 @@ LEFT JOIN provider_accounts a ON a.id = m.account_id
 }
 
 func (r *Repository) listProviderAccountsBySupplier(ctx context.Context, supplierID int64) ([]ProviderAccount, error) {
-	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, token_expires_at, health_status, health_reason, health_checked_at, bridge_endpoint, bridge_label, created_at FROM provider_accounts`
+	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, credential_secret, secret_ref, token_expires_at, health_status, health_reason, health_checked_at, bridge_endpoint, bridge_label, created_at FROM provider_accounts`
 	args := []any{}
 	if supplierID > 0 {
 		query += ` WHERE supplier_id = $1`
@@ -1019,7 +1026,7 @@ func (r *Repository) listProviderAccountsBySupplier(ctx context.Context, supplie
 	var items []ProviderAccount
 	for rows.Next() {
 		var item ProviderAccount
-		if err := rows.Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.Host, &item.Port, &item.AccessToken, &item.RefreshToken, &item.TokenExpiresAt, &item.HealthStatus, &item.HealthReason, &item.HealthCheckedAt, &item.BridgeEndpoint, &item.BridgeLabel, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.Host, &item.Port, &item.AccessToken, &item.RefreshToken, &item.CredentialSecret, &item.SecretRef, &item.TokenExpiresAt, &item.HealthStatus, &item.HealthReason, &item.HealthCheckedAt, &item.BridgeEndpoint, &item.BridgeLabel, &item.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)

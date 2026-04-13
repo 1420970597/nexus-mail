@@ -38,25 +38,27 @@ type Mailbox struct {
 }
 
 type ProviderAccount struct {
-	ID              int64      `json:"id"`
-	SupplierID      int64      `json:"supplier_id"`
-	Provider        string     `json:"provider"`
-	SourceType      string     `json:"source_type"`
-	AuthMode        string     `json:"auth_mode"`
-	ProtocolMode    string     `json:"protocol_mode"`
-	Identifier      string     `json:"identifier"`
-	Status          string     `json:"status"`
-	Host            string     `json:"host,omitempty"`
-	Port            int        `json:"port,omitempty"`
-	AccessToken     string     `json:"-"`
-	RefreshToken    string     `json:"-"`
-	TokenExpiresAt  *time.Time `json:"token_expires_at,omitempty"`
-	HealthStatus    string     `json:"health_status,omitempty"`
-	HealthReason    string     `json:"health_reason,omitempty"`
-	HealthCheckedAt *time.Time `json:"health_checked_at,omitempty"`
-	BridgeEndpoint  string     `json:"bridge_endpoint,omitempty"`
-	BridgeLabel     string     `json:"bridge_label,omitempty"`
-	CreatedAt       time.Time  `json:"created_at"`
+	ID               int64      `json:"id"`
+	SupplierID       int64      `json:"supplier_id"`
+	Provider         string     `json:"provider"`
+	SourceType       string     `json:"source_type"`
+	AuthMode         string     `json:"auth_mode"`
+	ProtocolMode     string     `json:"protocol_mode"`
+	Identifier       string     `json:"identifier"`
+	Status           string     `json:"status"`
+	Host             string     `json:"host,omitempty"`
+	Port             int        `json:"port,omitempty"`
+	AccessToken      string     `json:"-"`
+	RefreshToken     string     `json:"-"`
+	CredentialSecret string     `json:"-"`
+	SecretRef        string     `json:"secret_ref,omitempty"`
+	TokenExpiresAt   *time.Time `json:"token_expires_at,omitempty"`
+	HealthStatus     string     `json:"health_status,omitempty"`
+	HealthReason     string     `json:"health_reason,omitempty"`
+	HealthCheckedAt  *time.Time `json:"health_checked_at,omitempty"`
+	BridgeEndpoint   string     `json:"bridge_endpoint,omitempty"`
+	BridgeLabel      string     `json:"bridge_label,omitempty"`
+	CreatedAt        time.Time  `json:"created_at"`
 }
 
 type ProjectOffering struct {
@@ -119,18 +121,20 @@ type CreateDomainInput struct {
 }
 
 type CreateProviderAccountInput struct {
-	Provider       string `json:"provider"`
-	SourceType     string `json:"source_type"`
-	AuthMode       string `json:"auth_mode"`
-	ProtocolMode   string `json:"protocol_mode"`
-	Identifier     string `json:"identifier"`
-	Status         string `json:"status"`
-	Host           string `json:"host"`
-	Port           int    `json:"port"`
-	AccessToken    string `json:"access_token"`
-	RefreshToken   string `json:"refresh_token"`
-	BridgeEndpoint string `json:"bridge_endpoint"`
-	BridgeLabel    string `json:"bridge_label"`
+	Provider         string `json:"provider"`
+	SourceType       string `json:"source_type"`
+	AuthMode         string `json:"auth_mode"`
+	ProtocolMode     string `json:"protocol_mode"`
+	Identifier       string `json:"identifier"`
+	Status           string `json:"status"`
+	Host             string `json:"host"`
+	Port             int    `json:"port"`
+	AccessToken      string `json:"access_token"`
+	RefreshToken     string `json:"refresh_token"`
+	CredentialSecret string `json:"credential_secret"`
+	SecretRef        string `json:"secret_ref"`
+	BridgeEndpoint   string `json:"bridge_endpoint"`
+	BridgeLabel      string `json:"bridge_label"`
 }
 
 type CreateMailboxInput struct {

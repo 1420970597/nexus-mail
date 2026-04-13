@@ -8,21 +8,22 @@ import (
 )
 
 type AccountConfig struct {
-	AccountID      int64
-	Provider       string
-	SourceType     string
-	AuthMode       string
-	ProtocolMode   string
-	Identifier     string
-	Host           string
-	Port           int
-	Username       string
-	SecretRef      string
-	AccessToken    string
-	RefreshToken   string
-	TokenExpiresAt *time.Time
-	BridgeEndpoint string
-	BridgeLabel    string
+	AccountID        int64
+	Provider         string
+	SourceType       string
+	AuthMode         string
+	ProtocolMode     string
+	Identifier       string
+	Host             string
+	Port             int
+	Username         string
+	SecretRef        string
+	CredentialSecret string
+	AccessToken      string
+	RefreshToken     string
+	TokenExpiresAt   *time.Time
+	BridgeEndpoint   string
+	BridgeLabel      string
 }
 
 type PollResult struct {
@@ -44,6 +45,8 @@ func NormalizeAccountConfig(account AccountConfig) (AccountConfig, error) {
 	account.Identifier = strings.TrimSpace(account.Identifier)
 	account.Host = strings.TrimSpace(strings.ToLower(account.Host))
 	account.Username = strings.TrimSpace(account.Username)
+	account.SecretRef = strings.TrimSpace(account.SecretRef)
+	account.CredentialSecret = strings.TrimSpace(account.CredentialSecret)
 	account.AccessToken = strings.TrimSpace(account.AccessToken)
 	account.RefreshToken = strings.TrimSpace(account.RefreshToken)
 	account.BridgeEndpoint = strings.TrimSpace(strings.ToLower(account.BridgeEndpoint))
