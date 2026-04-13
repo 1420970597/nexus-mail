@@ -25,7 +25,7 @@ type Config struct {
 func Load() (Config, error) {
 	viper.AutomaticEnv()
 	cfg := Config{
-		AppEnv:               defaultString(viper.GetString("APP_ENV"), "development"),
+		AppEnv:               defaultString(viper.GetString("APP_ENV"), "production"),
 		AppPort:              defaultString(viper.GetString("APP_PORT"), "8080"),
 		DatabaseURL:          viper.GetString("DATABASE_URL"),
 		RedisURL:             viper.GetString("REDIS_URL"),

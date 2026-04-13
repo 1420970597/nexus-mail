@@ -4,9 +4,9 @@ services:
     container_name: nexus-mail-gateway
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
       web:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "80:80"
     volumes:
@@ -30,13 +30,13 @@ services:
       - .env
     depends_on:
       pgbouncer:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "127.0.0.1:8080:8080"
     healthcheck:
@@ -56,13 +56,13 @@ services:
       - .env
     depends_on:
       pgbouncer:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pidof worker >/dev/null"]
       interval: 30s
@@ -80,11 +80,11 @@ services:
       - .env
     depends_on:
       pgbouncer:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pidof scheduler >/dev/null"]
       interval: 30s
@@ -102,11 +102,11 @@ services:
       - .env
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
       pgbouncer:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "2525:2525"
     healthcheck:
@@ -126,7 +126,7 @@ services:
       - .env
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "127.0.0.1:5173:5173"
     healthcheck:
