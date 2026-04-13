@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
 )
 
 type App struct {
-	Config      config.Config
-	DB          *database.DB
-	AuthService *auth.Service
+	Config            config.Config
+	DB                *database.DB
+	AuthService       *auth.Service
+	ActivationService *activation.Service
 }
 
 func New(ctx context.Context, cfg config.Config) (*App, error) {
@@ -21,13 +23,27 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	repo := auth.NewRepository(db.Pool)
-	service := auth.NewService(repo, cfg.JWTSecret, time.Duration(cfg.JWTExpireSeconds)*time.Second, time.Duration(cfg.RefreshExpireSeconds)*time.Second)
-	if err := repo.EnsureSchema(ctx); err != nil {
+	authRepo := auth.NewRepository(db.Pool)
+	authService := auth.NewService(authRepo, cfg.JWTSecret, time.Duration(cfg.JWTExpireSeconds)*time.Second, time.Duration(cfg.RefreshExpireSeconds)*time.Second)
+	if err := authRepo.EnsureSchema(ctx); err != nil {
 		return nil, fmt.Errorf("ensure auth schema: %w", err)
 	}
-	if err := repo.SeedDevelopmentUsers(ctx, cfg.AppEnv); err != nil {
+	if err := authRepo.SeedDevelopmentUsers(ctx, cfg.AppEnv); err != nil {
 		return nil, fmt.Errorf("seed development users: %w", err)
 	}
-	return &App{Config: cfg, DB: db, AuthService: service}, nil
+
+	activationRepo := activation.NewRepository(db.Pool)
+	if err := activationRepo.EnsureSchema(ctx); err != nil {
+		return nil, fmt.Errorf("ensure activation schema: %w", err)
+	}
+	if err := activationRepo.SeedDevelopmentData(ctx, cfg.AppEnv); err != nil {
+		return nil, fmt.Errorf("seed activation data: %w", err)
+	}
+
+	return &App{
+		Config:            cfg,
+		DB:                db,
+		AuthService:       authService,
+		ActivationService: activation.NewService(activationRepo),
+	}, nil
 }

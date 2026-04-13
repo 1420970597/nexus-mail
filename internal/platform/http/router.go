@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/1420970597/nexus-mail/internal/app/bootstrap"
+	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
 )
 
@@ -31,16 +32,21 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 		secure.Use(authHandler.AuthRequiredForRoutes())
 		secure.GET("/dashboard/overview", func(c *gin.Context) {
 			user := c.MustGet("currentUser").(auth.User)
+			inventory, _ := app.ActivationService.ListInventory(c.Request.Context())
+			orders, _ := app.ActivationService.ListActivationOrders(c.Request.Context(), user.ID)
 			c.JSON(http.StatusOK, gin.H{
 				"message": "dashboard ready",
 				"role":    user.Role,
 				"stats": gin.H{
-					"projects":  0,
-					"orders":    0,
-					"suppliers": 0,
+					"projects":  len(inventory),
+					"orders":    len(orders),
+					"suppliers": uniqueSuppliers(inventory),
 				},
 			})
 		})
+
+		activationHandler := activation.NewHandler(app.ActivationService)
+		activationHandler.RegisterRoutes(secure)
 
 		supplier := secure.Group("/supplier")
 		supplier.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
@@ -65,4 +71,12 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 	}
 
 	return r
+}
+
+func uniqueSuppliers(items []activation.ProjectOffering) int {
+	seen := map[int64]struct{}{}
+	for _, item := range items {
+		seen[item.SupplierID] = struct{}{}
+	}
+	return len(seen)
 }
