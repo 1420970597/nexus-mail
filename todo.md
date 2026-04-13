@@ -66,6 +66,59 @@
 - **Postfix**：公网 25 端口 SMTP 接收边缘
 - **Go Mail Processor**：在 Postfix 后方做业务解析，而不是直接把 Go API 暴露成公网 SMTP 第一跳
 
+### 主流邮箱供应商接入结论
+供应商资源不能只局限于“自建域名邮箱”，还必须纳入主流公网邮箱与商业邮箱账号池。规划上应支持：
+
+- 自建域名 / 自建邮局
+- Google 体系：Gmail、Google Workspace
+- Microsoft 体系：Outlook.com、Hotmail、Live、Microsoft 365
+- Apple：iCloud Mail
+- Yahoo 体系：Yahoo Mail、AOL Mail
+- 中国公网邮箱：QQ 邮箱、163 邮箱、126 邮箱、yeah 邮箱
+- 商业邮箱：Zoho Mail、Fastmail、Yandex Mail、GMX、Mail.com
+- 特殊邮箱：Proton Mail（通过 Proton Bridge）
+
+### 接入方式结论
+系统设计上必须原生支持以下授权 / 协议模式：
+- `MX / SMTP inbound`
+- `IMAP pull`
+- `POP3 pull`
+- `OAuth2`
+- `App Password`
+- `授权码`
+- `Bridge / 本地代理`
+
+### 统一资源建模结论
+为了避免后续实现混乱，必须统一采用以下分类：
+- `source_type`
+  - `self_hosted_domain`
+  - `hosted_mailbox`
+  - `public_mailbox_account`
+  - `bridge_mailbox`
+- `auth_mode`
+  - `password`
+  - `oauth2`
+  - `app_password`
+  - `authorization_code`
+  - `bridge_local_credential`
+- `protocol_mode`
+  - `smtp_inbound`
+  - `imap_pull`
+  - `pop3_pull`
+
+### provider 映射示例
+- Gmail / Google Workspace：`public_mailbox_account` 或 `hosted_mailbox` + `oauth2` / `app_password` + `imap_pull`
+- Outlook / Hotmail / Live / Microsoft 365：`public_mailbox_account` 或 `hosted_mailbox` + `oauth2` / `app_password` + `imap_pull`
+- QQ / 163 / 126 / yeah：`public_mailbox_account` + `authorization_code` + `imap_pull` 或 `pop3_pull`
+- iCloud：`public_mailbox_account` + `app_password` + `imap_pull`
+- Proton：`bridge_mailbox` + `bridge_local_credential` + `imap_pull`
+
+设计原则：
+- 优先支持 IMAP，其次 POP3
+- Gmail / Outlook / Microsoft 365 优先 OAuth2
+- QQ / 163 / 126 / yeah 必须把授权码作为一等能力
+- Proton 必须单独建模为 Bridge 类资源
+
 ### 为什么不是“Go 直接监听公网 25 端口”
 虽然本机已经验证可绑定 25 端口，但商业生产环境中：
 - SMTP 接收涉及协议兼容
@@ -164,6 +217,9 @@ Internet MX
 - 项目
 - 域名
 - 邮箱池
+- 第三方邮箱账号池
+- 邮箱协议配置
+- OAuth / 授权码 / App Password / Bridge 凭证引用
 - 订单
 - 邮件元数据
 - 提取结果
@@ -364,6 +420,10 @@ nexus-mail/
 - 供应商资料与状态
 - 域名管理
 - 邮箱池 / 别名池管理
+- 第三方邮箱账号池管理
+- Gmail / Outlook / Hotmail / QQ / 163 / 126 / Yahoo / AOL / iCloud / Zoho / Fastmail / Yandex / GMX / Mail.com / Proton Bridge 账号接入
+- OAuth / 授权码 / App Password / Bridge 凭证管理
+- IMAP / POP3 / SMTP 配置与健康检查
 - 供货规则
 - 成本价设置
 - 可售项目范围
@@ -407,6 +467,8 @@ nexus-mail/
 - 获取提取结果
 - 取消订单
 - webhook 回调说明
+- 供应商自建域名接入说明
+- 供应商第三方邮箱账号接入说明（IMAP / POP3 / OAuth2 / 授权码 / App Password / Bridge）
 
 二期扩展：
 - 供应商 API
@@ -554,15 +616,17 @@ nexus-mail/
 ### 任务
 1. 项目管理模型
 2. 域名池 / 邮箱池模型
-3. 激活订单状态机
-4. 下单接口
-5. 查询订单接口
-6. 获取提取结果接口
-7. 取消订单接口
-8. 轮询接口优化
-9. 价格 / 库存接口
-10. 管理员项目配置页面
-11. 用户下单页面
+3. 第三方邮箱账号池模型（provider / source_type / auth_mode / protocol_mode）
+4. 激活订单状态机
+5. 下单接口
+6. 查询订单接口
+7. 获取提取结果接口
+8. 取消订单接口
+9. 轮询接口优化
+10. 价格 / 库存接口
+11. 管理员项目配置页面
+12. 用户下单页面
+13. 供应商资源录入页面（支持自建域名与主流邮箱账号）
 
 ### 输出
 - 用户可下单
@@ -587,10 +651,16 @@ nexus-mail/
 8. 实现验证码 / link 提取器
 9. 实现提取规则回退机制
 10. 订单自动状态迁移
+11. 实现 IMAP 拉取器
+12. 实现 POP3 拉取器
+13. 实现 OAuth2 凭证刷新机制（Gmail / Microsoft 优先）
+14. 实现授权码 / App Password 型账号健康检查
+15. 实现 Proton Bridge 型资源接入策略
 
 ### 输出
 - 邮件可进系统
 - 可成功提取验证码 / 链接
+- 自建域名与第三方邮箱账号都可被系统摄取
 - 订单可进入 READY / FINISHED
 
 ---
@@ -696,6 +766,11 @@ nexus-mail/
 ## 11.3 供应商菜单
 - 我的域名
 - 邮箱池 / 别名池
+- 第三方邮箱账号池
+- 凭证管理（OAuth / 授权码 / App Password / Bridge）
+- 协议配置（IMAP / POP3 / SMTP）
+- 健康检查 / 失效告警
+- Bridge 资源管理
 - 供货规则
 - 成本设置
 - 订单表现
@@ -733,6 +808,8 @@ nexus-mail/
 - `suppliers`
 - `domains`
 - `mailboxes`
+- `mailbox_accounts`
+- `provider_credentials`
 - `resource_pools`
 - `orders`
 - `messages`
