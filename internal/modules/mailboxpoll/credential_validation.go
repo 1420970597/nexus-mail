@@ -28,34 +28,18 @@ func (MultiSecretResolver) Resolve(_ context.Context, secretRef string) (string,
 	if ref == "" {
 		return "", fmt.Errorf("secret_ref 不能为空")
 	}
-	switch {
-	case strings.HasPrefix(ref, "env://"):
-		key := strings.TrimSpace(strings.TrimPrefix(ref, "env://"))
-		if key == "" {
-			return "", fmt.Errorf("env secret_ref 缺少变量名")
-		}
-		value := strings.TrimSpace(os.Getenv(key))
-		if value == "" {
-			return "", fmt.Errorf("环境变量 %s 未配置", key)
-		}
-		return value, nil
-	case strings.HasPrefix(ref, "file://"):
-		path := strings.TrimSpace(strings.TrimPrefix(ref, "file://"))
-		if path == "" {
-			return "", fmt.Errorf("file secret_ref 缺少路径")
-		}
-		payload, err := os.ReadFile(path)
-		if err != nil {
-			return "", fmt.Errorf("读取 secret_ref 文件失败: %w", err)
-		}
-		value := strings.TrimSpace(string(payload))
-		if value == "" {
-			return "", fmt.Errorf("secret_ref 文件为空")
-		}
-		return value, nil
-	default:
-		return "", fmt.Errorf("暂不支持的 secret_ref: %s", ref)
+	if !strings.HasPrefix(ref, "env://") {
+		return "", fmt.Errorf("暂不支持的 secret_ref: %s，仅支持 env://VAR_NAME", ref)
 	}
+	key := strings.TrimSpace(strings.TrimPrefix(ref, "env://"))
+	if key == "" {
+		return "", fmt.Errorf("env secret_ref 缺少变量名")
+	}
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return "", fmt.Errorf("环境变量 %s 未配置", key)
+	}
+	return value, nil
 }
 
 type NetworkCredentialValidator struct {
@@ -67,6 +51,9 @@ type NetworkCredentialValidator struct {
 func (v NetworkCredentialValidator) Validate(ctx context.Context, account AccountConfig) error {
 	normalized, err := NormalizeAccountConfig(account)
 	if err != nil {
+		return err
+	}
+	if err := validateProviderEndpoint(normalized); err != nil {
 		return err
 	}
 	secret := strings.TrimSpace(normalized.CredentialSecret)
@@ -215,7 +202,7 @@ func (v NetworkCredentialValidator) timeout() time.Duration {
 }
 
 func (v NetworkCredentialValidator) shouldUseTLS(host string, port int) bool {
-	if host == "127.0.0.1" || host == "localhost" {
+	if isLoopbackHost(host) {
 		return false
 	}
 	switch port {
@@ -226,6 +213,58 @@ func (v NetworkCredentialValidator) shouldUseTLS(host string, port int) bool {
 	default:
 		return true
 	}
+}
+
+func validateProviderEndpoint(account AccountConfig) error {
+	if account.AuthMode == "bridge_local_credential" {
+		if !isLoopbackHost(account.Host) || account.Port != 1143 {
+			return fmt.Errorf("Proton Bridge 仅允许 127.0.0.1/localhost:1143")
+		}
+		return nil
+	}
+	expectedHost, expectedPort, ok := expectedProviderEndpoint(account.Provider, account.ProtocolMode)
+	if !ok {
+		return nil
+	}
+	if account.Host != expectedHost || account.Port != expectedPort {
+		return fmt.Errorf("provider %s 仅允许连接官方端点 %s:%d", account.Provider, expectedHost, expectedPort)
+	}
+	return nil
+}
+
+func expectedProviderEndpoint(provider, protocol string) (string, int, bool) {
+	provider = strings.TrimSpace(strings.ToLower(provider))
+	protocol = strings.TrimSpace(strings.ToLower(protocol))
+	switch protocol {
+	case "pop3_pull":
+		switch provider {
+		case "outlook", "microsoft":
+			return "outlook.office365.com", 995, true
+		case "qq":
+			return "pop.qq.com", 995, true
+		case "163":
+			return "pop.163.com", 995, true
+		}
+	case "imap_pull":
+		switch provider {
+		case "gmail":
+			return "imap.gmail.com", 993, true
+		case "outlook", "microsoft":
+			return "outlook.office365.com", 993, true
+		case "qq":
+			return "imap.qq.com", 993, true
+		case "163":
+			return "imap.163.com", 993, true
+		case "proton", "protonmail":
+			return "127.0.0.1", 1143, true
+		}
+	}
+	return "", 0, false
+}
+
+func isLoopbackHost(host string) bool {
+	host = strings.TrimSpace(strings.ToLower(host))
+	return host == "127.0.0.1" || host == "localhost"
 }
 
 func quoteIMAPString(value string) string {

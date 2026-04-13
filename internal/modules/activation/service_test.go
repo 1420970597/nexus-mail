@@ -187,14 +187,30 @@ func TestCreateProviderAccountRequiresCredentialSecretForAppPassword(t *testing.
 }
 
 func TestCreateProviderAccountAcceptsSecretRefForAuthorizationCode(t *testing.T) {
-	repo := &stubRepo{providerAccountResp: ProviderAccount{ID: 3}}
+	repo := &stubRepo{}
 	service := NewService(repo)
-	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "qq", AuthMode: "authorization_code", ProtocolMode: "imap_pull", Identifier: "qq@example.com", SecretRef: "vault://mail/qq-auth-code"})
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "qq", AuthMode: "authorization_code", ProtocolMode: "imap_pull", Identifier: "qq@example.com", SecretRef: "env://NEXUS_QQ_AUTH_CODE"})
 	if err != nil {
 		t.Fatalf("CreateProviderAccount() error = %v", err)
 	}
-	if repo.providerAccountIn.SecretRef != "vault://mail/qq-auth-code" {
+	if repo.providerAccountIn.SecretRef != "env://NEXUS_QQ_AUTH_CODE" {
 		t.Fatalf("expected secret ref to propagate, got %q", repo.providerAccountIn.SecretRef)
+	}
+}
+
+func TestCreateProviderAccountRejectsNonOfficialEndpoint(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "qq", AuthMode: "app_password", ProtocolMode: "imap_pull", Identifier: "qq@example.com", CredentialSecret: "secret", Host: "10.0.0.9", Port: 993})
+	if err == nil || err.Error() != "provider qq 仅支持官方端点 imap.qq.com:993" {
+		t.Fatalf("expected official endpoint validation error, got %v", err)
+	}
+}
+
+func TestCreateProviderAccountRejectsRemoteProtonBridgeHost(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "proton", AuthMode: "bridge_local_credential", Identifier: "proton@example.com", CredentialSecret: "bridge-pass", Host: "192.168.1.10", Port: 1143})
+	if err == nil || err.Error() != "Proton Bridge 仅允许本机 127.0.0.1/localhost" {
+		t.Fatalf("expected proton bridge localhost validation error, got %v", err)
 	}
 }
 

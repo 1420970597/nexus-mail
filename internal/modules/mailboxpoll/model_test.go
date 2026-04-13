@@ -34,7 +34,7 @@ func TestLoginIdentityPrefersUsername(t *testing.T) {
 }
 
 func TestIMAPPollerValidatesNormalizedConfig(t *testing.T) {
-	_, err := (IMAPPoller{}).Poll(context.Background(), AccountConfig{Provider: "Outlook", Identifier: "acc-1", ProtocolMode: "imap_pull"})
+	_, err := (IMAPPoller{}).Poll(context.Background(), AccountConfig{Provider: "custom-imap", Identifier: "acc-1", ProtocolMode: "imap_pull"})
 	if err == nil || !strings.Contains(err.Error(), "credential_secret") {
 		t.Fatalf("expected credential validation error, got %v", err)
 	}

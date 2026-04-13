@@ -202,13 +202,33 @@ func TestSyncServiceMarksMissingResolvedSecretUnhealthy(t *testing.T) {
 	}
 }
 
+func TestSyncServiceRejectsUnsupportedSecretRefScheme(t *testing.T) {
+	writer := &stubHealthWriter{}
+	service := SyncService{Writer: writer}
+	if err := service.SyncAccount(context.Background(), AccountConfig{
+		AccountID:    11,
+		Provider:     "qq",
+		AuthMode:     "authorization_code",
+		ProtocolMode: "imap_pull",
+		Identifier:   "qq@example.com",
+		Host:         "imap.qq.com",
+		Port:         993,
+		SecretRef:    "file:///run/secrets/qq_auth_code",
+	}); err != nil {
+		t.Fatalf("SyncAccount() error = %v", err)
+	}
+	if writer.status != "unhealthy" || !strings.Contains(writer.reason, "仅支持 env://VAR_NAME") {
+		t.Fatalf("expected unsupported secret_ref failure, got status=%q reason=%q", writer.status, writer.reason)
+	}
+}
+
 func TestNetworkCredentialValidatorIMAPLogin(t *testing.T) {
 	addr, stop := startFakeIMAPServer(t, "mail@example.com", "imap-pass")
 	defer stop()
 	host, port := splitHostPort(t, addr)
 	validator := NetworkCredentialValidator{Timeout: 2 * time.Second}
 	if err := validator.Validate(context.Background(), AccountConfig{
-		Provider:         "qq",
+		Provider:         "test-imap",
 		AuthMode:         "app_password",
 		ProtocolMode:     "imap_pull",
 		Identifier:       "mail@example.com",
@@ -226,7 +246,7 @@ func TestNetworkCredentialValidatorPOP3Login(t *testing.T) {
 	host, port := splitHostPort(t, addr)
 	validator := NetworkCredentialValidator{Timeout: 2 * time.Second}
 	if err := validator.Validate(context.Background(), AccountConfig{
-		Provider:         "qq",
+		Provider:         "test-pop3",
 		AuthMode:         "authorization_code",
 		ProtocolMode:     "pop3_pull",
 		Identifier:       "mail@example.com",
@@ -244,7 +264,7 @@ func TestNetworkCredentialValidatorRejectsBadCredential(t *testing.T) {
 	host, port := splitHostPort(t, addr)
 	validator := NetworkCredentialValidator{Timeout: 2 * time.Second}
 	err := validator.Validate(context.Background(), AccountConfig{
-		Provider:         "qq",
+		Provider:         "test-pop3",
 		AuthMode:         "password",
 		ProtocolMode:     "pop3_pull",
 		Identifier:       "mail@example.com",
@@ -277,6 +297,22 @@ func TestNetworkCredentialValidatorSupportsExplicitTLSDialer(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "tls dial invoked") {
 		t.Fatalf("expected TLS dialer error, got %v", err)
+	}
+}
+
+func TestNetworkCredentialValidatorRejectsUnofficialProviderEndpoint(t *testing.T) {
+	validator := NetworkCredentialValidator{}
+	err := validator.Validate(context.Background(), AccountConfig{
+		Provider:         "qq",
+		AuthMode:         "app_password",
+		ProtocolMode:     "imap_pull",
+		Identifier:       "qq@example.com",
+		Host:             "10.0.0.5",
+		Port:             993,
+		CredentialSecret: "secret",
+	})
+	if err == nil || !strings.Contains(err.Error(), "仅允许连接官方端点") {
+		t.Fatalf("expected official endpoint validation error, got %v", err)
 	}
 }
 

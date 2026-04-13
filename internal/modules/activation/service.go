@@ -174,6 +174,19 @@ func (s *Service) CreateProviderAccount(ctx context.Context, supplierID int64, i
 	if input.Port == 0 {
 		input.Port = defaultProviderPort(input.ProtocolMode, input.AuthMode)
 	}
+	if input.AuthMode == "bridge_local_credential" {
+		if input.Host != "127.0.0.1" && input.Host != "localhost" {
+			return ProviderAccount{}, fmt.Errorf("Proton Bridge 仅允许本机 127.0.0.1/localhost")
+		}
+		if input.Port != 1143 {
+			return ProviderAccount{}, fmt.Errorf("Proton Bridge IMAP 端口固定为 1143")
+		}
+	} else if expectedHost := defaultProviderHost(input.Provider, input.ProtocolMode, input.AuthMode); expectedHost != "" {
+		expectedPort := defaultProviderPort(input.ProtocolMode, input.AuthMode)
+		if input.Host != expectedHost || input.Port != expectedPort {
+			return ProviderAccount{}, fmt.Errorf("provider %s 仅支持官方端点 %s:%d", input.Provider, expectedHost, expectedPort)
+		}
+	}
 	if requiresSecretCredential(input.AuthMode) && input.CredentialSecret == "" && input.SecretRef == "" {
 		return ProviderAccount{}, fmt.Errorf("当前认证方式要求 credential_secret 或 secret_ref")
 	}
