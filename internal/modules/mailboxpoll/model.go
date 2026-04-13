@@ -4,18 +4,25 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type AccountConfig struct {
-	Provider     string
-	SourceType   string
-	AuthMode     string
-	ProtocolMode string
-	Identifier   string
-	Host         string
-	Port         int
-	Username     string
-	SecretRef    string
+	AccountID      int64
+	Provider       string
+	SourceType     string
+	AuthMode       string
+	ProtocolMode   string
+	Identifier     string
+	Host           string
+	Port           int
+	Username       string
+	SecretRef      string
+	AccessToken    string
+	RefreshToken   string
+	TokenExpiresAt *time.Time
+	BridgeEndpoint string
+	BridgeLabel    string
 }
 
 type PollResult struct {
@@ -37,6 +44,13 @@ func NormalizeAccountConfig(account AccountConfig) (AccountConfig, error) {
 	account.Identifier = strings.TrimSpace(account.Identifier)
 	account.Host = strings.TrimSpace(strings.ToLower(account.Host))
 	account.Username = strings.TrimSpace(account.Username)
+	account.AccessToken = strings.TrimSpace(account.AccessToken)
+	account.RefreshToken = strings.TrimSpace(account.RefreshToken)
+	account.BridgeEndpoint = strings.TrimSpace(strings.ToLower(account.BridgeEndpoint))
+	account.BridgeLabel = strings.TrimSpace(account.BridgeLabel)
+	if account.Provider == "protonmail" {
+		account.Provider = "proton"
+	}
 	if account.Provider == "" || account.Identifier == "" {
 		return AccountConfig{}, fmt.Errorf("provider 与 identifier 不能为空")
 	}
@@ -45,6 +59,20 @@ func NormalizeAccountConfig(account AccountConfig) (AccountConfig, error) {
 	}
 	if account.ProtocolMode != "imap_pull" && account.ProtocolMode != "pop3_pull" {
 		return AccountConfig{}, fmt.Errorf("暂不支持的协议模式: %s", account.ProtocolMode)
+	}
+	if account.AuthMode == "bridge_local_credential" {
+		if account.Provider != "proton" {
+			return AccountConfig{}, fmt.Errorf("当前 bridge_local_credential 仅支持 proton")
+		}
+		if account.Host == "" {
+			account.Host = "127.0.0.1"
+		}
+		if account.Port == 0 {
+			account.Port = 1143
+		}
+		if account.BridgeEndpoint == "" {
+			account.BridgeEndpoint = fmt.Sprintf("%s:%d", account.Host, account.Port)
+		}
 	}
 	return account, nil
 }

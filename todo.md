@@ -8,7 +8,7 @@
 - Phase 0：**已完成**（开发底座、Docker、多服务骨架已提交）
 - Phase 1：**已完成**（身份权限、共享控制台骨架已提交）
 - Phase 2：**已完成**（项目/库存/激活订单主链路、管理员项目配置、供应商资源录入已提交）
-- Phase 3：**进行中**（已完成 SMTP 会话落盘、metadata 入库、RabbitMQ 解析任务入队、MinIO 原始对象上传，并打通基础验证码/link 提取与订单 READY 迁移；已补充 Postfix 转发样例，并完成 IMAP/POP3 拉取骨架；下一步重点：规则回退增强、真实 OAuth2 刷新接入、健康检查落库、Proton Bridge 与更完整的订单自动迁移）
+- Phase 3：**进行中**（已完成 SMTP 会话落盘、metadata 入库、RabbitMQ 解析任务入队、MinIO 原始对象上传，并打通验证码/link 提取回退增强、订单 READY/FINISHED 自动迁移、真实 OAuth2 刷新接入、账号健康状态落库、Proton Bridge 接入策略与 Postfix 转发样例；剩余主项：授权码 / App Password / 密码型凭证的真实接入与校验）
 - Phase 4：未开始
 - Phase 5：未开始
 - Phase 6：未开始
@@ -671,13 +671,13 @@ nexus-mail/
 6. 写入邮件元数据到 PostgreSQL
 7. 推送解析任务到 RabbitMQ
 8. 实现验证码 / link 提取器
-9. 实现提取规则回退机制（基础版已完成，后续继续增强）
-10. 订单自动状态迁移（基础 READY/TIMEOUT 迁移已完成）
+9. 实现提取规则回退机制（已完成：支持连续数字、空格/短横线分隔验证码与链接回退）
+10. 订单自动状态迁移（已完成：READY/TIMEOUT/FINISHED 自动迁移）
 11. 实现 IMAP 拉取器（骨架已完成）
 12. 实现 POP3 拉取器（骨架已完成）
-13. 实现 OAuth2 凭证刷新机制（Gmail / Microsoft 优先，骨架已完成）
-14. 实现授权码 / App Password 型账号健康检查（骨架已完成）
-15. 实现 Proton Bridge 型资源接入策略
+13. 实现 OAuth2 凭证刷新机制（已完成：Gmail / Microsoft HTTP refresh 接入）
+14. 实现授权码 / App Password 型账号健康检查（已完成：provider_accounts 健康状态落库与配置校验）
+15. 实现 Proton Bridge 型资源接入策略（已完成：bridge 默认主机/端口、endpoint 校验、健康检查与录入字段）
 
 ### 输出
 - 邮件可进系统

@@ -109,7 +109,7 @@ export function SupplierResourcesPage() {
       <Banner
         type="info"
         fullMode={false}
-        description="当前页面对应 todo Phase 2 第 13 项：供应商资源录入页面。已支持域名、第三方邮箱账号、邮箱池三类资源创建。"
+        description="当前页面对应 todo Phase 3 资源接入收尾：已支持 OAuth2 / 授权码 / App Password / Proton Bridge 所需的主机、端口、refresh token 与 bridge 配置录入。"
       />
 
       <Card title="新增域名池" style={{ width: '100%' }} loading={loading}>
@@ -126,11 +126,16 @@ export function SupplierResourcesPage() {
 
       <Card title="新增第三方邮箱账号" style={{ width: '100%' }} loading={loading}>
         <Form form={accountForm} layout="horizontal" labelPosition="left" initValues={{ source_type: 'public_mailbox_account', auth_mode: 'oauth2', protocol_mode: 'imap_pull', status: 'active' }}>
-          <Form.Input field="provider" label="Provider" rules={[{ required: true, message: '请输入 provider' }]} placeholder="outlook / gmail / qq" />
+          <Form.Input field="provider" label="Provider" rules={[{ required: true, message: '请输入 provider' }]} placeholder="outlook / gmail / qq / proton" />
           <Form.Input field="identifier" label="账号标识" rules={[{ required: true, message: '请输入邮箱或账号标识' }]} placeholder="supplier@example.com" />
           <Form.Input field="source_type" label="来源类型" />
           <Form.Input field="auth_mode" label="认证方式" />
           <Form.Input field="protocol_mode" label="协议模式" />
+          <Form.Input field="host" label="主机" placeholder="imap.gmail.com / 127.0.0.1" />
+          <Form.InputNumber field="port" label="端口" placeholder="993 / 995 / 1143" style={{ width: '100%' }} />
+          <Form.Input field="refresh_token" label="Refresh Token" placeholder="OAuth2 必填，授权码/App Password 可留空" />
+          <Form.Input field="bridge_endpoint" label="Bridge Endpoint" placeholder="127.0.0.1:1143" />
+          <Form.Input field="bridge_label" label="Bridge Label" placeholder="proton-bridge" />
           <Form.Input field="status" label="状态" />
           <Button theme="solid" type="primary" onClick={submitAccount}>保存账号</Button>
         </Form>
@@ -189,6 +194,9 @@ export function SupplierResourcesPage() {
             { title: '认证方式', dataIndex: 'auth_mode', key: 'auth_mode' },
             { title: '协议', dataIndex: 'protocol_mode', key: 'protocol_mode' },
             { title: '标识', dataIndex: 'identifier', key: 'identifier' },
+            { title: '主机', dataIndex: 'host', key: 'host', render: (value, record) => value ? `${value}:${record.port ?? ''}` : '-' },
+            { title: '健康状态', dataIndex: 'health_status', key: 'health_status', render: (value) => <Tag color={value === 'healthy' ? 'green' : 'red'}>{String(value || 'unknown')}</Tag> },
+            { title: 'Bridge', dataIndex: 'bridge_endpoint', key: 'bridge_endpoint', render: (value) => value || '-' },
             { title: '状态', dataIndex: 'status', key: 'status', render: (value) => <Tag color="orange">{String(value)}</Tag> },
           ]}
         />

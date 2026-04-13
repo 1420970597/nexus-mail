@@ -25,6 +25,7 @@ type repository interface {
 	CreateProviderAccount(ctx context.Context, supplierID int64, input CreateProviderAccountInput) (ProviderAccount, error)
 	CreateMailbox(ctx context.Context, supplierID int64, input CreateMailboxInput) (Mailbox, error)
 	ExpireStaleActivationOrders(ctx context.Context, now time.Time) (int64, error)
+	FinalizeReadyActivationOrders(ctx context.Context, now time.Time, finalizeAfter time.Duration) (int64, error)
 }
 
 type Service struct {
@@ -100,6 +101,10 @@ func (s *Service) ExpireStaleActivationOrders(ctx context.Context, now time.Time
 	return s.repo.ExpireStaleActivationOrders(ctx, now)
 }
 
+func (s *Service) FinalizeReadyActivationOrders(ctx context.Context, now time.Time, finalizeAfter time.Duration) (int64, error) {
+	return s.repo.FinalizeReadyActivationOrders(ctx, now, finalizeAfter)
+}
+
 func (s *Service) UpdateProject(ctx context.Context, projectID int64, input UpdateProjectInput) (Project, error) {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Description = strings.TrimSpace(input.Description)
@@ -141,6 +146,11 @@ func (s *Service) CreateProviderAccount(ctx context.Context, supplierID int64, i
 	input.ProtocolMode = strings.TrimSpace(strings.ToLower(input.ProtocolMode))
 	input.Identifier = strings.TrimSpace(input.Identifier)
 	input.Status = strings.TrimSpace(strings.ToLower(input.Status))
+	input.Host = strings.TrimSpace(strings.ToLower(input.Host))
+	input.AccessToken = strings.TrimSpace(input.AccessToken)
+	input.RefreshToken = strings.TrimSpace(input.RefreshToken)
+	input.BridgeEndpoint = strings.TrimSpace(strings.ToLower(input.BridgeEndpoint))
+	input.BridgeLabel = strings.TrimSpace(input.BridgeLabel)
 	if input.Provider == "" || input.Identifier == "" {
 		return ProviderAccount{}, fmt.Errorf("provider 与标识不能为空")
 	}
@@ -155,6 +165,35 @@ func (s *Service) CreateProviderAccount(ctx context.Context, supplierID int64, i
 	}
 	if input.Status == "" {
 		input.Status = "active"
+	}
+	if input.Host == "" {
+		input.Host = defaultProviderHost(input.Provider, input.ProtocolMode, input.AuthMode)
+	}
+	if input.Port == 0 {
+		input.Port = defaultProviderPort(input.ProtocolMode, input.AuthMode)
+	}
+	if input.AuthMode == "bridge_local_credential" {
+		if input.Provider != "proton" && input.Provider != "protonmail" {
+			return ProviderAccount{}, fmt.Errorf("bridge_local_credential 仅支持 proton")
+		}
+		if input.SourceType == "public_mailbox_account" {
+			input.SourceType = "bridge_mailbox"
+		}
+		if input.Provider == "proton" || input.Provider == "protonmail" {
+			input.Provider = "proton"
+			if input.Host == "" {
+				input.Host = "127.0.0.1"
+			}
+			if input.Port == 0 {
+				input.Port = 1143
+			}
+			if input.BridgeEndpoint == "" {
+				input.BridgeEndpoint = "127.0.0.1:1143"
+			}
+			if input.BridgeLabel == "" {
+				input.BridgeLabel = "proton-bridge"
+			}
+		}
 	}
 	return s.repo.CreateProviderAccount(ctx, supplierID, input)
 }
@@ -178,6 +217,49 @@ func (s *Service) CreateMailbox(ctx context.Context, supplierID int64, input Cre
 		return Mailbox{}, fmt.Errorf("邮箱地址或 local_part 至少填写一项")
 	}
 	return s.repo.CreateMailbox(ctx, supplierID, input)
+}
+
+func defaultProviderHost(provider, protocolMode, authMode string) string {
+	if authMode == "bridge_local_credential" && (provider == "proton" || provider == "protonmail") {
+		return "127.0.0.1"
+	}
+	switch protocolMode {
+	case "pop3_pull":
+		switch provider {
+		case "outlook", "microsoft":
+			return "outlook.office365.com"
+		case "qq":
+			return "pop.qq.com"
+		case "163":
+			return "pop.163.com"
+		}
+	default:
+		switch provider {
+		case "gmail":
+			return "imap.gmail.com"
+		case "outlook", "microsoft":
+			return "outlook.office365.com"
+		case "qq":
+			return "imap.qq.com"
+		case "163":
+			return "imap.163.com"
+		case "proton", "protonmail":
+			return "127.0.0.1"
+		}
+	}
+	return ""
+}
+
+func defaultProviderPort(protocolMode, authMode string) int {
+	if authMode == "bridge_local_credential" {
+		return 1143
+	}
+	switch protocolMode {
+	case "pop3_pull":
+		return 995
+	default:
+		return 993
+	}
 }
 
 func buildActivationResult(order ActivationOrder) ActivationResult {

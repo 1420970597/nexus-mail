@@ -48,8 +48,28 @@ CREATE TABLE IF NOT EXISTS provider_accounts (
   protocol_mode TEXT NOT NULL,
   identifier TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active',
+  host TEXT NOT NULL DEFAULT '',
+  port INTEGER NOT NULL DEFAULT 0,
+  access_token TEXT NOT NULL DEFAULT '',
+  refresh_token TEXT NOT NULL DEFAULT '',
+  token_expires_at TIMESTAMPTZ,
+  health_status TEXT NOT NULL DEFAULT 'unknown',
+  health_reason TEXT NOT NULL DEFAULT '',
+  health_checked_at TIMESTAMPTZ,
+  bridge_endpoint TEXT NOT NULL DEFAULT '',
+  bridge_label TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS host TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS port INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS access_token TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS refresh_token TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS token_expires_at TIMESTAMPTZ;
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS health_status TEXT NOT NULL DEFAULT 'unknown';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS health_reason TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS health_checked_at TIMESTAMPTZ;
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS bridge_endpoint TEXT NOT NULL DEFAULT '';
+ALTER TABLE provider_accounts ADD COLUMN IF NOT EXISTS bridge_label TEXT NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS mailbox_pool (
   id BIGSERIAL PRIMARY KEY,
@@ -150,13 +170,14 @@ SELECT 1
 WITH supplier AS (
   SELECT id FROM users WHERE email = 'supplier@nexus-mail.local' LIMIT 1
 )
-INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status)
-SELECT supplier.id, x.provider, x.source_type, x.auth_mode, x.protocol_mode, x.identifier, 'active'
+INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, refresh_token, bridge_endpoint, bridge_label)
+SELECT supplier.id, x.provider, x.source_type, x.auth_mode, x.protocol_mode, x.identifier, 'active', x.host, x.port, x.refresh_token, x.bridge_endpoint, x.bridge_label
 FROM supplier,
      (VALUES
-       ('gmail', 'oauth', 'oauth2', 'imap', 'gmail-demo@nexus-mail.local'),
-       ('outlook', 'shared-account', 'app_password', 'pop3', 'outlook-demo@nexus-mail.local')
-     ) AS x(provider, source_type, auth_mode, protocol_mode, identifier)
+       ('gmail', 'public_mailbox_account', 'oauth2', 'imap_pull', 'gmail-demo@nexus-mail.local', 'imap.gmail.com', 993, 'gmail-refresh-demo', '', ''),
+       ('outlook', 'public_mailbox_account', 'app_password', 'pop3_pull', 'outlook-demo@nexus-mail.local', 'outlook.office365.com', 995, '', '', ''),
+       ('proton', 'bridge_mailbox', 'bridge_local_credential', 'imap_pull', 'proton-demo@nexus-mail.local', '127.0.0.1', 1143, '', '127.0.0.1:1143', 'proton-bridge')
+     ) AS x(provider, source_type, auth_mode, protocol_mode, identifier, host, port, refresh_token, bridge_endpoint, bridge_label)
 ON CONFLICT DO NOTHING
 `); err != nil {
 		return err
@@ -702,10 +723,33 @@ RETURNING id, supplier_id, name, region, status, catch_all, created_at
 func (r *Repository) CreateProviderAccount(ctx context.Context, supplierID int64, input CreateProviderAccountInput) (ProviderAccount, error) {
 	var item ProviderAccount
 	err := r.pool.QueryRow(ctx, `
-INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, created_at
-`, supplierID, input.Provider, input.SourceType, input.AuthMode, input.ProtocolMode, input.Identifier, input.Status).Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.CreatedAt)
+INSERT INTO provider_accounts (
+  supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status,
+  host, port, access_token, refresh_token, bridge_endpoint, bridge_label
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+RETURNING id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, token_expires_at, health_status, health_reason, health_checked_at, bridge_endpoint, bridge_label, created_at
+`, supplierID, input.Provider, input.SourceType, input.AuthMode, input.ProtocolMode, input.Identifier, input.Status, input.Host, input.Port, input.AccessToken, input.RefreshToken, input.BridgeEndpoint, input.BridgeLabel).Scan(
+		&item.ID,
+		&item.SupplierID,
+		&item.Provider,
+		&item.SourceType,
+		&item.AuthMode,
+		&item.ProtocolMode,
+		&item.Identifier,
+		&item.Status,
+		&item.Host,
+		&item.Port,
+		&item.AccessToken,
+		&item.RefreshToken,
+		&item.TokenExpiresAt,
+		&item.HealthStatus,
+		&item.HealthReason,
+		&item.HealthCheckedAt,
+		&item.BridgeEndpoint,
+		&item.BridgeLabel,
+		&item.CreatedAt,
+	)
 	return item, err
 }
 
@@ -799,6 +843,87 @@ WHERE status IN ($2, $3)
 	return result.RowsAffected(), nil
 }
 
+func (r *Repository) FinalizeReadyActivationOrders(ctx context.Context, now time.Time, finalizeAfter time.Duration) (int64, error) {
+	if r == nil || r.pool == nil {
+		return 0, nil
+	}
+	if finalizeAfter <= 0 {
+		finalizeAfter = 2 * time.Minute
+	}
+	threshold := now.Add(-finalizeAfter)
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	rows, err := tx.Query(ctx, `
+SELECT mailbox_id
+FROM activation_orders
+WHERE status = $1
+  AND COALESCE(extraction_value, '') <> ''
+  AND updated_at <= $2
+FOR UPDATE
+`, OrderStatusReady, threshold)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	var mailboxIDs []int64
+	for rows.Next() {
+		var mailboxID int64
+		if err := rows.Scan(&mailboxID); err != nil {
+			return 0, err
+		}
+		mailboxIDs = append(mailboxIDs, mailboxID)
+	}
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	result, err := tx.Exec(ctx, `
+UPDATE activation_orders
+SET status = $1,
+    final_price = CASE WHEN final_price = 0 THEN quoted_price ELSE final_price END,
+    updated_at = NOW()
+WHERE status = $2
+  AND COALESCE(extraction_value, '') <> ''
+  AND updated_at <= $3
+`, OrderStatusFinished, OrderStatusReady, threshold)
+	if err != nil {
+		return 0, err
+	}
+	if len(mailboxIDs) > 0 {
+		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = ANY($1)`, mailboxIDs); err != nil {
+			return 0, err
+		}
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+func (r *Repository) ListActiveProviderAccounts(ctx context.Context) ([]ProviderAccount, error) {
+	return r.listProviderAccountsBySupplier(ctx, 0)
+}
+
+func (r *Repository) UpdateProviderAccountHealth(ctx context.Context, accountID int64, update ProviderAccountHealthUpdate) error {
+	if r == nil || r.pool == nil {
+		return nil
+	}
+	_, err := r.pool.Exec(ctx, `
+UPDATE provider_accounts
+SET health_status = $2,
+    health_reason = $3,
+    access_token = CASE WHEN $4 <> '' THEN $4 ELSE access_token END,
+    refresh_token = CASE WHEN $5 <> '' THEN $5 ELSE refresh_token END,
+    token_expires_at = COALESCE($6, token_expires_at),
+    health_checked_at = NOW()
+WHERE id = $1
+`, accountID, update.Status, update.Reason, update.AccessToken, update.RefreshToken, update.TokenExpiresAt)
+	return err
+}
+
 func (r *Repository) ListSupplierResources(ctx context.Context, supplierID int64) (map[string]any, error) {
 	domains, err := r.listDomainsBySupplier(ctx, supplierID)
 	if err != nil {
@@ -879,7 +1004,7 @@ LEFT JOIN provider_accounts a ON a.id = m.account_id
 }
 
 func (r *Repository) listProviderAccountsBySupplier(ctx context.Context, supplierID int64) ([]ProviderAccount, error) {
-	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, created_at FROM provider_accounts`
+	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, token_expires_at, health_status, health_reason, health_checked_at, bridge_endpoint, bridge_label, created_at FROM provider_accounts`
 	args := []any{}
 	if supplierID > 0 {
 		query += ` WHERE supplier_id = $1`
@@ -894,7 +1019,7 @@ func (r *Repository) listProviderAccountsBySupplier(ctx context.Context, supplie
 	var items []ProviderAccount
 	for rows.Next() {
 		var item ProviderAccount
-		if err := rows.Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.Host, &item.Port, &item.AccessToken, &item.RefreshToken, &item.TokenExpiresAt, &item.HealthStatus, &item.HealthReason, &item.HealthCheckedAt, &item.BridgeEndpoint, &item.BridgeLabel, &item.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)

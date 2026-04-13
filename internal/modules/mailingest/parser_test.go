@@ -15,3 +15,10 @@ func TestExtractResultFallsBackToLink(t *testing.T) {
 		t.Fatalf("expected link result, got %q %q", type_, value)
 	}
 }
+
+func TestExtractResultNormalizesSpacedCode(t *testing.T) {
+	type_, value := ExtractResult([]byte("Your verification code is 12 34 56 right now"))
+	if type_ != "code" || value != "123456" {
+		t.Fatalf("expected normalized code 123456, got %q %q", type_, value)
+	}
+}

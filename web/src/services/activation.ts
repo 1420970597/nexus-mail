@@ -70,6 +70,12 @@ export interface SupplierAccount {
   protocol_mode: string
   identifier: string
   status: string
+  host?: string
+  port?: number
+  health_status?: string
+  health_reason?: string
+  bridge_endpoint?: string
+  bridge_label?: string
 }
 
 export interface SupplierMailbox {
@@ -140,6 +146,12 @@ export async function createSupplierAccount(payload: {
   protocol_mode?: string
   identifier: string
   status?: string
+  host?: string
+  port?: number
+  access_token?: string
+  refresh_token?: string
+  bridge_endpoint?: string
+  bridge_label?: string
 }) {
   const { data } = await api.post<{ account: SupplierAccount }>('/supplier/resources/accounts', payload)
   return data

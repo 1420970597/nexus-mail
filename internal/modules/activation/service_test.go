@@ -26,6 +26,9 @@ type stubRepo struct {
 	finishErr           error
 	expireCount         int64
 	expireErr           error
+	finalizeCount       int64
+	finalizeAfter       time.Duration
+	finalizeErr         error
 }
 
 func (s *stubRepo) ListProjects(context.Context) ([]Project, error)                 { return nil, nil }
@@ -98,6 +101,13 @@ func (s *stubRepo) ExpireStaleActivationOrders(context.Context, time.Time) (int6
 	}
 	return s.expireCount, nil
 }
+func (s *stubRepo) FinalizeReadyActivationOrders(_ context.Context, _ time.Time, finalizeAfter time.Duration) (int64, error) {
+	s.finalizeAfter = finalizeAfter
+	if s.finalizeErr != nil {
+		return 0, s.finalizeErr
+	}
+	return s.finalizeCount, nil
+}
 
 func TestGetActivationResultIncludesPollingHints(t *testing.T) {
 	repo := &stubRepo{order: ActivationOrder{ID: 12, Status: OrderStatusWaitingEmail, ExpiresAt: time.Now().Add(25 * time.Second), ExtractionType: "code"}}
@@ -138,8 +148,33 @@ func TestCreateProviderAccountNormalizesDefaults(t *testing.T) {
 	if repo.providerAccountIn.ProtocolMode != "imap_pull" {
 		t.Fatalf("expected default protocol_mode imap_pull, got %q", repo.providerAccountIn.ProtocolMode)
 	}
+	if repo.providerAccountIn.Host != "outlook.office365.com" {
+		t.Fatalf("expected normalized host outlook.office365.com, got %q", repo.providerAccountIn.Host)
+	}
+	if repo.providerAccountIn.Port != 993 {
+		t.Fatalf("expected default IMAP port 993, got %d", repo.providerAccountIn.Port)
+	}
 	if repo.providerAccountIn.Identifier != "foo@example.com" {
 		t.Fatalf("expected trimmed identifier, got %q", repo.providerAccountIn.Identifier)
+	}
+}
+
+func TestCreateProviderAccountBuildsProtonBridgeDefaults(t *testing.T) {
+	repo := &stubRepo{providerAccountResp: ProviderAccount{ID: 2}}
+	service := NewService(repo)
+
+	_, err := service.CreateProviderAccount(context.Background(), 2, CreateProviderAccountInput{Provider: "ProtonMail", AuthMode: "bridge_local_credential", Identifier: " proton@example.com "})
+	if err != nil {
+		t.Fatalf("CreateProviderAccount() error = %v", err)
+	}
+	if repo.providerAccountIn.SourceType != "bridge_mailbox" {
+		t.Fatalf("expected bridge_mailbox source type, got %q", repo.providerAccountIn.SourceType)
+	}
+	if repo.providerAccountIn.Host != "127.0.0.1" || repo.providerAccountIn.Port != 1143 {
+		t.Fatalf("expected proton bridge endpoint defaults, got host=%q port=%d", repo.providerAccountIn.Host, repo.providerAccountIn.Port)
+	}
+	if repo.providerAccountIn.BridgeEndpoint != "127.0.0.1:1143" {
+		t.Fatalf("expected bridge endpoint default, got %q", repo.providerAccountIn.BridgeEndpoint)
 	}
 }
 
@@ -213,5 +248,20 @@ func TestExpireStaleActivationOrdersUsesRepository(t *testing.T) {
 	}
 	if count != 3 {
 		t.Fatalf("expected 3 expired orders, got %d", count)
+	}
+}
+
+func TestFinalizeReadyActivationOrdersUsesRepository(t *testing.T) {
+	repo := &stubRepo{finalizeCount: 2}
+	service := NewService(repo)
+	count, err := service.FinalizeReadyActivationOrders(context.Background(), time.Now(), 90*time.Second)
+	if err != nil {
+		t.Fatalf("FinalizeReadyActivationOrders() error = %v", err)
+	}
+	if count != 2 {
+		t.Fatalf("expected 2 finalized orders, got %d", count)
+	}
+	if repo.finalizeAfter != 90*time.Second {
+		t.Fatalf("expected finalizeAfter to propagate, got %s", repo.finalizeAfter)
 	}
 }
