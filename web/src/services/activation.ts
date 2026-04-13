@@ -8,6 +8,8 @@ export interface ProjectItem {
   default_price: number
   success_rate: number
   timeout_seconds: number
+  is_active?: boolean
+  created_at?: string
 }
 
 export interface InventoryItem {
@@ -43,6 +45,42 @@ export interface ActivationOrder {
   expires_at: string
 }
 
+export interface ActivationResultPayload {
+  status: string
+  extraction_type: string
+  extraction_value: string
+  is_terminal: boolean
+  expires_in_seconds: number
+  next_poll_after_seconds: number
+}
+
+export interface SupplierDomain {
+  id: number
+  name: string
+  region: string
+  status: string
+  catch_all: boolean
+}
+
+export interface SupplierAccount {
+  id: number
+  provider: string
+  source_type: string
+  auth_mode: string
+  protocol_mode: string
+  identifier: string
+  status: string
+}
+
+export interface SupplierMailbox {
+  id: number
+  address: string
+  source_type: string
+  status: string
+  project_key: string
+  provider: string
+}
+
 export async function getProjects() {
   const { data } = await api.get<{ items: ProjectItem[] }>('/projects')
   return data
@@ -67,7 +105,12 @@ export async function getActivationOrders() {
 }
 
 export async function getActivationResult(orderId: number) {
-  const { data } = await api.get<{ result: { status: string; extraction_type: string; extraction_value: string } }>(`/orders/activations/${orderId}/result`)
+  const { data } = await api.get<{ result: ActivationResultPayload }>(`/orders/activations/${orderId}/result`)
+  return data
+}
+
+export async function finishActivationOrder(orderId: number) {
+  const { data } = await api.post<{ order: ActivationOrder }>(`/orders/activations/${orderId}/finish`)
   return data
 }
 
@@ -79,10 +122,68 @@ export async function cancelActivationOrder(orderId: number) {
 export async function getSupplierResourcesOverview() {
   const { data } = await api.get('/supplier/resources/overview')
   return data as {
-    domains: Array<{ id: number; name: string; region: string; status: string; catch_all: boolean }>
-    mailboxes: Array<{ id: number; address: string; source_type: string; status: string; project_key: string; provider: string }>
-    accounts: Array<{ id: number; provider: string; source_type: string; auth_mode: string; protocol_mode: string; identifier: string; status: string }>
+    domains: SupplierDomain[]
+    mailboxes: SupplierMailbox[]
+    accounts: SupplierAccount[]
   }
+}
+
+export async function createSupplierDomain(payload: { name: string; region?: string; catch_all: boolean; status?: string }) {
+  const { data } = await api.post<{ domain: SupplierDomain }>('/supplier/resources/domains', payload)
+  return data
+}
+
+export async function createSupplierAccount(payload: {
+  provider: string
+  source_type?: string
+  auth_mode?: string
+  protocol_mode?: string
+  identifier: string
+  status?: string
+}) {
+  const { data } = await api.post<{ account: SupplierAccount }>('/supplier/resources/accounts', payload)
+  return data
+}
+
+export async function createSupplierMailbox(payload: {
+  domain_id?: number
+  account_id?: number
+  local_part?: string
+  address?: string
+  source_type?: string
+  project_key: string
+  status?: string
+}) {
+  const { data } = await api.post<{ mailbox: SupplierMailbox }>('/supplier/resources/mailboxes', payload)
+  return data
+}
+
+export async function submitSupplierActivationResult(
+  orderId: number,
+  payload: { extraction_type?: string; extraction_value: string; finalize?: boolean },
+) {
+  const { data } = await api.post<{ order: ActivationOrder }>(`/supplier/orders/activations/${orderId}/result`, payload)
+  return data
+}
+
+export async function getAdminProjects() {
+  const { data } = await api.get<{ items: ProjectItem[] }>('/admin/projects')
+  return data
+}
+
+export async function updateAdminProject(
+  projectId: number,
+  payload: {
+    name: string
+    description: string
+    default_price: number
+    success_rate: number
+    timeout_seconds: number
+    is_active: boolean
+  },
+) {
+  const { data } = await api.patch<{ project: ProjectItem }>(`/admin/projects/${projectId}`, payload)
+  return data
 }
 
 export async function getAdminProjectOfferings() {

@@ -7,10 +7,18 @@ export function ProjectsPage() {
   const [loading, setLoading] = useState(true)
   const [creatingKey, setCreatingKey] = useState('')
 
+  const load = async () => {
+    setLoading(true)
+    try {
+      const res = await getInventory()
+      setItems(res.items)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    getInventory()
-      .then((res) => setItems(res.items))
-      .finally(() => setLoading(false))
+    void load()
   }, [])
 
   const grouped = useMemo(() => items, [items])
@@ -20,8 +28,7 @@ export function ProjectsPage() {
     try {
       const res = await createActivationOrder(record.project_key, record.domain_id)
       Toast.success(`已创建订单 ${res.order.order_no}，邮箱：${res.order.email_address}`)
-      const latest = await getInventory()
-      setItems(latest.items)
+      await load()
     } catch (error: any) {
       Toast.error(error?.response?.data?.error ?? '创建订单失败')
     } finally {
@@ -33,10 +40,16 @@ export function ProjectsPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <div>
         <Typography.Title heading={3}>项目市场</Typography.Title>
-        <Typography.Paragraph>查看可售项目、价格、库存与推荐域名池，并直接创建一次性邮件接码订单。</Typography.Paragraph>
+        <Typography.Paragraph>
+          查看可售项目、价格、库存、供应商来源与协议模式，并直接创建一次性邮件接码订单。
+        </Typography.Paragraph>
       </div>
 
-      <Banner type="info" fullMode={false} description="Phase 2 已接入首批项目/库存接口，当前为订单流程骨架，可用于演示项目选择与下单分配。" />
+      <Banner
+        type="info"
+        fullMode={false}
+        description="Phase 2 已打通项目 -> 库存 -> 下单 -> 订单轮询主链路。优先展示项目键、域名池、成功率和库存，便于后续接入更精细的筛选器。"
+      />
 
       <Card style={{ width: '100%' }}>
         <Table
@@ -48,7 +61,9 @@ export function ProjectsPage() {
             { title: '项目', dataIndex: 'project_name', key: 'project_name' },
             { title: '项目键', dataIndex: 'project_key', key: 'project_key', render: (value) => <Tag color="blue">{String(value)}</Tag> },
             { title: '域名池', dataIndex: 'domain_name', key: 'domain_name' },
-            { title: '价格', dataIndex: 'price', key: 'price', render: (value) => `¥${Number(value) / 100}` },
+            { title: '来源类型', dataIndex: 'source_type', key: 'source_type', render: (value) => <Tag color="grey">{String(value)}</Tag> },
+            { title: '协议', dataIndex: 'protocol_mode', key: 'protocol_mode', render: (value) => value || 'smtp_inbound' },
+            { title: '价格', dataIndex: 'price', key: 'price', render: (value) => `¥${(Number(value) / 100).toFixed(2)}` },
             { title: '库存', dataIndex: 'stock', key: 'stock' },
             { title: '成功率', dataIndex: 'success_rate', key: 'success_rate', render: (value) => `${Math.round(Number(value) * 100)}%` },
             {
