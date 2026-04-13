@@ -1,0 +1,870 @@
+# Nexus-Mail 完整开发计划（todo.md）
+
+> **For Hermes:** 当前阶段为规划，不执行代码实现。后续开发将在本机进行；已验证本机可绑定 **25 端口**，适合承接邮件接收边缘服务。当前本机状态：`node` 已安装，`go` / `docker` / `pnpm` 尚未安装，需要在项目启动阶段先完成环境准备。
+
+## 0. 项目目标
+
+构建一个面向商业化运营的 **邮件接码平台**，核心产品逻辑对齐成熟 **SIM 接码平台**，但资源从“手机号 / 号码池”切换为“域名 / 邮箱别名 / 邮件接收能力”。
+
+### 明确目标
+- 后端：**Go**
+- 前端：**React**
+- 数据存储：
+  - 高性能持久存储：**PostgreSQL**
+  - 缓存数据库：**Redis**
+- 编译与部署：**必须使用 Docker**
+- UI 风格：参考 **QuantumNous/new-api**
+- 权限模型：**同一套系统页面 + 同一套布局骨架**，仅通过菜单和路由权限扩展区分用户 / 供应商 / 管理员，逻辑对齐 new-api 的共享控制台模式
+- 单独页面：必须提供 **API 文档页面**
+- 商业目标规模：
+  - 注册用户：**1 万+**
+  - 并发：**1000+**
+
+---
+
+## 1. 已完成调研结论（用于本计划）
+
+## 1.1 new-api UI / 权限模式结论
+基于公开资料调研，`new-api` 的前端特征可提炼为：
+
+- 使用 **React + Vite**
+- UI 组件偏向 **Semi Design (`@douyinfe/semi-ui`)** 风格
+- 采用 **单一共享控制台布局**：侧边栏 + 顶栏 + 内容区
+- 非“用户端 / 管理端”双前端拆分，而是在 **同一前端壳** 中按角色决定可见菜单与路由
+- 管理员角色通过菜单项追加、路由守卫与权限控制显示更多能力
+
+### 对 Nexus-Mail 的直接落地要求
+- 只维护 **一个 React 控制台项目**，不拆成三个独立后台
+- 通过角色与权限声明控制菜单：
+  - 普通用户菜单
+  - 供应商扩展菜单
+  - 管理员扩展菜单
+- 所有角色共享相同 Layout：
+  - `Sidebar`
+  - `Topbar`
+  - `Content`
+  - `Breadcrumb`
+  - `GlobalNotice / Toast`
+- 严禁做三套皮肤逻辑分叉；差异应体现在：
+  - 菜单树
+  - 页面权限
+  - 页面中局部操作按钮
+
+---
+
+## 1.2 架构与中间件调研结论
+结合商业项目目标与 1000+ 并发要求，推荐基础设施：
+
+### 核心推荐
+- **Go 后端**：高并发 API 与异步处理主服务
+- **PostgreSQL**：主业务数据库，系统唯一事实源（system of record）
+- **PgBouncer**：PostgreSQL 连接池层，避免高并发直接打爆数据库连接
+- **Redis**：缓存、会话、限流、幂等键、短生命周期状态
+- **RabbitMQ（Quorum Queues）**：可靠异步任务队列
+- **MinIO**：原始邮件 MIME、附件、审计快照等对象存储
+- **OpenAPI + Redoc**：单独 API 文档页面
+- **Postfix**：公网 25 端口 SMTP 接收边缘
+- **Go Mail Processor**：在 Postfix 后方做业务解析，而不是直接把 Go API 暴露成公网 SMTP 第一跳
+
+### 为什么不是“Go 直接监听公网 25 端口”
+虽然本机已经验证可绑定 25 端口，但商业生产环境中：
+- SMTP 接收涉及协议兼容
+- 重试/排队/退信/灰度处理复杂
+- 反垃圾、限流、TLS、MTA 行为必须稳定
+
+因此建议架构是：
+
+```text
+Internet MX
+  -> Postfix (25)
+  -> internal filter / LMTP / webhook bridge
+  -> Go mail-ingest service
+  -> RabbitMQ
+  -> parsing workers
+  -> PostgreSQL / Redis / MinIO
+```
+
+这是最稳妥、最适合商业长期维护的方案。
+
+---
+
+## 2. 最终技术选型（定稿建议）
+
+## 2.1 后端
+### 语言与框架
+- 语言：**Go 1.23+ / 1.24+**（正式落地时选稳定版本）
+- Web 框架：**Gin** 或 **Echo**
+  - 推荐：**Gin**
+  - 原因：社区成熟、资料多、适合商业 API 后台
+
+### Go 子模块建议
+- `cmd/api`：HTTP API 服务
+- `cmd/worker`：异步任务消费者
+- `cmd/mail-ingest`：邮件接收后的业务摄取服务
+- `cmd/scheduler`：定时任务 / 超时单 / 清理任务
+
+### 核心 Go 依赖建议
+- Web：`gin-gonic/gin`
+- ORM / SQL：**`sqlc` + `pgx`** 或 **GORM**
+  - 推荐：商业项目优先 **`sqlc + pgx`**，更可控、更稳定、更适合高并发
+- 配置：`spf13/viper` 或纯环境变量 + 自定义 config loader
+- 日志：`uber-go/zap`
+- 校验：`go-playground/validator`
+- JWT：`golang-jwt/jwt`
+- OpenAPI：`swaggo/swag` 或 contract-first OpenAPI 生成
+  - 推荐：一期先 `swaggo`，二期收敛成 contract-first
+- 队列：RabbitMQ 官方/成熟客户端
+- 邮件协议：`emersion/go-smtp`（用于内部组件，不建议替代公网 MTA）
+
+---
+
+## 2.2 前端
+### 框架
+- **React 18**
+- **Vite**
+- **TypeScript**（必须）
+
+### UI 方案
+为了最大程度贴近 new-api 风格，推荐：
+- **Semi Design** 作为主 UI 库
+- `react-router-dom`
+- `zustand` 或 `redux-toolkit`
+  - 推荐：**zustand**，更轻量
+- 表单：`react-hook-form`
+- 图表：`@visactor/react-vchart` 或 `echarts-for-react`
+  - 推荐：贴近 new-api 可选 `VChart`
+- 请求层：`axios`
+
+### 前端权限模式
+- 单一应用：`web/`
+- 单一 Layout：`ConsoleLayout`
+- 角色：
+  - `user`
+  - `supplier`
+  - `admin`
+- 菜单策略：
+  - 基础菜单：所有角色共享
+  - 供应商菜单：追加显示
+  - 管理员菜单：追加显示
+- 路由策略：
+  - `ProtectedRoute`
+  - `SupplierRoute`
+  - `AdminRoute`
+- 不允许复制页面壳，只允许扩展模块
+
+---
+
+## 2.3 数据与中间件
+### 持久数据库
+**PostgreSQL**
+
+用于保存：
+- 用户
+- 供应商
+- 项目
+- 域名
+- 邮箱池
+- 订单
+- 邮件元数据
+- 提取结果
+- 钱包交易
+- 退款记录
+- 审计日志
+- 风控事件
+
+### 缓存数据库
+**Redis**
+
+用于保存：
+- 登录会话 / token 黑名单
+- 限流计数器
+- 幂等键
+- 短生命周期订单状态缓存
+- 热门价格 / 库存缓存
+- Webhook 重试状态
+- 临时验证码读取窗口
+
+### 队列系统
+**RabbitMQ（Quorum Queues）**
+
+用于：
+- 入站邮件处理任务
+- 提取任务
+- Webhook 投递任务
+- 退款异步处理
+- 供应商结算任务
+- 统计聚合任务
+
+### 对象存储
+**MinIO**
+
+用于：
+- 原始 MIME 邮件
+- HTML 原文
+- 附件
+- 邮件快照
+- 审计归档
+
+---
+
+## 3. 部署拓扑（单机商业起步版）
+
+本项目初期以 **单台机器 Docker Compose** 启动，后续平滑升级为多机。
+
+## 3.1 单机生产拓扑
+
+```text
+[Internet]
+   |
+   |-- 80/443 --> Nginx / Caddy
+   |                |-- React Web
+   |                |-- Go API
+   |                |-- /docs -> Redoc
+   |
+   |-- 25 --> Postfix
+                    |-- internal handoff -> mail-ingest
+
+[Docker services]
+- gateway (Nginx/Caddy)
+- api (Go)
+- worker (Go)
+- scheduler (Go)
+- mail-ingest (Go)
+- postgres
+- pgbouncer
+- redis
+- rabbitmq
+- minio
+- postfix (host or containerized with stronger host networking strategy)
+- prometheus
+- grafana
+- loki / promtail（可选）
+```
+
+## 3.2 重要部署原则
+- **数据库、Redis、RabbitMQ、MinIO 必须有持久卷**
+- 所有服务必须通过 Docker 构建
+- 生产镜像必须使用 **multi-stage Dockerfile**
+- API 与前端必须通过反向代理统一暴露
+- API 文档页必须从正式环境可访问：`/docs`
+- 管理后台不能单独域名拆新项目；应继续复用同一套前端
+
+---
+
+## 4. 本机环境准备任务（必须先做）
+
+> 当前机器已验证：**可绑定 25 端口**。
+
+但当前机器还缺少开发关键依赖：
+- `go`：未安装
+- `docker`：未安装
+- `pnpm`：未安装
+
+## Task 0：开发机初始化
+
+### 目标
+让这台机器成为 Nexus-Mail 的长期开发与部署机器。
+
+### 必做事项
+- 安装 Go
+- 安装 Docker Engine + Docker Compose Plugin
+- 安装 pnpm
+- 安装 Make
+- 安装 Git LFS（如果后续文档/资产需要）
+- 安装 `swag` / `sqlc` / `golangci-lint`
+- 安装 `psql` / `redis-cli` / `rabbitmqadmin`（可选）
+
+### 验证标准
+- `go version` 可用
+- `docker version` 可用
+- `docker compose version` 可用
+- `pnpm -v` 可用
+- `docker run hello-world` 成功
+
+---
+
+## 5. 项目目录结构（目标结构）
+
+```text
+nexus-mail/
+├── cmd/
+│   ├── api/
+│   ├── worker/
+│   ├── scheduler/
+│   └── mail-ingest/
+├── internal/
+│   ├── app/
+│   ├── auth/
+│   ├── billing/
+│   ├── supplier/
+│   ├── order/
+│   ├── project/
+│   ├── mailbox/
+│   ├── mailparser/
+│   ├── risk/
+│   ├── webhook/
+│   ├── queue/
+│   ├── storage/
+│   └── platform/
+├── migrations/
+├── sql/
+├── deployments/
+│   ├── docker/
+│   ├── nginx/
+│   ├── postfix/
+│   └── monitoring/
+├── web/
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   ├── stores/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   └── styles/
+│   └── public/
+├── docs/
+│   ├── architecture/
+│   ├── api/
+│   ├── product/
+│   └── operations/
+├── tests/
+│   ├── integration/
+│   ├── e2e/
+│   └── load/
+├── Dockerfile.api
+├── Dockerfile.web
+├── Dockerfile.worker
+├── docker-compose.yml
+├── docker-compose.prod.yml
+├── Makefile
+├── README.md
+└── todo.md
+```
+
+---
+
+## 6. 核心产品模块规划
+
+## 6.1 用户侧模块
+- 登录注册
+- 钱包 / 充值 / 账单
+- 项目列表
+- 价格和库存查询
+- 一次性接码订单
+- 长租邮箱订单
+- 订单详情 / 提取结果
+- Webhook 配置
+- API Key 管理
+- 历史记录
+
+## 6.2 供应商侧模块
+- 供应商资料与状态
+- 域名管理
+- 邮箱池 / 别名池管理
+- 供货规则
+- 成本价设置
+- 可售项目范围
+- 收件路由配置
+- 订单表现统计
+- 结算与冻结金额
+
+## 6.3 管理员模块
+- 用户管理
+- 供应商管理
+- 项目管理
+- 价格规则
+- 风控规则
+- 订单总览
+- 财务总览
+- 退款 / 争议处理
+- 系统配置
+- API 文档入口
+- 审计日志
+
+---
+
+## 7. API 文档页面要求（单独页面，必须做）
+
+## 7.1 方案
+- OpenAPI 3.x 作为标准
+- 使用 **Redoc** 生成文档页面
+- 文档路径：`/docs`
+- 可选内部调试路径：`/swagger`
+
+## 7.2 文档范围
+一期必须覆盖：
+- 鉴权
+- 用户资料
+- 余额
+- 项目列表
+- 价格 / 库存
+- 激活订单创建
+- 长租订单创建
+- 查询订单
+- 获取提取结果
+- 取消订单
+- webhook 回调说明
+
+二期扩展：
+- 供应商 API
+- 管理员 API
+- SDK 示例
+
+---
+
+## 8. 高并发与容量设计（必须从一期就考虑）
+
+## 8.1 并发目标
+- 注册用户 1 万+
+- 峰值并发请求 1000+
+- 高频场景：
+  - 下单
+  - 轮询订单
+  - 获取验证码
+  - 入站邮件高峰解析
+  - webhook 重试
+
+## 8.2 性能设计原则
+- 所有热路径可缓存就缓存
+- 轮询接口必须设计为轻查询
+- 订单状态变更必须异步化
+- 原始邮件正文不直接放入热查询表
+- 大文本 / MIME / 附件进入对象存储
+- PostgreSQL 只存：
+  - 元数据
+  - 提取结果
+  - 状态
+  - 审计引用
+
+## 8.3 数据库设计原则
+- `orders` 表按时间或业务类型预留分区设计
+- `messages` / `audit_logs` / `wallet_transactions` 提前考虑分区
+- 使用 PgBouncer 管理连接池
+- 索引优先覆盖：
+  - `user_id + created_at`
+  - `project_id + status`
+  - `supplier_id + status`
+  - `mailbox_id + created_at`
+  - `external_message_id`
+
+## 8.4 Redis 设计原则
+- 所有 key 必须带前缀
+- 所有缓存必须明确 TTL
+- 不把 Redis 当主数据库
+- 限流必须以 Redis 原子操作实现
+
+## 8.5 队列设计原则
+- 入站邮件与解析解耦
+- 失败任务必须有 DLQ（死信队列）
+- webhook 任务必须支持指数退避
+- 账务任务必须幂等
+
+---
+
+## 9. 安全与商业化要求
+
+## 9.1 必须实现的安全能力
+- JWT / Session 双模式之一（建议 JWT + Refresh）
+- 登录限流
+- IP 白名单（API Key 级别）
+- Webhook 签名校验
+- 幂等键
+- 审计日志
+- 管理员高危操作二次确认
+- 供应商侧敏感配置加密保存
+
+## 9.2 商业化必须实现的账务能力
+- 钱包余额
+- 冻结余额
+- 成功扣费
+- 超时退款
+- 手工调账
+- 供应商待结算金额
+- 供应商已结算金额
+- 争议单标记
+
+## 9.3 合规与隐私要求
+- 原始邮件默认仅订单所有者可见
+- 管理员查看原文必须有审计日志
+- 供应商不能默认查看邮件原文
+- 邮件与附件保留期可配置
+- 日志必须做脱敏
+
+---
+
+## 10. 分阶段完整开发计划
+
+## Phase 0：项目与环境初始化（第 1 周）
+
+### 目标
+完成基础仓库结构、开发工具链、Docker 开发底座。
+
+### 任务
+1. 建立 Go 后端基础目录
+2. 建立 React + Vite + TS 前端目录
+3. 建立 Docker 多阶段构建模板
+4. 建立 `docker-compose.yml`
+5. 接入 PostgreSQL / Redis / RabbitMQ / MinIO / PgBouncer
+6. 建立 `.env.example`
+7. 建立 `Makefile`
+8. 建立基础 CI（lint/test/build）
+
+### 输出
+- 可启动空白前后端
+- Docker Compose 一键拉起核心依赖
+- 基础仓库规范完整
+
+---
+
+## Phase 1：身份、权限、共享控制台骨架（第 2-3 周）
+
+### 目标
+搭建与 new-api 一致的“单壳多角色”控制台。
+
+### 任务
+1. 后端实现用户、角色、权限模型
+2. 前端实现单一 `ConsoleLayout`
+3. 实现登录 / 登出 / 会话刷新
+4. 实现动态菜单系统
+5. 实现 `ProtectedRoute / SupplierRoute / AdminRoute`
+6. 实现基础页面：
+   - Dashboard
+   - Profile
+   - API Keys
+   - Settings
+7. 增加角色差异菜单：
+   - 用户：订单 / 余额 / 项目
+   - 供应商：域名 / 资源池 / 结算
+   - 管理员：用户 / 供应商 / 价格 / 风控 / 审计
+
+### 输出
+- 一套共享控制台页面
+- 菜单权限模型跑通
+
+---
+
+## Phase 2：核心订单与项目能力（第 4-6 周）
+
+### 目标
+实现商业最核心的一次性邮件接码流程。
+
+### 任务
+1. 项目管理模型
+2. 域名池 / 邮箱池模型
+3. 激活订单状态机
+4. 下单接口
+5. 查询订单接口
+6. 获取提取结果接口
+7. 取消订单接口
+8. 轮询接口优化
+9. 价格 / 库存接口
+10. 管理员项目配置页面
+11. 用户下单页面
+
+### 输出
+- 用户可下单
+- 系统可分配邮箱地址
+- 可查询订单状态
+
+---
+
+## Phase 3：SMTP 接收链路与邮件解析（第 6-8 周）
+
+### 目标
+打通从公网邮件接收到业务提取的完整链路。
+
+### 任务
+1. 部署 Postfix（或确定宿主机运行方式）
+2. 配置本机 25 端口接收策略
+3. 配置测试域名的 MX
+4. 建立 Postfix -> Go ingest handoff
+5. 存储原始 MIME 到 MinIO
+6. 写入邮件元数据到 PostgreSQL
+7. 推送解析任务到 RabbitMQ
+8. 实现验证码 / link 提取器
+9. 实现提取规则回退机制
+10. 订单自动状态迁移
+
+### 输出
+- 邮件可进系统
+- 可成功提取验证码 / 链接
+- 订单可进入 READY / FINISHED
+
+---
+
+## Phase 4：账务、退款、供应商闭环（第 8-10 周）
+
+### 目标
+形成真正可商业运营的交易闭环。
+
+### 任务
+1. 用户钱包
+2. 冻结余额
+3. 成功扣费
+4. 超时退款
+5. 供应商待结算余额
+6. 供应商资源成本模型
+7. 供应商供货页面
+8. 管理员调账能力
+9. 争议单处理流程
+10. 供应商报表页面
+
+### 输出
+- 用户能充值消费
+- 供应商能供货并结算
+- 管理员能处理异常单
+
+---
+
+## Phase 5：API 文档、Webhook、运营与风控（第 10-12 周）
+
+### 目标
+补齐面向客户和运营的商业化能力。
+
+### 任务
+1. 生成 OpenAPI 文档
+2. 挂载 `/docs` Redoc 页面
+3. webhook 配置与重试机制
+4. API Key 权限与 IP 白名单
+5. 限流系统
+6. 风控规则：
+   - 高频取消
+   - 高频超时
+   - API 异常访问
+   - 发件人黑名单
+7. 审计日志
+8. 仪表盘统计
+
+### 输出
+- 独立 API 文档页面可访问
+- 商业 API 可对外提供
+- 风控初步可用
+
+---
+
+## Phase 6：性能、灰度、上线准备（第 12-14 周）
+
+### 目标
+让系统可承载 1 万用户、1000+ 并发的商业环境。
+
+### 任务
+1. 压测脚本编写
+2. 订单轮询接口压测
+3. 入站邮件高峰压测
+4. PostgreSQL 索引与慢查询优化
+5. Redis 热 key / 内存优化
+6. RabbitMQ 队列堆积策略
+7. Docker 镜像瘦身
+8. 监控接入：
+   - Prometheus
+   - Grafana
+   - 应用指标
+   - 队列指标
+   - 数据库指标
+9. 日志归集
+10. 上线 Checklist
+
+### 输出
+- 压测报告
+- 上线部署方案
+- 回滚方案
+
+---
+
+## 11. 前端页面规划（共享控制台）
+
+## 11.1 公共页面
+- 登录页
+- 忘记密码
+- Dashboard
+- 个人资料
+- API Keys
+- 通知中心
+- 文档入口
+
+## 11.2 用户菜单
+- 项目市场
+- 激活订单
+- 长租邮箱
+- 订单历史
+- 钱包账单
+- Webhook 设置
+
+## 11.3 供应商菜单
+- 我的域名
+- 邮箱池 / 别名池
+- 供货规则
+- 成本设置
+- 订单表现
+- 结算中心
+
+## 11.4 管理员菜单
+- 用户管理
+- 供应商管理
+- 项目管理
+- 价格策略
+- 风控中心
+- 审计日志
+- 系统设置
+- 监控概览
+
+### 页面设计要求
+- 风格贴近 new-api：
+  - 简洁科技感
+  - 深浅色主题可选
+  - 左侧导航为主
+  - 卡片式统计面板
+  - 统一图标体系
+- 所有角色共用同一 Layout，不允许复制一份“admin 前端”
+
+---
+
+## 12. 数据库表优先级规划
+
+## P0 首批表
+- `users`
+- `roles`
+- `user_roles`
+- `api_keys`
+- `projects`
+- `suppliers`
+- `domains`
+- `mailboxes`
+- `resource_pools`
+- `orders`
+- `messages`
+- `extractions`
+- `wallet_transactions`
+
+## P1 第二批表
+- `refunds`
+- `risk_events`
+- `webhook_endpoints`
+- `webhook_deliveries`
+- `supplier_settlements`
+- `audit_logs`
+
+## P2 第三批表
+- `pricing_rules`
+- `dashboard_snapshots`
+- `notification_events`
+- `attachments`
+
+---
+
+## 13. 测试计划（必须写入开发节奏）
+
+## 13.1 后端测试
+- 单元测试
+- service 层测试
+- repository 层测试
+- 队列消费者测试
+- 邮件解析规则测试
+
+## 13.2 前端测试
+- 核心组件测试
+- 菜单权限测试
+- 路由守卫测试
+- 关键表单测试
+
+## 13.3 集成测试
+- 下单 -> 邮件到达 -> 提取 -> 完成
+- 超时 -> 自动退款
+- 供应商异常 -> BAD_RESOURCE
+- webhook 重试链路
+
+## 13.4 压测
+- 登录接口
+- 下单接口
+- 订单查询接口
+- 解析队列吞吐
+- Redis 限流
+- PostgreSQL 连接池
+
+---
+
+## 14. 必须优先落实的非功能性要求
+
+- Docker 化开发与部署
+- 单机环境可跑全套依赖
+- 数据持久化
+- 可监控
+- 可审计
+- 可回滚
+- 能灰度
+- 邮件原文安全可控
+- 角色共用一个系统页面
+- API 文档单独页面可访问
+
+---
+
+## 15. 明确的执行顺序（从下一步开始）
+
+## 下一步优先顺序
+1. 安装本机开发工具链（Go / Docker / pnpm）
+2. 初始化仓库目录结构
+3. 生成 Docker 开发底座
+4. 初始化 PostgreSQL / Redis / RabbitMQ / MinIO / PgBouncer
+5. 初始化 React 控制台骨架（new-api 风格）
+6. 初始化 Go API 服务
+7. 建立权限模型与共享菜单系统
+8. 实现订单与项目最小闭环
+9. 打通 Postfix + 邮件接收链路
+10. 接入 OpenAPI + Redoc `/docs`
+
+---
+
+## 16. 本计划的关键定论
+
+### 最终推荐栈
+- 后端：Go + Gin
+- 前端：React + Vite + TypeScript + Semi Design
+- 持久数据库：PostgreSQL
+- 连接池：PgBouncer
+- 缓存：Redis
+- 队列：RabbitMQ Quorum Queues
+- 对象存储：MinIO
+- 邮件边缘：Postfix
+- 文档：OpenAPI + Redoc
+- 编译部署：Docker + Docker Compose（一期）
+
+### 最终 UI / 权限结论
+- 与 new-api 一致采用：**单一共享控制台 + 按角色扩展菜单与路由**
+- 不做三套系统页面
+- API 文档页独立暴露 `/docs`
+
+### 最终基础设施结论
+- 本机具备 25 端口能力，可用于邮件接收边缘
+- 但公网 SMTP 第一跳仍建议使用 Postfix，不建议一期直接用 Go 替代完整 MTA
+
+---
+
+## 17. 备注
+
+这是一个商业项目，因此开发优先级必须遵循：
+
+1. **可运营**
+2. **可计费**
+3. **可审计**
+4. **可扩展**
+5. **再追求功能花哨**
+
+因此一期严禁过度追求：
+- 微服务拆太细
+- 多种数据库并存
+- 复杂工作流引擎提前引入
+- 三套前端后台
+- 直接裸写公网 SMTP 全协议栈
+
+应优先把：
+- 共享控制台
+- 核心订单闭环
+- 邮件接收闭环
+- 钱包退款闭环
+- API 文档闭环
+- Docker 部署闭环
+
+先做扎实。
