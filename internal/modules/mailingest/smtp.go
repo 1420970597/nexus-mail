@@ -12,15 +12,20 @@ import (
 )
 
 type Server struct {
-	service *Service
-	logger  *log.Logger
+	service   *Service
+	repo      *Repository
+	publisher Publisher
+	logger    *log.Logger
 }
 
-func NewServer(service *Service, logger *log.Logger) *Server {
+func NewServer(service *Service, repo *Repository, publisher Publisher, logger *log.Logger) *Server {
 	if logger == nil {
 		logger = log.Default()
 	}
-	return &Server{service: service, logger: logger}
+	if publisher == nil {
+		publisher = NopPublisher{}
+	}
+	return &Server{service: service, repo: repo, publisher: publisher, logger: logger}
 }
 
 func (s *Server) HandleConn(conn net.Conn) {
@@ -76,6 +81,16 @@ func (s *Server) HandleConn(conn net.Conn) {
 			item, err := s.service.Persist(context.Background(), env, raw)
 			if err != nil {
 				s.logger.Printf("persist mail error: %v", err)
+				_, _ = fmt.Fprint(conn, "451 Requested action aborted: local error in processing\r\n")
+				continue
+			}
+			if err := s.repo.SaveMessage(context.Background(), item); err != nil {
+				s.logger.Printf("save inbound message metadata error: %v", err)
+				_, _ = fmt.Fprint(conn, "451 Requested action aborted: local error in processing\r\n")
+				continue
+			}
+			if err := s.publisher.PublishParseJob(context.Background(), item); err != nil {
+				s.logger.Printf("publish parse job error: %v", err)
 				_, _ = fmt.Fprint(conn, "451 Requested action aborted: local error in processing\r\n")
 				continue
 			}

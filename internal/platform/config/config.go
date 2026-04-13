@@ -14,6 +14,7 @@ type Config struct {
 	DatabaseURL          string
 	RedisURL             string
 	RabbitMQURL          string
+	MailParseQueue       string
 	JWTSecret            string
 	JWTExpireSeconds     int
 	RefreshExpireSeconds int
@@ -30,7 +31,8 @@ func Load() (Config, error) {
 		AppPort:              defaultString(viper.GetString("APP_PORT"), "8080"),
 		DatabaseURL:          viper.GetString("DATABASE_URL"),
 		RedisURL:             viper.GetString("REDIS_URL"),
-		RabbitMQURL:          defaultString(viper.GetString("RABBITMQ_URL"), "amqp://nexus:nexus_dev@rabbitmq:5672/"),
+		RabbitMQURL:          defaultString(viper.GetString("RABBITMQ_URL"), "amqp://nexus:***@rabbitmq:5672/"),
+		MailParseQueue:       defaultString(viper.GetString("MAIL_PARSE_QUEUE"), "mail.parse.raw"),
 		JWTSecret:            defaultString(viper.GetString("JWT_SECRET"), "change-me"),
 		JWTExpireSeconds:     defaultInt(viper.GetInt("JWT_EXPIRE_SECONDS"), 3600),
 		RefreshExpireSeconds: defaultInt(viper.GetInt("REFRESH_EXPIRE_SECONDS"), 604800),

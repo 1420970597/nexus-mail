@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 	"os"
 
 	"github.com/1420970597/nexus-mail/internal/modules/mailingest"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
+	"github.com/1420970597/nexus-mail/internal/platform/database"
 )
 
 func main() {
@@ -14,9 +16,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config: %v", err)
 	}
+	ctx := context.Background()
+	db, err := database.New(ctx, cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("connect database: %v", err)
+	}
+	defer db.Close()
 
 	service := mailingest.NewService(cfg.MailIngestSpoolDir)
-	server := mailingest.NewServer(service, log.Default())
+	repo := mailingest.NewRepository(db.Pool)
+	if err := repo.EnsureSchema(ctx); err != nil {
+		log.Fatalf("ensure mail-ingest schema: %v", err)
+	}
+	publisher, err := mailingest.NewRabbitPublisher(cfg.RabbitMQURL, cfg.MailParseQueue)
+	if err != nil {
+		log.Fatalf("init rabbitmq publisher: %v", err)
+	}
+	defer publisher.Close()
+	server := mailingest.NewServer(service, repo, publisher, log.Default())
 	ln, err := net.Listen("tcp", ":"+cfg.MailIngestPort)
 	if err != nil {
 		log.Fatal(err)
@@ -26,7 +43,7 @@ func main() {
 	if err := os.MkdirAll(cfg.MailIngestSpoolDir, 0o755); err != nil {
 		log.Fatalf("prepare spool dir: %v", err)
 	}
-	log.Printf("mail-ingest listening on :%s, spool=%s", cfg.MailIngestPort, cfg.MailIngestSpoolDir)
+	log.Printf("mail-ingest listening on :%s, spool=%s, queue=%s", cfg.MailIngestPort, cfg.MailIngestSpoolDir, cfg.MailParseQueue)
 	for {
 		conn, err := ln.Accept()
 		if err != nil {

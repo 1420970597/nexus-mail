@@ -21,6 +21,9 @@ func TestLoadValidatesRequiredConfig(t *testing.T) {
 	if cfg.MailIngestSpoolDir != "/tmp/nexus-mail-ingest" {
 		t.Fatalf("expected default spool dir, got %s", cfg.MailIngestSpoolDir)
 	}
+	if cfg.MailParseQueue != "mail.parse.raw" {
+		t.Fatalf("expected default parse queue, got %s", cfg.MailParseQueue)
+	}
 }
 
 func TestLoadRejectsWeakSecret(t *testing.T) {
