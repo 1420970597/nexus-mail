@@ -3,6 +3,7 @@ package mailingest
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -12,12 +13,17 @@ import (
 
 type ObjectStorage interface {
 	Upload(ctx context.Context, item PersistedMessage) (PersistedMessage, error)
+	ReadObject(ctx context.Context, objectKey string) ([]byte, error)
 }
 
 type NopObjectStorage struct{}
 
 func (NopObjectStorage) Upload(_ context.Context, item PersistedMessage) (PersistedMessage, error) {
 	return item, nil
+}
+
+func (NopObjectStorage) ReadObject(context.Context, string) ([]byte, error) {
+	return nil, os.ErrNotExist
 }
 
 type MinIOStorage struct {
@@ -68,6 +74,22 @@ func (s *MinIOStorage) Upload(ctx context.Context, item PersistedMessage) (Persi
 	item.RawObjectKey = rawObjectKey
 	item.MetadataObjectKey = metaObjectKey
 	return item, nil
+}
+
+func (s *MinIOStorage) ReadObject(ctx context.Context, objectKey string) ([]byte, error) {
+	if s == nil || s.client == nil {
+		return nil, os.ErrNotExist
+	}
+	obj, err := s.client.GetObject(ctx, s.bucket, objectKey, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("get minio object: %w", err)
+	}
+	defer obj.Close()
+	payload, err := io.ReadAll(obj)
+	if err != nil {
+		return nil, fmt.Errorf("read minio object: %w", err)
+	}
+	return payload, nil
 }
 
 func (s *MinIOStorage) uploadFile(ctx context.Context, objectKey, path string) error {
