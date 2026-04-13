@@ -1,0 +1,31 @@
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Go
+bin/
+coverage.out
+*.test
+
+# Node
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Runtime data
+runtime/
+volumes/
+
+# Build artifacts
+build/
+dist/

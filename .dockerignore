@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+.env.*
+node_modules
+web/node_modules
+web/dist
+volumes
+runtime
+coverage.out
