@@ -8,7 +8,7 @@
 	}
 
 	handle /docs* {
-		reverse_proxy api:8080
+		reverse_proxy web:5173
 	}
 
 	handle {

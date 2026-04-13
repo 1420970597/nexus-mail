@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexus-Mail API Docs</title>
+    <style>
+      body { margin: 0; background: #0f172a; }
+      #redoc-container { height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="redoc-container"></div>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    <script>
+      Redoc.init('/openapi/openapi.yaml', {
+        scrollYOffset: 64,
+        hideDownloadButton: false,
+        theme: {
+          colors: { primary: { main: '#155eef' } },
+          typography: { fontSize: '14px', lineHeight: '1.6em' }
+        }
+      }, document.getElementById('redoc-container'))
+    </script>
+  </body>
+</html>

@@ -1,0 +1,408 @@
+openapi: 3.0.3
+info:
+  title: Nexus-Mail API
+  version: 0.5.0
+  description: |
+    Nexus-Mail 当前对外接口文档（Phase 5 初始版）。
+    覆盖身份认证、项目/订单、供应商资源、钱包与结算相关主链路。
+servers:
+  - url: /api/v1
+    description: 当前前后端统一反向代理入口
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    TokenPair:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        name:
+          type: string
+        default_price:
+          type: integer
+        success_rate:
+          type: number
+          format: float
+        timeout_seconds:
+          type: integer
+    ActivationOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        project_key:
+          type: string
+        mailbox_address:
+          type: string
+        status:
+          type: string
+        quoted_price:
+          type: integer
+        final_price:
+          type: integer
+        extraction_type:
+          type: string
+        extraction_value:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+    CreateActivationOrderRequest:
+      type: object
+      required: [project_key]
+      properties:
+        project_key:
+          type: string
+        preferred_country:
+          type: string
+    WalletOverview:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        email:
+          type: string
+        available_balance:
+          type: integer
+        frozen_balance:
+          type: integer
+        pending_settlement:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+    WalletTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        order_id:
+          type: integer
+        type:
+          type: string
+        direction:
+          type: string
+        amount:
+          type: integer
+        balance_type:
+          type: string
+        note:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    ProviderAccountRequest:
+      type: object
+      required: [provider, auth_mode, protocol_mode, identifier]
+      properties:
+        provider:
+          type: string
+        source_type:
+          type: string
+        auth_mode:
+          type: string
+          enum: [oauth2, authorization_code, app_password, password, bridge_local_credential]
+        protocol_mode:
+          type: string
+          enum: [imap_pull, pop3_pull]
+        identifier:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        refresh_token:
+          type: string
+        credential_secret:
+          type: string
+        secret_ref:
+          type: string
+          description: 仅支持 env://VAR_NAME
+        bridge_endpoint:
+          type: string
+        bridge_label:
+          type: string
+    TopUpRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: integer
+        note:
+          type: string
+    AdminWalletAdjustmentRequest:
+      type: object
+      required: [user_id, amount, reason]
+      properties:
+        user_id:
+          type: integer
+        amount:
+          type: integer
+        reason:
+          type: string
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      summary: 用户登录
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    $ref: '#/components/schemas/TokenPair'
+        '401':
+          description: 登录失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/refresh:
+    post:
+      summary: 刷新访问令牌
+      security: []
+      responses:
+        '200':
+          description: 刷新成功
+  /auth/me:
+    get:
+      summary: 获取当前用户
+      responses:
+        '200':
+          description: 当前用户资料
+  /projects:
+    get:
+      summary: 获取项目列表
+      responses:
+        '200':
+          description: 项目列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+  /projects/inventory:
+    get:
+      summary: 获取库存与供应情况
+      responses:
+        '200':
+          description: 库存列表
+  /orders/activations:
+    get:
+      summary: 获取当前用户激活订单
+      responses:
+        '200':
+          description: 订单列表
+    post:
+      summary: 创建激活订单
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateActivationOrderRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/ActivationOrder'
+  /orders/activations/{id}:
+    get:
+      summary: 获取激活订单详情
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 订单详情
+    post:
+      deprecated: true
+      summary: 占位
+  /orders/activations/{id}/result:
+    get:
+      summary: 获取提取结果
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 提取状态与结果
+  /orders/activations/{id}/cancel:
+    post:
+      summary: 取消订单并触发退款/释放冻结余额
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 已取消
+  /orders/activations/{id}/finish:
+    post:
+      summary: 手动完结订单
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 已完结
+  /supplier/resources/accounts:
+    post:
+      summary: 创建供应商邮箱账号资源
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderAccountRequest'
+      responses:
+        '201':
+          description: 创建成功
+        '400':
+          description: 校验失败（如非官方端点、secret_ref 非 env://）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /supplier/resources/overview:
+    get:
+      summary: 查看供应商资源总览
+      responses:
+        '200':
+          description: 总览成功
+  /wallet/overview:
+    get:
+      summary: 获取用户钱包总览
+      responses:
+        '200':
+          description: 钱包概览
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wallet:
+                    $ref: '#/components/schemas/WalletOverview'
+  /wallet/transactions:
+    get:
+      summary: 获取钱包流水
+      responses:
+        '200':
+          description: 流水列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WalletTransaction'
+  /wallet/topups:
+    post:
+      summary: 开发环境模拟充值
+      description: 非 development 环境应由后续真实充值链路替换
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpRequest'
+      responses:
+        '200':
+          description: 充值成功
+        '403':
+          description: 当前环境禁用
+  /supplier/settlements:
+    get:
+      summary: 获取供应商待结算总览与结算流水
+      responses:
+        '200':
+          description: 供应商结算总览
+  /admin/wallet-users:
+    get:
+      summary: 管理员查看钱包用户列表
+      responses:
+        '200':
+          description: 用户列表
+  /admin/wallet-adjustments:
+    post:
+      summary: 管理员执行钱包调账
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminWalletAdjustmentRequest'
+      responses:
+        '200':
+          description: 调账成功
+        '400':
+          description: 调账失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -15,6 +15,7 @@ import { SupplierResourcesPage } from './pages/SupplierResourcesPage'
 import { SupplierSettlementsPage } from './pages/SupplierSettlementsPage'
 import { AdminProjectsPage } from './pages/AdminProjectsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
+import { ApiDocsPage } from './pages/ApiDocsPage'
 import { getCurrentUser, getMenu, logoutSession } from './services/auth'
 import { useAuthStore } from './store/authStore'
 
@@ -87,7 +88,7 @@ function Shell() {
         <Route path="/admin/pricing" element={<AdminRoute><AdminProjectsPage /></AdminRoute>} />
         <Route path="/admin/risk" element={<AdminRoute><PlaceholderPage title="风控中心" description="Phase 5 将在此接入高频取消、高频超时与黑名单规则。" /></AdminRoute>} />
         <Route path="/admin/audit" element={<AdminRoute><PlaceholderPage title="审计日志" description="管理员审计日志、操作轨迹与异常事件将在此查看。" /></AdminRoute>} />
-        <Route path="/docs" element={<PlaceholderPage title="API 文档" description="Phase 5 将用 OpenAPI + Redoc 在此接入正式 API 文档页面。" />} />
+        <Route path="/docs" element={<ApiDocsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ConsoleLayout>
