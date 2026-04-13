@@ -9,12 +9,14 @@ import (
 )
 
 type QueueMessage struct {
-	MessageID    string   `json:"message_id"`
-	MailFrom     string   `json:"mail_from"`
-	RcptTo       []string `json:"rcpt_to"`
-	RawPath      string   `json:"raw_path"`
-	MetadataPath string   `json:"metadata_path"`
-	StoredAt     string   `json:"stored_at"`
+	MessageID         string   `json:"message_id"`
+	MailFrom          string   `json:"mail_from"`
+	RcptTo            []string `json:"rcpt_to"`
+	RawPath           string   `json:"raw_path"`
+	MetadataPath      string   `json:"metadata_path"`
+	RawObjectKey      string   `json:"raw_object_key,omitempty"`
+	MetadataObjectKey string   `json:"metadata_object_key,omitempty"`
+	StoredAt          string   `json:"stored_at"`
 }
 
 type Publisher interface {
@@ -56,12 +58,14 @@ func (p *RabbitPublisher) PublishParseJob(ctx context.Context, item PersistedMes
 		return nil
 	}
 	payload, err := json.Marshal(QueueMessage{
-		MessageID:    item.ID,
-		MailFrom:     item.MailFrom,
-		RcptTo:       item.RcptTo,
-		RawPath:      item.RawPath,
-		MetadataPath: item.MetadataPath,
-		StoredAt:     item.StoredAt.Format("2006-01-02T15:04:05Z07:00"),
+		MessageID:         item.ID,
+		MailFrom:          item.MailFrom,
+		RcptTo:            item.RcptTo,
+		RawPath:           item.RawPath,
+		MetadataPath:      item.MetadataPath,
+		RawObjectKey:      item.RawObjectKey,
+		MetadataObjectKey: item.MetadataObjectKey,
+		StoredAt:          item.StoredAt.Format("2006-01-02T15:04:05Z07:00"),
 	})
 	if err != nil {
 		return fmt.Errorf("marshal queue payload: %w", err)

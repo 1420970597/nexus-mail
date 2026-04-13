@@ -14,18 +14,22 @@ import (
 type Server struct {
 	service   *Service
 	repo      *Repository
+	storage   ObjectStorage
 	publisher Publisher
 	logger    *log.Logger
 }
 
-func NewServer(service *Service, repo *Repository, publisher Publisher, logger *log.Logger) *Server {
+func NewServer(service *Service, repo *Repository, storage ObjectStorage, publisher Publisher, logger *log.Logger) *Server {
 	if logger == nil {
 		logger = log.Default()
+	}
+	if storage == nil {
+		storage = NopObjectStorage{}
 	}
 	if publisher == nil {
 		publisher = NopPublisher{}
 	}
-	return &Server{service: service, repo: repo, publisher: publisher, logger: logger}
+	return &Server{service: service, repo: repo, storage: storage, publisher: publisher, logger: logger}
 }
 
 func (s *Server) HandleConn(conn net.Conn) {
@@ -81,6 +85,12 @@ func (s *Server) HandleConn(conn net.Conn) {
 			item, err := s.service.Persist(context.Background(), env, raw)
 			if err != nil {
 				s.logger.Printf("persist mail error: %v", err)
+				_, _ = fmt.Fprint(conn, "451 Requested action aborted: local error in processing\r\n")
+				continue
+			}
+			item, err = s.storage.Upload(context.Background(), item)
+			if err != nil {
+				s.logger.Printf("upload mail objects error: %v", err)
 				_, _ = fmt.Fprint(conn, "451 Requested action aborted: local error in processing\r\n")
 				continue
 			}

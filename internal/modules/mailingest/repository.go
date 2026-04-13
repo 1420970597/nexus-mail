@@ -30,12 +30,16 @@ CREATE TABLE IF NOT EXISTS inbound_messages (
   stored_at TIMESTAMPTZ NOT NULL,
   raw_path TEXT NOT NULL,
   metadata_path TEXT NOT NULL,
+  raw_object_key TEXT NOT NULL DEFAULT '',
+  metadata_object_key TEXT NOT NULL DEFAULT '',
   size_bytes INTEGER NOT NULL,
   parse_status TEXT NOT NULL DEFAULT 'queued',
   parse_attempts INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE inbound_messages ADD COLUMN IF NOT EXISTS raw_object_key TEXT NOT NULL DEFAULT '';
+ALTER TABLE inbound_messages ADD COLUMN IF NOT EXISTS metadata_object_key TEXT NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS idx_inbound_messages_parse_status_created_at
   ON inbound_messages(parse_status, created_at ASC);
 `)
@@ -52,8 +56,8 @@ func (r *Repository) SaveMessage(ctx context.Context, item PersistedMessage) err
 	}
 	_, err = r.pool.Exec(ctx, `
 INSERT INTO inbound_messages (
-  id, mail_from, rcpt_to, helo, remote_ip, stored_at, raw_path, metadata_path, size_bytes, parse_status, parse_attempts, created_at, updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'queued', 0, NOW(), NOW())
+  id, mail_from, rcpt_to, helo, remote_ip, stored_at, raw_path, metadata_path, raw_object_key, metadata_object_key, size_bytes, parse_status, parse_attempts, created_at, updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'queued', 0, NOW(), NOW())
 ON CONFLICT (id) DO UPDATE
 SET mail_from = EXCLUDED.mail_from,
     rcpt_to = EXCLUDED.rcpt_to,
@@ -62,9 +66,11 @@ SET mail_from = EXCLUDED.mail_from,
     stored_at = EXCLUDED.stored_at,
     raw_path = EXCLUDED.raw_path,
     metadata_path = EXCLUDED.metadata_path,
+    raw_object_key = EXCLUDED.raw_object_key,
+    metadata_object_key = EXCLUDED.metadata_object_key,
     size_bytes = EXCLUDED.size_bytes,
     updated_at = NOW()
-`, item.ID, item.MailFrom, rcptTo, item.Helo, item.RemoteIP, item.StoredAt, item.RawPath, item.MetadataPath, item.SizeBytes)
+`, item.ID, item.MailFrom, rcptTo, item.Helo, item.RemoteIP, item.StoredAt, item.RawPath, item.MetadataPath, item.RawObjectKey, item.MetadataObjectKey, item.SizeBytes)
 	if err != nil {
 		return fmt.Errorf("save inbound message: %w", err)
 	}

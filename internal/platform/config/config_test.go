@@ -24,6 +24,12 @@ func TestLoadValidatesRequiredConfig(t *testing.T) {
 	if cfg.MailParseQueue != "mail.parse.raw" {
 		t.Fatalf("expected default parse queue, got %s", cfg.MailParseQueue)
 	}
+	if cfg.MinIOEndpoint != "minio:9000" {
+		t.Fatalf("expected default minio endpoint, got %s", cfg.MinIOEndpoint)
+	}
+	if cfg.MinIORawBucket != "nexus-mail-raw" {
+		t.Fatalf("expected default minio raw bucket, got %s", cfg.MinIORawBucket)
+	}
 }
 
 func TestLoadRejectsWeakSecret(t *testing.T) {

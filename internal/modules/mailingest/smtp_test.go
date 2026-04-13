@@ -17,7 +17,7 @@ func TestServerHandleConnPersistsMail(t *testing.T) {
 	svc.nowFn = func() time.Time {
 		return time.Date(2026, 4, 13, 13, 0, 0, 0, time.UTC)
 	}
-	server := NewServer(svc, nil, NopPublisher{}, log.New(io.Discard, "", 0))
+	server := NewServer(svc, nil, NopObjectStorage{}, NopPublisher{}, log.New(io.Discard, "", 0))
 	client, backend := net.Pipe()
 	defer client.Close()
 	go server.HandleConn(backend)

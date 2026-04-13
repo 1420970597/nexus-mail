@@ -15,6 +15,11 @@ type Config struct {
 	RedisURL             string
 	RabbitMQURL          string
 	MailParseQueue       string
+	MinIOEndpoint        string
+	MinIOAccessKey       string
+	MinIOSecretKey       string
+	MinIOUseSSL          bool
+	MinIORawBucket       string
 	JWTSecret            string
 	JWTExpireSeconds     int
 	RefreshExpireSeconds int
@@ -31,8 +36,13 @@ func Load() (Config, error) {
 		AppPort:              defaultString(viper.GetString("APP_PORT"), "8080"),
 		DatabaseURL:          viper.GetString("DATABASE_URL"),
 		RedisURL:             viper.GetString("REDIS_URL"),
-		RabbitMQURL:          defaultString(viper.GetString("RABBITMQ_URL"), "amqp://nexus:***@rabbitmq:5672/"),
+		RabbitMQURL:          defaultString(viper.GetString("RABBITMQ_URL"), "amqp://nexus:nexus_dev@rabbitmq:5672/"),
 		MailParseQueue:       defaultString(viper.GetString("MAIL_PARSE_QUEUE"), "mail.parse.raw"),
+		MinIOEndpoint:        defaultString(viper.GetString("MINIO_ENDPOINT"), "minio:9000"),
+		MinIOAccessKey:       defaultString(viper.GetString("MINIO_ROOT_USER"), "minioadmin"),
+		MinIOSecretKey:       defaultString(viper.GetString("MINIO_ROOT_PASSWORD"), "minioadmin"),
+		MinIOUseSSL:          viper.GetBool("MINIO_USE_SSL"),
+		MinIORawBucket:       defaultString(viper.GetString("MINIO_BUCKET_RAW_MAIL"), "nexus-mail-raw"),
 		JWTSecret:            defaultString(viper.GetString("JWT_SECRET"), "change-me"),
 		JWTExpireSeconds:     defaultInt(viper.GetInt("JWT_EXPIRE_SECONDS"), 3600),
 		RefreshExpireSeconds: defaultInt(viper.GetInt("REFRESH_EXPIRE_SECONDS"), 604800),
