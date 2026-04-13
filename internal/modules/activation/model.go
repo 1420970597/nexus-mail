@@ -92,11 +92,55 @@ type CreateActivationOrderInput struct {
 	DomainID   int64  `json:"domain_id"`
 }
 
-type ActivationResult struct {
-	OrderID         int64  `json:"order_id"`
-	Status          string `json:"status"`
+type UpdateProjectInput struct {
+	Name           string  `json:"name"`
+	Description    string  `json:"description"`
+	DefaultPrice   int64   `json:"default_price"`
+	SuccessRate    float64 `json:"success_rate"`
+	TimeoutSeconds int     `json:"timeout_seconds"`
+	IsActive       bool    `json:"is_active"`
+}
+
+type CreateDomainInput struct {
+	Name     string `json:"name"`
+	Region   string `json:"region"`
+	CatchAll bool   `json:"catch_all"`
+	Status   string `json:"status"`
+}
+
+type CreateProviderAccountInput struct {
+	Provider     string `json:"provider"`
+	SourceType   string `json:"source_type"`
+	AuthMode     string `json:"auth_mode"`
+	ProtocolMode string `json:"protocol_mode"`
+	Identifier   string `json:"identifier"`
+	Status       string `json:"status"`
+}
+
+type CreateMailboxInput struct {
+	DomainID   int64  `json:"domain_id"`
+	AccountID  int64  `json:"account_id"`
+	LocalPart  string `json:"local_part"`
+	Address    string `json:"address"`
+	SourceType string `json:"source_type"`
+	ProjectKey string `json:"project_key"`
+	Status     string `json:"status"`
+}
+
+type SubmitActivationResultInput struct {
 	ExtractionType  string `json:"extraction_type"`
 	ExtractionValue string `json:"extraction_value"`
+	Finalize        bool   `json:"finalize"`
+}
+
+type ActivationResult struct {
+	OrderID              int64  `json:"order_id"`
+	Status               string `json:"status"`
+	ExtractionType       string `json:"extraction_type"`
+	ExtractionValue      string `json:"extraction_value"`
+	IsTerminal           bool   `json:"is_terminal"`
+	ExpiresInSeconds     int64  `json:"expires_in_seconds"`
+	NextPollAfterSeconds int    `json:"next_poll_after_seconds"`
 }
 
 const (
@@ -107,4 +151,14 @@ const (
 	OrderStatusReady        = "READY"
 	OrderStatusFinished     = "FINISHED"
 	OrderStatusCanceled     = "CANCELED"
+	OrderStatusTimeout      = "TIMEOUT"
 )
+
+func isTerminalOrderStatus(status string) bool {
+	switch status {
+	case OrderStatusReady, OrderStatusFinished, OrderStatusCanceled, OrderStatusTimeout:
+		return true
+	default:
+		return false
+	}
+}

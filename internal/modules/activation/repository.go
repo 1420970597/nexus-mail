@@ -234,6 +234,28 @@ ORDER BY id ASC
 	return items, rows.Err()
 }
 
+func (r *Repository) ListAllProjects(ctx context.Context) ([]Project, error) {
+	rows, err := r.pool.Query(ctx, `
+SELECT id, key, name, description, default_price, success_rate, timeout_seconds, is_active, created_at
+FROM projects
+ORDER BY id ASC
+`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []Project
+	for rows.Next() {
+		var item Project
+		if err := rows.Scan(&item.ID, &item.Key, &item.Name, &item.Description, &item.DefaultPrice, &item.SuccessRate, &item.TimeoutSeconds, &item.IsActive, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 func (r *Repository) ListProjectOfferings(ctx context.Context) ([]ProjectOffering, error) {
 	rows, err := r.pool.Query(ctx, `
 SELECT
@@ -501,6 +523,223 @@ FOR UPDATE
 		return ActivationOrder{}, err
 	}
 	return item, nil
+}
+
+func (r *Repository) TouchActivationOrderPolling(ctx context.Context, userID, orderID int64) (ActivationOrder, error) {
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return ActivationOrder{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var item ActivationOrder
+	err = tx.QueryRow(ctx, `
+SELECT
+  o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
+  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  o.final_price, o.extraction_type, o.extraction_value,
+  o.created_at, o.updated_at, o.expires_at, o.canceled_at
+FROM activation_orders o
+JOIN projects p ON p.id = o.project_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
+JOIN mailbox_pool m ON m.id = o.mailbox_id
+WHERE o.id = $1 AND o.user_id = $2
+FOR UPDATE
+`, orderID, userID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
+	if err != nil {
+		return ActivationOrder{}, err
+	}
+
+	now := time.Now().UTC()
+	if (item.Status == OrderStatusAllocated || item.Status == OrderStatusWaitingEmail) && item.ExtractionValue == "" && now.After(item.ExpiresAt) {
+		if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, updated_at = NOW() WHERE id = $1`, orderID, OrderStatusTimeout); err != nil {
+			return ActivationOrder{}, err
+		}
+		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'available' WHERE id = $1`, item.MailboxID); err != nil {
+			return ActivationOrder{}, err
+		}
+		item.Status = OrderStatusTimeout
+		item.UpdatedAt = now
+	} else if item.Status == OrderStatusAllocated {
+		if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, updated_at = NOW() WHERE id = $1`, orderID, OrderStatusWaitingEmail); err != nil {
+			return ActivationOrder{}, err
+		}
+		item.Status = OrderStatusWaitingEmail
+		item.UpdatedAt = now
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return ActivationOrder{}, err
+	}
+	return item, nil
+}
+
+func (r *Repository) FinishActivationOrder(ctx context.Context, userID, orderID int64) (ActivationOrder, error) {
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return ActivationOrder{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var item ActivationOrder
+	err = tx.QueryRow(ctx, `
+SELECT
+  o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
+  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  o.final_price, o.extraction_type, o.extraction_value,
+  o.created_at, o.updated_at, o.expires_at, o.canceled_at
+FROM activation_orders o
+JOIN projects p ON p.id = o.project_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
+JOIN mailbox_pool m ON m.id = o.mailbox_id
+WHERE o.id = $1 AND o.user_id = $2
+FOR UPDATE
+`, orderID, userID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
+	if err != nil {
+		return ActivationOrder{}, err
+	}
+	if item.Status != OrderStatusReady {
+		return ActivationOrder{}, fmt.Errorf("当前订单状态不允许完成")
+	}
+	if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, final_price = quoted_price, updated_at = NOW() WHERE id = $1`, orderID, OrderStatusFinished); err != nil {
+		return ActivationOrder{}, err
+	}
+	if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = $1`, item.MailboxID); err != nil {
+		return ActivationOrder{}, err
+	}
+	item.Status = OrderStatusFinished
+	item.FinalPrice = item.QuotedPrice
+	item.UpdatedAt = time.Now().UTC()
+	if err := tx.Commit(ctx); err != nil {
+		return ActivationOrder{}, err
+	}
+	return item, nil
+}
+
+func (r *Repository) SubmitActivationResult(ctx context.Context, supplierID, orderID int64, input SubmitActivationResultInput) (ActivationOrder, error) {
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return ActivationOrder{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var item ActivationOrder
+	var domainSupplierID int64
+	var accountSupplierID int64
+	err = tx.QueryRow(ctx, `
+SELECT
+  o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
+  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  o.final_price, o.extraction_type, o.extraction_value,
+  o.created_at, o.updated_at, o.expires_at, o.canceled_at,
+  COALESCE(d.supplier_id, 0), COALESCE(pa.supplier_id, 0)
+FROM activation_orders o
+JOIN projects p ON p.id = o.project_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
+JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+WHERE o.id = $1
+FOR UPDATE
+`, orderID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt, &domainSupplierID, &accountSupplierID)
+	if err != nil {
+		return ActivationOrder{}, err
+	}
+	if supplierID > 0 && supplierID != domainSupplierID && supplierID != accountSupplierID {
+		return ActivationOrder{}, fmt.Errorf("当前供应商无权回填该订单")
+	}
+	if item.Status != OrderStatusAllocated && item.Status != OrderStatusWaitingEmail && item.Status != OrderStatusReady {
+		return ActivationOrder{}, fmt.Errorf("当前订单状态不允许写回结果")
+	}
+	nextStatus := OrderStatusReady
+	if input.Finalize {
+		nextStatus = OrderStatusFinished
+	}
+	if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, extraction_type = $3, extraction_value = $4, final_price = CASE WHEN $2 = $5 THEN quoted_price ELSE final_price END, updated_at = NOW() WHERE id = $1`, orderID, nextStatus, input.ExtractionType, input.ExtractionValue, OrderStatusFinished); err != nil {
+		return ActivationOrder{}, err
+	}
+	if input.Finalize {
+		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = $1`, item.MailboxID); err != nil {
+			return ActivationOrder{}, err
+		}
+		item.FinalPrice = item.QuotedPrice
+	}
+	item.Status = nextStatus
+	item.ExtractionType = input.ExtractionType
+	item.ExtractionValue = input.ExtractionValue
+	item.UpdatedAt = time.Now().UTC()
+	if err := tx.Commit(ctx); err != nil {
+		return ActivationOrder{}, err
+	}
+	return item, nil
+}
+
+func (r *Repository) UpdateProject(ctx context.Context, projectID int64, input UpdateProjectInput) (Project, error) {
+	var item Project
+	err := r.pool.QueryRow(ctx, `
+UPDATE projects
+SET name = $2,
+    description = $3,
+    default_price = $4,
+    success_rate = $5,
+    timeout_seconds = $6,
+    is_active = $7
+WHERE id = $1
+RETURNING id, key, name, description, default_price, success_rate, timeout_seconds, is_active, created_at
+`, projectID, input.Name, input.Description, input.DefaultPrice, input.SuccessRate, input.TimeoutSeconds, input.IsActive).Scan(&item.ID, &item.Key, &item.Name, &item.Description, &item.DefaultPrice, &item.SuccessRate, &item.TimeoutSeconds, &item.IsActive, &item.CreatedAt)
+	return item, err
+}
+
+func (r *Repository) CreateDomain(ctx context.Context, supplierID int64, input CreateDomainInput) (Domain, error) {
+	var item Domain
+	err := r.pool.QueryRow(ctx, `
+INSERT INTO resource_domains (supplier_id, name, region, status, catch_all)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, supplier_id, name, region, status, catch_all, created_at
+`, supplierID, input.Name, input.Region, input.Status, input.CatchAll).Scan(&item.ID, &item.SupplierID, &item.Name, &item.Region, &item.Status, &item.CatchAll, &item.CreatedAt)
+	return item, err
+}
+
+func (r *Repository) CreateProviderAccount(ctx context.Context, supplierID int64, input CreateProviderAccountInput) (ProviderAccount, error) {
+	var item ProviderAccount
+	err := r.pool.QueryRow(ctx, `
+INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, created_at
+`, supplierID, input.Provider, input.SourceType, input.AuthMode, input.ProtocolMode, input.Identifier, input.Status).Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.CreatedAt)
+	return item, err
+}
+
+func (r *Repository) CreateMailbox(ctx context.Context, supplierID int64, input CreateMailboxInput) (Mailbox, error) {
+	if input.DomainID == 0 && input.AccountID == 0 {
+		return Mailbox{}, fmt.Errorf("domain_id 与 account_id 至少填写一项")
+	}
+	if input.Address == "" {
+		var domainName string
+		var domainSupplierID int64
+		if err := r.pool.QueryRow(ctx, `SELECT name, supplier_id FROM resource_domains WHERE id = $1`, input.DomainID).Scan(&domainName, &domainSupplierID); err != nil {
+			return Mailbox{}, err
+		}
+		if supplierID > 0 && domainSupplierID != supplierID {
+			return Mailbox{}, fmt.Errorf("当前供应商无权向该域名池录入邮箱")
+		}
+		input.Address = input.LocalPart + "@" + domainName
+	}
+	if input.AccountID != 0 {
+		var accountSupplierID int64
+		if err := r.pool.QueryRow(ctx, `SELECT supplier_id FROM provider_accounts WHERE id = $1`, input.AccountID).Scan(&accountSupplierID); err != nil {
+			return Mailbox{}, err
+		}
+		if supplierID > 0 && accountSupplierID != supplierID {
+			return Mailbox{}, fmt.Errorf("当前供应商无权向该账号池录入邮箱")
+		}
+	}
+	var item Mailbox
+	err := r.pool.QueryRow(ctx, `
+INSERT INTO mailbox_pool (domain_id, account_id, local_part, address, source_type, status, project_key)
+VALUES (NULLIF($1, 0), NULLIF($2, 0), $3, $4, $5, $6, $7)
+RETURNING id, COALESCE(domain_id, 0), COALESCE(account_id, 0), local_part, address, source_type, status, project_key, '', created_at
+`, input.DomainID, input.AccountID, input.LocalPart, input.Address, input.SourceType, input.Status, input.ProjectKey).Scan(&item.ID, &item.DomainID, &item.AccountID, &item.LocalPart, &item.Address, &item.SourceType, &item.Status, &item.ProjectKey, &item.Provider, &item.CreatedAt)
+	return item, err
 }
 
 func (r *Repository) ListSupplierResources(ctx context.Context, supplierID int64) (map[string]any, error) {

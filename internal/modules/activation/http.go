@@ -23,15 +23,25 @@ func (h *Handler) RegisterRoutes(secure *gin.RouterGroup) {
 	secure.POST("/orders/activations", h.createOrder)
 	secure.GET("/orders/activations/:id", h.getOrder)
 	secure.GET("/orders/activations/:id/result", h.getResult)
+	secure.POST("/orders/activations/:id/finish", h.finishOrder)
 	secure.POST("/orders/activations/:id/cancel", h.cancelOrder)
 
 	supplier := secure.Group("/supplier/resources")
 	supplier.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
 	supplier.GET("/overview", h.supplierOverview)
+	supplier.POST("/domains", h.createDomain)
+	supplier.POST("/accounts", h.createProviderAccount)
+	supplier.POST("/mailboxes", h.createMailbox)
+
+	supplierOrders := secure.Group("/supplier/orders/activations")
+	supplierOrders.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
+	supplierOrders.POST("/:id/result", h.submitActivationResult)
 
 	admin := secure.Group("/admin/projects")
 	admin.Use(auth.RequireRoles(auth.RoleAdmin))
+	admin.GET("", h.adminProjects)
 	admin.GET("/offerings", h.adminOfferings)
+	admin.PATCH("/:id", h.updateProject)
 }
 
 func (h *Handler) listProjects(c *gin.Context) {
@@ -105,6 +115,20 @@ func (h *Handler) getResult(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
+func (h *Handler) finishOrder(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	orderID, ok := parseID(c)
+	if !ok {
+		return
+	}
+	order, err := h.service.FinishActivationOrder(c.Request.Context(), user.ID, orderID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"order": order})
+}
+
 func (h *Handler) cancelOrder(c *gin.Context) {
 	user := c.MustGet("currentUser").(auth.User)
 	orderID, ok := parseID(c)
@@ -137,6 +161,79 @@ func (h *Handler) supplierOverview(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+func (h *Handler) createDomain(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	var input CreateDomainInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	domain, err := h.service.CreateDomain(c.Request.Context(), user.ID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"domain": domain})
+}
+
+func (h *Handler) createProviderAccount(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	var input CreateProviderAccountInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	account, err := h.service.CreateProviderAccount(c.Request.Context(), user.ID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"account": account})
+}
+
+func (h *Handler) createMailbox(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	var input CreateMailboxInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	mailbox, err := h.service.CreateMailbox(c.Request.Context(), user.ID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"mailbox": mailbox})
+}
+
+func (h *Handler) submitActivationResult(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	orderID, ok := parseID(c)
+	if !ok {
+		return
+	}
+	var input SubmitActivationResultInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	order, err := h.service.SubmitActivationResult(c.Request.Context(), user.ID, orderID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"order": order})
+}
+
+func (h *Handler) adminProjects(c *gin.Context) {
+	items, err := h.service.ListAllProjects(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
 func (h *Handler) adminOfferings(c *gin.Context) {
 	items, err := h.service.ListInventory(c.Request.Context())
 	if err != nil {
@@ -144,6 +241,24 @@ func (h *Handler) adminOfferings(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func (h *Handler) updateProject(c *gin.Context) {
+	projectID, ok := parseID(c)
+	if !ok {
+		return
+	}
+	var input UpdateProjectInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	project, err := h.service.UpdateProject(c.Request.Context(), projectID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"project": project})
 }
 
 func parseID(c *gin.Context) (int64, bool) {
