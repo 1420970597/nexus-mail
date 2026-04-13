@@ -109,6 +109,8 @@ services:
         condition: service_healthy
     ports:
       - "2525:2525"
+    volumes:
+      - mail_ingest_spool:${MAIL_INGEST_SPOOL_DIR:-/var/spool/nexus-mail-ingest}
     healthcheck:
       test: ["CMD-SHELL", "pidof mail-ingest >/dev/null"]
       interval: 30s
@@ -245,6 +247,7 @@ volumes:
   redis_data:
   rabbitmq_data:
   minio_data:
+  mail_ingest_spool:
 
 networks:
   app:

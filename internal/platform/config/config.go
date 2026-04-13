@@ -18,6 +18,7 @@ type Config struct {
 	JWTExpireSeconds     int
 	RefreshExpireSeconds int
 	MailIngestPort       string
+	MailIngestSpoolDir   string
 	ReadTimeout          time.Duration
 	WriteTimeout         time.Duration
 }
@@ -34,6 +35,7 @@ func Load() (Config, error) {
 		JWTExpireSeconds:     defaultInt(viper.GetInt("JWT_EXPIRE_SECONDS"), 3600),
 		RefreshExpireSeconds: defaultInt(viper.GetInt("REFRESH_EXPIRE_SECONDS"), 604800),
 		MailIngestPort:       defaultString(viper.GetString("MAIL_INGEST_PORT"), "2525"),
+		MailIngestSpoolDir:   defaultString(viper.GetString("MAIL_INGEST_SPOOL_DIR"), "/tmp/nexus-mail-ingest"),
 		ReadTimeout:          10 * time.Second,
 		WriteTimeout:         15 * time.Second,
 	}

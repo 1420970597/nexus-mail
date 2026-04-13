@@ -18,6 +18,9 @@ func TestLoadValidatesRequiredConfig(t *testing.T) {
 	if cfg.AppPort != "8080" {
 		t.Fatalf("expected app port 8080, got %s", cfg.AppPort)
 	}
+	if cfg.MailIngestSpoolDir != "/tmp/nexus-mail-ingest" {
+		t.Fatalf("expected default spool dir, got %s", cfg.MailIngestSpoolDir)
+	}
 }
 
 func TestLoadRejectsWeakSecret(t *testing.T) {
