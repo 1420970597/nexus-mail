@@ -10,8 +10,11 @@ import { ApiKeysPage } from './pages/ApiKeysPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { OrdersPage } from './pages/OrdersPage'
+import { BalancePage } from './pages/BalancePage'
 import { SupplierResourcesPage } from './pages/SupplierResourcesPage'
+import { SupplierSettlementsPage } from './pages/SupplierSettlementsPage'
 import { AdminProjectsPage } from './pages/AdminProjectsPage'
+import { AdminUsersPage } from './pages/AdminUsersPage'
 import { getCurrentUser, getMenu, logoutSession } from './services/auth'
 import { useAuthStore } from './store/authStore'
 
@@ -72,14 +75,14 @@ function Shell() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/balance" element={<PlaceholderPage title="余额中心" description="Phase 4 将在此实现钱包余额、账单明细与退款记录。" />} />
+        <Route path="/balance" element={<BalancePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/api-keys" element={<ApiKeysPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/supplier/domains" element={<SupplierRoute><PlaceholderPage title="域名管理" description="供应商域名池、Catch-All 与 MX 策略将在此统一管理。" /></SupplierRoute>} />
         <Route path="/supplier/resources" element={<SupplierRoute><SupplierResourcesPage /></SupplierRoute>} />
-        <Route path="/supplier/settlements" element={<SupplierRoute><PlaceholderPage title="供应商结算" description="Phase 4 将在此接入待结算金额、对账单与提现记录。" /></SupplierRoute>} />
-        <Route path="/admin/users" element={<AdminRoute><PlaceholderPage title="用户管理" description="管理员用户管理骨架已启用。" /></AdminRoute>} />
+        <Route path="/supplier/settlements" element={<SupplierRoute><SupplierSettlementsPage /></SupplierRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
         <Route path="/admin/suppliers" element={<AdminRoute><PlaceholderPage title="供应商管理" description="管理员供应商审核、评级与启停控制将在此实现。" /></AdminRoute>} />
         <Route path="/admin/pricing" element={<AdminRoute><AdminProjectsPage /></AdminRoute>} />
         <Route path="/admin/risk" element={<AdminRoute><PlaceholderPage title="风控中心" description="Phase 5 将在此接入高频取消、高频超时与黑名单规则。" /></AdminRoute>} />

@@ -135,7 +135,7 @@ export function SupplierResourcesPage() {
           <Form.InputNumber field="port" label="端口" placeholder="993 / 995 / 1143" style={{ width: '100%' }} />
           <Form.Input field="refresh_token" label="Refresh Token" placeholder="OAuth2 必填，授权码/App Password 可留空" />
           <Form.Input field="credential_secret" label="凭证密文" placeholder="App Password / 授权码 / Bridge 密码" />
-          <Form.Input field="secret_ref" label="Secret Ref" placeholder="vault://mail/qq-auth-code" />
+          <Form.Input field="secret_ref" label="Secret Ref" placeholder="env://NEXUS_QQ_AUTH_CODE 或 file:///run/secrets/qq_auth_code" />
           <Form.Input field="bridge_endpoint" label="Bridge Endpoint" placeholder="127.0.0.1:1143" />
           <Form.Input field="bridge_label" label="Bridge Label" placeholder="proton-bridge" />
           <Form.Input field="status" label="状态" />

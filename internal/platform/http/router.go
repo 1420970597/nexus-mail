@@ -8,6 +8,7 @@ import (
 	"github.com/1420970597/nexus-mail/internal/app/bootstrap"
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
+	"github.com/1420970597/nexus-mail/internal/modules/finance"
 )
 
 func NewRouter(app *bootstrap.App) *gin.Engine {
@@ -47,14 +48,13 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 
 		activationHandler := activation.NewHandler(app.ActivationService)
 		activationHandler.RegisterRoutes(secure)
+		financeHandler := finance.NewHandler(app.FinanceService, app.Config.AppEnv == "development")
+		financeHandler.RegisterRoutes(secure)
 
 		supplier := secure.Group("/supplier")
 		supplier.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
 		supplier.GET("/overview", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "supplier overview"})
-		})
-		supplier.GET("/settlements", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "supplier settlements"})
 		})
 
 		admin := secure.Group("/admin")

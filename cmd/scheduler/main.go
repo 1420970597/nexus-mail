@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
+	"github.com/1420970597/nexus-mail/internal/modules/finance"
 	"github.com/1420970597/nexus-mail/internal/modules/mailboxpoll"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
@@ -41,6 +42,13 @@ func main() {
 	}
 	defer db.Close()
 	repo := activation.NewRepository(db.Pool)
+	financeRepo := finance.NewRepository(db.Pool)
+	if err := financeRepo.EnsureSchema(ctx); err != nil {
+		log.Fatalf("ensure finance schema: %v", err)
+	}
+	if err := financeRepo.SeedDevelopmentData(ctx, cfg.AppEnv); err != nil {
+		log.Fatalf("seed finance data: %v", err)
+	}
 	service := activation.NewService(repo)
 	pollSync := mailboxpoll.SyncService{
 		Refresher: mailboxpoll.NewHTTPOAuthRefresher(map[string]mailboxpoll.ProviderOAuthConfig{

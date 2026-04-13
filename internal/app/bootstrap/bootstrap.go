@@ -7,6 +7,7 @@ import (
 
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
+	"github.com/1420970597/nexus-mail/internal/modules/finance"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
 )
@@ -16,6 +17,7 @@ type App struct {
 	DB                *database.DB
 	AuthService       *auth.Service
 	ActivationService *activation.Service
+	FinanceService    *finance.Service
 }
 
 func New(ctx context.Context, cfg config.Config) (*App, error) {
@@ -40,10 +42,19 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 		return nil, fmt.Errorf("seed activation data: %w", err)
 	}
 
+	financeRepo := finance.NewRepository(db.Pool)
+	if err := financeRepo.EnsureSchema(ctx); err != nil {
+		return nil, fmt.Errorf("ensure finance schema: %w", err)
+	}
+	if err := financeRepo.SeedDevelopmentData(ctx, cfg.AppEnv); err != nil {
+		return nil, fmt.Errorf("seed finance data: %w", err)
+	}
+
 	return &App{
 		Config:            cfg,
 		DB:                db,
 		AuthService:       authService,
 		ActivationService: activation.NewService(activationRepo),
+		FinanceService:    finance.NewService(financeRepo),
 	}, nil
 }

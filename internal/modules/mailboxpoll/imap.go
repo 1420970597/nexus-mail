@@ -2,11 +2,20 @@ package mailboxpoll
 
 import "context"
 
-type IMAPPoller struct{}
+type IMAPPoller struct {
+	Validator CredentialValidator
+}
 
-func (IMAPPoller) Poll(_ context.Context, account AccountConfig) (PollResult, error) {
+func (p IMAPPoller) Poll(ctx context.Context, account AccountConfig) (PollResult, error) {
 	normalized, err := NormalizeAccountConfig(account)
 	if err != nil {
+		return PollResult{}, err
+	}
+	validator := p.Validator
+	if validator == nil {
+		validator = NetworkCredentialValidator{}
+	}
+	if err := validator.Validate(ctx, normalized); err != nil {
 		return PollResult{}, err
 	}
 	return PollResult{

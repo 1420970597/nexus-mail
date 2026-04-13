@@ -403,6 +403,9 @@ LIMIT 1
 	if offering.Stock <= 0 {
 		return ActivationOrder{}, fmt.Errorf("库存不足")
 	}
+	if err := moveWalletBalanceTx(ctx, tx, userID, -offering.Price, offering.Price); err != nil {
+		return ActivationOrder{}, err
+	}
 
 	var mailbox Mailbox
 	if err := tx.QueryRow(ctx, `
@@ -453,6 +456,12 @@ RETURNING id, order_no, user_id, project_id, domain_id, mailbox_id, status,
 	order.ProjectName = project.Name
 	order.DomainName = offering.DomainName
 	order.EmailAddress = mailbox.Address
+	if err := addWalletTransactionTx(ctx, tx, userID, order.ID, "freeze", "debit", offering.Price, "available", "创建订单冻结余额"); err != nil {
+		return ActivationOrder{}, err
+	}
+	if err := addWalletTransactionTx(ctx, tx, userID, order.ID, "freeze", "credit", offering.Price, "frozen", "创建订单转入冻结余额"); err != nil {
+		return ActivationOrder{}, err
+	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return ActivationOrder{}, err
@@ -541,6 +550,15 @@ FOR UPDATE
 	if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'available' WHERE id = $1`, item.MailboxID); err != nil {
 		return ActivationOrder{}, err
 	}
+	if err := moveWalletBalanceTx(ctx, tx, userID, item.QuotedPrice, -item.QuotedPrice); err != nil {
+		return ActivationOrder{}, err
+	}
+	if err := addWalletTransactionTx(ctx, tx, userID, item.ID, "cancel_refund", "credit", item.QuotedPrice, "available", "取消订单退回可用余额"); err != nil {
+		return ActivationOrder{}, err
+	}
+	if err := addWalletTransactionTx(ctx, tx, userID, item.ID, "cancel_refund", "debit", item.QuotedPrice, "frozen", "取消订单释放冻结余额"); err != nil {
+		return ActivationOrder{}, err
+	}
 	item.Status = OrderStatusCanceled
 	now := time.Now().UTC()
 	item.CanceledAt = &now
@@ -584,6 +602,15 @@ FOR UPDATE
 		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'available' WHERE id = $1`, item.MailboxID); err != nil {
 			return ActivationOrder{}, err
 		}
+		if err := moveWalletBalanceTx(ctx, tx, userID, item.QuotedPrice, -item.QuotedPrice); err != nil {
+			return ActivationOrder{}, err
+		}
+		if err := addWalletTransactionTx(ctx, tx, userID, item.ID, "timeout_refund", "credit", item.QuotedPrice, "available", "订单超时退回可用余额"); err != nil {
+			return ActivationOrder{}, err
+		}
+		if err := addWalletTransactionTx(ctx, tx, userID, item.ID, "timeout_refund", "debit", item.QuotedPrice, "frozen", "订单超时释放冻结余额"); err != nil {
+			return ActivationOrder{}, err
+		}
 		item.Status = OrderStatusTimeout
 		item.UpdatedAt = now
 	} else if item.Status == OrderStatusAllocated {
@@ -608,19 +635,22 @@ func (r *Repository) FinishActivationOrder(ctx context.Context, userID, orderID 
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	var item ActivationOrder
+	var supplierID int64
 	err = tx.QueryRow(ctx, `
 SELECT
   o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
   COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
   o.final_price, o.extraction_type, o.extraction_value,
-  o.created_at, o.updated_at, o.expires_at, o.canceled_at
+  o.created_at, o.updated_at, o.expires_at, o.canceled_at,
+  COALESCE(pa.supplier_id, d.supplier_id, 0)
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.id = $1 AND o.user_id = $2
 FOR UPDATE
-`, orderID, userID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
+`, orderID, userID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt, &supplierID)
 	if err != nil {
 		return ActivationOrder{}, err
 	}
@@ -631,6 +661,15 @@ FOR UPDATE
 		return ActivationOrder{}, err
 	}
 	if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = $1`, item.MailboxID); err != nil {
+		return ActivationOrder{}, err
+	}
+	if err := moveWalletBalanceTx(ctx, tx, userID, 0, -item.QuotedPrice); err != nil {
+		return ActivationOrder{}, err
+	}
+	if err := addWalletTransactionTx(ctx, tx, userID, item.ID, "charge", "debit", item.QuotedPrice, "frozen", "订单完成扣减冻结余额"); err != nil {
+		return ActivationOrder{}, err
+	}
+	if err := addSupplierPendingSettlementTx(ctx, tx, supplierID, item.ID, item.QuotedPrice, "订单完成待结算入账"); err != nil {
 		return ActivationOrder{}, err
 	}
 	item.Status = OrderStatusFinished
@@ -685,6 +724,19 @@ FOR UPDATE
 	}
 	if input.Finalize {
 		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = $1`, item.MailboxID); err != nil {
+			return ActivationOrder{}, err
+		}
+		if err := moveWalletBalanceTx(ctx, tx, item.UserID, 0, -item.QuotedPrice); err != nil {
+			return ActivationOrder{}, err
+		}
+		if err := addWalletTransactionTx(ctx, tx, item.UserID, item.ID, "charge", "debit", item.QuotedPrice, "frozen", "供应商回填后完成订单扣减冻结余额"); err != nil {
+			return ActivationOrder{}, err
+		}
+		settlementSupplierID := domainSupplierID
+		if accountSupplierID > 0 {
+			settlementSupplierID = accountSupplierID
+		}
+		if err := addSupplierPendingSettlementTx(ctx, tx, settlementSupplierID, item.ID, item.QuotedPrice, "供应商回填完成订单待结算入账"); err != nil {
 			return ActivationOrder{}, err
 		}
 		item.FinalPrice = item.QuotedPrice
@@ -804,7 +856,7 @@ func (r *Repository) ExpireStaleActivationOrders(ctx context.Context, now time.T
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	rows, err := tx.Query(ctx, `
-SELECT mailbox_id
+SELECT id, user_id, mailbox_id, quoted_price
 FROM activation_orders
 WHERE status IN ($1, $2)
   AND COALESCE(extraction_value, '') = ''
@@ -815,39 +867,44 @@ FOR UPDATE
 		return 0, err
 	}
 	defer rows.Close()
-
-	var mailboxIDs []int64
+	type expiredOrder struct {
+		ID        int64
+		UserID    int64
+		MailboxID int64
+		Price     int64
+	}
+	var orders []expiredOrder
 	for rows.Next() {
-		var mailboxID int64
-		if err := rows.Scan(&mailboxID); err != nil {
+		var item expiredOrder
+		if err := rows.Scan(&item.ID, &item.UserID, &item.MailboxID, &item.Price); err != nil {
 			return 0, err
 		}
-		mailboxIDs = append(mailboxIDs, mailboxID)
+		orders = append(orders, item)
 	}
 	if err := rows.Err(); err != nil {
 		return 0, err
 	}
-
-	result, err := tx.Exec(ctx, `
-UPDATE activation_orders
-SET status = $1,
-    updated_at = NOW()
-WHERE status IN ($2, $3)
-  AND COALESCE(extraction_value, '') = ''
-  AND expires_at < $4
-`, OrderStatusTimeout, OrderStatusAllocated, OrderStatusWaitingEmail, now)
-	if err != nil {
-		return 0, err
-	}
-	if len(mailboxIDs) > 0 {
-		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'available' WHERE id = ANY($1)`, mailboxIDs); err != nil {
+	for _, order := range orders {
+		if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, updated_at = NOW() WHERE id = $1`, order.ID, OrderStatusTimeout); err != nil {
+			return 0, err
+		}
+		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'available' WHERE id = $1`, order.MailboxID); err != nil {
+			return 0, err
+		}
+		if err := moveWalletBalanceTx(ctx, tx, order.UserID, order.Price, -order.Price); err != nil {
+			return 0, err
+		}
+		if err := addWalletTransactionTx(ctx, tx, order.UserID, order.ID, "timeout_refund", "credit", order.Price, "available", "调度器执行超时退款"); err != nil {
+			return 0, err
+		}
+		if err := addWalletTransactionTx(ctx, tx, order.UserID, order.ID, "timeout_refund", "debit", order.Price, "frozen", "调度器释放冻结余额"); err != nil {
 			return 0, err
 		}
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return 0, err
 	}
-	return result.RowsAffected(), nil
+	return int64(len(orders)), nil
 }
 
 func (r *Repository) FinalizeReadyActivationOrders(ctx context.Context, now time.Time, finalizeAfter time.Duration) (int64, error) {
@@ -865,49 +922,59 @@ func (r *Repository) FinalizeReadyActivationOrders(ctx context.Context, now time
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	rows, err := tx.Query(ctx, `
-SELECT mailbox_id
-FROM activation_orders
-WHERE status = $1
-  AND COALESCE(extraction_value, '') <> ''
-  AND updated_at <= $2
+SELECT o.id, o.user_id, o.mailbox_id, o.quoted_price, COALESCE(pa.supplier_id, d.supplier_id, 0)
+FROM activation_orders o
+JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+WHERE o.status = $1
+  AND COALESCE(o.extraction_value, '') <> ''
+  AND o.updated_at <= $2
 FOR UPDATE
 `, OrderStatusReady, threshold)
 	if err != nil {
 		return 0, err
 	}
 	defer rows.Close()
-	var mailboxIDs []int64
+	type readyOrder struct {
+		ID         int64
+		UserID     int64
+		MailboxID  int64
+		Price      int64
+		SupplierID int64
+	}
+	var orders []readyOrder
 	for rows.Next() {
-		var mailboxID int64
-		if err := rows.Scan(&mailboxID); err != nil {
+		var item readyOrder
+		if err := rows.Scan(&item.ID, &item.UserID, &item.MailboxID, &item.Price, &item.SupplierID); err != nil {
 			return 0, err
 		}
-		mailboxIDs = append(mailboxIDs, mailboxID)
+		orders = append(orders, item)
 	}
 	if err := rows.Err(); err != nil {
 		return 0, err
 	}
-	result, err := tx.Exec(ctx, `
-UPDATE activation_orders
-SET status = $1,
-    final_price = CASE WHEN final_price = 0 THEN quoted_price ELSE final_price END,
-    updated_at = NOW()
-WHERE status = $2
-  AND COALESCE(extraction_value, '') <> ''
-  AND updated_at <= $3
-`, OrderStatusFinished, OrderStatusReady, threshold)
-	if err != nil {
-		return 0, err
-	}
-	if len(mailboxIDs) > 0 {
-		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = ANY($1)`, mailboxIDs); err != nil {
+	for _, order := range orders {
+		if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, final_price = CASE WHEN final_price = 0 THEN quoted_price ELSE final_price END, updated_at = NOW() WHERE id = $1`, order.ID, OrderStatusFinished); err != nil {
+			return 0, err
+		}
+		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'consumed' WHERE id = $1`, order.MailboxID); err != nil {
+			return 0, err
+		}
+		if err := moveWalletBalanceTx(ctx, tx, order.UserID, 0, -order.Price); err != nil {
+			return 0, err
+		}
+		if err := addWalletTransactionTx(ctx, tx, order.UserID, order.ID, "charge", "debit", order.Price, "frozen", "调度器自动完成订单扣减冻结余额"); err != nil {
+			return 0, err
+		}
+		if err := addSupplierPendingSettlementTx(ctx, tx, order.SupplierID, order.ID, order.Price, "调度器自动完成订单待结算入账"); err != nil {
 			return 0, err
 		}
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return 0, err
 	}
-	return result.RowsAffected(), nil
+	return int64(len(orders)), nil
 }
 
 func (r *Repository) ListActiveProviderAccounts(ctx context.Context) ([]ProviderAccount, error) {
@@ -1032,4 +1099,54 @@ func (r *Repository) listProviderAccountsBySupplier(ctx context.Context, supplie
 		items = append(items, item)
 	}
 	return items, rows.Err()
+}
+
+func ensureWalletRowTx(ctx context.Context, tx pgx.Tx, userID int64) error {
+	_, err := tx.Exec(ctx, `INSERT INTO user_wallets (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING`, userID)
+	return err
+}
+
+func moveWalletBalanceTx(ctx context.Context, tx pgx.Tx, userID, availableDelta, frozenDelta int64) error {
+	if err := ensureWalletRowTx(ctx, tx, userID); err != nil {
+		return err
+	}
+	var available, frozen int64
+	if err := tx.QueryRow(ctx, `SELECT available_balance, frozen_balance FROM user_wallets WHERE user_id = $1 FOR UPDATE`, userID).Scan(&available, &frozen); err != nil {
+		return err
+	}
+	if available+availableDelta < 0 {
+		return fmt.Errorf("余额不足")
+	}
+	if frozen+frozenDelta < 0 {
+		return fmt.Errorf("冻结余额不足")
+	}
+	_, err := tx.Exec(ctx, `UPDATE user_wallets SET available_balance = available_balance + $2, frozen_balance = frozen_balance + $3, updated_at = NOW() WHERE user_id = $1`, userID, availableDelta, frozenDelta)
+	return err
+}
+
+func addWalletTransactionTx(ctx context.Context, tx pgx.Tx, userID, orderID int64, txType, direction string, amount int64, balanceType, note string) error {
+	if amount <= 0 {
+		return nil
+	}
+	_, err := tx.Exec(ctx, `INSERT INTO wallet_transactions (user_id, order_id, type, direction, amount, balance_type, note) VALUES ($1, $2, $3, $4, $5, $6, $7)`, userID, orderID, txType, direction, amount, balanceType, note)
+	return err
+}
+
+func ensureSupplierLedgerTx(ctx context.Context, tx pgx.Tx, supplierID int64) error {
+	_, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_ledger (supplier_id) VALUES ($1) ON CONFLICT (supplier_id) DO NOTHING`, supplierID)
+	return err
+}
+
+func addSupplierPendingSettlementTx(ctx context.Context, tx pgx.Tx, supplierID, orderID, amount int64, note string) error {
+	if supplierID <= 0 || amount <= 0 {
+		return nil
+	}
+	if err := ensureSupplierLedgerTx(ctx, tx, supplierID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `UPDATE supplier_settlement_ledger SET pending_amount = pending_amount + $2, updated_at = NOW() WHERE supplier_id = $1`, supplierID, amount); err != nil {
+		return err
+	}
+	_, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_entries (supplier_id, order_id, amount, status, note) VALUES ($1, $2, $3, 'pending', $4)`, supplierID, orderID, amount, note)
+	return err
 }

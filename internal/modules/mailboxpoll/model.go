@@ -79,3 +79,10 @@ func NormalizeAccountConfig(account AccountConfig) (AccountConfig, error) {
 	}
 	return account, nil
 }
+
+func (a AccountConfig) LoginIdentity() string {
+	if strings.TrimSpace(a.Username) != "" {
+		return strings.TrimSpace(a.Username)
+	}
+	return strings.TrimSpace(a.Identifier)
+}
