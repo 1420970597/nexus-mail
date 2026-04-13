@@ -24,6 +24,8 @@ type stubRepo struct {
 	submitResultErr     error
 	finishResp          ActivationOrder
 	finishErr           error
+	expireCount         int64
+	expireErr           error
 }
 
 func (s *stubRepo) ListProjects(context.Context) ([]Project, error)                 { return nil, nil }
@@ -89,6 +91,12 @@ func (s *stubRepo) CreateMailbox(_ context.Context, _ int64, input CreateMailbox
 		return Mailbox{}, s.mailboxErr
 	}
 	return s.mailboxResp, nil
+}
+func (s *stubRepo) ExpireStaleActivationOrders(context.Context, time.Time) (int64, error) {
+	if s.expireErr != nil {
+		return 0, s.expireErr
+	}
+	return s.expireCount, nil
 }
 
 func TestGetActivationResultIncludesPollingHints(t *testing.T) {
@@ -194,5 +202,16 @@ func TestGetActivationResultPropagatesRepositoryErrors(t *testing.T) {
 	_, err := service.GetActivationResult(context.Background(), 1, 1)
 	if err == nil || err.Error() != "boom" {
 		t.Fatalf("expected repo error boom, got %v", err)
+	}
+}
+
+func TestExpireStaleActivationOrdersUsesRepository(t *testing.T) {
+	service := NewService(&stubRepo{expireCount: 3})
+	count, err := service.ExpireStaleActivationOrders(context.Background(), time.Now())
+	if err != nil {
+		t.Fatalf("ExpireStaleActivationOrders() error = %v", err)
+	}
+	if count != 3 {
+		t.Fatalf("expected 3 expired orders, got %d", count)
 	}
 }

@@ -742,6 +742,63 @@ RETURNING id, COALESCE(domain_id, 0), COALESCE(account_id, 0), local_part, addre
 	return item, err
 }
 
+func (r *Repository) ExpireStaleActivationOrders(ctx context.Context, now time.Time) (int64, error) {
+	if r == nil || r.pool == nil {
+		return 0, nil
+	}
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	rows, err := tx.Query(ctx, `
+SELECT mailbox_id
+FROM activation_orders
+WHERE status IN ($1, $2)
+  AND COALESCE(extraction_value, '') = ''
+  AND expires_at < $3
+FOR UPDATE
+`, OrderStatusAllocated, OrderStatusWaitingEmail, now)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	var mailboxIDs []int64
+	for rows.Next() {
+		var mailboxID int64
+		if err := rows.Scan(&mailboxID); err != nil {
+			return 0, err
+		}
+		mailboxIDs = append(mailboxIDs, mailboxID)
+	}
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+
+	result, err := tx.Exec(ctx, `
+UPDATE activation_orders
+SET status = $1,
+    updated_at = NOW()
+WHERE status IN ($2, $3)
+  AND COALESCE(extraction_value, '') = ''
+  AND expires_at < $4
+`, OrderStatusTimeout, OrderStatusAllocated, OrderStatusWaitingEmail, now)
+	if err != nil {
+		return 0, err
+	}
+	if len(mailboxIDs) > 0 {
+		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'available' WHERE id = ANY($1)`, mailboxIDs); err != nil {
+			return 0, err
+		}
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 func (r *Repository) ListSupplierResources(ctx context.Context, supplierID int64) (map[string]any, error) {
 	domains, err := r.listDomainsBySupplier(ctx, supplierID)
 	if err != nil {

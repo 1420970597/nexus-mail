@@ -24,6 +24,7 @@ type repository interface {
 	CreateDomain(ctx context.Context, supplierID int64, input CreateDomainInput) (Domain, error)
 	CreateProviderAccount(ctx context.Context, supplierID int64, input CreateProviderAccountInput) (ProviderAccount, error)
 	CreateMailbox(ctx context.Context, supplierID int64, input CreateMailboxInput) (Mailbox, error)
+	ExpireStaleActivationOrders(ctx context.Context, now time.Time) (int64, error)
 }
 
 type Service struct {
@@ -93,6 +94,10 @@ func (s *Service) SupplierResources(ctx context.Context, supplierID int64) (map[
 
 func (s *Service) AllSupplierResources(ctx context.Context) (map[string]any, error) {
 	return s.repo.ListAllSupplierResources(ctx)
+}
+
+func (s *Service) ExpireStaleActivationOrders(ctx context.Context, now time.Time) (int64, error) {
+	return s.repo.ExpireStaleActivationOrders(ctx, now)
 }
 
 func (s *Service) UpdateProject(ctx context.Context, projectID int64, input UpdateProjectInput) (Project, error) {
