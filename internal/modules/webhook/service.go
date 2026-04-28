@@ -34,6 +34,7 @@ type repository interface {
 	CreateEndpoint(ctx context.Context, input CreateEndpointRecord) (WebhookEndpoint, error)
 	GetEndpoint(ctx context.Context, userID, endpointID int64) (WebhookEndpoint, error)
 	CreateDelivery(ctx context.Context, input CreateDeliveryRecord) (WebhookDelivery, error)
+	ListDeliveries(ctx context.Context, userID, endpointID int64, limit int) ([]WebhookDelivery, error)
 }
 
 type Resolver interface {
@@ -133,6 +134,16 @@ func (s *Service) CreateTestDelivery(ctx context.Context, userID, endpointID int
 		return WebhookDelivery{}, err
 	}
 	return s.repo.CreateDelivery(ctx, CreateDeliveryRecord{EndpointID: endpoint.ID, UserID: userID, EventType: EventTypeWebhookTest, Payload: string(payloadBytes)})
+}
+
+func (s *Service) ListEndpointDeliveries(ctx context.Context, userID, endpointID int64) ([]WebhookDelivery, error) {
+	if endpointID <= 0 {
+		return nil, fmt.Errorf("endpoint_id 无效")
+	}
+	if _, err := s.repo.GetEndpoint(ctx, userID, endpointID); err != nil {
+		return nil, err
+	}
+	return s.repo.ListDeliveries(ctx, userID, endpointID, defaultEndpointListLimit)
 }
 
 func endpointResponse(item WebhookEndpoint, signingSecret string) WebhookEndpointResponse {

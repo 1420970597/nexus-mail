@@ -58,6 +58,16 @@ func (r *stubRepo) CreateDelivery(ctx context.Context, input CreateDeliveryRecor
 	return item, nil
 }
 
+func (r *stubRepo) ListDeliveries(ctx context.Context, userID, endpointID int64, limit int) ([]WebhookDelivery, error) {
+	items := make([]WebhookDelivery, 0)
+	for _, item := range r.deliveries {
+		if item.UserID == userID && item.EndpointID == endpointID {
+			items = append(items, item)
+		}
+	}
+	return items, nil
+}
+
 func TestCreateEndpointGeneratesSecretOnceAndListHidesPlaintext(t *testing.T) {
 	t.Setenv("WEBHOOK_SECRET_ENCRYPTION_KEY", "unit-test-webhook-key")
 	repo := &stubRepo{}
@@ -187,5 +197,32 @@ func TestCreateTestDeliveryCreatesPendingRetryRecordWithoutNetwork(t *testing.T)
 	}
 	if len(repo.deliveries) != 1 {
 		t.Fatalf("expected exactly one delivery record, got %d", len(repo.deliveries))
+	}
+}
+
+func TestListEndpointDeliveriesRequiresOwnedEndpointAndReturnsPendingRecords(t *testing.T) {
+	t.Setenv("WEBHOOK_SECRET_ENCRYPTION_KEY", "unit-test-webhook-key")
+	repo := &stubRepo{}
+	svc := NewService(repo)
+	created, err := svc.CreateEndpoint(context.Background(), 7, CreateEndpointInput{URL: "https://hooks.example.com/mail", Events: []string{"activation.finished"}})
+	if err != nil {
+		t.Fatalf("CreateEndpoint returned error: %v", err)
+	}
+	if _, err := svc.CreateTestDelivery(context.Background(), 7, created.ID); err != nil {
+		t.Fatalf("CreateTestDelivery returned error: %v", err)
+	}
+
+	items, err := svc.ListEndpointDeliveries(context.Background(), 7, created.ID)
+	if err != nil {
+		t.Fatalf("ListEndpointDeliveries returned error: %v", err)
+	}
+	if len(items) != 1 {
+		t.Fatalf("expected one delivery, got %d", len(items))
+	}
+	if items[0].EndpointID != created.ID || items[0].Status != DeliveryStatusPending || items[0].EventType != EventTypeWebhookTest {
+		t.Fatalf("unexpected delivery item: %+v", items[0])
+	}
+	if _, err := svc.ListEndpointDeliveries(context.Background(), 8, created.ID); err != ErrEndpointNotFound {
+		t.Fatalf("expected other user to receive ErrEndpointNotFound, got %v", err)
 	}
 }

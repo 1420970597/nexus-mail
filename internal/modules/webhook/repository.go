@@ -133,3 +133,29 @@ RETURNING id, endpoint_id, user_id, event_type, payload::text, status, attempt_c
 `, input.EndpointID, input.UserID, input.EventType, input.Payload, defaultDeliveryRetention.String()).Scan(&item.ID, &item.EndpointID, &item.UserID, &item.EventType, &item.Payload, &item.Status, &item.AttemptCount, &item.NextAttemptAt, &item.LockedAt, &item.LockedBy, &item.ExpiresAt, &item.LastError, &item.CreatedAt, &item.UpdatedAt)
 	return item, err
 }
+
+func (r *Repository) ListDeliveries(ctx context.Context, userID, endpointID int64, limit int) ([]WebhookDelivery, error) {
+	if limit <= 0 || limit > maxEndpointListLimit {
+		limit = defaultEndpointListLimit
+	}
+	rows, err := r.pool.Query(ctx, `
+SELECT id, endpoint_id, user_id, event_type, payload::text, status, attempt_count, next_attempt_at, locked_at, locked_by, expires_at, last_error, created_at, updated_at
+FROM webhook_deliveries
+WHERE user_id = $1 AND endpoint_id = $2
+ORDER BY created_at DESC, id DESC
+LIMIT $3
+`, userID, endpointID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]WebhookDelivery, 0)
+	for rows.Next() {
+		var item WebhookDelivery
+		if err := rows.Scan(&item.ID, &item.EndpointID, &item.UserID, &item.EventType, &item.Payload, &item.Status, &item.AttemptCount, &item.NextAttemptAt, &item.LockedAt, &item.LockedBy, &item.ExpiresAt, &item.LastError, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}

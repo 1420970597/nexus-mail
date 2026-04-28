@@ -74,6 +74,21 @@ func TestHandlerCreatesListsAndQueuesTestDelivery(t *testing.T) {
 	if deliveryResp["delivery"].Status != DeliveryStatusPending {
 		t.Fatalf("expected pending delivery, got %q", deliveryResp["delivery"].Status)
 	}
+
+	w = httptest.NewRecorder()
+	r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api/v1/webhooks/endpoints/1/deliveries", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200 from list deliveries, got %d: %s", w.Code, w.Body.String())
+	}
+	var deliveriesResp struct {
+		Items []WebhookDelivery `json:"items"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &deliveriesResp); err != nil {
+		t.Fatalf("decode deliveries response: %v", err)
+	}
+	if len(deliveriesResp.Items) != 1 || deliveriesResp.Items[0].Status != DeliveryStatusPending {
+		t.Fatalf("expected one pending delivery, got %+v", deliveriesResp.Items)
+	}
 }
 
 func TestHandlerRejectsUnsafeEndpointURL(t *testing.T) {

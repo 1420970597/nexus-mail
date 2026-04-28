@@ -19,6 +19,7 @@ func (h *Handler) RegisterRoutes(secure *gin.RouterGroup) {
 	group := secure.Group("/webhooks")
 	group.GET("/endpoints", h.listEndpoints)
 	group.POST("/endpoints", h.createEndpoint)
+	group.GET("/endpoints/:id/deliveries", h.listDeliveries)
 	group.POST("/endpoints/:id/test-delivery", h.createTestDelivery)
 }
 
@@ -45,6 +46,25 @@ func (h *Handler) createEndpoint(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"endpoint": item})
+}
+
+func (h *Handler) listDeliveries(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	endpointID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || endpointID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 webhook endpoint ID"})
+		return
+	}
+	items, err := h.service.ListEndpointDeliveries(c.Request.Context(), user.ID, endpointID)
+	if err != nil {
+		status := http.StatusBadRequest
+		if err == ErrEndpointNotFound {
+			status = http.StatusNotFound
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
 }
 
 func (h *Handler) createTestDelivery(c *gin.Context) {
