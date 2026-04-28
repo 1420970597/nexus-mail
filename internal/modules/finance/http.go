@@ -1,6 +1,7 @@
 package finance
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -161,8 +162,18 @@ func (h *Handler) upsertSupplierCostProfile(c *gin.Context) {
 
 func (h *Handler) supplierReports(c *gin.Context) {
 	user := c.MustGet("currentUser").(auth.User)
-	items, err := h.service.SupplierReport(c.Request.Context(), user.ID)
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "0"))
+	items, err := h.service.SupplierReport(c.Request.Context(), user.ID, SupplierReportInput{
+		From:  c.Query("from"),
+		To:    c.Query("to"),
+		Limit: limit,
+	})
 	if err != nil {
+		var validationErr ValidationError
+		if errors.As(err, &validationErr) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

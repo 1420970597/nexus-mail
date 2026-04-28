@@ -73,6 +73,42 @@ func TestSupplierCostProfilesEndpointRejectsAdminWrites(t *testing.T) {
 	}
 }
 
+func TestSupplierReportsEndpointAppliesFilters(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &stubRepo{}
+	handler := NewHandler(NewService(repo), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 7, Email: "supplier@nexus-mail.local", Role: auth.RoleSupplier}))
+	handler.RegisterRoutes(secure)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/supplier/reports?from=2026-04-01&to=2026-04-28&limit=500", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	if repo.userID != 7 || repo.reportInput.From != "2026-04-01" || repo.reportInput.To != "2026-04-28" || repo.reportInput.Limit != 200 {
+		t.Fatalf("unexpected report input: supplier=%d input=%#v", repo.userID, repo.reportInput)
+	}
+}
+
+func TestSupplierReportsEndpointRejectsInvalidFilter(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	handler := NewHandler(NewService(&stubRepo{}), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 7, Email: "supplier@nexus-mail.local", Role: auth.RoleSupplier}))
+	handler.RegisterRoutes(secure)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/supplier/reports?from=2026/04/01", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
 func TestCreateDisputeEndpointCreatesDisputeForOrder(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &stubRepo{dispute: OrderDispute{ID: 3, OrderID: 10, Status: "open", Reason: "验证码错误"}}

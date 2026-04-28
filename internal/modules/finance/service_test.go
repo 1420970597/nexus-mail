@@ -12,7 +12,7 @@ type stubRepo struct {
 	settlements        []SupplierSettlementEntry
 	users              []WalletOverview
 	costProfiles       []SupplierCostProfile
-	reportRows         []SupplierReportRow
+	reportInput        SupplierReportInput
 	disputes           []OrderDispute
 	dispute            OrderDispute
 	amount             int64
@@ -78,8 +78,10 @@ func (s *stubRepo) UpsertSupplierCostProfile(_ context.Context, supplierID int64
 	}
 	return SupplierCostProfile{SupplierID: supplierID, ProjectKey: input.ProjectKey, Currency: input.Currency, Status: input.Status}, nil
 }
-func (s *stubRepo) SupplierReport(context.Context, int64) ([]SupplierReportRow, error) {
-	return s.reportRows, s.walletErr
+func (s *stubRepo) SupplierReport(_ context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error) {
+	s.userID = supplierID
+	s.reportInput = input
+	return []SupplierReportRow{{ProjectKey: "discord", TotalOrders: 3}}, s.walletErr
 }
 
 func (s *stubRepo) SettleSupplierPending(_ context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error) {

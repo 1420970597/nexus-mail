@@ -122,8 +122,8 @@ export async function saveSupplierCostProfile(payload: {
   return data
 }
 
-export async function getSupplierReports() {
-  const { data } = await api.get<{ items: SupplierReportRow[] }>('/supplier/reports')
+export async function getSupplierReports(params?: { from?: string; to?: string; limit?: number }) {
+  const { data } = await api.get<{ items: SupplierReportRow[] }>('/supplier/reports', { params })
   return data
 }
 

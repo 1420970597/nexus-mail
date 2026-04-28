@@ -34,6 +34,8 @@ export function SupplierSettlementsPage() {
   const [reports, setReports] = useState<SupplierReportRow[]>([])
   const [disputes, setDisputes] = useState<OrderDispute[]>([])
   const [loading, setLoading] = useState(true)
+  const [reportFilters, setReportFilters] = useState({ from: '', to: '', limit: 100 })
+  const [reportDraft, setReportDraft] = useState({ from: '', to: '', limit: 100 })
   const [costForm] = Form.useForm()
   const [disputeForm] = Form.useForm()
 
@@ -43,7 +45,11 @@ export function SupplierSettlementsPage() {
       const [overviewRes, profileRes, reportRes, disputeRes] = await Promise.all([
         getSupplierSettlementOverview(),
         getSupplierCostProfiles(),
-        getSupplierReports(),
+        getSupplierReports({
+          from: reportFilters.from || undefined,
+          to: reportFilters.to || undefined,
+          limit: reportFilters.limit,
+        }),
         getSupplierDisputes(),
       ])
       setWallet(overviewRes.wallet)
@@ -60,7 +66,7 @@ export function SupplierSettlementsPage() {
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [reportFilters])
 
   const handleSaveProfile = async () => {
     try {
@@ -134,6 +140,29 @@ export function SupplierSettlementsPage() {
         />
       </Card>
       <Card title="项目报表" style={{ width: '100%' }} loading={loading}>
+        <Form layout="horizontal" labelPosition="left" initValues={reportDraft}>
+          <Form.Input
+            field="from"
+            label="开始日期"
+            placeholder="YYYY-MM-DD"
+            onChange={(value) => setReportDraft((prev) => ({ ...prev, from: String(value ?? '') }))}
+          />
+          <Form.Input
+            field="to"
+            label="结束日期"
+            placeholder="YYYY-MM-DD"
+            onChange={(value) => setReportDraft((prev) => ({ ...prev, to: String(value ?? '') }))}
+          />
+          <Form.InputNumber
+            field="limit"
+            label="最多项目数"
+            min={1}
+            max={200}
+            onChange={(value) => setReportDraft((prev) => ({ ...prev, limit: Number(value) || 100 }))}
+            style={{ width: '100%' }}
+          />
+          <Button onClick={() => setReportFilters(reportDraft)}>查询报表</Button>
+        </Form>
         <Table
           pagination={false}
           rowKey="project_key"

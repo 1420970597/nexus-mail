@@ -66,6 +66,12 @@ type SupplierReportRow struct {
 	EstimatedGrossPnL int64  `json:"estimated_gross_pnl"`
 }
 
+type SupplierReportInput struct {
+	From  string `json:"from"`
+	To    string `json:"to"`
+	Limit int    `json:"limit"`
+}
+
 type OrderDispute struct {
 	ID             int64      `json:"id"`
 	OrderID        int64      `json:"order_id"`

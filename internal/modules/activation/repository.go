@@ -187,6 +187,8 @@ CREATE TABLE IF NOT EXISTS activation_orders (
 );
 CREATE INDEX IF NOT EXISTS idx_activation_orders_user_id_created_at ON activation_orders(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activation_orders_status_updated_at ON activation_orders(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activation_orders_domain_id_created_at ON activation_orders(domain_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_resource_domains_supplier_id_id ON resource_domains(supplier_id, id);
 `)
 	return err
 }

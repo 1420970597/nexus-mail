@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type repository interface {
@@ -15,7 +16,7 @@ type repository interface {
 	AdminWalletUsers(ctx context.Context) ([]WalletOverview, error)
 	ListSupplierCostProfiles(ctx context.Context, supplierID int64) ([]SupplierCostProfile, error)
 	UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error)
-	SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error)
+	SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error)
 	SettleSupplierPending(ctx context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error)
 	CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error)
 	ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error)
@@ -25,6 +26,12 @@ type repository interface {
 type Service struct {
 	repo repository
 }
+
+type ValidationError struct {
+	Message string
+}
+
+func (e ValidationError) Error() string { return e.Message }
 
 func NewService(repo repository) *Service { return &Service{repo: repo} }
 
@@ -87,8 +94,33 @@ func (s *Service) UpsertSupplierCostProfile(ctx context.Context, supplierID int6
 	return s.repo.UpsertSupplierCostProfile(ctx, supplierID, input)
 }
 
-func (s *Service) SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error) {
-	return s.repo.SupplierReport(ctx, supplierID)
+func (s *Service) SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error) {
+	input.From = strings.TrimSpace(input.From)
+	input.To = strings.TrimSpace(input.To)
+	if input.Limit <= 0 {
+		input.Limit = 100
+	}
+	if input.Limit > 200 {
+		input.Limit = 200
+	}
+	if input.From != "" {
+		if _, err := time.Parse("2006-01-02", input.From); err != nil {
+			return nil, ValidationError{Message: "from 必须使用 YYYY-MM-DD 格式"}
+		}
+	}
+	if input.To != "" {
+		if _, err := time.Parse("2006-01-02", input.To); err != nil {
+			return nil, ValidationError{Message: "to 必须使用 YYYY-MM-DD 格式"}
+		}
+	}
+	if input.From != "" && input.To != "" {
+		from, _ := time.Parse("2006-01-02", input.From)
+		to, _ := time.Parse("2006-01-02", input.To)
+		if from.After(to) {
+			return nil, ValidationError{Message: "from 不能晚于 to"}
+		}
+	}
+	return s.repo.SupplierReport(ctx, supplierID, input)
 }
 
 func (s *Service) SettleSupplierPending(ctx context.Context, adminID int64, input SettleSupplierPendingInput) (SupplierSettlementPayout, error) {

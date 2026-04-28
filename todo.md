@@ -9,7 +9,7 @@
 - Phase 1：**已完成**（身份权限、共享控制台骨架已提交）
 - Phase 2：**已完成**（项目/库存/激活订单主链路、管理员项目配置、供应商资源录入已提交）
 - Phase 3：**已完成**（已完成 SMTP 会话落盘、metadata 入库、RabbitMQ 解析任务入队、MinIO 原始对象上传，并打通验证码/link 提取回退增强、订单 READY/FINISHED 自动迁移、真实 OAuth2 刷新接入、授权码/App Password/密码型凭证录入与健康状态落库、`env://` secret_ref 解析、IMAP/POP3 实际登录校验、官方邮箱端点限制、Proton Bridge 接入策略与 Postfix 转发样例）
-- Phase 4：进行中（已完成用户钱包、冻结余额、成功扣费、超时退款、供应商待结算余额、管理员调账能力与基础结算页面；本轮新增管理员供应商待结算确认：`POST /api/v1/admin/supplier-settlements` 可将供应商 pending 结算流水原子标记为 settled，并将待结算余额迁移到已结算余额，写入 `settle_supplier_pending` 审计且纳入管理员审计过滤与 OpenAPI/前端入口；下一步重点：供应商资源成本模型、争议单处理、报表完善）
+- Phase 4：进行中（已完成用户钱包、冻结余额、成功扣费、超时退款、供应商待结算余额、管理员调账能力与基础结算页面；本轮新增管理员供应商待结算确认：`POST /api/v1/admin/supplier-settlements` 可将供应商 pending 结算流水原子标记为 settled，并将待结算余额迁移到已结算余额，写入 `settle_supplier_pending` 审计且纳入管理员审计过滤与 OpenAPI/前端入口；本轮补强供应商报表筛选：`GET /api/v1/supplier/reports` 支持 `from/to/limit`，服务端校验日期与上限、前端显式查询、OpenAPI 文档与真实 API/索引验证已完成；下一步重点：供应商资源成本模型、争议单处理、报表继续完善）
 - Phase 5：进行中（已接入 OpenAPI 3 初始规范文件与 `/docs` Redoc 页面；已补齐管理员 `/api/v1/admin/audit` 审计查询接口，可基于真实 API 回放查询 API Key 生命周期与鉴权事件；已交付管理员 `/api/v1/admin/overview` 真实聚合概览、`/api/v1/admin/risk` 风险信号汇总，以及前端管理端风控/审计/仪表盘真实数据页面；已补强 API Key 创建默认最小权限：省略 scopes 时默认 `activation:read`、显式空白 scopes 拒绝，并通过真实 API Key 创建/使用/撤销回放验证；已交付 API Key IP 白名单管理里程碑：支持 `PATCH /api/v1/auth/api-keys/:id/whitelist` 更新白名单、规范化 IP/CIDR、写入 `update_whitelist` 审计并可由管理员审计接口筛选，已通过真实 API 回放验证更新前 403、更新后 200；已交付 API Key 运行时限流首个里程碑：同一 API Key 每分钟 60 次后返回 429 并写入 `denied_rate_limit` 审计，已通过 70 次真实 API 连续请求回放验证；已交付 Webhook 配置、重试可观测性与异步真实投递里程碑：用户鉴权下 endpoint 创建/列表、一次性签名 secret、secret_preview 列表脱敏、SSRF URL 拦截、test-delivery 创建 pending delivery 并由独立 webhook-worker 异步真实 POST，携带 HMAC-SHA256 签名，2xx 标记 sent，失败按指数退避重试并支持陈旧锁回收，同时新增 `GET /api/v1/webhooks/endpoints/:id/deliveries` 查询当前用户 endpoint 的最近投递/重试记录；已交付可配置风控规则首个里程碑：新增 `GET/PUT /api/v1/admin/risk/rules`、`risk_rules` schema/default seed、前端风控规则表格编辑、`update_risk_rule` 管理员审计、OpenAPI 文档，并通过真实 API 验证默认规则、非法阈值 400、更新后持久化；本轮补强仪表盘深度统计：管理员 overview 增加订单完成/超时/取消率、完成订单流水、平均完成客单价、争议发生率、鉴权拒绝总数/拒绝率，并在前端仪表盘展示，已通过真实 API 验证新增字段存在；本轮补强财务运营审计闭环：成本模型更新、管理员调账、争议处理分别写入 `update_supplier_cost_profile`、`admin_wallet_adjustment`、`resolve_dispute` 审计并纳入管理员过滤与 OpenAPI 文档，已通过真实 API 查询验证）
 - Phase 6：未开始
 
@@ -702,7 +702,7 @@ nexus-mail/
 7. 供应商供货页面
 8. 管理员调账能力（已完成：/admin/wallet-adjustments）
 9. 争议单处理流程（已完成首个里程碑：用户/供应商可对 FINISHED/TIMEOUT 订单发起争议，管理员可处理退款/驳回；本轮补强退款处理契约，`refund_amount > 0` 时必须显式使用 `resolution_type=refund`，避免“人工调整”类型误触发真实退款，并已通过真实 API 验证非法类型 400、合法 refund 200）
-10. 供应商报表页面（基础结算流水已完成）
+10. 供应商报表页面（基础结算流水已完成；本轮补强项目级报表筛选，支持 `from/to/limit`，真实 API 验证 200/400 与索引存在）
 
 ### 输出
 - 用户能充值消费

@@ -721,9 +721,39 @@ paths:
   /supplier/reports:
     get:
       summary: 获取当前供应商项目级订单/收入/成本报表
+      parameters:
+        - in: query
+          name: from
+          required: false
+          schema:
+            type: string
+            format: date
+          description: 按订单创建日期过滤，起始日期（YYYY-MM-DD，含当天）。
+        - in: query
+          name: to
+          required: false
+          schema:
+            type: string
+            format: date
+          description: 按订单创建日期过滤，结束日期（YYYY-MM-DD，含当天）。
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 100
+          description: 返回项目数量上限，服务端最大 200。
       responses:
         '200':
           description: 项目报表列表
+        '400':
+          description: 日期格式无效或 from 晚于 to
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /supplier/disputes:
     get:
       summary: 获取当前供应商相关争议单
