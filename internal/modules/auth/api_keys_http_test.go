@@ -3,8 +3,10 @@ package auth
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -163,6 +165,30 @@ func TestAuthRequiredReturns429WhenAPIKeyRateLimited(t *testing.T) {
 	r.ServeHTTP(w, req)
 	if w.Code != http.StatusTooManyRequests {
 		t.Fatalf("expected 429, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestAuthRequiredReturns503WhenAPIKeyRateLimiterBackendFails(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "runtime", KeyPreview: "nmx_rate...test", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.1"}, Status: "active"}, rateLimitErr: errors.New("dial tcp redis.internal:6379: connection refused")}
+	service := NewService(nil, repo, "test-secret", time.Hour, 24*time.Hour)
+	service.SetAPIKeyRateLimiter(repo)
+	handler := NewHandler(service)
+	r := gin.New()
+	r.GET("/secure", handler.AuthRequiredForAPIKeyScope("activation:read"), func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"ok": true})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/secure", nil)
+	req.Header.Set("X-API-Key", "nmx_runtime")
+	req.RemoteAddr = "127.0.0.1:23456"
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503, got %d: %s", w.Code, w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), "redis.internal") {
+		t.Fatalf("response leaked backend error: %s", w.Body.String())
 	}
 }
 

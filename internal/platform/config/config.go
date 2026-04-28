@@ -34,6 +34,11 @@ type Config struct {
 	MicrosoftOAuthTokenURL string
 	ReadTimeout            time.Duration
 	WriteTimeout           time.Duration
+	RedisDialTimeout       time.Duration
+	RedisReadTimeout       time.Duration
+	RedisWriteTimeout      time.Duration
+	RedisPoolSize          int
+	APIKeyRateLimitTimeout time.Duration
 	WebhookEncryptionKey   string
 }
 
@@ -65,6 +70,11 @@ func Load() (Config, error) {
 		MicrosoftOAuthTokenURL: defaultString(viper.GetString("MICROSOFT_OAUTH_TOKEN_URL"), "https://login.microsoftonline.com/common/oauth2/v2.0/token"),
 		ReadTimeout:            10 * time.Second,
 		WriteTimeout:           15 * time.Second,
+		RedisDialTimeout:       time.Duration(defaultInt(viper.GetInt("REDIS_DIAL_TIMEOUT_MS"), 500)) * time.Millisecond,
+		RedisReadTimeout:       time.Duration(defaultInt(viper.GetInt("REDIS_READ_TIMEOUT_MS"), 200)) * time.Millisecond,
+		RedisWriteTimeout:      time.Duration(defaultInt(viper.GetInt("REDIS_WRITE_TIMEOUT_MS"), 200)) * time.Millisecond,
+		RedisPoolSize:          defaultInt(viper.GetInt("REDIS_POOL_SIZE"), 20),
+		APIKeyRateLimitTimeout: time.Duration(defaultInt(viper.GetInt("API_KEY_RATE_LIMIT_TIMEOUT_MS"), 100)) * time.Millisecond,
 		WebhookEncryptionKey:   defaultString(viper.GetString("WEBHOOK_SECRET_ENCRYPTION_KEY"), defaultString(viper.GetString("JWT_SECRET"), "")),
 	}
 	return cfg, cfg.Validate()
@@ -83,6 +93,12 @@ func (c Config) Validate() error {
 	}
 	if c.WebhookEncryptionKey == "" || c.WebhookEncryptionKey == "change-me" || c.WebhookEncryptionKey == "change-me-in-production" {
 		missing = append(missing, "WEBHOOK_SECRET_ENCRYPTION_KEY(valid)")
+	}
+	if c.RedisPoolSize <= 0 {
+		missing = append(missing, "REDIS_POOL_SIZE(>0)")
+	}
+	if c.RedisDialTimeout <= 0 || c.RedisReadTimeout <= 0 || c.RedisWriteTimeout <= 0 || c.APIKeyRateLimitTimeout <= 0 {
+		missing = append(missing, "Redis/API Key timeout(>0)")
 	}
 	if len(missing) > 0 {
 		return fmt.Errorf("invalid configuration, missing or insecure settings: %s", strings.Join(missing, ", "))

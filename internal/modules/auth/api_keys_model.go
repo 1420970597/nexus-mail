@@ -46,11 +46,12 @@ type UpdateAPIKeyWhitelistInput struct {
 type APIKeyAuthOutcome string
 
 const (
-	APIKeyAuthOutcomeSuccess         APIKeyAuthOutcome = "success"
-	APIKeyAuthOutcomeDeniedInvalid   APIKeyAuthOutcome = "denied_invalid"
-	APIKeyAuthOutcomeDeniedWhitelist APIKeyAuthOutcome = "denied_whitelist"
-	APIKeyAuthOutcomeDeniedScope     APIKeyAuthOutcome = "denied_scope"
-	APIKeyAuthOutcomeDeniedRateLimit APIKeyAuthOutcome = "denied_rate_limit"
+	APIKeyAuthOutcomeSuccess               APIKeyAuthOutcome = "success"
+	APIKeyAuthOutcomeDeniedInvalid         APIKeyAuthOutcome = "denied_invalid"
+	APIKeyAuthOutcomeDeniedWhitelist       APIKeyAuthOutcome = "denied_whitelist"
+	APIKeyAuthOutcomeDeniedScope           APIKeyAuthOutcome = "denied_scope"
+	APIKeyAuthOutcomeDeniedRateLimit       APIKeyAuthOutcome = "denied_rate_limit"
+	APIKeyAuthOutcomeRateLimitBackendError APIKeyAuthOutcome = "rate_limit_backend_error"
 )
 
 type APIKeyAuthAuditEvent struct {

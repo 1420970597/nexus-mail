@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer app.DB.Close()
+	defer app.Close()
 	r := httpx.NewRouter(app)
 
 	srv := &http.Server{

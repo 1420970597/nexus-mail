@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/alicebob/miniredis/v2"
+	redis "github.com/redis/go-redis/v9"
 )
 
 type apiKeyStubRepo struct {
@@ -36,6 +39,7 @@ type apiKeyStubRepo struct {
 	users                []User
 	listUsersFn          func(context.Context) ([]User, error)
 	rateLimitExceeded    bool
+	rateLimitErr         error
 }
 
 func (s *apiKeyStubRepo) CreateAPIKey(_ context.Context, userID int64, name string, scopes []string, whitelist []string) (APIKey, string, error) {
@@ -96,6 +100,9 @@ func (s *apiKeyStubRepo) RecordAPIKeyAuthAudit(_ context.Context, event APIKeyAu
 }
 
 func (s *apiKeyStubRepo) Allow(context.Context, string, int, time.Duration) (bool, error) {
+	if s.rateLimitErr != nil {
+		return false, s.rateLimitErr
+	}
 	return !s.rateLimitExceeded, nil
 }
 
@@ -104,6 +111,53 @@ func (s *apiKeyStubRepo) ListAllUsers(ctx context.Context) ([]User, error) {
 		return s.listUsersFn(ctx)
 	}
 	return s.users, nil
+}
+
+func TestRedisAPIKeyRateLimiterAllowsLimitThenBlocksAndResetsByWindow(t *testing.T) {
+	server := miniredis.RunT(t)
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
+	t.Cleanup(func() { _ = client.Close() })
+
+	limiter := NewRedisAPIKeyRateLimiter(client, "test:nexus:api-key")
+	ctx := context.Background()
+
+	for i := 0; i < 2; i++ {
+		allowed, err := limiter.Allow(ctx, "nmx_preview", 2, time.Minute)
+		if err != nil {
+			t.Fatalf("Allow(%d) error = %v", i+1, err)
+		}
+		if !allowed {
+			t.Fatalf("Allow(%d) expected true", i+1)
+		}
+	}
+
+	allowed, err := limiter.Allow(ctx, "nmx_preview", 2, time.Minute)
+	if err != nil {
+		t.Fatalf("Allow over limit error = %v", err)
+	}
+	if allowed {
+		t.Fatal("expected third request in same window to be rate limited")
+	}
+
+	server.FastForward(time.Minute)
+	allowed, err = limiter.Allow(ctx, "nmx_preview", 2, time.Minute)
+	if err != nil {
+		t.Fatalf("Allow after reset error = %v", err)
+	}
+	if !allowed {
+		t.Fatal("expected request after Redis key expiry to be allowed")
+	}
+}
+
+func TestRedisAPIKeyRateLimiterFailsOpenWhenClientMissingOrInvalidLimit(t *testing.T) {
+	limiter := NewRedisAPIKeyRateLimiter(nil, "test:nexus:api-key")
+	allowed, err := limiter.Allow(context.Background(), "nmx_preview", 0, time.Minute)
+	if err != nil {
+		t.Fatalf("Allow with invalid limit error = %v", err)
+	}
+	if !allowed {
+		t.Fatal("expected invalid limiter configuration to fail open")
+	}
 }
 
 func TestCreateAPIKeyNormalizesNameScopesAndWhitelist(t *testing.T) {
@@ -295,6 +349,22 @@ func TestAuthenticateAPIKeyRejectsWhenRuntimeRateLimitExceededAndRecordsAudit(t 
 	}
 }
 
+func TestAuthenticateAPIKeyRecordsSanitizedAuditWhenRateLimiterBackendFails(t *testing.T) {
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "cron", KeyPreview: "nmx_safe...test", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.1"}, Status: "active"}, rateLimitErr: errors.New("dial tcp redis.internal:6379: connection refused")}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	service.SetAPIKeyRateLimiter(repo)
+	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
+	if !errors.Is(err, ErrAPIKeyRateLimiterFailed) {
+		t.Fatalf("expected sanitized rate limiter failure, got %v", err)
+	}
+	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeRateLimitBackendError {
+		t.Fatalf("expected rate-limit-backend-error audit, got %#v", repo.lastAuditEvent)
+	}
+	if repo.lastAuditEvent.Note != ErrAPIKeyRateLimiterFailed.Error() {
+		t.Fatalf("expected sanitized note, got %q", repo.lastAuditEvent.Note)
+	}
+}
+
 func TestAuthenticateAPIKeyPropagatesValidationFailureAndRecordsAudit(t *testing.T) {
 	repo := &apiKeyStubRepo{validateErr: errors.New("API Key 无效")}
 	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
@@ -353,6 +423,21 @@ func TestListAdminAuditAcceptsRateLimitDenialAction(t *testing.T) {
 	}
 	if repo.lastAdminAuditFilter == nil || repo.lastAdminAuditFilter.Action != "denied_rate_limit" {
 		t.Fatalf("expected denied_rate_limit filter to be forwarded, got %#v", repo.lastAdminAuditFilter)
+	}
+}
+
+func TestListAdminAuditAcceptsRateLimitBackendErrorAction(t *testing.T) {
+	repo := &apiKeyStubRepo{audit: []APIKeyAuditEntry{{ID: 4, Action: "rate_limit_backend_error"}}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	items, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{Action: " RATE_LIMIT_BACKEND_ERROR "})
+	if err != nil {
+		t.Fatalf("ListAdminAudit() error = %v", err)
+	}
+	if len(items) != 1 || items[0].Action != "rate_limit_backend_error" {
+		t.Fatalf("unexpected items: %#v", items)
+	}
+	if repo.lastAdminAuditFilter == nil || repo.lastAdminAuditFilter.Action != "rate_limit_backend_error" {
+		t.Fatalf("expected rate_limit_backend_error filter to be forwarded, got %#v", repo.lastAdminAuditFilter)
 	}
 }
 

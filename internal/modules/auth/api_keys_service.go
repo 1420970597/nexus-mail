@@ -92,7 +92,7 @@ func (s *Service) ListAdminAudit(ctx context.Context, filter AdminAuditFilter) (
 	}
 	if filter.Action != "" {
 		switch filter.Action {
-		case "create", "update_whitelist", "update_risk_rule", "admin_wallet_adjustment", "update_supplier_cost_profile", "settle_supplier_pending", "resolve_dispute", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit":
+		case "create", "update_whitelist", "update_risk_rule", "admin_wallet_adjustment", "update_supplier_cost_profile", "settle_supplier_pending", "resolve_dispute", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit", "rate_limit_backend_error":
 		default:
 			return nil, fmt.Errorf("action 不受支持")
 		}

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"strings"
 	"time"
@@ -52,9 +53,18 @@ func (s *Service) AuthenticateAPIKey(ctx context.Context, key, clientIP, require
 		return User{}, APIKey{}, err
 	}
 	if s.apiKeyRateLimiter != nil {
-		allowed, err := s.apiKeyRateLimiter.Allow(ctx, item.KeyPreview, defaultAPIKeyRateLimit, defaultAPIKeyRateLimitWindow)
+		allowed, err := s.apiKeyRateLimiter.Allow(ctx, fmt.Sprintf("api-key:%d", item.ID), defaultAPIKeyRateLimit, defaultAPIKeyRateLimitWindow)
 		if err != nil {
-			return User{}, APIKey{}, err
+			s.recordAPIKeyAudit(ctx, APIKeyAuthAuditEvent{
+				APIKeyID:   &item.ID,
+				UserID:     &item.UserID,
+				KeyPreview: item.KeyPreview,
+				ClientIP:   clientIP,
+				Scope:      requiredScope,
+				Outcome:    APIKeyAuthOutcomeRateLimitBackendError,
+				Note:       ErrAPIKeyRateLimiterFailed.Error(),
+			})
+			return User{}, APIKey{}, ErrAPIKeyRateLimiterFailed
 		}
 		if !allowed {
 			s.recordAPIKeyAudit(ctx, APIKeyAuthAuditEvent{

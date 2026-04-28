@@ -162,6 +162,9 @@ func (h *Handler) authRequiredForAPIKeyScope(requiredScope string) gin.HandlerFu
 			if errors.Is(err, ErrAPIKeyRateLimited) {
 				status = http.StatusTooManyRequests
 			}
+			if errors.Is(err, ErrAPIKeyRateLimiterFailed) {
+				status = http.StatusServiceUnavailable
+			}
 			c.AbortWithStatusJSON(status, gin.H{"error": err.Error()})
 			return
 		}

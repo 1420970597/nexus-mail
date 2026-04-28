@@ -10,13 +10,16 @@ import (
 	"github.com/1420970597/nexus-mail/internal/modules/finance"
 	"github.com/1420970597/nexus-mail/internal/modules/risk"
 	"github.com/1420970597/nexus-mail/internal/modules/webhook"
+	"github.com/1420970597/nexus-mail/internal/platform/cache"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
+	redis "github.com/redis/go-redis/v9"
 )
 
 type App struct {
 	Config            config.Config
 	DB                *database.DB
+	Redis             *redis.Client
 	AuthService       *auth.Service
 	ActivationService *activation.Service
 	FinanceService    *finance.Service
@@ -29,9 +32,26 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	redisClient, err := cache.NewRedisClient(ctx, cfg.RedisURL, cache.RedisOptions{
+		DialTimeout:  cfg.RedisDialTimeout,
+		ReadTimeout:  cfg.RedisReadTimeout,
+		WriteTimeout: cfg.RedisWriteTimeout,
+		PoolSize:     cfg.RedisPoolSize,
+	})
+	if err != nil {
+		db.Close()
+		return nil, fmt.Errorf("connect redis: %w", err)
+	}
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = redisClient.Close()
+			db.Close()
+		}
+	}()
 	authRepo := auth.NewRepository(db.Pool)
 	authService := auth.NewService(authRepo, authRepo, cfg.JWTSecret, time.Duration(cfg.JWTExpireSeconds)*time.Second, time.Duration(cfg.RefreshExpireSeconds)*time.Second)
-	authService.SetAPIKeyRateLimiter(auth.NewMemoryAPIKeyRateLimiter())
+	authService.SetAPIKeyRateLimiter(auth.NewRedisAPIKeyRateLimiterWithTimeout(redisClient, "", cfg.APIKeyRateLimitTimeout))
 	if err := authRepo.EnsureSchema(ctx); err != nil {
 		return nil, fmt.Errorf("ensure auth schema: %w", err)
 	}
@@ -68,13 +88,27 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 	webhookService := webhook.NewServiceWithEncryptionKey(webhookRepo, cfg.WebhookEncryptionKey)
 	webhookService.UseNetworkResolver()
 
+	cleanup = false
 	return &App{
 		Config:            cfg,
 		DB:                db,
+		Redis:             redisClient,
 		AuthService:       authService,
 		ActivationService: activation.NewService(activationRepo),
 		FinanceService:    finance.NewService(financeRepo),
 		RiskService:       riskService,
 		WebhookService:    webhookService,
 	}, nil
+}
+
+func (a *App) Close() {
+	if a == nil {
+		return
+	}
+	if a.Redis != nil {
+		_ = a.Redis.Close()
+	}
+	if a.DB != nil {
+		a.DB.Close()
+	}
 }

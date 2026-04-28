@@ -21,7 +21,17 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 	r.Use(gin.Logger(), gin.Recovery())
 
 	r.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		payload := gin.H{"status": "ok"}
+		if app != nil && app.Redis != nil {
+			ctx, cancel := context.WithTimeout(c.Request.Context(), 100*time.Millisecond)
+			defer cancel()
+			if err := app.Redis.Ping(ctx).Err(); err != nil {
+				c.JSON(http.StatusServiceUnavailable, gin.H{"status": "degraded", "redis": "unavailable"})
+				return
+			}
+			payload["redis"] = "ok"
+		}
+		c.JSON(http.StatusOK, payload)
 	})
 
 	api := r.Group("/api/v1")
