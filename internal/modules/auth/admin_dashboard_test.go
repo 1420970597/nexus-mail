@@ -45,8 +45,8 @@ func TestBuildDashboardSummaryAggregatesKeyAdminMetrics(t *testing.T) {
 	if summary.Projects.Active != 1 || summary.Projects.Inactive != 1 {
 		t.Fatalf("unexpected project summary: %#v", summary.Projects)
 	}
-	if summary.Suppliers.Total != 3 {
-		t.Fatalf("expected 3 supplier/admin principals, got %d", summary.Suppliers.Total)
+	if summary.Suppliers.Total != 1 {
+		t.Fatalf("expected 1 supplier principal, got %d", summary.Suppliers.Total)
 	}
 	if summary.Audit.DeniedWhitelist != 1 || summary.Audit.DeniedScope != 1 || summary.Audit.DeniedRateLimit != 1 || summary.Audit.Total != 6 {
 		t.Fatalf("unexpected audit summary: %#v", summary.Audit)
@@ -65,6 +65,22 @@ func TestBuildDashboardSummaryAggregatesKeyAdminMetrics(t *testing.T) {
 	}
 	if summary.Audit.DeniedTotal != 3 || summary.Audit.DeniedRateBps != 5000 {
 		t.Fatalf("unexpected denied audit depth metrics: %#v", summary.Audit)
+	}
+}
+
+func TestBuildDashboardSummaryCountsOnlySupplierRoleAsSuppliers(t *testing.T) {
+	walletUsers := []DashboardWalletUser{
+		{UserID: 1, Email: "admin@nexus-mail.local", Role: "admin"},
+		{UserID: 2, Email: "supplier@nexus-mail.local", Role: "supplier"},
+	}
+	orders := []DashboardOrder{
+		{ID: 1, SupplierID: 2, Status: "FINISHED", FinalPrice: 1200},
+		{ID: 2, SupplierID: 99, Status: "FINISHED", FinalPrice: 9999},
+	}
+
+	summary := BuildDashboardSummary(context.Background(), nil, orders, walletUsers, nil, nil)
+	if summary.Suppliers.Total != 1 {
+		t.Fatalf("expected only supplier-role principals to be counted as suppliers, got %d", summary.Suppliers.Total)
 	}
 }
 

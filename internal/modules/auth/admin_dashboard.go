@@ -139,6 +139,12 @@ func BuildDashboardSummary(
 	summary.Projects.Total = len(projects)
 
 	supplierSeen := map[int64]struct{}{}
+	supplierRoleIDs := map[int64]struct{}{}
+	for _, wallet := range walletUsers {
+		if wallet.Role == string(RoleSupplier) {
+			supplierRoleIDs[wallet.UserID] = struct{}{}
+		}
+	}
 	for _, project := range projects {
 		if project.IsActive {
 			summary.Projects.Active++
@@ -160,7 +166,7 @@ func BuildDashboardSummary(
 		case "TIMEOUT":
 			summary.Orders.Timeout++
 		}
-		if order.SupplierID > 0 {
+		if _, ok := supplierRoleIDs[order.SupplierID]; ok {
 			supplierSeen[order.SupplierID] = struct{}{}
 		}
 	}
@@ -175,7 +181,7 @@ func BuildDashboardSummary(
 		if wallet.PendingSettlement > 0 {
 			summary.SupplierSettlements.PendingAmount += wallet.PendingSettlement
 		}
-		if wallet.Role == string(RoleSupplier) || wallet.Role == string(RoleAdmin) {
+		if wallet.Role == string(RoleSupplier) {
 			supplierSeen[wallet.UserID] = struct{}{}
 		}
 	}
