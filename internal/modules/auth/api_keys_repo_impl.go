@@ -142,6 +142,46 @@ LIMIT 100
 	return items, rows.Err()
 }
 
+func (r *Repository) ValidateAPIKey(ctx context.Context, key string) (APIKey, error) {
+	return r.validateAPIKey(ctx, key)
+}
+
+func (r *Repository) RecordAPIKeyAuthAudit(ctx context.Context, event APIKeyAuthAuditEvent) error {
+	if r == nil || r.pool == nil {
+		return nil
+	}
+	var apiKeyID any
+	if event.APIKeyID != nil {
+		apiKeyID = *event.APIKeyID
+	}
+	var userID any
+	if event.UserID != nil {
+		userID = *event.UserID
+	}
+	_, err := r.pool.Exec(ctx, `
+INSERT INTO api_key_audit_logs (user_id, api_key_id, action, actor_type, note)
+VALUES ($1, $2, $3, 'system', $4)
+`, userID, apiKeyID, string(event.Outcome), buildAPIKeyAuditNote(event))
+	return err
+}
+
+func buildAPIKeyAuditNote(event APIKeyAuthAuditEvent) string {
+	parts := make([]string, 0, 4)
+	if event.Scope != "" {
+		parts = append(parts, "scope="+event.Scope)
+	}
+	if event.ClientIP != "" {
+		parts = append(parts, "ip="+event.ClientIP)
+	}
+	if event.KeyPreview != "" {
+		parts = append(parts, "key="+event.KeyPreview)
+	}
+	if event.Note != "" {
+		parts = append(parts, event.Note)
+	}
+	return strings.Join(parts, " | ")
+}
+
 func (r *Repository) validateAPIKey(ctx context.Context, key string) (APIKey, error) {
 	key = strings.TrimSpace(key)
 	if key == "" {

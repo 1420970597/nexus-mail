@@ -29,6 +29,27 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 		authGroup := api.Group("/auth")
 		authHandler.RegisterRoutes(authGroup)
 
+		apiKeyRead := api.Group("")
+		apiKeyRead.Use(authHandler.AuthRequiredForAPIKeyScope("activation:read"))
+		apiKeyRead.GET("/dashboard/overview/api-key", func(c *gin.Context) {
+			user := c.MustGet("currentUser").(auth.User)
+			key := c.MustGet("currentAPIKey").(auth.APIKey)
+			inventory, err := app.ActivationService.ListInventory(c.Request.Context())
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"message":    "dashboard ready",
+				"role":       user.Role,
+				"api_key_id": key.ID,
+				"stats": gin.H{
+					"projects":  len(inventory),
+					"suppliers": uniqueSuppliers(inventory),
+				},
+			})
+		})
+
 		secure := api.Group("")
 		secure.Use(authHandler.AuthRequiredForRoutes())
 		secure.GET("/dashboard/overview", func(c *gin.Context) {

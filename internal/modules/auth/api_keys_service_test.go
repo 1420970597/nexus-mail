@@ -21,6 +21,11 @@ type apiKeyStubRepo struct {
 	createdWhitelist []string
 	revokedID        int64
 	revokedUID       int64
+	validatedKey     string
+	validatedItem    APIKey
+	validateErr      error
+	auditAuthErr     error
+	lastAuditEvent   APIKeyAuthAuditEvent
 }
 
 func (s *apiKeyStubRepo) CreateAPIKey(_ context.Context, userID int64, name string, scopes []string, whitelist []string) (APIKey, string, error) {
@@ -49,6 +54,19 @@ func (s *apiKeyStubRepo) RevokeAPIKey(_ context.Context, userID, id int64) (APIK
 
 func (s *apiKeyStubRepo) ListAPIKeyAudit(context.Context, int64) ([]APIKeyAuditEntry, error) {
 	return s.audit, nil
+}
+
+func (s *apiKeyStubRepo) ValidateAPIKey(_ context.Context, key string) (APIKey, error) {
+	s.validatedKey = key
+	if s.validateErr != nil {
+		return APIKey{}, s.validateErr
+	}
+	return s.validatedItem, nil
+}
+
+func (s *apiKeyStubRepo) RecordAPIKeyAuthAudit(_ context.Context, event APIKeyAuthAuditEvent) error {
+	s.lastAuditEvent = event
+	return s.auditAuthErr
 }
 
 func TestCreateAPIKeyNormalizesNameScopesAndWhitelist(t *testing.T) {
@@ -110,5 +128,62 @@ func TestCreateAPIKeyReturnsRepositoryError(t *testing.T) {
 	_, _, err := service.CreateAPIKey(context.Background(), 1, CreateAPIKeyInput{Name: "x"})
 	if err == nil || err.Error() != "boom" {
 		t.Fatalf("expected repo error, got %v", err)
+	}
+}
+
+func TestAuthenticateAPIKeyAcceptsValidWhitelistedScope(t *testing.T) {
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "cron", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.1"}, Status: "active"}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	user, key, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
+	if err != nil {
+		t.Fatalf("AuthenticateAPIKey() error = %v", err)
+	}
+	if repo.validatedKey != "nmx_key" {
+		t.Fatalf("expected repo to validate exact key, got %q", repo.validatedKey)
+	}
+	if user.ID != 7 || user.Role != RoleUser {
+		t.Fatalf("unexpected user: %#v", user)
+	}
+	if key.ID != 9 {
+		t.Fatalf("unexpected key: %#v", key)
+	}
+	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeSuccess {
+		t.Fatalf("expected success audit, got %#v", repo.lastAuditEvent)
+	}
+}
+
+func TestAuthenticateAPIKeyRejectsMissingScopeAndRecordsAudit(t *testing.T) {
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "cron", Scopes: []string{"activation:read"}, Status: "active"}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "finance:write")
+	if err == nil || err.Error() != "API Key 无权限访问该接口" {
+		t.Fatalf("expected scope rejection, got %v", err)
+	}
+	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeDeniedScope {
+		t.Fatalf("expected denied-scope audit, got %#v", repo.lastAuditEvent)
+	}
+}
+
+func TestAuthenticateAPIKeyRejectsNonWhitelistedIPAndRecordsAudit(t *testing.T) {
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "cron", Scopes: []string{"activation:read"}, Whitelist: []string{"10.0.0.0/24"}, Status: "active"}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
+	if err == nil || err.Error() != "当前 IP 不在 API Key 白名单内" {
+		t.Fatalf("expected whitelist rejection, got %v", err)
+	}
+	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeDeniedWhitelist {
+		t.Fatalf("expected denied-whitelist audit, got %#v", repo.lastAuditEvent)
+	}
+}
+
+func TestAuthenticateAPIKeyPropagatesValidationFailureAndRecordsAudit(t *testing.T) {
+	repo := &apiKeyStubRepo{validateErr: errors.New("API Key 无效")}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
+	if err == nil || err.Error() != "API Key 无效" {
+		t.Fatalf("expected validation failure, got %v", err)
+	}
+	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeDeniedInvalid {
+		t.Fatalf("expected invalid-key audit, got %#v", repo.lastAuditEvent)
 	}
 }

@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"errors"
+	"net"
 	"net/http"
 	"strings"
 
@@ -99,6 +101,37 @@ func (h *Handler) menu(c *gin.Context) {
 		"role":        user.Role,
 		"permissions": h.service.PermissionsForRole(user.Role),
 	})
+}
+
+func (h *Handler) authRequiredForAPIKeyScope(requiredScope string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := strings.TrimSpace(c.GetHeader("X-API-Key"))
+		if key == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "缺少 API Key"})
+			return
+		}
+		clientIP := requestClientIP(c)
+		user, apiKey, err := h.service.AuthenticateAPIKey(c.Request.Context(), key, clientIP, requiredScope)
+		if err != nil {
+			status := http.StatusUnauthorized
+			if errors.Is(err, ErrAPIKeyDeniedIP) || errors.Is(err, ErrAPIKeyDeniedScope) {
+				status = http.StatusForbidden
+			}
+			c.AbortWithStatusJSON(status, gin.H{"error": err.Error()})
+			return
+		}
+		c.Set("currentUser", user)
+		c.Set("currentAPIKey", apiKey)
+		c.Next()
+	}
+}
+
+func requestClientIP(c *gin.Context) string {
+	remoteAddr := strings.TrimSpace(c.Request.RemoteAddr)
+	if host, _, err := net.SplitHostPort(remoteAddr); err == nil {
+		return host
+	}
+	return remoteAddr
 }
 
 func (h *Handler) authRequired() gin.HandlerFunc {

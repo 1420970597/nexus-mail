@@ -30,3 +30,22 @@ type CreateAPIKeyInput struct {
 	Scopes    []string `json:"scopes"`
 	Whitelist []string `json:"whitelist"`
 }
+
+type APIKeyAuthOutcome string
+
+const (
+	APIKeyAuthOutcomeSuccess         APIKeyAuthOutcome = "success"
+	APIKeyAuthOutcomeDeniedInvalid   APIKeyAuthOutcome = "denied_invalid"
+	APIKeyAuthOutcomeDeniedWhitelist APIKeyAuthOutcome = "denied_whitelist"
+	APIKeyAuthOutcomeDeniedScope     APIKeyAuthOutcome = "denied_scope"
+)
+
+type APIKeyAuthAuditEvent struct {
+	APIKeyID   *int64
+	UserID     *int64
+	KeyPreview string
+	ClientIP   string
+	Scope      string
+	Outcome    APIKeyAuthOutcome
+	Note       string
+}

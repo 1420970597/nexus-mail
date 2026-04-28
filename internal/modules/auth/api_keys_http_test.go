@@ -86,3 +86,46 @@ func TestAPIKeysEndpointsRequireAuthAndSupportLifecycle(t *testing.T) {
 		}
 	})
 }
+
+func TestAuthRequiredAcceptsAPIKeyForScopedRoute(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "runtime", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.1"}, Status: "active"}}
+	service := NewService(nil, repo, "test-secret", time.Hour, 24*time.Hour)
+	handler := NewHandler(service)
+	r := gin.New()
+	r.GET("/secure", handler.AuthRequiredForAPIKeyScope("activation:read"), func(c *gin.Context) {
+		user := c.MustGet("currentUser").(User)
+		key := c.MustGet("currentAPIKey").(APIKey)
+		c.JSON(http.StatusOK, gin.H{"user_id": user.ID, "api_key_id": key.ID})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/secure", nil)
+	req.Header.Set("X-API-Key", "nmx_runtime")
+	req.Header.Set("X-Forwarded-For", "8.8.8.8")
+	req.RemoteAddr = "127.0.0.1:23456"
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestAuthRequiredRejectsAPIKeyOutsideWhitelist(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "runtime", Scopes: []string{"activation:read"}, Whitelist: []string{"10.0.0.0/24"}, Status: "active"}}
+	service := NewService(nil, repo, "test-secret", time.Hour, 24*time.Hour)
+	handler := NewHandler(service)
+	r := gin.New()
+	r.GET("/secure", handler.AuthRequiredForAPIKeyScope("activation:read"), func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"ok": true})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/secure", nil)
+	req.Header.Set("X-API-Key", "nmx_runtime")
+	req.RemoteAddr = "127.0.0.1:23456"
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d: %s", w.Code, w.Body.String())
+	}
+}
