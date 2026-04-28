@@ -4,6 +4,12 @@ import (
 	"context"
 	"net"
 	"strings"
+	"time"
+)
+
+const (
+	defaultAPIKeyRateLimit       = 60
+	defaultAPIKeyRateLimitWindow = time.Minute
 )
 
 func (s *Service) AuthenticateAPIKey(ctx context.Context, key, clientIP, requiredScope string) (User, APIKey, error) {
@@ -44,6 +50,24 @@ func (s *Service) AuthenticateAPIKey(ctx context.Context, key, clientIP, require
 			Note:       err.Error(),
 		})
 		return User{}, APIKey{}, err
+	}
+	if s.apiKeyRateLimiter != nil {
+		allowed, err := s.apiKeyRateLimiter.Allow(ctx, item.KeyPreview, defaultAPIKeyRateLimit, defaultAPIKeyRateLimitWindow)
+		if err != nil {
+			return User{}, APIKey{}, err
+		}
+		if !allowed {
+			s.recordAPIKeyAudit(ctx, APIKeyAuthAuditEvent{
+				APIKeyID:   &item.ID,
+				UserID:     &item.UserID,
+				KeyPreview: item.KeyPreview,
+				ClientIP:   clientIP,
+				Scope:      requiredScope,
+				Outcome:    APIKeyAuthOutcomeDeniedRateLimit,
+				Note:       ErrAPIKeyRateLimited.Error(),
+			})
+			return User{}, APIKey{}, ErrAPIKeyRateLimited
+		}
 	}
 	user := User{ID: item.UserID, Role: RoleUser}
 	s.recordAPIKeyAudit(ctx, APIKeyAuthAuditEvent{

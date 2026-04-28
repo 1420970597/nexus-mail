@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct{ 
+type Handler struct {
 	service *Service
 }
 
@@ -157,6 +157,9 @@ func (h *Handler) authRequiredForAPIKeyScope(requiredScope string) gin.HandlerFu
 			status := http.StatusUnauthorized
 			if errors.Is(err, ErrAPIKeyDeniedIP) || errors.Is(err, ErrAPIKeyDeniedScope) {
 				status = http.StatusForbidden
+			}
+			if errors.Is(err, ErrAPIKeyRateLimited) {
+				status = http.StatusTooManyRequests
 			}
 			c.AbortWithStatusJSON(status, gin.H{"error": err.Error()})
 			return

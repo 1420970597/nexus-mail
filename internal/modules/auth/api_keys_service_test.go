@@ -29,6 +29,7 @@ type apiKeyStubRepo struct {
 	lastAdminAuditFilter *AdminAuditFilter
 	users                []User
 	listUsersFn          func(context.Context) ([]User, error)
+	rateLimitExceeded    bool
 }
 
 func (s *apiKeyStubRepo) CreateAPIKey(_ context.Context, userID int64, name string, scopes []string, whitelist []string) (APIKey, string, error) {
@@ -76,6 +77,10 @@ func (s *apiKeyStubRepo) ValidateAPIKey(_ context.Context, key string) (APIKey, 
 func (s *apiKeyStubRepo) RecordAPIKeyAuthAudit(_ context.Context, event APIKeyAuthAuditEvent) error {
 	s.lastAuditEvent = event
 	return s.auditAuthErr
+}
+
+func (s *apiKeyStubRepo) Allow(context.Context, string, int, time.Duration) (bool, error) {
+	return !s.rateLimitExceeded, nil
 }
 
 func (s *apiKeyStubRepo) ListAllUsers(ctx context.Context) ([]User, error) {
@@ -218,6 +223,19 @@ func TestAuthenticateAPIKeyAcceptsIPv4AddressAgainstIPv4CIDRStoredAsCanonicalNet
 	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
 	if err != nil {
 		t.Fatalf("expected IPv4 CIDR whitelist to allow 127.0.0.1, got %v", err)
+	}
+}
+
+func TestAuthenticateAPIKeyRejectsWhenRuntimeRateLimitExceededAndRecordsAudit(t *testing.T) {
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "cron", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.1"}, Status: "active"}, rateLimitExceeded: true}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	service.SetAPIKeyRateLimiter(repo)
+	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
+	if err == nil || err.Error() != "API Key 请求过于频繁" {
+		t.Fatalf("expected rate limit rejection, got %v", err)
+	}
+	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeDeniedRateLimit {
+		t.Fatalf("expected denied-rate-limit audit, got %#v", repo.lastAuditEvent)
 	}
 }
 

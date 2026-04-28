@@ -28,6 +28,7 @@ type authRepository interface {
 type Service struct {
 	authRepo          authRepository
 	apiKeyRepo        apiKeyRepository
+	apiKeyRateLimiter APIKeyRateLimiter
 	jwtSecret         string
 	tokenExpire       time.Duration
 	refreshExpire     time.Duration
@@ -54,6 +55,13 @@ func NewService(authRepo authRepository, apiKeyRepo apiKeyRepository, jwtSecret 
 		refreshExpire:     refreshExpire,
 		revokedSessionIDs: map[string]struct{}{},
 	}
+}
+
+func (s *Service) SetAPIKeyRateLimiter(limiter APIKeyRateLimiter) {
+	if s == nil {
+		return
+	}
+	s.apiKeyRateLimiter = limiter
 }
 
 func (s *Service) Register(ctx context.Context, input RegisterInput) (Session, error) {

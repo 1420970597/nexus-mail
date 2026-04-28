@@ -130,6 +130,27 @@ func TestAuthRequiredRejectsAPIKeyOutsideWhitelist(t *testing.T) {
 	}
 }
 
+func TestAuthRequiredReturns429WhenAPIKeyRateLimited(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 9, UserID: 7, Name: "runtime", KeyPreview: "nmx_rate...test", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.1"}, Status: "active"}, rateLimitExceeded: true}
+	service := NewService(nil, repo, "test-secret", time.Hour, 24*time.Hour)
+	service.SetAPIKeyRateLimiter(repo)
+	handler := NewHandler(service)
+	r := gin.New()
+	r.GET("/secure", handler.AuthRequiredForAPIKeyScope("activation:read"), func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"ok": true})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/secure", nil)
+	req.Header.Set("X-API-Key", "nmx_runtime")
+	req.RemoteAddr = "127.0.0.1:23456"
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected 429, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
 func TestAdminAuditEndpointRequiresAdminAndAppliesFilters(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &apiKeyStubRepo{audit: []APIKeyAuditEntry{{ID: 21, UserID: 7, Action: "success", ActorType: "system", Note: "scope=activation:read"}}}

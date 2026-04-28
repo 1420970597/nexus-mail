@@ -46,6 +46,7 @@ const (
 	APIKeyAuthOutcomeDeniedInvalid   APIKeyAuthOutcome = "denied_invalid"
 	APIKeyAuthOutcomeDeniedWhitelist APIKeyAuthOutcome = "denied_whitelist"
 	APIKeyAuthOutcomeDeniedScope     APIKeyAuthOutcome = "denied_scope"
+	APIKeyAuthOutcomeDeniedRateLimit APIKeyAuthOutcome = "denied_rate_limit"
 )
 
 type APIKeyAuthAuditEvent struct {

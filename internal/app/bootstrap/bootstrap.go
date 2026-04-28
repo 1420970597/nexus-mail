@@ -27,6 +27,7 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 	}
 	authRepo := auth.NewRepository(db.Pool)
 	authService := auth.NewService(authRepo, authRepo, cfg.JWTSecret, time.Duration(cfg.JWTExpireSeconds)*time.Second, time.Duration(cfg.RefreshExpireSeconds)*time.Second)
+	authService.SetAPIKeyRateLimiter(auth.NewMemoryAPIKeyRateLimiter())
 	if err := authRepo.EnsureSchema(ctx); err != nil {
 		return nil, fmt.Errorf("ensure auth schema: %w", err)
 	}
