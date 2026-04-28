@@ -38,6 +38,8 @@ export function AdminUsersPage() {
   const [items, setItems] = useState<WalletOverview[]>([])
   const [disputes, setDisputes] = useState<OrderDispute[]>([])
   const [loading, setLoading] = useState(true)
+  const [disputeFilters, setDisputeFilters] = useState<{ status?: 'open' | 'resolved' | 'rejected'; limit: number }>({ limit: 100 })
+  const [disputeDraft, setDisputeDraft] = useState<{ status: '' | 'open' | 'resolved' | 'rejected'; limit: number }>({ status: '', limit: 100 })
   const [form] = Form.useForm()
   const [settlementForm] = Form.useForm()
   const [disputeForm] = Form.useForm()
@@ -45,7 +47,13 @@ export function AdminUsersPage() {
   const load = async () => {
     setLoading(true)
     try {
-      const [walletRes, disputeRes] = await Promise.all([getAdminWalletUsers(), getAdminDisputes()])
+      const [walletRes, disputeRes] = await Promise.all([
+        getAdminWalletUsers(),
+        getAdminDisputes({
+          status: disputeFilters.status,
+          limit: disputeFilters.limit,
+        }),
+      ])
       setItems(walletRes.items)
       setDisputes(disputeRes.items)
     } catch (error: any) {
@@ -57,7 +65,7 @@ export function AdminUsersPage() {
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [disputeFilters])
 
   const handleAdjust = async () => {
     try {
@@ -145,6 +153,26 @@ export function AdminUsersPage() {
         </Form>
       </Card>
       <Card title="争议单列表" style={{ width: '100%' }} loading={loading}>
+        <Form layout="horizontal" labelPosition="left" initValues={disputeDraft}>
+          <Form.Input
+            field="status"
+            label="状态筛选"
+            placeholder="open / resolved / rejected，留空为全部"
+            onChange={(value) => {
+              const next = String(value || '').trim().toLowerCase()
+              setDisputeDraft((prev) => ({ ...prev, status: (next === 'open' || next === 'resolved' || next === 'rejected' ? next : '') as '' | 'open' | 'resolved' | 'rejected' }))
+            }}
+          />
+          <Form.InputNumber
+            field="limit"
+            label="最多条数"
+            min={1}
+            max={200}
+            onChange={(value) => setDisputeDraft((prev) => ({ ...prev, limit: Number(value) || 100 }))}
+            style={{ width: '100%' }}
+          />
+          <Button onClick={() => setDisputeFilters({ status: disputeDraft.status || undefined, limit: disputeDraft.limit })}>查询争议单</Button>
+        </Form>
         <Table
           pagination={false}
           rowKey="id"

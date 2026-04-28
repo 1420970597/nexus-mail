@@ -148,4 +148,18 @@ describe('AdminUsersPage dispute handling', () => {
       },
     })
   })
+
+  it('applies explicit admin dispute filters only after clicking query', async () => {
+    render(<AdminUsersPage />)
+    expect(await screen.findByText('验证码错误')).toBeInTheDocument()
+    const listCard = screen.getByText('争议单列表').closest('.semi-card') as HTMLElement
+
+    fireEvent.change(within(listCard).getByLabelText('状态筛选'), { target: { value: 'resolved' } })
+    fireEvent.change(within(listCard).getByLabelText('最多条数'), { target: { value: '25' } })
+    expect(mockedGetAdminDisputes).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(within(listCard).getByRole('button', { name: '查询争议单' }))
+
+    await waitFor(() => expect(mockedGetAdminDisputes).toHaveBeenLastCalledWith({ status: 'resolved', limit: 25 }))
+  })
 })
