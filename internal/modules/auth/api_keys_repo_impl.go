@@ -81,6 +81,49 @@ ORDER BY updated_at DESC, id DESC
 	return items, rows.Err()
 }
 
+func (r *Repository) UpdateAPIKeyWhitelist(ctx context.Context, userID int64, id int64, whitelist []string) (APIKey, error) {
+	var item APIKey
+	whitelistJSON, err := json.Marshal(whitelist)
+	if err != nil {
+		return APIKey{}, err
+	}
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return APIKey{}, err
+	}
+	defer tx.Rollback(ctx)
+	err = tx.QueryRow(ctx, `
+UPDATE api_keys
+SET whitelist = $3::jsonb, updated_at = NOW()
+WHERE id = $1 AND user_id = $2 AND status = 'active'
+RETURNING id, user_id, name, key_preview, scopes, whitelist, status, last_used_at, created_at, updated_at
+`, id, userID, string(whitelistJSON)).Scan(
+		&item.ID,
+		&item.UserID,
+		&item.Name,
+		&item.KeyPreview,
+		&item.Scopes,
+		&item.Whitelist,
+		&item.Status,
+		&item.LastUsedAt,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return APIKey{}, fmt.Errorf("API Key 不存在或已撤销")
+		}
+		return APIKey{}, err
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO api_key_audit_logs (user_id, api_key_id, action, actor_type, note) VALUES ($1, $2, 'update_whitelist', 'user', $3)`, userID, item.ID, fmt.Sprintf("更新 API Key %s IP 白名单为 %s", item.Name, strings.Join(item.Whitelist, ","))); err != nil {
+		return APIKey{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return APIKey{}, err
+	}
+	return item, nil
+}
+
 func (r *Repository) RevokeAPIKey(ctx context.Context, userID int64, id int64) (APIKey, error) {
 	var item APIKey
 	tx, err := r.pool.Begin(ctx)

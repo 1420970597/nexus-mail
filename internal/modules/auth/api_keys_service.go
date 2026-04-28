@@ -36,6 +36,21 @@ func (s *Service) ListAPIKeys(ctx context.Context, userID int64) ([]APIKey, erro
 	return repo.ListAPIKeys(ctx, userID)
 }
 
+func (s *Service) UpdateAPIKeyWhitelist(ctx context.Context, userID, id int64, input UpdateAPIKeyWhitelistInput) (APIKey, error) {
+	repo := s.apiKeyRepo
+	if repo == nil {
+		return APIKey{}, fmt.Errorf("API Key 存储尚未初始化")
+	}
+	if id <= 0 {
+		return APIKey{}, fmt.Errorf("API Key ID 无效")
+	}
+	whitelist, err := normalizeWhitelist(input.Whitelist)
+	if err != nil {
+		return APIKey{}, err
+	}
+	return repo.UpdateAPIKeyWhitelist(ctx, userID, id, whitelist)
+}
+
 func (s *Service) RevokeAPIKey(ctx context.Context, userID, id int64) (APIKey, error) {
 	repo := s.apiKeyRepo
 	if repo == nil {
@@ -77,7 +92,7 @@ func (s *Service) ListAdminAudit(ctx context.Context, filter AdminAuditFilter) (
 	}
 	if filter.Action != "" {
 		switch filter.Action {
-		case "create", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit":
+		case "create", "update_whitelist", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit":
 		default:
 			return nil, fmt.Errorf("action 不受支持")
 		}

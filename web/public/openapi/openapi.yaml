@@ -171,6 +171,47 @@ components:
           type: integer
         reason:
           type: string
+    APIKey:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        name:
+          type: string
+        key_preview:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        whitelist:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        last_used_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    UpdateAPIKeyWhitelistRequest:
+      type: object
+      required: [whitelist]
+      properties:
+        whitelist:
+          type: array
+          maxItems: 64
+          description: IP 或 CIDR 白名单；空数组表示不限制来源 IP。
+          items:
+            type: string
+            example: 172.18.0.1
 security:
   - bearerAuth: []
 paths:
@@ -213,6 +254,47 @@ paths:
       responses:
         '200':
           description: 当前用户资料
+  /auth/api-keys/{id}/whitelist:
+    patch:
+      summary: 更新当前用户 API Key 的 IP 白名单
+      description: |
+        仅可更新当前用户自己名下且处于 active 状态的 API Key。
+        whitelist 支持 IP 或 CIDR，最多 64 条；空数组表示不限制来源 IP。
+        更新动作会写入 update_whitelist 审计日志，可由管理员审计接口筛选。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAPIKeyWhitelistRequest'
+      responses:
+        '200':
+          description: 白名单已更新
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    $ref: '#/components/schemas/APIKey'
+        '400':
+          description: 参数无效、白名单非法或 API Key 不存在/已撤销
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 缺少或无效的用户认证令牌
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /projects:
     get:
       summary: 获取项目列表

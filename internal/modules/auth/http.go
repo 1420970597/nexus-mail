@@ -26,6 +26,7 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.GET("/api-keys", h.authRequired(), h.apiKeys)
 	rg.POST("/api-keys", h.authRequired(), h.createAPIKey)
 	rg.GET("/api-keys/audit", h.authRequired(), h.apiKeyAudit)
+	rg.PATCH("/api-keys/:id/whitelist", h.authRequired(), h.updateAPIKeyWhitelist)
 	rg.POST("/api-keys/:id/revoke", h.authRequired(), h.revokeAPIKey)
 }
 

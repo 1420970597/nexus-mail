@@ -39,6 +39,10 @@ type CreateAPIKeyInput struct {
 	Whitelist []string `json:"whitelist"`
 }
 
+type UpdateAPIKeyWhitelistInput struct {
+	Whitelist []string `json:"whitelist"`
+}
+
 type APIKeyAuthOutcome string
 
 const (

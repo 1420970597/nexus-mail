@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+const maxAPIKeyWhitelistEntries = 64
+
 var allowedAPIKeyScopes = map[string]struct{}{
 	"activation:read":  {},
 	"activation:write": {},
@@ -86,6 +88,9 @@ func normalizeWhitelist(items []string) ([]string, error) {
 		}
 		if _, ok := seen[normalized]; ok {
 			continue
+		}
+		if len(result) >= maxAPIKeyWhitelistEntries {
+			return nil, fmt.Errorf("IP 白名单最多支持 %d 条", maxAPIKeyWhitelistEntries)
 		}
 		seen[normalized] = struct{}{}
 		result = append(result, normalized)

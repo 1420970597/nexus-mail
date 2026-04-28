@@ -66,6 +66,21 @@ func TestAPIKeysEndpointsRequireAuthAndSupportLifecycle(t *testing.T) {
 		}
 	})
 
+	t.Run("update whitelist", func(t *testing.T) {
+		body, _ := json.Marshal(UpdateAPIKeyWhitelistInput{Whitelist: []string{"172.18.0.1", "10.0.0.8/24"}})
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/api-keys/2/whitelist", bytes.NewReader(body))
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+		}
+		if repo.updatedWhitelistUID != 7 || repo.updatedWhitelistID != 2 {
+			t.Fatalf("unexpected update payload: %#v", repo)
+		}
+	})
+
 	t.Run("list audit", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/api-keys/audit", nil)
 		req.Header.Set("Authorization", "Bearer "+accessToken)

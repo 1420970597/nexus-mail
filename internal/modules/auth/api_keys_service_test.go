@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -21,6 +22,11 @@ type apiKeyStubRepo struct {
 	createdWhitelist     []string
 	revokedID            int64
 	revokedUID           int64
+	updatedWhitelistID   int64
+	updatedWhitelistUID  int64
+	updatedWhitelist     []string
+	updateWhitelistItem  APIKey
+	updateWhitelistErr   error
 	validatedKey         string
 	validatedItem        APIKey
 	validateErr          error
@@ -45,6 +51,16 @@ func (s *apiKeyStubRepo) CreateAPIKey(_ context.Context, userID int64, name stri
 
 func (s *apiKeyStubRepo) ListAPIKeys(context.Context, int64) ([]APIKey, error) {
 	return s.items, nil
+}
+
+func (s *apiKeyStubRepo) UpdateAPIKeyWhitelist(_ context.Context, userID, id int64, whitelist []string) (APIKey, error) {
+	s.updatedWhitelistUID = userID
+	s.updatedWhitelistID = id
+	s.updatedWhitelist = whitelist
+	if s.updateWhitelistErr != nil {
+		return APIKey{}, s.updateWhitelistErr
+	}
+	return s.updateWhitelistItem, nil
 }
 
 func (s *apiKeyStubRepo) RevokeAPIKey(_ context.Context, userID, id int64) (APIKey, error) {
@@ -128,6 +144,18 @@ func TestCreateAPIKeyRejectsInvalidWhitelist(t *testing.T) {
 	}
 }
 
+func TestCreateAPIKeyRejectsTooManyWhitelistEntries(t *testing.T) {
+	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
+	whitelist := make([]string, 0, maxAPIKeyWhitelistEntries+1)
+	for i := 0; i <= maxAPIKeyWhitelistEntries; i++ {
+		whitelist = append(whitelist, fmt.Sprintf("10.0.0.%d", i+1))
+	}
+	_, _, err := service.CreateAPIKey(context.Background(), 1, CreateAPIKeyInput{Name: "x", Whitelist: whitelist})
+	if err == nil || err.Error() != "IP 白名单最多支持 64 条" {
+		t.Fatalf("expected whitelist limit error, got %v", err)
+	}
+}
+
 func TestCreateAPIKeyDefaultsEmptyScopesToActivationRead(t *testing.T) {
 	repo := &apiKeyStubRepo{created: APIKey{ID: 1, Name: "默认密钥"}, plaintext: "nmx_test"}
 	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
@@ -153,6 +181,34 @@ func TestCreateAPIKeyRejectsEmptyName(t *testing.T) {
 	_, _, err := service.CreateAPIKey(context.Background(), 1, CreateAPIKeyInput{Name: "   "})
 	if err == nil {
 		t.Fatal("expected empty name validation error")
+	}
+}
+
+func TestUpdateAPIKeyWhitelistNormalizesPayload(t *testing.T) {
+	repo := &apiKeyStubRepo{updateWhitelistItem: APIKey{ID: 12, Name: "runtime", Whitelist: []string{"10.0.0.0/24", "172.18.0.1"}, Status: "active"}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	item, err := service.UpdateAPIKeyWhitelist(context.Background(), 7, 12, UpdateAPIKeyWhitelistInput{Whitelist: []string{" 172.18.0.1 ", "10.0.0.8/24", "172.18.0.1"}})
+	if err != nil {
+		t.Fatalf("UpdateAPIKeyWhitelist() error = %v", err)
+	}
+	if item.ID != 12 {
+		t.Fatalf("unexpected item: %#v", item)
+	}
+	if repo.updatedWhitelistUID != 7 || repo.updatedWhitelistID != 12 {
+		t.Fatalf("unexpected update identifiers: %#v", repo)
+	}
+	if len(repo.updatedWhitelist) != 2 || repo.updatedWhitelist[0] != "10.0.0.0/24" || repo.updatedWhitelist[1] != "172.18.0.1" {
+		t.Fatalf("unexpected normalized whitelist: %#v", repo.updatedWhitelist)
+	}
+}
+
+func TestUpdateAPIKeyWhitelistRejectsInvalidIDAndWhitelist(t *testing.T) {
+	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
+	if _, err := service.UpdateAPIKeyWhitelist(context.Background(), 1, 0, UpdateAPIKeyWhitelistInput{Whitelist: []string{"127.0.0.1"}}); err == nil || err.Error() != "API Key ID 无效" {
+		t.Fatalf("expected invalid id error, got %v", err)
+	}
+	if _, err := service.UpdateAPIKeyWhitelist(context.Background(), 1, 1, UpdateAPIKeyWhitelistInput{Whitelist: []string{"not-an-ip"}}); err == nil || err.Error() != "IP 白名单仅支持合法 IP 或 CIDR" {
+		t.Fatalf("expected invalid whitelist error, got %v", err)
 	}
 }
 
