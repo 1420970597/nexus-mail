@@ -236,6 +236,131 @@ components:
         updated_at:
           type: string
           format: date-time
+    AdminDashboardSummary:
+      type: object
+      properties:
+        users:
+          type: object
+          properties:
+            total:
+              type: integer
+        orders:
+          type: object
+          properties:
+            total:
+              type: integer
+            waiting_email:
+              type: integer
+            ready:
+              type: integer
+            finished:
+              type: integer
+            canceled:
+              type: integer
+            timeout:
+              type: integer
+            completion_rate_bps:
+              type: integer
+              description: 完成订单数 / 总订单数，单位 bps（10000 = 100%）。
+            timeout_rate_bps:
+              type: integer
+              description: 超时订单数 / 总订单数，单位 bps。
+            cancel_rate_bps:
+              type: integer
+              description: 取消订单数 / 总订单数，单位 bps。
+            gross_revenue:
+              type: integer
+              description: 已完成订单 final_price 合计，单位分。
+            average_finished_order_value:
+              type: integer
+              description: 已完成订单平均 final_price，单位分。
+        disputes:
+          type: object
+          properties:
+            total:
+              type: integer
+            open:
+              type: integer
+            resolved:
+              type: integer
+            rejected:
+              type: integer
+            dispute_rate_bps:
+              type: integer
+              description: 争议单数量 / 总订单数，单位 bps。
+        projects:
+          type: object
+          properties:
+            total:
+              type: integer
+            active:
+              type: integer
+            inactive:
+              type: integer
+        suppliers:
+          type: object
+          properties:
+            total:
+              type: integer
+        audit:
+          type: object
+          properties:
+            total:
+              type: integer
+            create:
+              type: integer
+            revoke:
+              type: integer
+            success:
+              type: integer
+            denied_invalid:
+              type: integer
+            denied_scope:
+              type: integer
+            denied_whitelist:
+              type: integer
+            denied_rate_limit:
+              type: integer
+            denied_total:
+              type: integer
+            denied_rate_bps:
+              type: integer
+              description: 最近审计样本中的鉴权拒绝事件占比，单位 bps。
+        supplier_settlements:
+          type: object
+          properties:
+            pending_amount:
+              type: integer
+    AdminAuditEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        api_key_id:
+          type: integer
+        action:
+          type: string
+        actor_type:
+          type: string
+        note:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    AdminOverviewResponse:
+      type: object
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        summary:
+          $ref: '#/components/schemas/AdminDashboardSummary'
+        recent_audit:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminAuditEntry'
     UpdateRiskRulesRequest:
       type: object
       required: [items]
@@ -497,6 +622,29 @@ paths:
       responses:
         '200':
           description: 供应商结算总览
+  /admin/overview:
+    get:
+      summary: 获取管理员运营仪表盘深度统计
+      description: 返回管理员 overview 聚合数据，包括订单率、流水、争议率、API Key 鉴权拒绝率以及最近审计事件。
+      responses:
+        '200':
+          description: 管理员仪表盘统计
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminOverviewResponse'
+        '401':
+          description: 缺少或无效的用户认证令牌
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 非管理员无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/wallet-users:
     get:
       summary: 管理员查看钱包用户列表

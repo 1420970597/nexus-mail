@@ -29,7 +29,7 @@ func TestBuildAdminOverviewPayloadUsesDashboardAggregates(t *testing.T) {
 	service := NewService(nil, repo, "test-secret", time.Hour, 24*time.Hour)
 	payload := service.BuildAdminOverview(context.Background(),
 		[]DashboardProject{{ID: 1, Key: "discord", Name: "Discord", IsActive: true}},
-		[]DashboardOrder{{ID: 1, UserID: 3, Status: "TIMEOUT"}, {ID: 2, UserID: 3, Status: "FINISHED"}},
+		[]DashboardOrder{{ID: 1, UserID: 3, Status: "TIMEOUT"}, {ID: 2, UserID: 3, Status: "FINISHED", FinalPrice: 1200}},
 		[]DashboardWalletUser{{UserID: 2, Email: "supplier@nexus-mail.local", Role: "supplier", PendingSettlement: 1500}},
 		[]DashboardDispute{{ID: 9, Status: "open"}},
 		repo.audit,
@@ -40,6 +40,9 @@ func TestBuildAdminOverviewPayloadUsesDashboardAggregates(t *testing.T) {
 	}
 	if summary.Orders.Total != 2 || summary.Orders.Timeout != 1 || summary.Disputes.Open != 1 {
 		t.Fatalf("unexpected summary: %#v", summary)
+	}
+	if summary.Orders.GrossRevenue != 1200 || summary.Orders.AverageFinishedOrderValue != 1200 || summary.Orders.CompletionRateBps != 5000 {
+		t.Fatalf("expected final_price backed revenue metrics, got %#v", summary.Orders)
 	}
 }
 

@@ -19,11 +19,11 @@ export interface DashboardOverviewResponse {
 
 export interface AdminDashboardSummary {
   users: { total: number }
-  orders: { total: number; waiting_email: number; ready: number; finished: number; canceled: number; timeout: number }
-  disputes: { total: number; open: number; resolved: number; rejected: number }
+  orders: { total: number; waiting_email: number; ready: number; finished: number; canceled: number; timeout: number; completion_rate_bps: number; timeout_rate_bps: number; cancel_rate_bps: number; gross_revenue: number; average_finished_order_value: number }
+  disputes: { total: number; open: number; resolved: number; rejected: number; dispute_rate_bps: number }
   projects: { total: number; active: number; inactive: number }
   suppliers: { total: number }
-  audit: { total: number; create: number; revoke: number; success: number; denied_invalid: number; denied_scope: number; denied_whitelist: number; denied_rate_limit: number }
+  audit: { total: number; create: number; revoke: number; success: number; denied_invalid: number; denied_scope: number; denied_whitelist: number; denied_rate_limit: number; denied_total: number; denied_rate_bps: number }
   supplier_settlements: { pending_amount: number }
 }
 

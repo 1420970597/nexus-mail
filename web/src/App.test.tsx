@@ -54,11 +54,11 @@ describe('App', () => {
       generated_at: '2026-04-28T00:00:00Z',
       summary: {
         users: { total: 3 },
-        orders: { total: 5, waiting_email: 1, ready: 1, finished: 1, canceled: 1, timeout: 1 },
-        disputes: { total: 2, open: 1, resolved: 1, rejected: 0 },
+        orders: { total: 5, waiting_email: 1, ready: 1, finished: 1, canceled: 1, timeout: 1, completion_rate_bps: 2000, timeout_rate_bps: 2000, cancel_rate_bps: 2000, gross_revenue: 1200, average_finished_order_value: 1200 },
+        disputes: { total: 2, open: 1, resolved: 1, rejected: 0, dispute_rate_bps: 4000 },
         projects: { total: 2, active: 1, inactive: 1 },
         suppliers: { total: 2 },
-        audit: { total: 4, create: 1, revoke: 0, success: 1, denied_invalid: 0, denied_scope: 0, denied_whitelist: 1, denied_rate_limit: 1 },
+        audit: { total: 4, create: 1, revoke: 0, success: 1, denied_invalid: 0, denied_scope: 0, denied_whitelist: 1, denied_rate_limit: 1, denied_total: 2, denied_rate_bps: 5000 },
         supplier_settlements: { pending_amount: 1500 },
       },
       recent_audit: [{ id: 1, user_id: 3, api_key_id: 9, action: 'denied_whitelist', actor_type: 'system', note: 'blocked', created_at: '2026-04-28T00:00:00Z' }],
@@ -108,6 +108,32 @@ describe('App', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+  })
+
+  it('renders admin dashboard deep statistics', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+      ],
+    })
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('订单完成率')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('20.00%').length).toBeGreaterThanOrEqual(3))
+    expect(await screen.findByText('争议发生率')).toBeInTheDocument()
+    expect(await screen.findByText('40.00%')).toBeInTheDocument()
+    expect(await screen.findByText('已完成订单流水')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('¥12.00').length).toBeGreaterThanOrEqual(2))
+    expect(await screen.findByText('鉴权拒绝率')).toBeInTheDocument()
+    expect(await screen.findByText('50.00%')).toBeInTheDocument()
+    expect(await screen.findByText('鉴权拒绝总数：2')).toBeInTheDocument()
   })
 
   it('renders admin risk page with real widgets', async () => {

@@ -12,18 +12,24 @@ type DashboardSummary struct {
 		Total int `json:"total"`
 	} `json:"users"`
 	Orders struct {
-		Total        int `json:"total"`
-		WaitingEmail int `json:"waiting_email"`
-		Ready        int `json:"ready"`
-		Finished     int `json:"finished"`
-		Canceled     int `json:"canceled"`
-		Timeout      int `json:"timeout"`
+		Total                     int   `json:"total"`
+		WaitingEmail              int   `json:"waiting_email"`
+		Ready                     int   `json:"ready"`
+		Finished                  int   `json:"finished"`
+		Canceled                  int   `json:"canceled"`
+		Timeout                   int   `json:"timeout"`
+		CompletionRateBps         int   `json:"completion_rate_bps"`
+		TimeoutRateBps            int   `json:"timeout_rate_bps"`
+		CancelRateBps             int   `json:"cancel_rate_bps"`
+		GrossRevenue              int64 `json:"gross_revenue"`
+		AverageFinishedOrderValue int64 `json:"average_finished_order_value"`
 	} `json:"orders"`
 	Disputes struct {
-		Total    int `json:"total"`
-		Open     int `json:"open"`
-		Resolved int `json:"resolved"`
-		Rejected int `json:"rejected"`
+		Total          int `json:"total"`
+		Open           int `json:"open"`
+		Resolved       int `json:"resolved"`
+		Rejected       int `json:"rejected"`
+		DisputeRateBps int `json:"dispute_rate_bps"`
 	} `json:"disputes"`
 	Projects struct {
 		Total    int `json:"total"`
@@ -42,6 +48,8 @@ type DashboardSummary struct {
 		DeniedScope     int `json:"denied_scope"`
 		DeniedWhitelist int `json:"denied_whitelist"`
 		DeniedRateLimit int `json:"denied_rate_limit"`
+		DeniedTotal     int `json:"denied_total"`
+		DeniedRateBps   int `json:"denied_rate_bps"`
 	} `json:"audit"`
 	SupplierSettlements struct {
 		PendingAmount int64 `json:"pending_amount"`
@@ -80,6 +88,7 @@ type DashboardOrder struct {
 	UserID     int64
 	SupplierID int64
 	Status     string
+	FinalPrice int64
 }
 
 type DashboardWalletUser struct {
@@ -124,6 +133,7 @@ func BuildDashboardSummary(
 			summary.Orders.Ready++
 		case "FINISHED":
 			summary.Orders.Finished++
+			summary.Orders.GrossRevenue += order.FinalPrice
 		case "CANCELED":
 			summary.Orders.Canceled++
 		case "TIMEOUT":
@@ -133,6 +143,13 @@ func BuildDashboardSummary(
 			supplierSeen[order.SupplierID] = struct{}{}
 		}
 	}
+	summary.Orders.CompletionRateBps = rateBps(summary.Orders.Finished, summary.Orders.Total)
+	summary.Orders.TimeoutRateBps = rateBps(summary.Orders.Timeout, summary.Orders.Total)
+	summary.Orders.CancelRateBps = rateBps(summary.Orders.Canceled, summary.Orders.Total)
+	if summary.Orders.Finished > 0 {
+		summary.Orders.AverageFinishedOrderValue = summary.Orders.GrossRevenue / int64(summary.Orders.Finished)
+	}
+	summary.Disputes.DisputeRateBps = rateBps(summary.Disputes.Total, summary.Orders.Total)
 	for _, wallet := range walletUsers {
 		if wallet.PendingSettlement > 0 {
 			summary.SupplierSettlements.PendingAmount += wallet.PendingSettlement
@@ -170,9 +187,18 @@ func BuildDashboardSummary(
 		}
 	}
 	summary.Audit.Total = len(audit)
+	summary.Audit.DeniedTotal = summary.Audit.DeniedInvalid + summary.Audit.DeniedScope + summary.Audit.DeniedWhitelist + summary.Audit.DeniedRateLimit
+	summary.Audit.DeniedRateBps = rateBps(summary.Audit.DeniedTotal, summary.Audit.Total)
 	summary.Suppliers.Total = len(supplierSeen)
 	_ = ctx
 	return summary
+}
+
+func rateBps(numerator, denominator int) int {
+	if denominator <= 0 || numerator <= 0 {
+		return 0
+	}
+	return int(int64(numerator) * 10000 / int64(denominator))
 }
 
 func BuildRiskSignals(

@@ -153,7 +153,7 @@ func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.Das
 		return nil, nil, nil, nil, nil, err
 	}
 	for _, entry := range orderItems {
-		orders = append(orders, auth.DashboardOrder{ID: entry.ID, UserID: entry.UserID, Status: entry.Status})
+		orders = append(orders, auth.DashboardOrder{ID: entry.ID, UserID: entry.UserID, Status: entry.Status, FinalPrice: entry.FinalPrice})
 	}
 	projectItems, err := app.ActivationService.ListAllProjects(ctx)
 	if err != nil {

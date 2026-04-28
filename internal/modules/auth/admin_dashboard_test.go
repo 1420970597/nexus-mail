@@ -11,7 +11,7 @@ func TestBuildDashboardSummaryAggregatesKeyAdminMetrics(t *testing.T) {
 		{ID: 2, Key: "google", IsActive: false},
 	}
 	orders := []DashboardOrder{
-		{ID: 1, UserID: 3, SupplierID: 2, Status: "FINISHED"},
+		{ID: 1, UserID: 3, SupplierID: 2, Status: "FINISHED", FinalPrice: 1000},
 		{ID: 2, UserID: 3, SupplierID: 2, Status: "TIMEOUT"},
 		{ID: 3, UserID: 4, SupplierID: 5, Status: "CANCELED"},
 		{ID: 4, UserID: 4, SupplierID: 5, Status: "READY"},
@@ -53,6 +53,43 @@ func TestBuildDashboardSummaryAggregatesKeyAdminMetrics(t *testing.T) {
 	}
 	if summary.SupplierSettlements.PendingAmount != 1500 {
 		t.Fatalf("expected pending settlement 1500, got %d", summary.SupplierSettlements.PendingAmount)
+	}
+	if summary.Orders.CompletionRateBps != 2000 || summary.Orders.TimeoutRateBps != 2000 || summary.Orders.CancelRateBps != 2000 {
+		t.Fatalf("unexpected order rate metrics: %#v", summary.Orders)
+	}
+	if summary.Orders.GrossRevenue != 1000 || summary.Orders.AverageFinishedOrderValue != 1000 {
+		t.Fatalf("unexpected revenue metrics: %#v", summary.Orders)
+	}
+	if summary.Disputes.DisputeRateBps != 6000 {
+		t.Fatalf("unexpected dispute rate: %#v", summary.Disputes)
+	}
+	if summary.Audit.DeniedTotal != 3 || summary.Audit.DeniedRateBps != 5000 {
+		t.Fatalf("unexpected denied audit depth metrics: %#v", summary.Audit)
+	}
+}
+
+func TestBuildDashboardSummaryHandlesZeroAndFractionalRates(t *testing.T) {
+	var empty DashboardSummary
+	empty = BuildDashboardSummary(context.Background(), nil, nil, nil, []DashboardDispute{{ID: 1, Status: "open"}}, nil)
+	if empty.Orders.CompletionRateBps != 0 || empty.Disputes.DisputeRateBps != 0 || empty.Audit.DeniedRateBps != 0 {
+		t.Fatalf("expected zero rates without denominators, got %#v", empty)
+	}
+
+	summary := BuildDashboardSummary(context.Background(), nil,
+		[]DashboardOrder{
+			{ID: 1, Status: "FINISHED", FinalPrice: 100},
+			{ID: 2, Status: "TIMEOUT"},
+			{ID: 3, Status: "READY"},
+		},
+		nil,
+		[]DashboardDispute{{ID: 2, Status: "open"}},
+		[]APIKeyAuditEntry{{ID: 1, Action: "denied_scope"}, {ID: 2, Action: "success"}, {ID: 3, Action: "success"}},
+	)
+	if summary.Orders.CompletionRateBps != 3333 || summary.Orders.TimeoutRateBps != 3333 || summary.Disputes.DisputeRateBps != 3333 {
+		t.Fatalf("unexpected fractional rates: %#v", summary)
+	}
+	if summary.Audit.DeniedRateBps != 3333 || summary.Audit.DeniedTotal != 1 {
+		t.Fatalf("unexpected fractional audit rates: %#v", summary.Audit)
 	}
 }
 

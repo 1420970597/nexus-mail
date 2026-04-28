@@ -7,6 +7,10 @@ function amountLabel(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
 }
 
+function percentLabel(value: number) {
+  return `${(Number(value || 0) / 100).toFixed(2)}%`
+}
+
 export function DashboardPage() {
   const { user } = useAuthStore()
   const [overview, setOverview] = useState<DashboardOverviewResponse | null>(null)
@@ -63,6 +67,17 @@ export function DashboardPage() {
             <Col span={6}><Card title="超时订单">{adminSummary.orders.timeout}</Card></Col>
             <Col span={6}><Card title="待结算金额">{amountLabel(adminSummary.supplier_settlements.pending_amount)}</Card></Col>
           </Row>
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={6}><Card title="订单完成率">{percentLabel(adminSummary.orders.completion_rate_bps)}</Card></Col>
+            <Col span={6}><Card title="订单超时率">{percentLabel(adminSummary.orders.timeout_rate_bps)}</Card></Col>
+            <Col span={6}><Card title="订单取消率">{percentLabel(adminSummary.orders.cancel_rate_bps)}</Card></Col>
+            <Col span={6}><Card title="争议发生率">{percentLabel(adminSummary.disputes.dispute_rate_bps)}</Card></Col>
+          </Row>
+          <Row gutter={16} style={{ width: '100%' }}>
+            <Col span={8}><Card title="已完成订单流水">{amountLabel(adminSummary.orders.gross_revenue)}</Card></Col>
+            <Col span={8}><Card title="平均完成客单价">{amountLabel(adminSummary.orders.average_finished_order_value)}</Card></Col>
+            <Col span={8}><Card title="鉴权拒绝率">{percentLabel(adminSummary.audit.denied_rate_bps)}</Card></Col>
+          </Row>
           <Card title="管理员运营摘要" style={{ width: '100%' }}>
             <Space wrap>
               <Tag color="blue">项目：{adminSummary.projects.active}/{adminSummary.projects.total} 启用</Tag>
@@ -70,6 +85,7 @@ export function DashboardPage() {
               <Tag color="orange">取消订单：{adminSummary.orders.canceled}</Tag>
               <Tag color="red">白名单拦截：{adminSummary.audit.denied_whitelist}</Tag>
               <Tag color="red">限流拦截：{adminSummary.audit.denied_rate_limit}</Tag>
+              <Tag color="red">鉴权拒绝总数：{adminSummary.audit.denied_total}</Tag>
             </Space>
           </Card>
           <Card title="最近审计事件" style={{ width: '100%' }}>
