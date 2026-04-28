@@ -545,6 +545,34 @@ ORDER BY o.created_at DESC, o.id DESC
 	return items, rows.Err()
 }
 
+func (r *Repository) ListAllActivationOrders(ctx context.Context) ([]ActivationOrder, error) {
+	rows, err := r.pool.Query(ctx, `
+SELECT
+  o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
+  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  o.final_price, o.extraction_type, o.extraction_value,
+  o.created_at, o.updated_at, o.expires_at, o.canceled_at
+FROM activation_orders o
+JOIN projects p ON p.id = o.project_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
+JOIN mailbox_pool m ON m.id = o.mailbox_id
+ORDER BY o.created_at DESC, o.id DESC
+`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ActivationOrder
+	for rows.Next() {
+		var item ActivationOrder
+		if err := rows.Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 func (r *Repository) GetActivationOrderForUser(ctx context.Context, userID, orderID int64) (ActivationOrder, error) {
 	var item ActivationOrder
 	err := r.pool.QueryRow(ctx, `

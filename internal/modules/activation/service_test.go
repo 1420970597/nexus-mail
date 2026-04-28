@@ -9,6 +9,8 @@ import (
 
 type stubRepo struct {
 	order               ActivationOrder
+	allOrders           []ActivationOrder
+	listAllOrdersCalled bool
 	providerAccountIn   CreateProviderAccountInput
 	mailboxIn           CreateMailboxInput
 	updatedProjectIn    UpdateProjectInput
@@ -39,6 +41,10 @@ func (s *stubRepo) CreateActivationOrder(context.Context, int64, CreateActivatio
 }
 func (s *stubRepo) ListActivationOrdersByUser(context.Context, int64) ([]ActivationOrder, error) {
 	return nil, nil
+}
+func (s *stubRepo) ListAllActivationOrders(context.Context) ([]ActivationOrder, error) {
+	s.listAllOrdersCalled = true
+	return s.allOrders, nil
 }
 func (s *stubRepo) GetActivationOrderForUser(context.Context, int64, int64) (ActivationOrder, error) {
 	return ActivationOrder{}, nil
@@ -107,6 +113,22 @@ func (s *stubRepo) FinalizeReadyActivationOrders(_ context.Context, _ time.Time,
 		return 0, s.finalizeErr
 	}
 	return s.finalizeCount, nil
+}
+
+func TestListAllActivationOrdersDelegatesToRepository(t *testing.T) {
+	repo := &stubRepo{allOrders: []ActivationOrder{{ID: 1, UserID: 7, Status: OrderStatusCanceled}, {ID: 2, UserID: 8, Status: OrderStatusTimeout}}}
+	service := NewService(repo)
+
+	items, err := service.ListAllActivationOrders(context.Background())
+	if err != nil {
+		t.Fatalf("ListAllActivationOrders() error = %v", err)
+	}
+	if !repo.listAllOrdersCalled {
+		t.Fatal("expected service to delegate to repository ListAllActivationOrders")
+	}
+	if len(items) != 2 || items[0].ID != 1 || items[1].UserID != 8 {
+		t.Fatalf("unexpected orders: %#v", items)
+	}
 }
 
 func TestFinishActivationOrderDelegatesToRepository(t *testing.T) {

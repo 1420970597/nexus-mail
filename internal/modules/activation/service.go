@@ -13,6 +13,7 @@ type repository interface {
 	ListProjectOfferings(ctx context.Context) ([]ProjectOffering, error)
 	CreateActivationOrder(ctx context.Context, userID int64, input CreateActivationOrderInput) (ActivationOrder, error)
 	ListActivationOrdersByUser(ctx context.Context, userID int64) ([]ActivationOrder, error)
+	ListAllActivationOrders(ctx context.Context) ([]ActivationOrder, error)
 	GetActivationOrderForUser(ctx context.Context, userID, orderID int64) (ActivationOrder, error)
 	CancelActivationOrder(ctx context.Context, userID, orderID int64) (ActivationOrder, error)
 	TouchActivationOrderPolling(ctx context.Context, userID, orderID int64) (ActivationOrder, error)
@@ -55,6 +56,10 @@ func (s *Service) CreateActivationOrder(ctx context.Context, userID int64, input
 
 func (s *Service) ListActivationOrders(ctx context.Context, userID int64) ([]ActivationOrder, error) {
 	return s.repo.ListActivationOrdersByUser(ctx, userID)
+}
+
+func (s *Service) ListAllActivationOrders(ctx context.Context) ([]ActivationOrder, error) {
+	return s.repo.ListAllActivationOrders(ctx)
 }
 
 func (s *Service) GetActivationOrder(ctx context.Context, userID, orderID int64) (ActivationOrder, error) {

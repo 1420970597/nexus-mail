@@ -2,7 +2,6 @@ package httpx
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -143,26 +142,15 @@ func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.Das
 	projects := make([]auth.DashboardProject, 0)
 	walletUsers := make([]auth.DashboardWalletUser, 0, len(users))
 	orders := make([]auth.DashboardOrder, 0)
-	endUserCount := 0
 	for _, user := range users {
 		walletUsers = append(walletUsers, auth.DashboardWalletUser{UserID: user.ID, Email: user.Email, Role: string(user.Role)})
-		if user.Role == auth.RoleUser {
-			endUserCount++
-		}
 	}
-	if endUserCount > 10 {
-		return nil, nil, nil, nil, nil, errors.New("管理员概览当前仅支持 10 个以内终端用户的实时聚合，请先扩展聚合查询实现")
+	orderItems, err := app.ActivationService.ListAllActivationOrders(ctx)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
 	}
-	for _, user := range users {
-		if user.Role == auth.RoleUser {
-			entries, listErr := app.ActivationService.ListActivationOrders(ctx, user.ID)
-			if listErr != nil {
-				return nil, nil, nil, nil, nil, listErr
-			}
-			for _, entry := range entries {
-				orders = append(orders, auth.DashboardOrder{ID: entry.ID, UserID: entry.UserID, Status: entry.Status})
-			}
-		}
+	for _, entry := range orderItems {
+		orders = append(orders, auth.DashboardOrder{ID: entry.ID, UserID: entry.UserID, Status: entry.Status})
 	}
 	projectItems, err := app.ActivationService.ListAllProjects(ctx)
 	if err != nil {
