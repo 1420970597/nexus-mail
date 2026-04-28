@@ -164,10 +164,22 @@ func TestAdminAdjustWalletValidatesInput(t *testing.T) {
 	}
 }
 
+func TestAdminAdjustWalletRequiresConfirmationPhrase(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.AdminAdjustWallet(context.Background(), 1, AdminAdjustmentInput{UserID: 7, Amount: 100, Reason: "x"})
+	if err == nil || !strings.Contains(err.Error(), "confirmation_phrase") {
+		t.Fatalf("expected missing confirmation_phrase validation error, got %v", err)
+	}
+	_, err = service.AdminAdjustWallet(context.Background(), 1, AdminAdjustmentInput{UserID: 7, Amount: 100, Reason: "x", ConfirmationPhrase: "wrong"})
+	if err == nil || !strings.Contains(err.Error(), "确认调账") {
+		t.Fatalf("expected exact confirmation phrase validation error, got %v", err)
+	}
+}
+
 func TestAdminAdjustWalletPassesTrimmedReason(t *testing.T) {
 	repo := &stubRepo{wallet: WalletOverview{UserID: 8}}
 	service := NewService(repo)
-	_, err := service.AdminAdjustWallet(context.Background(), 99, AdminAdjustmentInput{UserID: 8, Amount: -300, Reason: "  dispute refund  "})
+	_, err := service.AdminAdjustWallet(context.Background(), 99, AdminAdjustmentInput{UserID: 8, Amount: -300, Reason: "  dispute refund  ", ConfirmationPhrase: "确认调账"})
 	if err != nil {
 		t.Fatalf("AdminAdjustWallet() error = %v", err)
 	}
@@ -243,10 +255,22 @@ func TestSettleSupplierPendingValidatesSupplierID(t *testing.T) {
 	}
 }
 
+func TestSettleSupplierPendingRequiresConfirmationPhrase(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.SettleSupplierPending(context.Background(), 9, SettleSupplierPendingInput{SupplierID: 7, Reason: "x"})
+	if err == nil || !strings.Contains(err.Error(), "confirmation_phrase") {
+		t.Fatalf("expected missing confirmation_phrase validation error, got %v", err)
+	}
+	_, err = service.SettleSupplierPending(context.Background(), 9, SettleSupplierPendingInput{SupplierID: 7, Reason: "x", ConfirmationPhrase: "wrong"})
+	if err == nil || !strings.Contains(err.Error(), "确认结算") {
+		t.Fatalf("expected exact confirmation phrase validation error, got %v", err)
+	}
+}
+
 func TestSettleSupplierPendingDefaultsAndTrimsReason(t *testing.T) {
 	repo := &stubRepo{}
 	service := NewService(repo)
-	payout, err := service.SettleSupplierPending(context.Background(), 9, SettleSupplierPendingInput{SupplierID: 7, Reason: "  月度结算  "})
+	payout, err := service.SettleSupplierPending(context.Background(), 9, SettleSupplierPendingInput{SupplierID: 7, Reason: "  月度结算  ", ConfirmationPhrase: "确认结算"})
 	if err != nil {
 		t.Fatalf("SettleSupplierPending() error = %v", err)
 	}

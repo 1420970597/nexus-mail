@@ -149,6 +149,26 @@ describe('AdminUsersPage dispute handling', () => {
     })
   })
 
+  it('submits confirmation phrases for high-risk wallet and settlement operations', async () => {
+    render(<AdminUsersPage />)
+    expect(await screen.findByText('验证码错误')).toBeInTheDocument()
+
+    const adjustmentCard = screen.getByText('管理员调账').closest('.semi-card') as HTMLElement
+    fireEvent.change(within(adjustmentCard).getByLabelText('用户 ID'), { target: { value: '2' } })
+    fireEvent.change(within(adjustmentCard).getByLabelText('金额（分）'), { target: { value: '500' } })
+    fireEvent.change(within(adjustmentCard).getByLabelText('原因'), { target: { value: '运营补偿' } })
+    fireEvent.change(within(adjustmentCard).getByLabelText('二次确认'), { target: { value: '确认调账' } })
+    fireEvent.click(within(adjustmentCard).getByRole('button', { name: '执行调账' }))
+    await waitFor(() => expect(mockedAdminAdjustWallet).toHaveBeenCalledWith(2, 500, '运营补偿', '确认调账'))
+
+    const settlementCard = screen.getByText('供应商待结算确认').closest('.semi-card') as HTMLElement
+    fireEvent.change(within(settlementCard).getByLabelText('供应商用户 ID'), { target: { value: '7' } })
+    fireEvent.change(within(settlementCard).getByLabelText('结算说明'), { target: { value: '月度结算' } })
+    fireEvent.change(within(settlementCard).getByLabelText('二次确认'), { target: { value: '确认结算' } })
+    fireEvent.click(within(settlementCard).getByRole('button', { name: '确认结算' }))
+    await waitFor(() => expect(mockedSettleSupplierPending).toHaveBeenCalledWith(7, '月度结算', '确认结算'))
+  })
+
   it('applies explicit admin dispute filters only after clicking query', async () => {
     render(<AdminUsersPage />)
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()

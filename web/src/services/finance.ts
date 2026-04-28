@@ -142,13 +142,13 @@ export async function getAdminWalletUsers() {
   return data
 }
 
-export async function adminAdjustWallet(userId: number, amount: number, reason: string) {
-  const { data } = await api.post<{ wallet: WalletOverview }>('/admin/wallet-adjustments', { user_id: userId, amount, reason })
+export async function adminAdjustWallet(userId: number, amount: number, reason: string, confirmationPhrase: string) {
+  const { data } = await api.post<{ wallet: WalletOverview }>('/admin/wallet-adjustments', { user_id: userId, amount, reason, confirmation_phrase: confirmationPhrase })
   return data
 }
 
-export async function settleSupplierPending(supplierId: number, reason: string) {
-  const { data } = await api.post<{ payout: SupplierSettlementPayout }>('/admin/supplier-settlements', { supplier_id: supplierId, reason })
+export async function settleSupplierPending(supplierId: number, reason: string, confirmationPhrase: string) {
+  const { data } = await api.post<{ payout: SupplierSettlementPayout }>('/admin/supplier-settlements', { supplier_id: supplierId, reason, confirmation_phrase: confirmationPhrase })
   return data
 }
 

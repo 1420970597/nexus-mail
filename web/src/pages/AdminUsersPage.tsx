@@ -70,7 +70,7 @@ export function AdminUsersPage() {
   const handleAdjust = async () => {
     try {
       const values = await form.validate()
-      await adminAdjustWallet(Number(values.user_id), Number(values.amount), values.reason)
+      await adminAdjustWallet(Number(values.user_id), Number(values.amount), values.reason, values.confirmation_phrase)
       Toast.success('调账成功')
       form.reset()
       await load()
@@ -83,7 +83,7 @@ export function AdminUsersPage() {
   const handleSettleSupplier = async () => {
     try {
       const values = await settlementForm.validate()
-      const result = await settleSupplierPending(Number(values.supplier_id), values.reason)
+      const result = await settleSupplierPending(Number(values.supplier_id), values.reason, values.confirmation_phrase)
       Toast.success(`结算成功：¥${(Number(result.payout.settled_amount) / 100).toFixed(2)}，流水 ${result.payout.entry_count} 条`)
       settlementForm.reset()
       await load()
@@ -124,6 +124,7 @@ export function AdminUsersPage() {
           <Form.InputNumber field="user_id" label="用户 ID" rules={[{ required: true, message: '请输入用户 ID' }]} style={{ width: '100%' }} />
           <Form.InputNumber field="amount" label="金额（分）" rules={[{ required: true, message: '请输入调账金额' }]} style={{ width: '100%' }} />
           <Form.Input field="reason" label="原因" rules={[{ required: true, message: '请输入调账原因' }]} />
+          <Form.Input field="confirmation_phrase" label="二次确认" placeholder="请输入：确认调账" rules={[{ required: true, message: '请输入确认短语：确认调账' }]} />
           <Button type="primary" theme="solid" onClick={handleAdjust}>执行调账</Button>
         </Form>
       </Card>
@@ -132,6 +133,7 @@ export function AdminUsersPage() {
         <Form form={settlementForm} layout="horizontal" labelPosition="left">
           <Form.InputNumber field="supplier_id" label="供应商用户 ID" rules={[{ required: true, message: '请输入供应商用户 ID' }]} style={{ width: '100%' }} />
           <Form.Input field="reason" label="结算说明" rules={[{ required: true, message: '请输入结算说明' }]} />
+          <Form.Input field="confirmation_phrase" label="二次确认" placeholder="请输入：确认结算" rules={[{ required: true, message: '请输入确认短语：确认结算' }]} />
           <Button type="primary" theme="solid" onClick={handleSettleSupplier}>确认结算</Button>
         </Form>
       </Card>

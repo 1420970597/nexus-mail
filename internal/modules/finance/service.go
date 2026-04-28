@@ -23,6 +23,11 @@ type repository interface {
 	ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error)
 }
 
+const (
+	adminWalletAdjustmentConfirmationPhrase = "确认调账"
+	supplierSettlementConfirmationPhrase    = "确认结算"
+)
+
 type Service struct {
 	repo repository
 }
@@ -57,11 +62,15 @@ func (s *Service) SupplierOverview(ctx context.Context, supplierID int64) (Walle
 
 func (s *Service) AdminAdjustWallet(ctx context.Context, adminID int64, input AdminAdjustmentInput) (WalletOverview, error) {
 	input.Reason = strings.TrimSpace(input.Reason)
+	input.ConfirmationPhrase = strings.TrimSpace(input.ConfirmationPhrase)
 	if input.UserID <= 0 {
 		return WalletOverview{}, fmt.Errorf("user_id 无效")
 	}
 	if input.Amount == 0 {
 		return WalletOverview{}, fmt.Errorf("调账金额不能为 0")
+	}
+	if input.ConfirmationPhrase != adminWalletAdjustmentConfirmationPhrase {
+		return WalletOverview{}, fmt.Errorf("confirmation_phrase 必须为 %s", adminWalletAdjustmentConfirmationPhrase)
 	}
 	return s.repo.AdminAdjustWallet(ctx, adminID, input.UserID, input.Amount, input.Reason)
 }
@@ -147,8 +156,12 @@ func (s *Service) SupplierReport(ctx context.Context, supplierID int64, input Su
 
 func (s *Service) SettleSupplierPending(ctx context.Context, adminID int64, input SettleSupplierPendingInput) (SupplierSettlementPayout, error) {
 	input.Reason = strings.TrimSpace(input.Reason)
+	input.ConfirmationPhrase = strings.TrimSpace(input.ConfirmationPhrase)
 	if input.SupplierID <= 0 {
 		return SupplierSettlementPayout{}, fmt.Errorf("supplier_id 无效")
+	}
+	if input.ConfirmationPhrase != supplierSettlementConfirmationPhrase {
+		return SupplierSettlementPayout{}, fmt.Errorf("confirmation_phrase 必须为 %s", supplierSettlementConfirmationPhrase)
 	}
 	if input.Reason == "" {
 		input.Reason = "管理员确认供应商结算"

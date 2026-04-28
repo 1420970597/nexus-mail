@@ -167,7 +167,7 @@ components:
           type: string
     AdminWalletAdjustmentRequest:
       type: object
-      required: [user_id, amount, reason]
+      required: [user_id, amount, reason, confirmation_phrase]
       properties:
         user_id:
           type: integer
@@ -175,14 +175,22 @@ components:
           type: integer
         reason:
           type: string
+        confirmation_phrase:
+          type: string
+          enum: [确认调账]
+          description: 高危调账二次确认短语，必须精确填写“确认调账”。
     SettleSupplierPendingRequest:
       type: object
-      required: [supplier_id, reason]
+      required: [supplier_id, reason, confirmation_phrase]
       properties:
         supplier_id:
           type: integer
         reason:
           type: string
+        confirmation_phrase:
+          type: string
+          enum: [确认结算]
+          description: 高危结算二次确认短语，必须精确填写“确认结算”。
     SupplierSettlementPayout:
       type: object
       properties:
@@ -1124,7 +1132,7 @@ paths:
   /admin/wallet-adjustments:
     post:
       summary: 管理员执行钱包调账
-      description: 调账成功后写入 admin_wallet_adjustment 审计，管理员可通过 /admin/audit?action=admin_wallet_adjustment 查询。
+      description: 调账成功后写入 admin_wallet_adjustment 审计，管理员可通过 /admin/audit?action=admin_wallet_adjustment 查询；请求必须携带 confirmation_phrase=确认调账 完成高危操作二次确认。
       requestBody:
         required: true
         content:
@@ -1143,7 +1151,7 @@ paths:
   /admin/supplier-settlements:
     post:
       summary: 管理员确认供应商待结算款
-      description: 将指定供应商的 pending 结算流水原子标记为 settled，并把 supplier_settlement_ledger.pending_amount 迁移到 settled_amount；若账本金额与 pending 流水合计不一致会拒绝处理。成功后写入 settle_supplier_pending 审计，管理员可通过 /admin/audit?action=settle_supplier_pending 查询。
+      description: 将指定供应商的 pending 结算流水原子标记为 settled，并把 supplier_settlement_ledger.pending_amount 迁移到 settled_amount；若账本金额与 pending 流水合计不一致会拒绝处理。请求必须携带 confirmation_phrase=确认结算 完成高危操作二次确认。成功后写入 settle_supplier_pending 审计，管理员可通过 /admin/audit?action=settle_supplier_pending 查询。
       requestBody:
         required: true
         content:

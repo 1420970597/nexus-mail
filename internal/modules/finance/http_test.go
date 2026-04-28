@@ -182,7 +182,7 @@ func TestAdminSettleSupplierPendingEndpointReturnsPayout(t *testing.T) {
 	secure.Use(mockAuth(auth.User{ID: 9, Email: "admin@nexus-mail.local", Role: auth.RoleAdmin}))
 	handler.RegisterRoutes(secure)
 
-	body, _ := json.Marshal(SettleSupplierPendingInput{SupplierID: 7, Reason: "  月度结算  "})
+	body, _ := json.Marshal(SettleSupplierPendingInput{SupplierID: 7, Reason: "  月度结算  ", ConfirmationPhrase: "确认结算"})
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/supplier-settlements", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()

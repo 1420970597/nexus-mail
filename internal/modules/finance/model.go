@@ -94,14 +94,16 @@ type TopUpInput struct {
 }
 
 type AdminAdjustmentInput struct {
-	UserID int64  `json:"user_id"`
-	Amount int64  `json:"amount"`
-	Reason string `json:"reason"`
+	UserID             int64  `json:"user_id"`
+	Amount             int64  `json:"amount"`
+	Reason             string `json:"reason"`
+	ConfirmationPhrase string `json:"confirmation_phrase"`
 }
 
 type SettleSupplierPendingInput struct {
-	SupplierID int64  `json:"supplier_id"`
-	Reason     string `json:"reason"`
+	SupplierID         int64  `json:"supplier_id"`
+	Reason             string `json:"reason"`
+	ConfirmationPhrase string `json:"confirmation_phrase"`
 }
 
 type UpsertSupplierCostProfileInput struct {
