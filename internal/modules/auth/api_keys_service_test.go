@@ -27,6 +27,8 @@ type apiKeyStubRepo struct {
 	auditAuthErr         error
 	lastAuditEvent       APIKeyAuthAuditEvent
 	lastAdminAuditFilter *AdminAuditFilter
+	users                []User
+	listUsersFn          func(context.Context) ([]User, error)
 }
 
 func (s *apiKeyStubRepo) CreateAPIKey(_ context.Context, userID int64, name string, scopes []string, whitelist []string) (APIKey, string, error) {
@@ -74,6 +76,13 @@ func (s *apiKeyStubRepo) ValidateAPIKey(_ context.Context, key string) (APIKey, 
 func (s *apiKeyStubRepo) RecordAPIKeyAuthAudit(_ context.Context, event APIKeyAuthAuditEvent) error {
 	s.lastAuditEvent = event
 	return s.auditAuthErr
+}
+
+func (s *apiKeyStubRepo) ListAllUsers(ctx context.Context) ([]User, error) {
+	if s.listUsersFn != nil {
+		return s.listUsersFn(ctx)
+	}
+	return s.users, nil
 }
 
 func TestCreateAPIKeyNormalizesNameScopesAndWhitelist(t *testing.T) {

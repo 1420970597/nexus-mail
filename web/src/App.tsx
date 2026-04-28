@@ -16,6 +16,8 @@ import { SupplierSettlementsPage } from './pages/SupplierSettlementsPage'
 import { AdminProjectsPage } from './pages/AdminProjectsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { ApiDocsPage } from './pages/ApiDocsPage'
+import { AdminRiskPage } from './pages/AdminRiskPage'
+import { AdminAuditPage } from './pages/AdminAuditPage'
 import { getCurrentUser, getMenu, logoutSession } from './services/auth'
 import { useAuthStore } from './store/authStore'
 
@@ -86,8 +88,8 @@ function Shell() {
         <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
         <Route path="/admin/suppliers" element={<AdminRoute><PlaceholderPage title="供应商管理" description="管理员供应商审核、评级与启停控制将在此实现。" /></AdminRoute>} />
         <Route path="/admin/pricing" element={<AdminRoute><AdminProjectsPage /></AdminRoute>} />
-        <Route path="/admin/risk" element={<AdminRoute><PlaceholderPage title="风控中心" description="Phase 5 将在此接入高频取消、高频超时与黑名单规则。" /></AdminRoute>} />
-        <Route path="/admin/audit" element={<AdminRoute><PlaceholderPage title="审计日志" description="管理员审计日志、操作轨迹与异常事件将在此查看。" /></AdminRoute>} />
+        <Route path="/admin/risk" element={<AdminRoute><AdminRiskPage /></AdminRoute>} />
+        <Route path="/admin/audit" element={<AdminRoute><AdminAuditPage /></AdminRoute>} />
         <Route path="/docs" element={<ApiDocsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

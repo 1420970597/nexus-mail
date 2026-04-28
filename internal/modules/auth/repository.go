@@ -147,6 +147,26 @@ func (r *Repository) FindByID(ctx context.Context, id int64) (User, error) {
 	return user, err
 }
 
+func (r *Repository) ListAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := r.pool.Query(ctx, `SELECT id, email, '' AS password_hash, role, created_at FROM users ORDER BY id ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 func (r *Repository) CreateRefreshSession(ctx context.Context, sessionID string, userID int64, refreshToken string, expiresAt time.Time) error {
 	_, err := r.pool.Exec(ctx, `
 INSERT INTO auth_sessions (session_id, user_id, refresh_token, expires_at)
