@@ -78,6 +78,16 @@ type ProjectOffering struct {
 	ProtocolMode string  `json:"protocol_mode,omitempty"`
 }
 
+type UpsertProjectOfferingInput struct {
+	ProjectKey   string  `json:"project_key"`
+	DomainID     int64   `json:"domain_id"`
+	Price        int64   `json:"price"`
+	SuccessRate  float64 `json:"success_rate"`
+	Priority     int     `json:"priority"`
+	SourceType   string  `json:"source_type"`
+	ProtocolMode string  `json:"protocol_mode"`
+}
+
 type ActivationOrder struct {
 	ID              int64      `json:"id"`
 	OrderNo         string     `json:"order_no"`

@@ -17,6 +17,7 @@ type stubRepo struct {
 	providerAccountResp ProviderAccount
 	mailboxResp         Mailbox
 	projectResp         Project
+	offeringInput       UpsertProjectOfferingInput
 	touchErr            error
 	providerErr         error
 	mailboxErr          error
@@ -36,6 +37,13 @@ type stubRepo struct {
 func (s *stubRepo) ListProjects(context.Context) ([]Project, error)                 { return nil, nil }
 func (s *stubRepo) ListAllProjects(context.Context) ([]Project, error)              { return nil, nil }
 func (s *stubRepo) ListProjectOfferings(context.Context) ([]ProjectOffering, error) { return nil, nil }
+func (s *stubRepo) ListSupplierProjectOfferings(context.Context, int64) ([]ProjectOffering, error) {
+	return []ProjectOffering{{SupplierID: 7, ProjectKey: "discord"}}, nil
+}
+func (s *stubRepo) UpsertProjectOffering(_ context.Context, _ int64, input UpsertProjectOfferingInput) (ProjectOffering, error) {
+	s.offeringInput = input
+	return ProjectOffering{ProjectKey: input.ProjectKey, DomainID: input.DomainID, Price: input.Price, SuccessRate: input.SuccessRate, Priority: input.Priority, SourceType: input.SourceType, ProtocolMode: input.ProtocolMode}, nil
+}
 func (s *stubRepo) CreateActivationOrder(context.Context, int64, CreateActivationOrderInput) (ActivationOrder, error) {
 	return ActivationOrder{}, nil
 }
@@ -113,6 +121,32 @@ func (s *stubRepo) FinalizeReadyActivationOrders(_ context.Context, _ time.Time,
 		return 0, s.finalizeErr
 	}
 	return s.finalizeCount, nil
+}
+
+func TestUpsertProjectOfferingNormalizesAndValidatesInput(t *testing.T) {
+	repo := &stubRepo{}
+	service := NewService(repo)
+
+	offering, err := service.UpsertProjectOffering(context.Background(), 7, UpsertProjectOfferingInput{ProjectKey: " Discord ", DomainID: 12, Price: 1500, SuccessRate: 0.95, Priority: 5, SourceType: " DOMAIN "})
+	if err != nil {
+		t.Fatalf("UpsertProjectOffering() error = %v", err)
+	}
+	if offering.ProjectKey != "discord" || offering.SourceType != "domain" || offering.DomainID != 12 || offering.Price != 1500 || repo.offeringInput.ProjectKey != "discord" {
+		t.Fatalf("unexpected offering: %#v repo input: %#v", offering, repo.offeringInput)
+	}
+
+	cases := []UpsertProjectOfferingInput{
+		{ProjectKey: "", DomainID: 12, Price: 1, SuccessRate: 0.9},
+		{ProjectKey: "discord", DomainID: 0, Price: 1, SuccessRate: 0.9},
+		{ProjectKey: "discord", DomainID: 12, Price: -1, SuccessRate: 0.9},
+		{ProjectKey: "discord", DomainID: 12, Price: 1, SuccessRate: 1.1},
+		{ProjectKey: "discord", DomainID: 12, Price: 1, SuccessRate: 0.9, SourceType: "bad"},
+	}
+	for _, input := range cases {
+		if _, err := service.UpsertProjectOffering(context.Background(), 7, input); err == nil {
+			t.Fatalf("expected validation error for %#v", input)
+		}
+	}
 }
 
 func TestListAllActivationOrdersDelegatesToRepository(t *testing.T) {

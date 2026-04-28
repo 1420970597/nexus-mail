@@ -62,7 +62,21 @@ export function SupplierResourcesPage() {
   const submitAccount = async () => {
     try {
       const values = await accountForm.validate()
-      await createSupplierAccount(values)
+      await createSupplierAccount({
+        provider: values.provider,
+        source_type: values.source_type,
+        auth_mode: values.auth_mode,
+        protocol_mode: values.protocol_mode,
+        identifier: values.identifier,
+        status: values.status,
+        host: values.host,
+        port: values.port ? Number(values.port) : undefined,
+        refresh_token: values.refresh_token,
+        credential_secret: values.credential_secret,
+        secret_ref: values.secret_ref,
+        bridge_endpoint: values.bridge_endpoint,
+        bridge_label: values.bridge_label,
+      })
       Toast.success('第三方邮箱账号已新增')
       accountForm.reset()
       await load()

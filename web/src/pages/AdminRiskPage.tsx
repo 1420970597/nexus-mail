@@ -74,7 +74,7 @@ export function AdminRiskPage() {
       <Card title="风险信号" style={{ width: '100%' }}>
         <Table
           pagination={false}
-          rowKey={(record) => `${record.category}-${record.title}`}
+          rowKey={(record) => `${record?.category ?? 'unknown'}-${record?.title ?? 'signal'}`}
           dataSource={data?.signals ?? []}
           columns={[
             { title: '类别', dataIndex: 'category', key: 'category' },

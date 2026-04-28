@@ -11,6 +11,8 @@ type repository interface {
 	ListProjects(ctx context.Context) ([]Project, error)
 	ListAllProjects(ctx context.Context) ([]Project, error)
 	ListProjectOfferings(ctx context.Context) ([]ProjectOffering, error)
+	ListSupplierProjectOfferings(ctx context.Context, supplierID int64) ([]ProjectOffering, error)
+	UpsertProjectOffering(ctx context.Context, supplierID int64, input UpsertProjectOfferingInput) (ProjectOffering, error)
 	CreateActivationOrder(ctx context.Context, userID int64, input CreateActivationOrderInput) (ActivationOrder, error)
 	ListActivationOrdersByUser(ctx context.Context, userID int64) ([]ActivationOrder, error)
 	ListAllActivationOrders(ctx context.Context) ([]ActivationOrder, error)
@@ -45,6 +47,35 @@ func (s *Service) ListAllProjects(ctx context.Context) ([]Project, error) {
 
 func (s *Service) ListInventory(ctx context.Context) ([]ProjectOffering, error) {
 	return s.repo.ListProjectOfferings(ctx)
+}
+
+func (s *Service) ListSupplierOfferings(ctx context.Context, supplierID int64) ([]ProjectOffering, error) {
+	return s.repo.ListSupplierProjectOfferings(ctx, supplierID)
+}
+
+func (s *Service) UpsertProjectOffering(ctx context.Context, supplierID int64, input UpsertProjectOfferingInput) (ProjectOffering, error) {
+	input.ProjectKey = strings.TrimSpace(strings.ToLower(input.ProjectKey))
+	input.SourceType = strings.TrimSpace(strings.ToLower(input.SourceType))
+	input.ProtocolMode = strings.TrimSpace(strings.ToLower(input.ProtocolMode))
+	if input.ProjectKey == "" {
+		return ProjectOffering{}, fmt.Errorf("project_key 不能为空")
+	}
+	if input.DomainID <= 0 {
+		return ProjectOffering{}, fmt.Errorf("domain_id 无效")
+	}
+	if input.Price < 0 {
+		return ProjectOffering{}, fmt.Errorf("price 不能小于 0")
+	}
+	if input.SuccessRate < 0 || input.SuccessRate > 1 {
+		return ProjectOffering{}, fmt.Errorf("success_rate 必须位于 0 到 1 之间")
+	}
+	if input.SourceType == "" {
+		input.SourceType = "domain"
+	}
+	if input.SourceType != "domain" && input.SourceType != "public_mailbox_account" && input.SourceType != "hosted_mailbox" && input.SourceType != "bridge_mailbox" && input.SourceType != "self_hosted_domain" {
+		return ProjectOffering{}, fmt.Errorf("source_type 不受支持")
+	}
+	return s.repo.UpsertProjectOffering(ctx, supplierID, input)
 }
 
 func (s *Service) CreateActivationOrder(ctx context.Context, userID int64, input CreateActivationOrderInput) (ActivationOrder, error) {

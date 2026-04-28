@@ -651,6 +651,60 @@ paths:
       responses:
         '200':
           description: 总览成功
+  /supplier/resources/offerings:
+    get:
+      summary: 获取当前供应商供货规则列表
+      description: 返回当前供应商自己维护的可售规则，不暴露其他供应商的价格、域名或库存。
+      responses:
+        '200':
+          description: 当前供应商供货规则列表
+    post:
+      summary: 新增或更新当前供应商供货规则
+      description: 仅供应商角色可维护自己的供货规则；供货规则按 project_key、domain_id、source_type、protocol_mode 定义可售库存的售价、优先级与预估成功率，并直接影响用户下单时的库存分配路径。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [project_key, domain_id, price, success_rate]
+              properties:
+                project_key:
+                  type: string
+                  example: discord
+                domain_id:
+                  type: integer
+                  minimum: 1
+                price:
+                  type: integer
+                  minimum: 0
+                  description: 售价，单位为分。
+                success_rate:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                priority:
+                  type: integer
+                  minimum: 0
+                  default: 0
+                source_type:
+                  type: string
+                  enum: [domain, self_hosted_domain, public_mailbox_account, hosted_mailbox, bridge_mailbox]
+                  default: domain
+                protocol_mode:
+                  type: string
+                  example: imap_pull
+      responses:
+        '200':
+          description: 供货规则已保存
+        '400':
+          description: 参数无效、项目不存在或域名不属于当前供应商
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 非供应商角色不可维护供货规则
   /wallet/overview:
     get:
       summary: 获取用户钱包总览

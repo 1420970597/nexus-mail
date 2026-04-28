@@ -159,12 +159,12 @@ export function OrdersPage() {
         {resultModal.result ? (
           <Descriptions
             data={[
-              { key: 'status', value: <Tag color={statusColor(resultModal.result.status)}>{resultModal.result.status}</Tag>, label: '当前状态' },
-              { key: 'type', value: resultModal.result.extraction_type || '—', label: '提取类型' },
-              { key: 'value', value: resultModal.result.extraction_value || '暂无结果', label: '提取结果' },
-              { key: 'expires', value: `${resultModal.result.expires_in_seconds}s`, label: '剩余有效期' },
-              { key: 'poll', value: resultModal.result.next_poll_after_seconds > 0 ? `${resultModal.result.next_poll_after_seconds}s 后轮询` : '无需继续轮询', label: '轮询建议' },
-              { key: 'terminal', value: resultModal.result.is_terminal ? '是' : '否', label: '终态' },
+              { key: '当前状态', value: <Tag color={statusColor(resultModal.result.status)}>{resultModal.result.status}</Tag> },
+              { key: '提取类型', value: resultModal.result.extraction_type || '—' },
+              { key: '提取结果', value: resultModal.result.extraction_value || '暂无结果' },
+              { key: '剩余有效期', value: `${resultModal.result.expires_in_seconds}s` },
+              { key: '轮询建议', value: resultModal.result.next_poll_after_seconds > 0 ? `${resultModal.result.next_poll_after_seconds}s 后轮询` : '无需继续轮询' },
+              { key: '终态', value: resultModal.result.is_terminal ? '是' : '否' },
             ]}
           />
         ) : null}

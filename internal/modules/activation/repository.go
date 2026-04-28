@@ -168,6 +168,10 @@ CREATE TABLE IF NOT EXISTS project_offerings (
   protocol_mode TEXT NOT NULL DEFAULT '',
   UNIQUE(project_id, domain_id, supplier_id, source_type, protocol_mode)
 );
+CREATE INDEX IF NOT EXISTS idx_mailbox_pool_domain_project_source_status
+  ON mailbox_pool(domain_id, project_key, source_type, status);
+CREATE INDEX IF NOT EXISTS idx_project_offerings_supplier_project_priority
+  ON project_offerings(supplier_id, project_id, priority, id);
 CREATE TABLE IF NOT EXISTS activation_orders (
   id BIGSERIAL PRIMARY KEY,
   order_no TEXT NOT NULL UNIQUE,
@@ -377,6 +381,95 @@ ORDER BY po.project_id ASC, po.priority ASC, po.id ASC
 		items = append(items, item)
 	}
 	return items, rows.Err()
+}
+
+func (r *Repository) ListSupplierProjectOfferings(ctx context.Context, supplierID int64) ([]ProjectOffering, error) {
+	rows, err := r.pool.Query(ctx, `
+SELECT
+  po.id,
+  po.project_id,
+  p.key,
+  p.name,
+  po.domain_id,
+  d.name,
+  po.supplier_id,
+  po.price,
+  COUNT(m.id) FILTER (WHERE m.status = 'available' AND m.project_key = p.key AND m.source_type = po.source_type) AS stock,
+  po.success_rate,
+  po.priority,
+  po.source_type,
+  po.protocol_mode
+FROM project_offerings po
+JOIN projects p ON p.id = po.project_id AND p.is_active = TRUE
+JOIN resource_domains d ON d.id = po.domain_id AND d.status = 'active'
+LEFT JOIN mailbox_pool m ON m.domain_id = po.domain_id
+WHERE po.supplier_id = $1
+GROUP BY po.id, po.project_id, p.key, p.name, po.domain_id, d.name, po.supplier_id, po.price, po.success_rate, po.priority, po.source_type, po.protocol_mode
+ORDER BY po.project_id ASC, po.priority ASC, po.id ASC
+`, supplierID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ProjectOffering
+	for rows.Next() {
+		var item ProjectOffering
+		if err := rows.Scan(&item.ID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.SupplierID, &item.Price, &item.Stock, &item.SuccessRate, &item.Priority, &item.SourceType, &item.ProtocolMode); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) UpsertProjectOffering(ctx context.Context, supplierID int64, input UpsertProjectOfferingInput) (ProjectOffering, error) {
+	var item ProjectOffering
+	err := r.pool.QueryRow(ctx, `
+WITH project_row AS (
+  SELECT id, key, name
+  FROM projects
+  WHERE key = $1 AND is_active = TRUE
+), domain_row AS (
+  SELECT id, name
+  FROM resource_domains
+  WHERE id = $2 AND supplier_id = $3 AND status = 'active'
+), upserted AS (
+  INSERT INTO project_offerings (project_id, domain_id, supplier_id, price, success_rate, priority, source_type, protocol_mode)
+  SELECT project_row.id, domain_row.id, $3, $4, $5, $6, $7, $8
+  FROM project_row, domain_row
+  ON CONFLICT (project_id, domain_id, supplier_id, source_type, protocol_mode) DO UPDATE
+  SET price = EXCLUDED.price,
+      success_rate = EXCLUDED.success_rate,
+      priority = EXCLUDED.priority
+  RETURNING id, project_id, domain_id, supplier_id, price, success_rate, priority, source_type, protocol_mode
+)
+SELECT
+  u.id,
+  u.project_id,
+  p.key,
+  p.name,
+  u.domain_id,
+  d.name,
+  u.supplier_id,
+  u.price,
+  COUNT(m.id) FILTER (WHERE m.status = 'available' AND m.project_key = p.key AND m.source_type = u.source_type) AS stock,
+  u.success_rate,
+  u.priority,
+  u.source_type,
+  u.protocol_mode
+FROM upserted u
+JOIN projects p ON p.id = u.project_id
+JOIN resource_domains d ON d.id = u.domain_id
+LEFT JOIN mailbox_pool m ON m.domain_id = u.domain_id
+GROUP BY u.id, u.project_id, p.key, p.name, u.domain_id, d.name, u.supplier_id, u.price, u.success_rate, u.priority, u.source_type, u.protocol_mode
+`, input.ProjectKey, input.DomainID, supplierID, input.Price, input.SuccessRate, input.Priority, input.SourceType, input.ProtocolMode).Scan(&item.ID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.SupplierID, &item.Price, &item.Stock, &item.SuccessRate, &item.Priority, &item.SourceType, &item.ProtocolMode)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return ProjectOffering{}, fmt.Errorf("项目或域名不存在")
+		}
+		return ProjectOffering{}, err
+	}
+	return item, nil
 }
 
 func (r *Repository) CreateActivationOrder(ctx context.Context, userID int64, input CreateActivationOrderInput) (ActivationOrder, error) {

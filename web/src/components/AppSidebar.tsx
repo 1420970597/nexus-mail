@@ -1,6 +1,7 @@
 import { Nav } from '@douyinfe/semi-ui'
 import {
   IconActivity,
+  IconBolt,
   IconComponent,
   IconHome,
   IconPriceTag,
@@ -23,6 +24,7 @@ const iconMap: Record<string, JSX.Element> = {
   settings: <IconSetting />,
   'supplier-domains': <IconServer />,
   'supplier-resources': <IconPriceTag />,
+  'supplier-offerings': <IconBolt />,
   'supplier-settlements': <IconActivity />,
   'admin-users': <IconUser />,
   'admin-suppliers': <IconServer />,
@@ -46,6 +48,7 @@ function fallbackMenu(role?: string): MenuItem[] {
     base.push(
       { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
       { key: 'supplier-resources', label: '供应商资源', path: '/supplier/resources' },
+      { key: 'supplier-offerings', label: '供货规则', path: '/supplier/offerings' },
       { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
     )
   }

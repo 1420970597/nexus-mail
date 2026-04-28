@@ -98,6 +98,24 @@ export async function getInventory() {
   return data
 }
 
+export async function getSupplierOfferings() {
+  const { data } = await api.get<{ items: InventoryItem[] }>('/supplier/resources/offerings')
+  return data
+}
+
+export async function saveSupplierOffering(payload: {
+  project_key: string
+  domain_id: number
+  price: number
+  success_rate: number
+  priority?: number
+  source_type?: string
+  protocol_mode?: string
+}) {
+  const { data } = await api.post<{ offering: InventoryItem }>('/supplier/resources/offerings', payload)
+  return data
+}
+
 export async function createActivationOrder(projectKey: string, domainId?: number) {
   const { data } = await api.post<{ order: ActivationOrder }>('/orders/activations', {
     project_key: projectKey,

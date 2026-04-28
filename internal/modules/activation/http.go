@@ -29,9 +29,11 @@ func (h *Handler) RegisterRoutes(secure *gin.RouterGroup) {
 	supplier := secure.Group("/supplier/resources")
 	supplier.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
 	supplier.GET("/overview", h.supplierOverview)
+	supplier.GET("/offerings", h.supplierOfferings)
 	supplier.POST("/domains", h.createDomain)
 	supplier.POST("/accounts", h.createProviderAccount)
 	supplier.POST("/mailboxes", h.createMailbox)
+	supplier.POST("/offerings", h.upsertProjectOffering)
 
 	supplierOrders := secure.Group("/supplier/orders/activations")
 	supplierOrders.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
@@ -161,6 +163,16 @@ func (h *Handler) supplierOverview(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+func (h *Handler) supplierOfferings(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	items, err := h.service.ListSupplierOfferings(c.Request.Context(), user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
 func (h *Handler) createDomain(c *gin.Context) {
 	user := c.MustGet("currentUser").(auth.User)
 	var input CreateDomainInput
@@ -204,6 +216,25 @@ func (h *Handler) createMailbox(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"mailbox": mailbox})
+}
+
+func (h *Handler) upsertProjectOffering(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	if user.Role != auth.RoleSupplier {
+		c.JSON(http.StatusForbidden, gin.H{"error": "仅供应商可维护供货规则"})
+		return
+	}
+	var input UpsertProjectOfferingInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	offering, err := h.service.UpsertProjectOffering(c.Request.Context(), user.ID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"offering": offering})
 }
 
 func (h *Handler) submitActivationResult(c *gin.Context) {
