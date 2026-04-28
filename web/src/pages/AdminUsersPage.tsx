@@ -1,4 +1,4 @@
-import { Button, Card, Form, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
+import { Button, Card, Form, Select, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
 import { useEffect, useState } from 'react'
 import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, settleSupplierPending, OrderDispute, WalletOverview } from '../services/finance'
 
@@ -10,6 +10,27 @@ function disputeStatusColor(status: string) {
       return 'red'
     default:
       return 'orange'
+  }
+}
+
+export function buildDisputeResolutionPayload(values: {
+  dispute_id: number | string
+  status: 'resolved' | 'rejected'
+  resolution_type?: string
+  resolution_note?: string
+  refund_amount?: number | string
+}) {
+  const status = values.status
+  const refundAmount = status === 'rejected' ? 0 : Number(values.refund_amount || 0)
+  const resolutionType = refundAmount > 0 ? 'refund' : (status === 'rejected' ? 'manual_adjustment' : (values.resolution_type || 'manual_adjustment'))
+  return {
+    disputeId: Number(values.dispute_id),
+    payload: {
+      status,
+      resolution_type: resolutionType,
+      resolution_note: values.resolution_note,
+      refund_amount: refundAmount,
+    },
   }
 }
 
@@ -67,12 +88,14 @@ export function AdminUsersPage() {
   const handleResolveDispute = async () => {
     try {
       const values = await disputeForm.validate()
-      await resolveAdminDispute(Number(values.dispute_id), {
-        status: values.status,
-        resolution_type: values.resolution_type,
-        resolution_note: values.resolution_note,
-        refund_amount: Number(values.refund_amount || 0),
+      const { disputeId, payload } = buildDisputeResolutionPayload(values as {
+        dispute_id: number | string
+        status: 'resolved' | 'rejected'
+        resolution_type?: string
+        resolution_note?: string
+        refund_amount?: number | string
       })
+      await resolveAdminDispute(disputeId, payload)
       Toast.success('争议单处理完成')
       disputeForm.reset()
       await load()
@@ -105,11 +128,18 @@ export function AdminUsersPage() {
         </Form>
       </Card>
       <Card title="争议单处理" style={{ width: '100%' }}>
+        <Typography.Paragraph>退款金额大于 0 时必须选择“原路退款”，驳回争议时退款金额必须为 0；处理后会写入 resolve_dispute 审计。</Typography.Paragraph>
         <Form form={disputeForm} layout="horizontal" labelPosition="left" initValues={{ status: 'resolved', resolution_type: 'manual_adjustment', refund_amount: 0 }}>
           <Form.InputNumber field="dispute_id" label="争议单 ID" rules={[{ required: true, message: '请输入争议单 ID' }]} style={{ width: '100%' }} />
-          <Form.Input field="status" label="处理状态" rules={[{ required: true, message: '请输入处理状态' }]} />
-          <Form.Input field="resolution_type" label="处理类型" />
-          <Form.InputNumber field="refund_amount" label="退款金额（分）" style={{ width: '100%' }} />
+          <Form.Select field="status" label="处理状态" rules={[{ required: true, message: '请选择处理状态' }]}>
+            <Select.Option value="resolved">通过并处理</Select.Option>
+            <Select.Option value="rejected">驳回争议</Select.Option>
+          </Form.Select>
+          <Form.Select field="resolution_type" label="处理类型" rules={[{ required: true, message: '请选择处理类型' }]}>
+            <Select.Option value="manual_adjustment">人工调整/无需退款</Select.Option>
+            <Select.Option value="refund">原路退款</Select.Option>
+          </Form.Select>
+          <Form.InputNumber field="refund_amount" label="退款金额（分）" min={0} style={{ width: '100%' }} />
           <Form.Input field="resolution_note" label="处理备注" />
           <Button type="primary" theme="solid" onClick={handleResolveDispute}>处理争议单</Button>
         </Form>
