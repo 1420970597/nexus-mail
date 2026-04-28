@@ -14,6 +14,8 @@ vi.mock('./services/auth', async () => {
     getDashboardOverview: vi.fn(),
     getAdminOverview: vi.fn(),
     getAdminRisk: vi.fn(),
+    getAdminRiskRules: vi.fn(),
+    updateAdminRiskRules: vi.fn(),
     getAdminAudit: vi.fn(),
   }
 })
@@ -23,6 +25,8 @@ const mockedGetMenu = vi.mocked(authService.getMenu)
 const mockedGetDashboardOverview = vi.mocked(authService.getDashboardOverview)
 const mockedGetAdminOverview = vi.mocked(authService.getAdminOverview)
 const mockedGetAdminRisk = vi.mocked(authService.getAdminRisk)
+const mockedGetAdminRiskRules = vi.mocked(authService.getAdminRiskRules)
+const mockedUpdateAdminRiskRules = vi.mocked(authService.updateAdminRiskRules)
 const mockedGetAdminAudit = vi.mocked(authService.getAdminAudit)
 
 function setSession(role: 'user' | 'supplier' | 'admin' = 'user') {
@@ -71,6 +75,13 @@ describe('App', () => {
         { category: 'auth', severity: 'high', count: 1, title: 'API Key 触发限流', detail: '最近审计中检测到 1 次 denied_rate_limit 事件，可能存在异常高频访问或客户端重试风暴' },
       ],
     })
+    mockedGetAdminRiskRules.mockResolvedValue({
+      items: [
+        { key: 'api_denied_rate', enabled: true, threshold: 10, window_minutes: 15, severity: 'high', description: 'API Key 异常访问检测', updated_at: '2026-04-28T00:00:00Z' },
+        { key: 'high_timeout', enabled: true, threshold: 5, window_minutes: 60, severity: 'medium', description: '高频超时', updated_at: '2026-04-28T00:00:00Z' },
+      ],
+    })
+    mockedUpdateAdminRiskRules.mockImplementation(async (items) => ({ items }))
     mockedGetAdminAudit.mockResolvedValue({ items: [{ id: 1, user_id: 3, api_key_id: 9, action: 'success', actor_type: 'system', note: 'scope ok', created_at: '2026-04-28T00:00:00Z' }] })
   })
 

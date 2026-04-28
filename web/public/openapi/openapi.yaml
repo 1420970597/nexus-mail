@@ -245,6 +245,8 @@ components:
     RiskRule:
       type: object
       required: [key, enabled, threshold, window_minutes, severity]
+      description: |
+        可配置风控规则。/admin/risk 会实时读取已启用规则：high_timeout、high_cancel、api_denied_rate 的 threshold/severity/enabled 会直接影响风险信号是否出现及等级；window_minutes 预留给后续时间窗口化聚合。
       properties:
         key:
           type: string
@@ -443,6 +445,54 @@ components:
         updated_at:
           type: string
           format: date-time
+    AdminRiskSummary:
+      type: object
+      properties:
+        open_disputes:
+          type: integer
+        denied_whitelist:
+          type: integer
+        denied_scope:
+          type: integer
+        denied_invalid:
+          type: integer
+        denied_rate_limit:
+          type: integer
+        timeout_orders:
+          type: integer
+        canceled_orders:
+          type: integer
+        high_risk_signal_count:
+          type: integer
+        medium_risk_signal_count:
+          type: integer
+    AdminRiskSignal:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [dispute, auth, order, behavior]
+        severity:
+          type: string
+          enum: [high, medium, low]
+        count:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+    AdminRiskResponse:
+      type: object
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        summary:
+          $ref: '#/components/schemas/AdminRiskSummary'
+        signals:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminRiskSignal'
     UpdateRiskRulesRequest:
       type: object
       required: [items]
@@ -1133,9 +1183,14 @@ paths:
   /admin/risk:
     get:
       summary: 获取管理员风控信号汇总
+      description: 根据当前 risk_rules 配置实时生成风险信号；规则的 enabled、threshold 与 severity 会影响信号过滤和等级。
       responses:
         '200':
           description: 风控汇总与风险信号
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRiskResponse'
   /admin/risk/rules:
     get:
       summary: 获取可配置风控规则

@@ -14,7 +14,9 @@ func (s *Service) ListAllUsers(ctx context.Context) ([]User, error) {
 		}
 	}
 	if s.authRepo != nil {
-		userRepo, ok := s.authRepo.(interface{ ListAllUsers(context.Context) ([]User, error) })
+		userRepo, ok := s.authRepo.(interface {
+			ListAllUsers(context.Context) ([]User, error)
+		})
 		if ok {
 			return userRepo.ListAllUsers(ctx)
 		}
@@ -47,8 +49,21 @@ func (s *Service) BuildAdminRisk(
 ) map[string]any {
 	summary, signals := BuildRiskSignals(ctx, orders, disputes, audit)
 	return map[string]any{
-		"generated_at": time.Now().UTC(),
-		"summary":      summary,
-		"signals":      signals,
+		"summary": summary,
+		"signals": signals,
+	}
+}
+
+func (s *Service) BuildAdminRiskWithRules(
+	ctx context.Context,
+	orders []DashboardOrder,
+	disputes []DashboardDispute,
+	audit []APIKeyAuditEntry,
+	rules []RiskRuleConfig,
+) map[string]any {
+	summary, signals := BuildRiskSignalsWithRules(ctx, orders, disputes, audit, rules)
+	return map[string]any{
+		"summary": summary,
+		"signals": signals,
 	}
 }

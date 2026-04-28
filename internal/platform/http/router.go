@@ -135,12 +135,36 @@ func buildAdminRiskPayload(ctx context.Context, app *bootstrap.App) (gin.H, erro
 	if err != nil {
 		return nil, err
 	}
-	summary, signals := auth.BuildRiskSignals(ctx, orders, disputes, audit)
+	rules, err := loadRiskRuleConfigs(ctx, app)
+	if err != nil {
+		return nil, err
+	}
+	summary, signals := auth.BuildRiskSignalsWithRules(ctx, orders, disputes, audit, rules)
 	return gin.H{
 		"generated_at": time.Now().UTC(),
 		"summary":      summary,
 		"signals":      signals,
 	}, nil
+}
+
+func loadRiskRuleConfigs(ctx context.Context, app *bootstrap.App) ([]auth.RiskRuleConfig, error) {
+	if app == nil || app.RiskService == nil {
+		return nil, nil
+	}
+	items, err := app.RiskService.ListRules(ctx)
+	if err != nil {
+		return nil, err
+	}
+	rules := make([]auth.RiskRuleConfig, 0, len(items))
+	for _, item := range items {
+		rules = append(rules, auth.RiskRuleConfig{
+			Key:       item.Key,
+			Enabled:   item.Enabled,
+			Threshold: item.Threshold,
+			Severity:  item.Severity,
+		})
+	}
+	return rules, nil
 }
 
 func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.DashboardProject, []auth.DashboardOrder, []auth.DashboardWalletUser, []auth.DashboardDispute, []auth.APIKeyAuditEntry, error) {

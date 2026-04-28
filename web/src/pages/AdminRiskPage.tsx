@@ -34,7 +34,9 @@ export function AdminRiskPage() {
     try {
       const payload = await updateAdminRiskRules(rules)
       setRules(payload.items)
-      Toast.success('风控规则已保存')
+      const refreshedRisk = await getAdminRisk()
+      setData(refreshedRisk)
+      Toast.success('风控规则已保存，风险信号已刷新')
     } catch (error) {
       Toast.error('风控规则保存失败')
     } finally {

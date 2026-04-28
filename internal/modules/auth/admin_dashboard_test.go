@@ -93,6 +93,34 @@ func TestBuildDashboardSummaryHandlesZeroAndFractionalRates(t *testing.T) {
 	}
 }
 
+func TestBuildRiskSignalsAppliesConfiguredRuleThresholdsAndDisabledRules(t *testing.T) {
+	orders := []DashboardOrder{
+		{ID: 1, UserID: 3, Status: "TIMEOUT"},
+		{ID: 2, UserID: 3, Status: "TIMEOUT"},
+		{ID: 3, UserID: 4, Status: "CANCELED"},
+	}
+	audit := []APIKeyAuditEntry{
+		{ID: 1, Action: "denied_rate_limit"},
+		{ID: 2, Action: "denied_rate_limit"},
+	}
+	rules := []RiskRuleConfig{
+		{Key: "high_timeout", Enabled: true, Threshold: 2, Severity: "high"},
+		{Key: "api_denied_rate", Enabled: false, Threshold: 1, Severity: "high"},
+		{Key: "high_cancel", Enabled: true, Threshold: 2, Severity: "medium"},
+	}
+
+	summary, signals := BuildRiskSignalsWithRules(context.Background(), orders, nil, audit, rules)
+	if summary.DeniedRateLimit != 2 {
+		t.Fatalf("expected raw denied rate-limit counter to remain visible, got %#v", summary)
+	}
+	if summary.HighRiskSignalCount != 1 || summary.MediumRiskSignalCount != 0 {
+		t.Fatalf("expected only the high-timeout signal to be counted, got summary=%#v signals=%#v", summary, signals)
+	}
+	if len(signals) != 1 || signals[0].Title != "超时订单需要关注" || signals[0].Severity != "high" || signals[0].Count != 2 {
+		t.Fatalf("unexpected configured risk signals: %#v", signals)
+	}
+}
+
 func TestBuildRiskSignalsRanksHighAndMediumSignals(t *testing.T) {
 	orders := []DashboardOrder{
 		{ID: 1, UserID: 3, SupplierID: 2, Status: "TIMEOUT"},

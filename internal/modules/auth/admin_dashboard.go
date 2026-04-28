@@ -56,6 +56,13 @@ type DashboardSummary struct {
 	} `json:"supplier_settlements"`
 }
 
+type RiskRuleConfig struct {
+	Key       string
+	Enabled   bool
+	Threshold int
+	Severity  string
+}
+
 type RiskSignal struct {
 	Category string `json:"category"`
 	Severity string `json:"severity"`
@@ -207,6 +214,16 @@ func BuildRiskSignals(
 	disputes []DashboardDispute,
 	audit []APIKeyAuditEntry,
 ) (RiskSummary, []RiskSignal) {
+	return BuildRiskSignalsWithRules(ctx, orders, disputes, audit, nil)
+}
+
+func BuildRiskSignalsWithRules(
+	ctx context.Context,
+	orders []DashboardOrder,
+	disputes []DashboardDispute,
+	audit []APIKeyAuditEntry,
+	rules []RiskRuleConfig,
+) (RiskSummary, []RiskSignal) {
 	var summary RiskSummary
 	orderCountByUser := map[int64]int{}
 	timeoutCountByUser := map[int64]int{}
@@ -243,8 +260,28 @@ func BuildRiskSignals(
 		}
 	}
 
+	signalRule := func(key, defaultSeverity string, defaultThreshold int) (bool, string, int) {
+		for _, rule := range rules {
+			if strings.EqualFold(strings.TrimSpace(rule.Key), key) {
+				if !rule.Enabled {
+					return false, "", 0
+				}
+				severity := strings.ToLower(strings.TrimSpace(rule.Severity))
+				if severity == "" {
+					severity = defaultSeverity
+				}
+				threshold := rule.Threshold
+				if threshold <= 0 {
+					threshold = defaultThreshold
+				}
+				return true, severity, threshold
+			}
+		}
+		return true, defaultSeverity, defaultThreshold
+	}
+
 	signals := make([]RiskSignal, 0, 8)
-	appendSignal := func(category, severity string, count int, title, detail string) {
+	appendStaticSignal := func(category, severity string, count int, title, detail string) {
 		if count <= 0 {
 			return
 		}
@@ -255,24 +292,31 @@ func BuildRiskSignals(
 			summary.MediumRiskSignalCount++
 		}
 	}
+	appendRuleSignal := func(ruleKey, category, defaultSeverity string, defaultThreshold int, count int, title, detail string) {
+		enabled, severity, threshold := signalRule(ruleKey, defaultSeverity, defaultThreshold)
+		if !enabled || count < threshold {
+			return
+		}
+		appendStaticSignal(category, severity, count, title, detail)
+	}
 
-	appendSignal("dispute", "high", summary.OpenDisputes, "存在未处理争议单", fmt.Sprintf("当前共有 %d 笔 open 争议单待管理员处理", summary.OpenDisputes))
-	appendSignal("auth", "high", summary.DeniedWhitelist, "API Key 白名单拦截频繁", fmt.Sprintf("最近审计中检测到 %d 次 denied_whitelist 事件", summary.DeniedWhitelist))
-	appendSignal("auth", "high", summary.DeniedRateLimit, "API Key 触发限流", fmt.Sprintf("最近审计中检测到 %d 次 denied_rate_limit 事件，可能存在异常高频访问或客户端重试风暴", summary.DeniedRateLimit))
-	appendSignal("auth", "medium", summary.DeniedScope, "API Key 权限越权尝试", fmt.Sprintf("最近审计中检测到 %d 次 denied_scope 事件", summary.DeniedScope))
-	appendSignal("auth", "medium", summary.DeniedInvalid, "存在无效 API Key 请求", fmt.Sprintf("最近审计中检测到 %d 次 denied_invalid 事件", summary.DeniedInvalid))
-	appendSignal("order", "medium", summary.TimeoutOrders, "超时订单需要关注", fmt.Sprintf("当前共有 %d 笔 TIMEOUT 订单", summary.TimeoutOrders))
-	appendSignal("order", "medium", summary.CanceledOrders, "取消订单偏多", fmt.Sprintf("当前共有 %d 笔 CANCELED 订单", summary.CanceledOrders))
+	appendStaticSignal("dispute", "high", summary.OpenDisputes, "存在未处理争议单", fmt.Sprintf("当前共有 %d 笔 open 争议单待管理员处理", summary.OpenDisputes))
+	appendStaticSignal("auth", "high", summary.DeniedWhitelist, "API Key 白名单拦截频繁", fmt.Sprintf("最近审计中检测到 %d 次 denied_whitelist 事件", summary.DeniedWhitelist))
+	appendRuleSignal("api_denied_rate", "auth", "high", 1, summary.DeniedRateLimit, "API Key 触发限流", fmt.Sprintf("最近审计中检测到 %d 次 denied_rate_limit 事件，可能存在异常高频访问或客户端重试风暴", summary.DeniedRateLimit))
+	appendStaticSignal("auth", "medium", summary.DeniedScope, "API Key 权限越权尝试", fmt.Sprintf("最近审计中检测到 %d 次 denied_scope 事件", summary.DeniedScope))
+	appendStaticSignal("auth", "medium", summary.DeniedInvalid, "存在无效 API Key 请求", fmt.Sprintf("最近审计中检测到 %d 次 denied_invalid 事件", summary.DeniedInvalid))
+	appendRuleSignal("high_timeout", "order", "medium", 1, summary.TimeoutOrders, "超时订单需要关注", fmt.Sprintf("当前共有 %d 笔 TIMEOUT 订单", summary.TimeoutOrders))
+	appendRuleSignal("high_cancel", "order", "medium", 1, summary.CanceledOrders, "取消订单偏多", fmt.Sprintf("当前共有 %d 笔 CANCELED 订单", summary.CanceledOrders))
 
 	for userID, total := range orderCountByUser {
 		if total < 3 {
 			continue
 		}
 		if timeoutCountByUser[userID]*2 >= total {
-			appendSignal("behavior", "high", timeoutCountByUser[userID], "单用户高超时占比", fmt.Sprintf("user_id=%d 在 %d 笔订单中有 %d 笔 TIMEOUT", userID, total, timeoutCountByUser[userID]))
+			appendRuleSignal("high_timeout", "behavior", "high", 1, timeoutCountByUser[userID], "单用户高超时占比", fmt.Sprintf("user_id=%d 在 %d 笔订单中有 %d 笔 TIMEOUT", userID, total, timeoutCountByUser[userID]))
 		}
 		if cancelCountByUser[userID]*2 >= total {
-			appendSignal("behavior", "medium", cancelCountByUser[userID], "单用户高取消占比", fmt.Sprintf("user_id=%d 在 %d 笔订单中有 %d 笔 CANCELED", userID, total, cancelCountByUser[userID]))
+			appendRuleSignal("high_cancel", "behavior", "medium", 1, cancelCountByUser[userID], "单用户高取消占比", fmt.Sprintf("user_id=%d 在 %d 笔订单中有 %d 笔 CANCELED", userID, total, cancelCountByUser[userID]))
 		}
 	}
 
