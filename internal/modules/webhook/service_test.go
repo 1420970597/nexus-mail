@@ -68,6 +68,23 @@ func (r *stubRepo) ListDeliveries(ctx context.Context, userID, endpointID int64,
 	return items, nil
 }
 
+func (r *stubRepo) ClaimPendingDeliveries(ctx context.Context, workerID string, limit int) ([]WebhookDelivery, error) {
+	return nil, nil
+}
+
+func (r *stubRepo) GetEndpointByID(ctx context.Context, endpointID int64) (WebhookEndpoint, error) {
+	for _, item := range r.endpoints {
+		if item.ID == endpointID {
+			return item, nil
+		}
+	}
+	return WebhookEndpoint{}, ErrEndpointNotFound
+}
+
+func (r *stubRepo) UpdateDeliveryResult(ctx context.Context, input WebhookDeliveryUpdate) error {
+	return nil
+}
+
 func TestCreateEndpointGeneratesSecretOnceAndListHidesPlaintext(t *testing.T) {
 	t.Setenv("WEBHOOK_SECRET_ENCRYPTION_KEY", "unit-test-webhook-key")
 	repo := &stubRepo{}

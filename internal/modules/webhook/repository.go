@@ -159,3 +159,68 @@ LIMIT $3
 	}
 	return items, rows.Err()
 }
+
+func (r *Repository) ClaimPendingDeliveries(ctx context.Context, workerID string, limit int) ([]WebhookDelivery, error) {
+	if limit <= 0 || limit > maxEndpointListLimit {
+		limit = defaultDeliveryBatchSize
+	}
+	rows, err := r.pool.Query(ctx, `
+WITH candidate AS (
+  SELECT id
+  FROM webhook_deliveries
+  WHERE status = 'pending'
+    AND next_attempt_at <= NOW()
+    AND expires_at > NOW()
+    AND (locked_at IS NULL OR locked_at < NOW() - ($2::text)::interval)
+  ORDER BY next_attempt_at ASC, id ASC
+  LIMIT $1
+  FOR UPDATE SKIP LOCKED
+)
+UPDATE webhook_deliveries d
+SET locked_at = NOW(), locked_by = $3, updated_at = NOW()
+FROM candidate
+WHERE d.id = candidate.id
+RETURNING d.id, d.endpoint_id, d.user_id, d.event_type, d.payload::text, d.status, d.attempt_count, d.next_attempt_at, d.locked_at, d.locked_by, d.expires_at, d.last_error, d.created_at, d.updated_at
+`, limit, defaultDeliveryLockTTL.String(), workerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]WebhookDelivery, 0)
+	for rows.Next() {
+		var item WebhookDelivery
+		if err := rows.Scan(&item.ID, &item.EndpointID, &item.UserID, &item.EventType, &item.Payload, &item.Status, &item.AttemptCount, &item.NextAttemptAt, &item.LockedAt, &item.LockedBy, &item.ExpiresAt, &item.LastError, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) GetEndpointByID(ctx context.Context, endpointID int64) (WebhookEndpoint, error) {
+	var item WebhookEndpoint
+	err := r.pool.QueryRow(ctx, `
+SELECT id, user_id, url, events, status, signing_secret_ciphertext, secret_preview, created_at, updated_at
+FROM webhook_endpoints
+WHERE id = $1
+`, endpointID).Scan(&item.ID, &item.UserID, &item.URL, &item.Events, &item.Status, &item.SecretCiphertext, &item.SecretPreview, &item.CreatedAt, &item.UpdatedAt)
+	if err == pgx.ErrNoRows {
+		return WebhookEndpoint{}, ErrEndpointNotFound
+	}
+	return item, err
+}
+
+func (r *Repository) UpdateDeliveryResult(ctx context.Context, input WebhookDeliveryUpdate) error {
+	_, err := r.pool.Exec(ctx, `
+UPDATE webhook_deliveries
+SET status = $2,
+    attempt_count = $3,
+    next_attempt_at = $4,
+    last_error = $5,
+    locked_at = NULL,
+    locked_by = '',
+    updated_at = NOW()
+WHERE id = $1
+`, input.ID, input.Status, input.AttemptCount, input.NextAttemptAt, input.LastError)
+	return err
+}

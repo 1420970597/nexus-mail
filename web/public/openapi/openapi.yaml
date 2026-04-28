@@ -725,7 +725,7 @@ paths:
   /webhooks/endpoints/{id}/test-delivery:
     post:
       summary: 创建一条 Webhook 测试投递记录
-      description: 当前里程碑仅创建 pending 重试状态记录，不立即发起外网请求。
+      description: 创建测试投递记录并由 Webhook delivery worker 异步真实发送；worker 会携带 HMAC-SHA256 签名请求头，2xx 标记 sent，非 2xx/网络错误按指数退避重试，达到最大尝试次数后标记 failed。
       parameters:
         - in: path
           name: id

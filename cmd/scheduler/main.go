@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/finance"
 	"github.com/1420970597/nexus-mail/internal/modules/mailboxpoll"
+	"github.com/1420970597/nexus-mail/internal/modules/webhook"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
 )
@@ -26,6 +28,18 @@ func (w accountHealthWriter) UpdateProviderAccountHealth(ctx context.Context, ac
 		RefreshToken:   refreshToken,
 		TokenExpiresAt: expiresAt,
 	})
+}
+
+func schedulerMode(args []string) string {
+	if len(args) > 1 && args[1] == "webhook-worker" {
+		return "webhook-worker"
+	}
+	return "scheduler"
+}
+
+func newWebhookDeliveryWorker(service *webhook.Service) *webhook.DeliveryWorker {
+	service.UseNetworkResolver()
+	return webhook.NewDeliveryWorker(service, webhook.DeliveryWorkerConfig{WorkerID: "scheduler-webhook-worker"})
 }
 
 func main() {
@@ -45,6 +59,37 @@ func main() {
 	financeRepo := finance.NewRepository(db.Pool)
 	if err := financeRepo.EnsureSchema(ctx); err != nil {
 		log.Fatalf("ensure finance schema: %v", err)
+	}
+	webhookRepo := webhook.NewRepository(db.Pool)
+	if err := webhookRepo.EnsureSchema(ctx); err != nil {
+		log.Fatalf("ensure webhook schema: %v", err)
+	}
+	if schedulerMode(os.Args) == "webhook-worker" {
+		webhookService := webhook.NewServiceWithEncryptionKey(webhookRepo, cfg.WebhookEncryptionKey)
+		worker := newWebhookDeliveryWorker(webhookService)
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		log.Println("nexus-mail webhook delivery worker booted")
+		runWebhookSweep := func() {
+			processed, err := worker.ProcessPending(ctx)
+			if err != nil {
+				log.Printf("webhook delivery sweep failed: %v", err)
+				return
+			}
+			if processed > 0 {
+				log.Printf("webhook delivery sweep complete: processed=%d", processed)
+			}
+		}
+		runWebhookSweep()
+		for {
+			select {
+			case <-ticker.C:
+				runWebhookSweep()
+			case <-ctx.Done():
+				log.Printf("webhook delivery worker shutting down: %v", ctx.Err())
+				return
+			}
+		}
 	}
 	if err := financeRepo.SeedDevelopmentData(ctx, cfg.AppEnv); err != nil {
 		log.Fatalf("seed finance data: %v", err)

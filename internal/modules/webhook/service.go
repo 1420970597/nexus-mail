@@ -35,6 +35,13 @@ type repository interface {
 	GetEndpoint(ctx context.Context, userID, endpointID int64) (WebhookEndpoint, error)
 	CreateDelivery(ctx context.Context, input CreateDeliveryRecord) (WebhookDelivery, error)
 	ListDeliveries(ctx context.Context, userID, endpointID int64, limit int) ([]WebhookDelivery, error)
+	deliveryRepository
+}
+
+type deliveryRepository interface {
+	ClaimPendingDeliveries(ctx context.Context, workerID string, limit int) ([]WebhookDelivery, error)
+	GetEndpointByID(ctx context.Context, endpointID int64) (WebhookEndpoint, error)
+	UpdateDeliveryResult(ctx context.Context, input WebhookDeliveryUpdate) error
 }
 
 type Resolver interface {
@@ -216,6 +223,39 @@ func (s *Service) encryptSigningSecret(userID int64, secret string) (string, err
 	}
 	sealed := gcm.Seal(nonce, nonce, []byte(secret), nil)
 	return webhookSecretCipherPrefix + base64.RawURLEncoding.EncodeToString(sealed), nil
+}
+
+func (s *Service) decryptSigningSecret(userID int64, ciphertext string) (string, error) {
+	keyMaterial := strings.TrimSpace(s.encryptionKey)
+	if keyMaterial == "" {
+		return "", fmt.Errorf("WEBHOOK_SECRET_ENCRYPTION_KEY 未配置")
+	}
+	if !strings.HasPrefix(ciphertext, webhookSecretCipherPrefix) {
+		return "", fmt.Errorf("webhook signing secret ciphertext 无效")
+	}
+	sealed, err := base64.RawURLEncoding.DecodeString(strings.TrimPrefix(ciphertext, webhookSecretCipherPrefix))
+	if err != nil {
+		return "", err
+	}
+	key := sha256.Sum256([]byte(fmt.Sprintf("nexus-mail-webhook-secret:v1:%d:%s", userID, keyMaterial)))
+	block, err := aes.NewCipher(key[:])
+	if err != nil {
+		return "", err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+	if len(sealed) < gcm.NonceSize() {
+		return "", fmt.Errorf("webhook signing secret ciphertext 长度无效")
+	}
+	nonce := sealed[:gcm.NonceSize()]
+	body := sealed[gcm.NonceSize():]
+	plaintext, err := gcm.Open(nil, nonce, body, nil)
+	if err != nil {
+		return "", err
+	}
+	return string(plaintext), nil
 }
 
 func (s *Service) validateEndpointURL(ctx context.Context, raw string) (string, error) {
