@@ -117,6 +117,11 @@ type CreateOrderDisputeInput struct {
 	Reason string `json:"reason"`
 }
 
+type OrderDisputeFilter struct {
+	Status string `json:"status"`
+	Limit  int    `json:"limit"`
+}
+
 type ResolveOrderDisputeInput struct {
 	Status         string `json:"status"`
 	ResolutionType string `json:"resolution_type"`

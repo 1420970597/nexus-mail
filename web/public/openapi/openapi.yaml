@@ -922,9 +922,28 @@ paths:
   /supplier/disputes:
     get:
       summary: 获取当前供应商相关争议单
+      description: 支持按争议状态过滤并限制返回数量；仅返回当前供应商相关订单争议。
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [open, resolved, rejected]
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            maximum: 200
       responses:
         '200':
           description: 争议单列表
+        '400':
+          description: 过滤条件无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /supplier/disputes/{orderID}:
     post:
       summary: 供应商对订单发起争议
@@ -1113,9 +1132,28 @@ paths:
   /admin/disputes:
     get:
       summary: 管理员查看全部争议单
+      description: 支持按争议状态过滤并限制返回数量，用于争议处理工作台聚焦待处理或已处理记录。
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [open, resolved, rejected]
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            maximum: 200
       responses:
         '200':
           description: 争议单列表
+        '400':
+          description: 过滤条件无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /admin/disputes/{id}/resolve:
     post:
       summary: 管理员处理争议单

@@ -131,6 +131,48 @@ func TestCreateDisputeEndpointCreatesDisputeForOrder(t *testing.T) {
 	}
 }
 
+func TestSupplierDisputesEndpointForwardsFilters(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &stubRepo{disputes: []OrderDispute{{ID: 4, SupplierID: 7, Status: "resolved"}}}
+	handler := NewHandler(NewService(repo), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 7, Email: "supplier@nexus-mail.local", Role: auth.RoleSupplier}))
+	handler.RegisterRoutes(secure)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/supplier/disputes?status=resolved&limit=3", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	if repo.disputeListSupplierID != 7 || repo.disputeListAdminView || repo.disputeFilter.Status != "resolved" || repo.disputeFilter.Limit != 3 {
+		t.Fatalf("unexpected dispute filter: supplier=%d admin=%v filter=%#v", repo.disputeListSupplierID, repo.disputeListAdminView, repo.disputeFilter)
+	}
+}
+
+func TestAdminDisputesEndpointRejectsInvalidFilters(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	handler := NewHandler(NewService(&stubRepo{}), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 9, Email: "admin@nexus-mail.local", Role: auth.RoleAdmin}))
+	handler.RegisterRoutes(secure)
+
+	for _, target := range []string{
+		"/api/v1/admin/disputes?status=deleted",
+		"/api/v1/admin/disputes?limit=-1",
+		"/api/v1/admin/disputes?limit=abc",
+	} {
+		req := httptest.NewRequest(http.MethodGet, target, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("%s: expected 400, got %d: %s", target, w.Code, w.Body.String())
+		}
+	}
+}
+
 func TestAdminSettleSupplierPendingEndpointReturnsPayout(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &stubRepo{}

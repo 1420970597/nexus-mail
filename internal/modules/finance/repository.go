@@ -94,6 +94,14 @@ CREATE INDEX IF NOT EXISTS idx_order_disputes_supplier_id_created_at
   ON order_disputes(supplier_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_order_disputes_status_updated_at
   ON order_disputes(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_disputes_updated_id
+  ON order_disputes(updated_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_order_disputes_supplier_updated_id
+  ON order_disputes(supplier_id, updated_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_order_disputes_status_updated_id
+  ON order_disputes(status, updated_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_order_disputes_supplier_status_updated_id
+  ON order_disputes(supplier_id, status, updated_at DESC, id DESC);
 `)
 	return err
 }
@@ -572,19 +580,27 @@ RETURNING id, order_id, project_key, supplier_id, user_id, status, reason, resol
 	return item, nil
 }
 
-func (r *Repository) ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error) {
-	query := `
+func (r *Repository) ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool, filter OrderDisputeFilter) ([]OrderDispute, error) {
+	baseQuery := `
 SELECT id, order_id, project_key, supplier_id, user_id, status, reason, resolution_type, resolution_note, refund_amount, created_at, updated_at, resolved_at
 FROM order_disputes`
-	var rows pgx.Rows
-	var err error
-	if adminView {
-		query += ` ORDER BY updated_at DESC, id DESC LIMIT 100`
-		rows, err = r.pool.Query(ctx, query)
-	} else {
-		query += ` WHERE supplier_id = $1 ORDER BY updated_at DESC, id DESC LIMIT 100`
-		rows, err = r.pool.Query(ctx, query, supplierID)
+	args := make([]any, 0, 3)
+	conditions := make([]string, 0, 2)
+	if !adminView {
+		args = append(args, supplierID)
+		conditions = append(conditions, fmt.Sprintf("supplier_id = $%d", len(args)))
 	}
+	if filter.Status != "" {
+		args = append(args, filter.Status)
+		conditions = append(conditions, fmt.Sprintf("status = $%d", len(args)))
+	}
+	query := baseQuery
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+	args = append(args, filter.Limit)
+	query += fmt.Sprintf(" ORDER BY updated_at DESC, id DESC LIMIT $%d", len(args))
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ type repository interface {
 	SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput, fromDate, toDate *time.Time) ([]SupplierReportRow, error)
 	SettleSupplierPending(ctx context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error)
 	CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error)
-	ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error)
+	ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool, filter OrderDisputeFilter) ([]OrderDispute, error)
 	ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error)
 }
 
@@ -168,8 +168,21 @@ func (s *Service) CreateOrderDispute(ctx context.Context, actorID, orderID int64
 	return s.repo.CreateOrderDispute(ctx, actorID, orderID, actorRole, reason)
 }
 
-func (s *Service) ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error) {
-	return s.repo.ListOrderDisputes(ctx, supplierID, adminView)
+func (s *Service) ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool, filter OrderDisputeFilter) ([]OrderDispute, error) {
+	filter.Status = strings.TrimSpace(strings.ToLower(filter.Status))
+	if filter.Status != "" && filter.Status != "open" && filter.Status != "resolved" && filter.Status != "rejected" {
+		return nil, ValidationError{Message: "status 仅支持 open、resolved 或 rejected"}
+	}
+	if filter.Limit < 0 {
+		return nil, ValidationError{Message: "limit 不能为负数"}
+	}
+	if filter.Limit <= 0 {
+		filter.Limit = 100
+	}
+	if filter.Limit > 200 {
+		filter.Limit = 200
+	}
+	return s.repo.ListOrderDisputes(ctx, supplierID, adminView, filter)
 }
 
 func (s *Service) ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error) {

@@ -9,32 +9,35 @@ import (
 )
 
 type stubRepo struct {
-	wallet             WalletOverview
-	transactions       []WalletTransaction
-	settlements        []SupplierSettlementEntry
-	users              []WalletOverview
-	costProfiles       []SupplierCostProfile
-	reportInput        SupplierReportInput
-	reportFromDate     *time.Time
-	reportToDate       *time.Time
-	disputes           []OrderDispute
-	dispute            OrderDispute
-	amount             int64
-	note               string
-	userID             int64
-	adminID            int64
-	adjustUserID       int64
-	adjustAmount       int64
-	adjustReason       string
-	costProfileInput   UpsertSupplierCostProfileInput
-	disputeActorID     int64
-	disputeOrderID     int64
-	disputeActorRole   string
-	disputeReason      string
-	resolveDisputeID   int64
-	resolveDisputeData ResolveOrderDisputeInput
-	walletErr          error
-	transactionErr     error
+	wallet                WalletOverview
+	transactions          []WalletTransaction
+	settlements           []SupplierSettlementEntry
+	users                 []WalletOverview
+	costProfiles          []SupplierCostProfile
+	reportInput           SupplierReportInput
+	reportFromDate        *time.Time
+	reportToDate          *time.Time
+	disputes              []OrderDispute
+	dispute               OrderDispute
+	amount                int64
+	note                  string
+	userID                int64
+	adminID               int64
+	adjustUserID          int64
+	adjustAmount          int64
+	adjustReason          string
+	costProfileInput      UpsertSupplierCostProfileInput
+	disputeActorID        int64
+	disputeOrderID        int64
+	disputeActorRole      string
+	disputeReason         string
+	disputeFilter         OrderDisputeFilter
+	disputeListSupplierID int64
+	disputeListAdminView  bool
+	resolveDisputeID      int64
+	resolveDisputeData    ResolveOrderDisputeInput
+	walletErr             error
+	transactionErr        error
 }
 
 func (s *stubRepo) WalletOverview(context.Context, int64) (WalletOverview, error) {
@@ -111,7 +114,10 @@ func (s *stubRepo) CreateOrderDispute(_ context.Context, actorID, orderID int64,
 	return s.dispute, nil
 }
 
-func (s *stubRepo) ListOrderDisputes(context.Context, int64, bool) ([]OrderDispute, error) {
+func (s *stubRepo) ListOrderDisputes(_ context.Context, supplierID int64, adminView bool, filter OrderDisputeFilter) ([]OrderDispute, error) {
+	s.disputeListSupplierID = supplierID
+	s.disputeListAdminView = adminView
+	s.disputeFilter = filter
 	return s.disputes, s.walletErr
 }
 
@@ -271,6 +277,34 @@ func TestCreateOrderDisputePassesNormalizedValues(t *testing.T) {
 	}
 	if repo.disputeActorID != 7 || repo.disputeOrderID != 10 || repo.disputeActorRole != "supplier" || repo.disputeReason != "验证码错误" {
 		t.Fatalf("unexpected dispute repo call: %#v", repo)
+	}
+}
+
+func TestListOrderDisputesNormalizesFilters(t *testing.T) {
+	repo := &stubRepo{}
+	service := NewService(repo)
+	_, err := service.ListOrderDisputes(context.Background(), 7, false, OrderDisputeFilter{Status: " OPEN ", Limit: 500})
+	if err != nil {
+		t.Fatalf("ListOrderDisputes() error = %v", err)
+	}
+	if repo.disputeListSupplierID != 7 || repo.disputeListAdminView || repo.disputeFilter.Status != "open" || repo.disputeFilter.Limit != 200 {
+		t.Fatalf("unexpected dispute filter: supplier=%d admin=%v filter=%#v", repo.disputeListSupplierID, repo.disputeListAdminView, repo.disputeFilter)
+	}
+}
+
+func TestListOrderDisputesRejectsUnsupportedStatus(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.ListOrderDisputes(context.Background(), 7, false, OrderDisputeFilter{Status: "deleted"})
+	if err == nil {
+		t.Fatal("expected unsupported status validation error")
+	}
+}
+
+func TestListOrderDisputesRejectsInvalidLimit(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.ListOrderDisputes(context.Background(), 7, false, OrderDisputeFilter{Limit: -1})
+	if err == nil {
+		t.Fatal("expected invalid limit validation error")
 	}
 }
 

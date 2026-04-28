@@ -213,7 +213,7 @@ func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.Das
 	for index := range walletUsers {
 		walletUsers[index].PendingSettlement = pendingByUser[walletUsers[index].UserID]
 	}
-	adminDisputes, err := app.FinanceService.ListOrderDisputes(ctx, 0, true)
+	adminDisputes, err := app.FinanceService.ListOrderDisputes(ctx, 0, true, finance.OrderDisputeFilter{Limit: 100})
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}

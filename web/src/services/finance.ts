@@ -127,8 +127,8 @@ export async function getSupplierReports(params?: { from?: string; to?: string; 
   return data
 }
 
-export async function getSupplierDisputes() {
-  const { data } = await api.get<{ items: OrderDispute[] }>('/supplier/disputes')
+export async function getSupplierDisputes(params?: { status?: 'open' | 'resolved' | 'rejected'; limit?: number }) {
+  const { data } = await api.get<{ items: OrderDispute[] }>('/supplier/disputes', { params })
   return data
 }
 
@@ -152,8 +152,8 @@ export async function settleSupplierPending(supplierId: number, reason: string) 
   return data
 }
 
-export async function getAdminDisputes() {
-  const { data } = await api.get<{ items: OrderDispute[] }>('/admin/disputes')
+export async function getAdminDisputes(params?: { status?: 'open' | 'resolved' | 'rejected'; limit?: number }) {
+  const { data } = await api.get<{ items: OrderDispute[] }>('/admin/disputes', { params })
   return data
 }
 

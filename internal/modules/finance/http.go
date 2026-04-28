@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -210,21 +211,42 @@ func (h *Handler) createDispute(c *gin.Context, user auth.User, actorRole string
 
 func (h *Handler) listSupplierDisputes(c *gin.Context) {
 	user := c.MustGet("currentUser").(auth.User)
-	items, err := h.service.ListOrderDisputes(c.Request.Context(), user.ID, false)
+	items, err := h.listDisputes(c, user.ID, false)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"items": items})
 }
 
 func (h *Handler) listAdminDisputes(c *gin.Context) {
-	items, err := h.service.ListOrderDisputes(c.Request.Context(), 0, true)
+	items, err := h.listDisputes(c, 0, true)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func (h *Handler) listDisputes(c *gin.Context, supplierID int64, adminView bool) ([]OrderDispute, error) {
+	limit := 0
+	if rawLimit := strings.TrimSpace(c.Query("limit")); rawLimit != "" {
+		parsedLimit, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "limit 必须为整数"})
+			return nil, err
+		}
+		limit = parsedLimit
+	}
+	items, err := h.service.ListOrderDisputes(c.Request.Context(), supplierID, adminView, OrderDisputeFilter{Status: c.Query("status"), Limit: limit})
+	if err != nil {
+		var validationErr ValidationError
+		if errors.As(err, &validationErr) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return nil, err
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return nil, err
+	}
+	return items, nil
 }
 
 func (h *Handler) resolveDispute(c *gin.Context) {
