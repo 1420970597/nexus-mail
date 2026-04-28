@@ -85,14 +85,14 @@ func (s *Service) ListAdminAudit(ctx context.Context, filter AdminAuditFilter) (
 	}
 	if filter.ActorType != "" {
 		switch filter.ActorType {
-		case "user", "system":
+		case "user", "system", "admin":
 		default:
-			return nil, fmt.Errorf("actor_type 仅支持 user 或 system")
+			return nil, fmt.Errorf("actor_type 仅支持 user、system 或 admin")
 		}
 	}
 	if filter.Action != "" {
 		switch filter.Action {
-		case "create", "update_whitelist", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit":
+		case "create", "update_whitelist", "update_risk_rule", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit":
 		default:
 			return nil, fmt.Errorf("action 不受支持")
 		}

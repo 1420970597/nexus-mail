@@ -114,6 +114,26 @@ export async function getAdminRisk() {
   return data
 }
 
+export interface RiskRule {
+  key: string
+  enabled: boolean
+  threshold: number
+  window_minutes: number
+  severity: string
+  description: string
+  updated_at: string
+}
+
+export async function getAdminRiskRules() {
+  const { data } = await api.get<{ items: RiskRule[] }>('/admin/risk/rules')
+  return data
+}
+
+export async function updateAdminRiskRules(items: RiskRule[]) {
+  const { data } = await api.put<{ items: RiskRule[] }>('/admin/risk/rules', { items })
+  return data
+}
+
 export async function getAdminAudit(params?: { user_id?: number; api_key_id?: number; actor_type?: string; action?: string; limit?: number }) {
   const { data } = await api.get<{ items: AdminAuditEntry[] }>('/admin/audit', { params })
   return data

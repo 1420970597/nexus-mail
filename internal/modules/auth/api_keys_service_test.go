@@ -336,7 +336,7 @@ func TestListAdminAuditNormalizesFilterAndCapsLimit(t *testing.T) {
 func TestListAdminAuditRejectsUnsupportedActorType(t *testing.T) {
 	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
 	_, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{ActorType: "robot"})
-	if err == nil || err.Error() != "actor_type 仅支持 user 或 system" {
+	if err == nil || err.Error() != "actor_type 仅支持 user、system 或 admin" {
 		t.Fatalf("expected invalid actor_type error, got %v", err)
 	}
 }

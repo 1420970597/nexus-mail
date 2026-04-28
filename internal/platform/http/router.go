@@ -12,6 +12,7 @@ import (
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
 	"github.com/1420970597/nexus-mail/internal/modules/finance"
+	"github.com/1420970597/nexus-mail/internal/modules/risk"
 	"github.com/1420970597/nexus-mail/internal/modules/webhook"
 )
 
@@ -102,6 +103,8 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 			}
 			c.JSON(http.StatusOK, payload)
 		})
+		riskHandler := risk.NewHandler(app.RiskService)
+		riskHandler.RegisterAdminRoutes(admin)
 		admin.GET("/audit", authHandler.AdminAudit)
 	}
 
