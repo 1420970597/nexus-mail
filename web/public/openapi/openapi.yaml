@@ -342,6 +342,19 @@ components:
           type: integer
         action:
           type: string
+          enum:
+            - create
+            - update_whitelist
+            - update_risk_rule
+            - admin_wallet_adjustment
+            - update_supplier_cost_profile
+            - resolve_dispute
+            - revoke
+            - success
+            - denied_invalid
+            - denied_scope
+            - denied_whitelist
+            - denied_rate_limit
         actor_type:
           type: string
         note:
@@ -661,6 +674,48 @@ paths:
       responses:
         '200':
           description: 供应商结算总览
+  /supplier/cost-profiles:
+    get:
+      summary: 获取当前供应商成本模型列表
+      responses:
+        '200':
+          description: 成本模型列表
+    post:
+      summary: 新增或更新当前供应商项目成本模型
+      description: 仅供应商角色可维护自己的成本模型；更新动作会写入 update_supplier_cost_profile 审计，管理员可通过 /admin/audit?action=update_supplier_cost_profile 查询。
+      responses:
+        '200':
+          description: 成本模型已保存
+        '400':
+          description: project_key 无效、成本为负或请求参数无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /supplier/reports:
+    get:
+      summary: 获取当前供应商项目级订单/收入/成本报表
+      responses:
+        '200':
+          description: 项目报表列表
+  /supplier/disputes:
+    get:
+      summary: 获取当前供应商相关争议单
+      responses:
+        '200':
+          description: 争议单列表
+  /supplier/disputes/{orderID}:
+    post:
+      summary: 供应商对订单发起争议
+      parameters:
+        - in: path
+          name: orderID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: 争议单已创建
   /webhooks/endpoints:
     get:
       summary: 获取当前用户 Webhook endpoint 列表
@@ -780,6 +835,7 @@ paths:
   /admin/wallet-adjustments:
     post:
       summary: 管理员执行钱包调账
+      description: 调账成功后写入 admin_wallet_adjustment 审计，管理员可通过 /admin/audit?action=admin_wallet_adjustment 查询。
       requestBody:
         required: true
         content:
@@ -791,6 +847,88 @@ paths:
           description: 调账成功
         '400':
           description: 调账失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /wallet/disputes/{orderID}:
+    post:
+      summary: 用户对自己的订单发起争议
+      parameters:
+        - in: path
+          name: orderID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: 争议单已创建
+  /admin/disputes:
+    get:
+      summary: 管理员查看全部争议单
+      responses:
+        '200':
+          description: 争议单列表
+  /admin/disputes/{id}/resolve:
+    post:
+      summary: 管理员处理争议单
+      description: 处理动作会写入 resolve_dispute 审计；refund_amount 大于 0 时必须使用 resolution_type=refund。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 争议单已处理
+        '400':
+          description: 请求无效或退款契约不满足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/audit:
+    get:
+      summary: 管理员审计日志查询
+      description: 支持按 action、actor_type、user_id、api_key_id 与 limit 过滤；action 覆盖 API Key 生命周期、鉴权拒绝、风控规则更新以及 Phase 4 财务运营动作（admin_wallet_adjustment、update_supplier_cost_profile、resolve_dispute）。
+      parameters:
+        - in: query
+          name: action
+          schema:
+            type: string
+        - in: query
+          name: actor_type
+          schema:
+            type: string
+            enum: [user, system, admin]
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+        - in: query
+          name: api_key_id
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            maximum: 200
+      responses:
+        '200':
+          description: 审计日志列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminAuditEntry'
+        '400':
+          description: 过滤条件不受支持
           content:
             application/json:
               schema:

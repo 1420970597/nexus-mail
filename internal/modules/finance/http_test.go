@@ -55,6 +55,24 @@ func TestSupplierCostProfilesEndpointRejectsRegularUser(t *testing.T) {
 	}
 }
 
+func TestSupplierCostProfilesEndpointRejectsAdminWrites(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	handler := NewHandler(NewService(&stubRepo{}), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 1, Email: "admin@nexus-mail.local", Role: auth.RoleAdmin}))
+	handler.RegisterRoutes(secure)
+
+	body, _ := json.Marshal(UpsertSupplierCostProfileInput{ProjectKey: "discord", CostPerSuccess: 1, CostPerTimeout: 1})
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/supplier/cost-profiles", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
 func TestCreateDisputeEndpointCreatesDisputeForOrder(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &stubRepo{dispute: OrderDispute{ID: 3, OrderID: 10, Status: "open", Reason: "验证码错误"}}

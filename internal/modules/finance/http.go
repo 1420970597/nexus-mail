@@ -126,6 +126,10 @@ func (h *Handler) supplierCostProfiles(c *gin.Context) {
 
 func (h *Handler) upsertSupplierCostProfile(c *gin.Context) {
 	user := c.MustGet("currentUser").(auth.User)
+	if user.Role != auth.RoleSupplier {
+		c.JSON(http.StatusForbidden, gin.H{"error": "仅供应商可维护成本模型"})
+		return
+	}
 	var input UpsertSupplierCostProfileInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})

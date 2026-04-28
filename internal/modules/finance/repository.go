@@ -274,6 +274,9 @@ func (r *Repository) AdminAdjustWallet(ctx context.Context, adminID, userID, amo
 	if _, err := tx.Exec(ctx, `INSERT INTO wallet_transactions (user_id, order_id, type, direction, amount, balance_type, note) VALUES ($1, 0, 'admin_adjustment', $2, $3, 'available', $4)`, userID, direction, abs(amount), note); err != nil {
 		return WalletOverview{}, err
 	}
+	if err := recordFinanceAuditTx(ctx, tx, adminID, "admin_wallet_adjustment", fmt.Sprintf("管理员调账 user_id=%d amount=%d", userID, amount)); err != nil {
+		return WalletOverview{}, err
+	}
 	if err := tx.Commit(ctx); err != nil {
 		return WalletOverview{}, err
 	}
@@ -326,15 +329,21 @@ ORDER BY project_key ASC
 }
 
 func (r *Repository) UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return SupplierCostProfile{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
 	var projectExists bool
-	if err := r.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM projects WHERE key = $1 AND is_active = TRUE)`, input.ProjectKey).Scan(&projectExists); err != nil {
+	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM projects WHERE key = $1 AND is_active = TRUE)`, input.ProjectKey).Scan(&projectExists); err != nil {
 		return SupplierCostProfile{}, err
 	}
 	if !projectExists {
 		return SupplierCostProfile{}, fmt.Errorf("project_key 不存在或未启用")
 	}
 	var item SupplierCostProfile
-	err := r.pool.QueryRow(ctx, `
+	err = tx.QueryRow(ctx, `
 INSERT INTO supplier_cost_profiles (supplier_id, project_key, cost_per_success, cost_per_timeout, currency, status, notes, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
 ON CONFLICT (supplier_id, project_key) DO UPDATE
@@ -356,7 +365,16 @@ RETURNING id, supplier_id, project_key, cost_per_success, cost_per_timeout, curr
 		&item.Notes,
 		&item.UpdatedAt,
 	)
-	return item, err
+	if err != nil {
+		return SupplierCostProfile{}, err
+	}
+	if err := recordFinanceAuditTx(ctx, tx, supplierID, "update_supplier_cost_profile", fmt.Sprintf("更新供应商成本模型 project_key=%s success=%d timeout=%d status=%s", item.ProjectKey, item.CostPerSuccess, item.CostPerTimeout, item.Status)); err != nil {
+		return SupplierCostProfile{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return SupplierCostProfile{}, err
+	}
+	return item, nil
 }
 
 func (r *Repository) SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error) {
@@ -596,6 +614,9 @@ RETURNING id, order_id, project_key, supplier_id, user_id, status, reason, resol
 	if err != nil {
 		return OrderDispute{}, err
 	}
+	if err := recordFinanceAuditTx(ctx, tx, adminID, "resolve_dispute", fmt.Sprintf("处理争议单 dispute_id=%d status=%s resolution_type=%s refund_amount=%d", item.ID, item.Status, item.ResolutionType, item.RefundAmount)); err != nil {
+		return OrderDispute{}, err
+	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return OrderDispute{}, err
@@ -610,6 +631,17 @@ func (r *Repository) ensureWalletRow(ctx context.Context, userID int64) error {
 
 func ensureWalletRowTx(ctx context.Context, tx pgx.Tx, userID int64) error {
 	_, err := tx.Exec(ctx, `INSERT INTO user_wallets (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING`, userID)
+	return err
+}
+
+func recordFinanceAuditTx(ctx context.Context, tx pgx.Tx, userID int64, action, note string) error {
+	action = strings.TrimSpace(strings.ToLower(action))
+	note = strings.TrimSpace(note)
+	actorType := "admin"
+	if action == "update_supplier_cost_profile" {
+		actorType = "user"
+	}
+	_, err := tx.Exec(ctx, `INSERT INTO api_key_audit_logs (user_id, api_key_id, action, actor_type, note) VALUES ($1, NULL, $2, $3, $4)`, userID, action, actorType, note)
 	return err
 }
 

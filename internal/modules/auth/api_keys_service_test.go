@@ -356,6 +356,23 @@ func TestListAdminAuditAcceptsRateLimitDenialAction(t *testing.T) {
 	}
 }
 
+func TestListAdminAuditAcceptsFinanceOperationActions(t *testing.T) {
+	repo := &apiKeyStubRepo{audit: []APIKeyAuditEntry{{ID: 3, Action: "resolve_dispute"}}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	for _, action := range []string{"admin_wallet_adjustment", "update_supplier_cost_profile", "resolve_dispute"} {
+		items, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{Action: " " + action + " "})
+		if err != nil {
+			t.Fatalf("ListAdminAudit(%s) error = %v", action, err)
+		}
+		if len(items) != 1 {
+			t.Fatalf("expected audit items for %s, got %#v", action, items)
+		}
+		if repo.lastAdminAuditFilter == nil || repo.lastAdminAuditFilter.Action != action {
+			t.Fatalf("expected %s filter to be forwarded, got %#v", action, repo.lastAdminAuditFilter)
+		}
+	}
+}
+
 func TestListAdminAuditRejectsUnsupportedAction(t *testing.T) {
 	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
 	_, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{Action: "drop_table"})
