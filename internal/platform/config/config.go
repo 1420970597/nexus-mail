@@ -34,6 +34,7 @@ type Config struct {
 	MicrosoftOAuthTokenURL string
 	ReadTimeout            time.Duration
 	WriteTimeout           time.Duration
+	WebhookEncryptionKey   string
 }
 
 func Load() (Config, error) {
@@ -64,6 +65,7 @@ func Load() (Config, error) {
 		MicrosoftOAuthTokenURL: defaultString(viper.GetString("MICROSOFT_OAUTH_TOKEN_URL"), "https://login.microsoftonline.com/common/oauth2/v2.0/token"),
 		ReadTimeout:            10 * time.Second,
 		WriteTimeout:           15 * time.Second,
+		WebhookEncryptionKey:   defaultString(viper.GetString("WEBHOOK_SECRET_ENCRYPTION_KEY"), defaultString(viper.GetString("JWT_SECRET"), "")),
 	}
 	return cfg, cfg.Validate()
 }
@@ -78,6 +80,9 @@ func (c Config) Validate() error {
 	}
 	if c.JWTSecret == "" || c.JWTSecret == "change-me" || c.JWTSecret == "change-me-in-production" {
 		missing = append(missing, "JWT_SECRET(valid)")
+	}
+	if c.WebhookEncryptionKey == "" || c.WebhookEncryptionKey == "change-me" || c.WebhookEncryptionKey == "change-me-in-production" {
+		missing = append(missing, "WEBHOOK_SECRET_ENCRYPTION_KEY(valid)")
 	}
 	if len(missing) > 0 {
 		return fmt.Errorf("invalid configuration, missing or insecure settings: %s", strings.Join(missing, ", "))

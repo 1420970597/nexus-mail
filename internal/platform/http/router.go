@@ -13,6 +13,7 @@ import (
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
 	"github.com/1420970597/nexus-mail/internal/modules/finance"
+	"github.com/1420970597/nexus-mail/internal/modules/webhook"
 )
 
 func NewRouter(app *bootstrap.App) *gin.Engine {
@@ -75,6 +76,8 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 		activationHandler.RegisterRoutes(secure)
 		financeHandler := finance.NewHandler(app.FinanceService, app.Config.AppEnv == "development")
 		financeHandler.RegisterRoutes(secure)
+		webhookHandler := webhook.NewHandler(app.WebhookService)
+		webhookHandler.RegisterRoutes(secure)
 
 		supplier := secure.Group("/supplier")
 		supplier.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))

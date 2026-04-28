@@ -10,6 +10,7 @@ import (
 	"github.com/1420970597/nexus-mail/internal/app/bootstrap"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
 	"github.com/1420970597/nexus-mail/internal/modules/finance"
+	"github.com/1420970597/nexus-mail/internal/modules/webhook"
 )
 
 func TestHealthz(t *testing.T) {
@@ -45,5 +46,6 @@ func testApp() *bootstrap.App {
 	return &bootstrap.App{
 		AuthService:    auth.NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour),
 		FinanceService: finance.NewService(nil),
+		WebhookService: webhook.NewService(nil),
 	}
 }

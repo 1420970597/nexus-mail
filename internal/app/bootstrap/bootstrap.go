@@ -8,6 +8,7 @@ import (
 	"github.com/1420970597/nexus-mail/internal/modules/activation"
 	"github.com/1420970597/nexus-mail/internal/modules/auth"
 	"github.com/1420970597/nexus-mail/internal/modules/finance"
+	"github.com/1420970597/nexus-mail/internal/modules/webhook"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
 )
@@ -18,6 +19,7 @@ type App struct {
 	AuthService       *auth.Service
 	ActivationService *activation.Service
 	FinanceService    *finance.Service
+	WebhookService    *webhook.Service
 }
 
 func New(ctx context.Context, cfg config.Config) (*App, error) {
@@ -51,11 +53,19 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 		return nil, fmt.Errorf("seed finance data: %w", err)
 	}
 
+	webhookRepo := webhook.NewRepository(db.Pool)
+	if err := webhookRepo.EnsureSchema(ctx); err != nil {
+		return nil, fmt.Errorf("ensure webhook schema: %w", err)
+	}
+	webhookService := webhook.NewServiceWithEncryptionKey(webhookRepo, cfg.WebhookEncryptionKey)
+	webhookService.UseNetworkResolver()
+
 	return &App{
 		Config:            cfg,
 		DB:                db,
 		AuthService:       authService,
 		ActivationService: activation.NewService(activationRepo),
 		FinanceService:    finance.NewService(financeRepo),
+		WebhookService:    webhookService,
 	}, nil
 }
