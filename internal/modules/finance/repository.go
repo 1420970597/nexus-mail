@@ -383,7 +383,7 @@ FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 JOIN resource_domains rd ON rd.id = o.domain_id
 LEFT JOIN supplier_cost_profiles cp ON cp.supplier_id = rd.supplier_id AND cp.project_key = p.key
-LEFT JOIN order_disputes d ON d.order_id = o.id AND d.status IN ('open', 'resolved')
+LEFT JOIN order_disputes d ON d.order_id = o.id AND d.status IN ('open', 'resolved', 'rejected')
 WHERE rd.supplier_id = $1
 GROUP BY p.key
 ORDER BY p.key ASC

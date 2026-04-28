@@ -15,8 +15,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type authRepository interface {
+	Create(ctx context.Context, email, password string, role Role) (User, error)
+	FindByEmail(ctx context.Context, email string) (User, error)
+	FindByID(ctx context.Context, id int64) (User, error)
+	CreateRefreshSession(ctx context.Context, sessionID string, userID int64, refreshToken string, expiresAt time.Time) error
+	IsRefreshSessionActive(ctx context.Context, sessionID string, refreshToken string) (bool, error)
+	IsSessionActive(ctx context.Context, sessionID string) (bool, error)
+	RevokeRefreshSession(ctx context.Context, sessionID string) error
+}
+
 type Service struct {
-	repo              *Repository
+	authRepo          authRepository
+	apiKeyRepo        apiKeyRepository
 	jwtSecret         string
 	tokenExpire       time.Duration
 	refreshExpire     time.Duration
@@ -24,9 +35,20 @@ type Service struct {
 	revokedSessionIDs map[string]struct{}
 }
 
-func NewService(repo *Repository, jwtSecret string, tokenExpire, refreshExpire time.Duration) *Service {
+func NewService(authRepo authRepository, apiKeyRepo apiKeyRepository, jwtSecret string, tokenExpire, refreshExpire time.Duration) *Service {
+	if authRepo == nil {
+		if candidate, ok := any(apiKeyRepo).(authRepository); ok {
+			authRepo = candidate
+		}
+	}
+	if apiKeyRepo == nil {
+		if candidate, ok := any(authRepo).(apiKeyRepository); ok {
+			apiKeyRepo = candidate
+		}
+	}
 	return &Service{
-		repo:              repo,
+		authRepo:          authRepo,
+		apiKeyRepo:        apiKeyRepo,
 		jwtSecret:         jwtSecret,
 		tokenExpire:       tokenExpire,
 		refreshExpire:     refreshExpire,
@@ -38,7 +60,7 @@ func (s *Service) Register(ctx context.Context, input RegisterInput) (Session, e
 	if err := validateCredentials(input.Email, input.Password); err != nil {
 		return Session{}, err
 	}
-	user, err := s.repo.Create(ctx, input.Email, input.Password, RoleUser)
+	user, err := s.authRepo.Create(ctx, input.Email, input.Password, RoleUser)
 	if err != nil {
 		return Session{}, err
 	}
@@ -49,7 +71,7 @@ func (s *Service) Login(ctx context.Context, input LoginInput) (Session, error) 
 	if err := validateCredentials(input.Email, input.Password); err != nil {
 		return Session{}, err
 	}
-	user, err := s.repo.FindByEmail(ctx, input.Email)
+	user, err := s.authRepo.FindByEmail(ctx, input.Email)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return Session{}, errors.New("邮箱或密码错误")
@@ -200,8 +222,8 @@ func (s *Service) parseTokenClaimsByType(ctx context.Context, tokenString, expec
 			return User{}, "", errors.New("会话已失效")
 		}
 	}
-	if s.repo != nil {
-		storedUser, lookupErr := s.repo.FindByID(ctx, user.ID)
+	if s.authRepo != nil {
+		storedUser, lookupErr := s.authRepo.FindByID(ctx, user.ID)
 		if lookupErr != nil {
 			return User{}, "", errors.New("用户不存在")
 		}
@@ -240,8 +262,8 @@ func (s *Service) signToken(user User, tokenType string, sessionID string, expir
 }
 
 func (s *Service) storeRefreshSession(ctx context.Context, sessionID string, userID int64, refreshToken string, expiresAt time.Time) error {
-	if s.repo != nil {
-		return s.repo.CreateRefreshSession(ctx, sessionID, userID, hashToken(refreshToken), expiresAt)
+	if s.authRepo != nil {
+		return s.authRepo.CreateRefreshSession(ctx, sessionID, userID, hashToken(refreshToken), expiresAt)
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -250,8 +272,8 @@ func (s *Service) storeRefreshSession(ctx context.Context, sessionID string, use
 }
 
 func (s *Service) revokeRefreshSession(ctx context.Context, sessionID string) error {
-	if s.repo != nil {
-		return s.repo.RevokeRefreshSession(ctx, sessionID)
+	if s.authRepo != nil {
+		return s.authRepo.RevokeRefreshSession(ctx, sessionID)
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -260,8 +282,8 @@ func (s *Service) revokeRefreshSession(ctx context.Context, sessionID string) er
 }
 
 func (s *Service) isRefreshSessionActive(ctx context.Context, sessionID string, refreshToken string) (bool, error) {
-	if s.repo != nil {
-		return s.repo.IsRefreshSessionActive(ctx, sessionID, hashToken(refreshToken))
+	if s.authRepo != nil {
+		return s.authRepo.IsRefreshSessionActive(ctx, sessionID, hashToken(refreshToken))
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -270,8 +292,8 @@ func (s *Service) isRefreshSessionActive(ctx context.Context, sessionID string, 
 }
 
 func (s *Service) isAccessSessionActive(ctx context.Context, sessionID string) (bool, error) {
-	if s.repo != nil {
-		return s.repo.IsSessionActive(ctx, sessionID)
+	if s.authRepo != nil {
+		return s.authRepo.IsSessionActive(ctx, sessionID)
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()

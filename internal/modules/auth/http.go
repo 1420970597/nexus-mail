@@ -18,6 +18,10 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.POST("/logout", h.logout)
 	rg.GET("/me", h.authRequired(), h.me)
 	rg.GET("/menu", h.authRequired(), h.menu)
+	rg.GET("/api-keys", h.authRequired(), h.apiKeys)
+	rg.POST("/api-keys", h.authRequired(), h.createAPIKey)
+	rg.GET("/api-keys/audit", h.authRequired(), h.apiKeyAudit)
+	rg.POST("/api-keys/:id/revoke", h.authRequired(), h.revokeAPIKey)
 }
 
 func (h *Handler) register(c *gin.Context) {

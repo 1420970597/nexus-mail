@@ -13,7 +13,7 @@ import (
 
 func TestRefreshIssuesNewAccessTokenAndRevokesPreviousRefreshToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	service := NewService(nil, "test-secret", time.Hour, 24*time.Hour)
+	service := NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour)
 	handler := NewHandler(service)
 	r := gin.New()
 	api := r.Group("/api/v1/auth")
@@ -66,7 +66,7 @@ func TestRefreshIssuesNewAccessTokenAndRevokesPreviousRefreshToken(t *testing.T)
 
 func TestLogoutRevokesRefreshToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	service := NewService(nil, "test-secret", time.Hour, 24*time.Hour)
+	service := NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour)
 	handler := NewHandler(service)
 	r := gin.New()
 	api := r.Group("/api/v1/auth")
@@ -101,7 +101,7 @@ func TestLogoutRevokesRefreshToken(t *testing.T) {
 
 func TestMenuReturnsRoleSpecificEntries(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	service := NewService(nil, "test-secret", time.Hour, 24*time.Hour)
+	service := NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour)
 	handler := NewHandler(service)
 	r := gin.New()
 	api := r.Group("/api/v1/auth")

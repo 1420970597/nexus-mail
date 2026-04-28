@@ -13,21 +13,22 @@ const (
 )
 
 const (
-	PermissionDashboardView       Permission = "dashboard:view"
-	PermissionProjectView         Permission = "project:view"
-	PermissionOrderView           Permission = "order:view"
-	PermissionBalanceView         Permission = "balance:view"
-	PermissionProfileManage       Permission = "profile:manage"
-	PermissionAPIKeysManage       Permission = "api_keys:manage"
-	PermissionSettingsManage      Permission = "settings:manage"
-	PermissionSupplierDomain      Permission = "supplier:domain"
-	PermissionSupplierResource    Permission = "supplier:resource"
-	PermissionSupplierSettlement  Permission = "supplier:settlement"
-	PermissionAdminUserManage     Permission = "admin:user_manage"
-	PermissionAdminSupplierManage Permission = "admin:supplier_manage"
-	PermissionAdminPricingManage  Permission = "admin:pricing_manage"
-	PermissionAdminRiskManage     Permission = "admin:risk_manage"
-	PermissionAdminAuditView      Permission = "admin:audit_view"
+	PermissionDashboardView        Permission = "dashboard:view"
+	PermissionProjectView          Permission = "project:view"
+	PermissionOrderView            Permission = "order:view"
+	PermissionBalanceView          Permission = "balance:view"
+	PermissionProfileManage        Permission = "profile:manage"
+	PermissionAPIKeysManage        Permission = "api_keys:manage"
+	PermissionSettingsManage       Permission = "settings:manage"
+	PermissionSupplierDomain       Permission = "supplier:domain"
+	PermissionSupplierResource     Permission = "supplier:resource"
+	PermissionSupplierSettlement   Permission = "supplier:settlement"
+	PermissionAdminUserManage      Permission = "admin:user_manage"
+	PermissionAdminSupplierManage  Permission = "admin:supplier_manage"
+	PermissionAdminPricingManage   Permission = "admin:pricing_manage"
+	PermissionAdminRiskManage      Permission = "admin:risk_manage"
+	PermissionAdminAuditView       Permission = "admin:audit_view"
+	PermissionAPIKeyWhitelistWrite Permission = "api_keys:whitelist_manage"
 )
 
 var rolePermissions = map[Role][]Permission{
@@ -38,6 +39,7 @@ var rolePermissions = map[Role][]Permission{
 		PermissionBalanceView,
 		PermissionProfileManage,
 		PermissionAPIKeysManage,
+		PermissionAPIKeyWhitelistWrite,
 		PermissionSettingsManage,
 	},
 	RoleSupplier: {
@@ -47,6 +49,7 @@ var rolePermissions = map[Role][]Permission{
 		PermissionBalanceView,
 		PermissionProfileManage,
 		PermissionAPIKeysManage,
+		PermissionAPIKeyWhitelistWrite,
 		PermissionSettingsManage,
 		PermissionSupplierDomain,
 		PermissionSupplierResource,
@@ -59,6 +62,7 @@ var rolePermissions = map[Role][]Permission{
 		PermissionBalanceView,
 		PermissionProfileManage,
 		PermissionAPIKeysManage,
+		PermissionAPIKeyWhitelistWrite,
 		PermissionSettingsManage,
 		PermissionSupplierDomain,
 		PermissionSupplierResource,

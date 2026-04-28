@@ -6,7 +6,7 @@ import (
 )
 
 func TestAuthRequiredParsesTrimmedBearerTokenValue(t *testing.T) {
-	service := NewService(nil, "super-secret-value", 3600*time.Second, 7200*time.Second)
+	service := NewService(nil, nil, "super-secret-value", 3600*time.Second, 7200*time.Second)
 	sessionID, err := generateTokenID()
 	if err != nil {
 		t.Fatalf("generate token id: %v", err)

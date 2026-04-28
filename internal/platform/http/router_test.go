@@ -43,7 +43,7 @@ func TestPing(t *testing.T) {
 
 func testApp() *bootstrap.App {
 	return &bootstrap.App{
-		AuthService:    auth.NewService(nil, "test-secret", time.Hour, 24*time.Hour),
+		AuthService:    auth.NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour),
 		FinanceService: finance.NewService(nil),
 	}
 }
