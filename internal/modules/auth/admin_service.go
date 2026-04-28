@@ -34,9 +34,14 @@ func (s *Service) BuildAdminOverview(
 ) map[string]any {
 	summary := BuildDashboardSummary(ctx, projects, orders, walletUsers, disputes, audit)
 	recentAudit := latestAuditEntries(audit, 5)
+	users := make([]User, 0, len(walletUsers))
+	for _, wallet := range walletUsers {
+		users = append(users, User{ID: wallet.UserID, Email: wallet.Email, Role: Role(wallet.Role)})
+	}
 	return map[string]any{
 		"generated_at": time.Now().UTC(),
 		"summary":      summary,
+		"suppliers":    BuildAdminSupplierSummaries(users, walletUsers),
 		"recent_audit": recentAudit,
 	}
 }

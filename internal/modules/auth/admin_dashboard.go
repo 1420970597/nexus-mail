@@ -106,6 +106,13 @@ type DashboardWalletUser struct {
 	PendingSettlement int64
 }
 
+type AdminSupplierSummary struct {
+	UserID            int64  `json:"user_id"`
+	Email             string `json:"email"`
+	Role              string `json:"role"`
+	PendingSettlement int64  `json:"pending_settlement"`
+}
+
 type DashboardDispute struct {
 	ID     int64
 	Status string
@@ -207,6 +214,32 @@ func rateBps(numerator, denominator int) int {
 		return 0
 	}
 	return int(int64(numerator) * 10000 / int64(denominator))
+}
+
+func BuildAdminSupplierSummaries(users []User, walletUsers []DashboardWalletUser) []AdminSupplierSummary {
+	pendingByUser := make(map[int64]int64, len(walletUsers))
+	for _, wallet := range walletUsers {
+		pendingByUser[wallet.UserID] = wallet.PendingSettlement
+	}
+	items := make([]AdminSupplierSummary, 0)
+	for _, user := range users {
+		if user.Role != RoleSupplier {
+			continue
+		}
+		items = append(items, AdminSupplierSummary{
+			UserID:            user.ID,
+			Email:             user.Email,
+			Role:              string(user.Role),
+			PendingSettlement: pendingByUser[user.ID],
+		})
+	}
+	sort.SliceStable(items, func(i, j int) bool {
+		if items[i].PendingSettlement == items[j].PendingSettlement {
+			return items[i].UserID < items[j].UserID
+		}
+		return items[i].PendingSettlement > items[j].PendingSettlement
+	})
+	return items
 }
 
 func BuildRiskSignals(

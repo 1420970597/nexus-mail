@@ -449,6 +449,20 @@ components:
         created_at:
           type: string
           format: date-time
+    AdminSupplierSummary:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [supplier]
+        pending_settlement:
+          type: integer
+          description: 当前供应商待结算余额，单位分。
     AdminOverviewResponse:
       type: object
       properties:
@@ -457,6 +471,11 @@ components:
           format: date-time
         summary:
           $ref: '#/components/schemas/AdminDashboardSummary'
+        suppliers:
+          type: array
+          description: 供应商待结算排行数据，仅包含 supplier 角色主体，按待结算金额降序、用户 ID 升序稳定返回。
+          items:
+            $ref: '#/components/schemas/AdminSupplierSummary'
         recent_audit:
           type: array
           items:

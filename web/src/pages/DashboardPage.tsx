@@ -88,6 +88,18 @@ export function DashboardPage() {
               <Tag color="red">鉴权拒绝总数：{adminSummary.audit.denied_total}</Tag>
             </Space>
           </Card>
+          <Card title="供应商待结算排行" style={{ width: '100%' }}>
+            <Table
+              pagination={false}
+              rowKey="user_id"
+              dataSource={adminOverview?.suppliers ?? []}
+              columns={[
+                { title: '供应商 ID', dataIndex: 'user_id', key: 'user_id' },
+                { title: '邮箱', dataIndex: 'email', key: 'email' },
+                { title: '待结算金额', dataIndex: 'pending_settlement', key: 'pending_settlement', render: (value) => amountLabel(Number(value || 0)) },
+              ]}
+            />
+          </Card>
           <Card title="最近审计事件" style={{ width: '100%' }}>
             <Table
               pagination={false}

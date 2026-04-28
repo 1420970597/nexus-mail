@@ -128,7 +128,7 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 }
 
 func buildAdminOverviewPayload(ctx context.Context, app *bootstrap.App) (gin.H, error) {
-	projects, orders, wallets, disputes, audit, err := loadAdminDashboardData(ctx, app)
+	projects, orders, wallets, disputes, audit, users, err := loadAdminDashboardData(ctx, app)
 	if err != nil {
 		return nil, err
 	}
@@ -136,12 +136,13 @@ func buildAdminOverviewPayload(ctx context.Context, app *bootstrap.App) (gin.H, 
 	return gin.H{
 		"generated_at": time.Now().UTC(),
 		"summary":      summary,
+		"suppliers":    auth.BuildAdminSupplierSummaries(users, wallets),
 		"recent_audit": latestAuditEntries(audit, 5),
 	}, nil
 }
 
 func buildAdminRiskPayload(ctx context.Context, app *bootstrap.App) (gin.H, error) {
-	_, orders, _, disputes, audit, err := loadAdminDashboardData(ctx, app)
+	_, orders, _, disputes, audit, _, err := loadAdminDashboardData(ctx, app)
 	if err != nil {
 		return nil, err
 	}
@@ -177,10 +178,10 @@ func loadRiskRuleConfigs(ctx context.Context, app *bootstrap.App) ([]auth.RiskRu
 	return rules, nil
 }
 
-func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.DashboardProject, []auth.DashboardOrder, []auth.DashboardWalletUser, []auth.DashboardDispute, []auth.APIKeyAuditEntry, error) {
+func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.DashboardProject, []auth.DashboardOrder, []auth.DashboardWalletUser, []auth.DashboardDispute, []auth.APIKeyAuditEntry, []auth.User, error) {
 	users, err := app.AuthService.ListAllUsers(ctx)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, err
 	}
 	projects := make([]auth.DashboardProject, 0)
 	walletUsers := make([]auth.DashboardWalletUser, 0, len(users))
@@ -190,21 +191,21 @@ func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.Das
 	}
 	orderItems, err := app.ActivationService.ListAllActivationOrders(ctx)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, err
 	}
 	for _, entry := range orderItems {
 		orders = append(orders, auth.DashboardOrder{ID: entry.ID, UserID: entry.UserID, Status: entry.Status, FinalPrice: entry.FinalPrice})
 	}
 	projectItems, err := app.ActivationService.ListAllProjects(ctx)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, err
 	}
 	for _, item := range projectItems {
 		projects = append(projects, auth.DashboardProject{ID: item.ID, Key: item.Key, Name: item.Name, IsActive: item.IsActive})
 	}
 	financeUsers, err := app.FinanceService.AdminWalletUsers(ctx)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, err
 	}
 	pendingByUser := map[int64]int64{}
 	for _, wallet := range financeUsers {
@@ -215,7 +216,7 @@ func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.Das
 	}
 	adminDisputes, err := app.FinanceService.ListOrderDisputes(ctx, 0, true, finance.OrderDisputeFilter{Limit: 100})
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, err
 	}
 	disputes := make([]auth.DashboardDispute, 0, len(adminDisputes))
 	for _, item := range adminDisputes {
@@ -223,9 +224,9 @@ func loadAdminDashboardData(ctx context.Context, app *bootstrap.App) ([]auth.Das
 	}
 	audit, err := app.AuthService.ListAdminAudit(ctx, auth.AdminAuditFilter{Limit: 200})
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, nil, err
 	}
-	return projects, orders, walletUsers, disputes, normalizeAuditEntries(audit), nil
+	return projects, orders, walletUsers, disputes, normalizeAuditEntries(audit), users, nil
 }
 
 func latestAuditEntries(items []auth.APIKeyAuditEntry, limit int) []auth.APIKeyAuditEntry {

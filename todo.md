@@ -728,7 +728,7 @@ nexus-mail/
    - API 异常访问
    - 发件人黑名单（已完成：新增管理员 `GET/PUT /api/v1/admin/risk/sender-blacklist`，mail-ingest 在 SMTP DATA 前以 554 拒收命中发件人并写入 `sender_blacklist_hit`，`/admin/risk` 暴露 `sender_blacklist_hits` 与对应风险信号；真实 API/SMTP 回放已验证）
 7. 审计日志（已完成财务运营审计补强里程碑：管理员 `/api/v1/admin/audit` 可查询 API Key 创建/撤销与运行时鉴权成功/拒绝事件、`update_whitelist` 白名单变更、`update_risk_rule` 风控规则变更，并新增 `admin_wallet_adjustment`、`update_supplier_cost_profile`、`resolve_dispute` 三类 Phase 4 财务运营动作过滤；成本模型更新、管理员调账与争议处理会写入可筛选审计，已通过真实 API 回放验证）
-8. 仪表盘统计（已完成深度统计里程碑：管理员 `/api/v1/admin/overview` 输出订单完成/超时/取消率、完成订单流水、平均完成客单价、争议发生率、鉴权拒绝总数/拒绝率，前端 Dashboard 展示这些深度指标；已通过真实 API 回放验证字段与数值存在）
+8. 仪表盘统计（已完成深度统计里程碑：管理员 `/api/v1/admin/overview` 输出订单完成/超时/取消率、完成订单流水、平均完成客单价、争议发生率、鉴权拒绝总数/拒绝率；本轮补强供应商待结算排行，overview 新增 `suppliers` 数组，仅返回 supplier 角色主体并按待结算金额降序排序，前端 Dashboard 展示供应商 ID/邮箱/待结算金额，OpenAPI 契约同步更新；已通过真实 API 验证 admin 200、普通用户 403 与供应商列表结构）
 
 ### 输出
 - 独立 API 文档页面可访问

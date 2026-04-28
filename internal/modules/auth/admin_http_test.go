@@ -44,6 +44,10 @@ func TestBuildAdminOverviewPayloadUsesDashboardAggregates(t *testing.T) {
 	if summary.Orders.GrossRevenue != 1200 || summary.Orders.AverageFinishedOrderValue != 1200 || summary.Orders.CompletionRateBps != 5000 {
 		t.Fatalf("expected final_price backed revenue metrics, got %#v", summary.Orders)
 	}
+	suppliers, ok := payload["suppliers"].([]AdminSupplierSummary)
+	if !ok || len(suppliers) != 1 || suppliers[0].UserID != 2 || suppliers[0].PendingSettlement != 1500 {
+		t.Fatalf("expected supplier summaries in overview payload, got %#v", payload["suppliers"])
+	}
 }
 
 func TestBuildAdminRiskPayloadUsesRiskSignals(t *testing.T) {

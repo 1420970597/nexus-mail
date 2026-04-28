@@ -93,6 +93,31 @@ func TestBuildDashboardSummaryHandlesZeroAndFractionalRates(t *testing.T) {
 	}
 }
 
+func TestBuildAdminSupplierSummariesKeepsSupplierScopeAndWalletMetrics(t *testing.T) {
+	users := []User{
+		{ID: 1, Email: "admin@nexus-mail.local", Role: RoleAdmin},
+		{ID: 2, Email: "supplier-a@nexus-mail.local", Role: RoleSupplier},
+		{ID: 3, Email: "user@nexus-mail.local", Role: RoleUser},
+		{ID: 4, Email: "supplier-b@nexus-mail.local", Role: RoleSupplier},
+	}
+	wallets := []DashboardWalletUser{
+		{UserID: 2, PendingSettlement: 1200},
+		{UserID: 4, PendingSettlement: 3400},
+		{UserID: 99, PendingSettlement: 9999},
+	}
+
+	items := BuildAdminSupplierSummaries(users, wallets)
+	if len(items) != 2 {
+		t.Fatalf("expected only supplier users, got %#v", items)
+	}
+	if items[0].UserID != 4 || items[0].Email != "supplier-b@nexus-mail.local" || items[0].PendingSettlement != 3400 {
+		t.Fatalf("expected highest pending settlement first, got %#v", items[0])
+	}
+	if items[1].UserID != 2 || items[1].PendingSettlement != 1200 {
+		t.Fatalf("unexpected second supplier summary: %#v", items[1])
+	}
+}
+
 func TestBuildRiskSignalsAppliesConfiguredRuleThresholdsAndDisabledRules(t *testing.T) {
 	orders := []DashboardOrder{
 		{ID: 1, UserID: 3, Status: "TIMEOUT"},

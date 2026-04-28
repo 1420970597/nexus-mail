@@ -37,9 +37,17 @@ export interface AdminAuditEntry {
   created_at: string
 }
 
+export interface AdminSupplierSummary {
+  user_id: number
+  email: string
+  role: string
+  pending_settlement: number
+}
+
 export interface AdminOverviewResponse {
   generated_at: string
   summary: AdminDashboardSummary
+  suppliers: AdminSupplierSummary[]
   recent_audit: AdminAuditEntry[]
 }
 

@@ -66,6 +66,9 @@ describe('App', () => {
         supplier_settlements: { pending_amount: 1500 },
       },
       recent_audit: [{ id: 1, user_id: 3, api_key_id: 9, action: 'denied_whitelist', actor_type: 'system', note: 'blocked', created_at: '2026-04-28T00:00:00Z' }],
+      suppliers: [
+        { user_id: 2, email: 'supplier@nexus-mail.local', role: 'supplier', pending_settlement: 1500 },
+      ],
     })
     mockedGetAdminRisk.mockResolvedValue({
       generated_at: '2026-04-28T00:00:00Z',
@@ -144,6 +147,8 @@ describe('App', () => {
     await waitFor(() => expect(screen.getAllByText('¥12.00').length).toBeGreaterThanOrEqual(2))
     expect(await screen.findByText('鉴权拒绝率')).toBeInTheDocument()
     expect(await screen.findByText('50.00%')).toBeInTheDocument()
+    expect(await screen.findByText('供应商待结算排行')).toBeInTheDocument()
+    expect(await screen.findByText('supplier@nexus-mail.local')).toBeInTheDocument()
     expect(await screen.findByText('鉴权拒绝总数：2')).toBeInTheDocument()
   })
 
