@@ -150,3 +150,27 @@ func TestBuildRiskSignalsRanksHighAndMediumSignals(t *testing.T) {
 		t.Fatalf("expected both high and medium signals, got %#v", summary)
 	}
 }
+
+func TestBuildRiskSignalsAppliesSenderBlacklistRule(t *testing.T) {
+	audit := []APIKeyAuditEntry{
+		{ID: 1, Action: "sender_blacklist_hit", ActorType: "system", Note: "mail_from=bad@example.test"},
+		{ID: 2, Action: "sender_blacklist_hit", ActorType: "system", Note: "mail_from=bad@example.test"},
+	}
+	rules := []RiskRuleConfig{{Key: "sender_blacklist", Enabled: true, Threshold: 2, Severity: "high"}}
+
+	summary, signals := BuildRiskSignalsWithRules(context.Background(), nil, nil, audit, rules)
+	if summary.SenderBlacklistHits != 2 {
+		t.Fatalf("expected 2 sender blacklist hits, got %#v", summary)
+	}
+	if len(signals) != 1 || signals[0].Title != "发件人黑名单命中" || signals[0].Count != 2 || signals[0].Severity != "high" {
+		t.Fatalf("unexpected sender blacklist signal: %#v", signals)
+	}
+
+	disabledSummary, disabledSignals := BuildRiskSignalsWithRules(context.Background(), nil, nil, audit, []RiskRuleConfig{{Key: "sender_blacklist", Enabled: false, Threshold: 1, Severity: "high"}})
+	if disabledSummary.SenderBlacklistHits != 2 {
+		t.Fatalf("expected raw sender blacklist counter even when rule disabled, got %#v", disabledSummary)
+	}
+	if len(disabledSignals) != 0 {
+		t.Fatalf("expected disabled sender blacklist rule to suppress signals, got %#v", disabledSignals)
+	}
+}

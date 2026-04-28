@@ -77,6 +77,7 @@ type RiskSummary struct {
 	DeniedScope           int `json:"denied_scope"`
 	DeniedInvalid         int `json:"denied_invalid"`
 	DeniedRateLimit       int `json:"denied_rate_limit"`
+	SenderBlacklistHits   int `json:"sender_blacklist_hits"`
 	TimeoutOrders         int `json:"timeout_orders"`
 	CanceledOrders        int `json:"canceled_orders"`
 	HighRiskSignalCount   int `json:"high_risk_signal_count"`
@@ -257,6 +258,8 @@ func BuildRiskSignalsWithRules(
 			summary.DeniedInvalid++
 		case "denied_rate_limit":
 			summary.DeniedRateLimit++
+		case "sender_blacklist_hit":
+			summary.SenderBlacklistHits++
 		}
 	}
 
@@ -307,6 +310,7 @@ func BuildRiskSignalsWithRules(
 	appendStaticSignal("auth", "medium", summary.DeniedInvalid, "存在无效 API Key 请求", fmt.Sprintf("最近审计中检测到 %d 次 denied_invalid 事件", summary.DeniedInvalid))
 	appendRuleSignal("high_timeout", "order", "medium", 1, summary.TimeoutOrders, "超时订单需要关注", fmt.Sprintf("当前共有 %d 笔 TIMEOUT 订单", summary.TimeoutOrders))
 	appendRuleSignal("high_cancel", "order", "medium", 1, summary.CanceledOrders, "取消订单偏多", fmt.Sprintf("当前共有 %d 笔 CANCELED 订单", summary.CanceledOrders))
+	appendRuleSignal("sender_blacklist", "mail", "high", 1, summary.SenderBlacklistHits, "发件人黑名单命中", fmt.Sprintf("最近审计中检测到 %d 次 sender_blacklist_hit 事件，请检查入站邮件来源与黑名单策略", summary.SenderBlacklistHits))
 
 	for userID, total := range orderCountByUser {
 		if total < 3 {

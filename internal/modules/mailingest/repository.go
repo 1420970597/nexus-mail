@@ -65,7 +65,7 @@ func (r *Repository) SaveMessage(ctx context.Context, item PersistedMessage) err
 	_, err = r.pool.Exec(ctx, `
 INSERT INTO inbound_messages (
   id, mail_from, rcpt_to, helo, remote_ip, stored_at, raw_path, metadata_path, raw_object_key, metadata_object_key, size_bytes, parse_status, parse_attempts, extraction_type, extraction_value, matched_order_id, created_at, updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'queued', 0, '', '', 0, NOW(), NOW())
+) VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7, $8, $9, $10, $11, 'queued', 0, '', '', 0, NOW(), NOW())
 ON CONFLICT (id) DO UPDATE
 SET mail_from = EXCLUDED.mail_from,
     rcpt_to = EXCLUDED.rcpt_to,
@@ -78,7 +78,7 @@ SET mail_from = EXCLUDED.mail_from,
     metadata_object_key = EXCLUDED.metadata_object_key,
     size_bytes = EXCLUDED.size_bytes,
     updated_at = NOW()
-`, item.ID, item.MailFrom, rcptTo, item.Helo, item.RemoteIP, item.StoredAt, item.RawPath, item.MetadataPath, item.RawObjectKey, item.MetadataObjectKey, item.SizeBytes)
+`, item.ID, item.MailFrom, string(rcptTo), item.Helo, item.RemoteIP, item.StoredAt, item.RawPath, item.MetadataPath, item.RawObjectKey, item.MetadataObjectKey, item.SizeBytes)
 	if err != nil {
 		return fmt.Errorf("save inbound message: %w", err)
 	}

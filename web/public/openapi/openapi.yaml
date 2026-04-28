@@ -246,7 +246,7 @@ components:
       type: object
       required: [key, enabled, threshold, window_minutes, severity]
       description: |
-        可配置风控规则。/admin/risk 会实时读取已启用规则：high_timeout、high_cancel、api_denied_rate 的 threshold/severity/enabled 会直接影响风险信号是否出现及等级；window_minutes 预留给后续时间窗口化聚合。
+        可配置风控规则。/admin/risk 会实时读取已启用规则：high_timeout、high_cancel、api_denied_rate、sender_blacklist 的 threshold/severity/enabled 会直接影响风险信号是否出现及等级；sender_blacklist 由入站 SMTP 发件人黑名单命中审计驱动；window_minutes 预留给后续时间窗口化聚合。
       properties:
         key:
           type: string
@@ -268,6 +268,51 @@ components:
         updated_at:
           type: string
           format: date-time
+    SenderBlacklistEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        pattern:
+          type: string
+          description: 明确邮箱地址、域名或 *.域名。
+        match_type:
+          type: string
+          enum: [email, domain]
+        enabled:
+          type: boolean
+        note:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    UpdateSenderBlacklistRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            type: object
+            required: [pattern, match_type]
+            properties:
+              pattern:
+                type: string
+                maxLength: 255
+                example: bad@example.test
+              match_type:
+                type: string
+                enum: [email, domain]
+              enabled:
+                type: boolean
+                default: true
+              note:
+                type: string
     AdminDashboardSummary:
       type: object
       properties:
@@ -378,6 +423,8 @@ components:
             - create
             - update_whitelist
             - update_risk_rule
+            - update_sender_blacklist
+            - sender_blacklist_hit
             - admin_wallet_adjustment
             - update_supplier_cost_profile
             - resolve_dispute
@@ -458,6 +505,8 @@ components:
           type: integer
         denied_rate_limit:
           type: integer
+        sender_blacklist_hits:
+          type: integer
         timeout_orders:
           type: integer
         canceled_orders:
@@ -471,7 +520,7 @@ components:
       properties:
         category:
           type: string
-          enum: [dispute, auth, order, behavior]
+          enum: [dispute, auth, order, behavior, mail]
         severity:
           type: string
           enum: [high, medium, low]
@@ -1176,7 +1225,7 @@ paths:
   /admin/audit:
     get:
       summary: 管理员审计日志查询
-      description: 支持按 action、actor_type、user_id、api_key_id 与 limit 过滤；action 覆盖 API Key 生命周期、鉴权拒绝、风控规则更新以及 Phase 4 财务运营动作（admin_wallet_adjustment、update_supplier_cost_profile、settle_supplier_pending、resolve_dispute）。
+      description: 支持按 action、actor_type、user_id、api_key_id 与 limit 过滤；action 覆盖 API Key 生命周期、鉴权拒绝、风控规则更新、发件人黑名单管理/命中（update_sender_blacklist、sender_blacklist_hit）以及 Phase 4 财务运营动作（admin_wallet_adjustment、update_supplier_cost_profile、settle_supplier_pending、resolve_dispute）。
       parameters:
         - in: query
           name: action
@@ -1265,6 +1314,49 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/RiskRule'
+        '400':
+          description: 参数无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/risk/sender-blacklist:
+    get:
+      summary: 获取发件人黑名单
+      description: 管理员查看 SMTP 入站发件人黑名单；命中项会在 mail-ingest DATA 前拒收并写入 sender_blacklist_hit 审计。
+      responses:
+        '200':
+          description: 发件人黑名单列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SenderBlacklistEntry'
+    put:
+      summary: 更新发件人黑名单
+      description: 管理员新增或更新邮箱/域名黑名单，支持明确邮箱地址、域名与 *.域名；每条更新写入 update_sender_blacklist 审计，管理员审计接口可按 action 过滤。本接口为批量 upsert，不会删除未提交的既有条目；如需停用条目，请对相同 pattern/match_type 提交 enabled=false。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSenderBlacklistRequest'
+      responses:
+        '200':
+          description: 已保存发件人黑名单
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SenderBlacklistEntry'
         '400':
           description: 参数无效
           content:

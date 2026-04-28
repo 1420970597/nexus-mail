@@ -12,14 +12,19 @@ import (
 )
 
 type Server struct {
-	service   *Service
-	repo      *Repository
-	storage   ObjectStorage
-	publisher Publisher
-	logger    *log.Logger
+	service       *Service
+	repo          *Repository
+	storage       ObjectStorage
+	publisher     Publisher
+	riskEvaluator SenderRiskEvaluator
+	logger        *log.Logger
 }
 
 func NewServer(service *Service, repo *Repository, storage ObjectStorage, publisher Publisher, logger *log.Logger) *Server {
+	return NewServerWithRiskEvaluator(service, repo, storage, publisher, NopSenderRiskEvaluator{}, logger)
+}
+
+func NewServerWithRiskEvaluator(service *Service, repo *Repository, storage ObjectStorage, publisher Publisher, riskEvaluator SenderRiskEvaluator, logger *log.Logger) *Server {
 	if logger == nil {
 		logger = log.Default()
 	}
@@ -29,7 +34,10 @@ func NewServer(service *Service, repo *Repository, storage ObjectStorage, publis
 	if publisher == nil {
 		publisher = NopPublisher{}
 	}
-	return &Server{service: service, repo: repo, storage: storage, publisher: publisher, logger: logger}
+	if riskEvaluator == nil {
+		riskEvaluator = NopSenderRiskEvaluator{}
+	}
+	return &Server{service: service, repo: repo, storage: storage, publisher: publisher, riskEvaluator: riskEvaluator, logger: logger}
 }
 
 func (s *Server) HandleConn(conn net.Conn) {
@@ -73,6 +81,16 @@ func (s *Server) HandleConn(conn net.Conn) {
 		case upper == "DATA":
 			if env.MailFrom == "" || len(env.RcptTo) == 0 {
 				_, _ = fmt.Fprint(conn, "554 Missing MAIL FROM or RCPT TO\r\n")
+				continue
+			}
+			if matched, reason, err := s.riskEvaluator.EvaluateSender(context.Background(), env.MailFrom); err != nil {
+				s.logger.Printf("sender risk evaluation error: %v", err)
+				_, _ = fmt.Fprint(conn, "451 Requested action aborted: local error in processing\r\n")
+				continue
+			} else if matched {
+				s.logger.Printf("blocked mail from=%s reason=%s", env.MailFrom, reason)
+				_, _ = fmt.Fprint(conn, "554 Sender blocked by policy\r\n")
+				resetEnvelope()
 				continue
 			}
 			_, _ = fmt.Fprint(conn, "354 End data with <CR><LF>.<CR><LF>\r\n")
@@ -138,6 +156,14 @@ func readData(reader *bufio.Reader) ([]byte, error) {
 
 func smtpAddress(raw string) string {
 	value := strings.TrimSpace(raw)
+	if strings.HasPrefix(value, "<") {
+		if end := strings.Index(value, ">"); end >= 0 {
+			return strings.TrimSpace(value[1:end])
+		}
+	}
+	if fields := strings.Fields(value); len(fields) > 0 {
+		value = fields[0]
+	}
 	value = strings.Trim(value, "<>")
 	return strings.TrimSpace(value)
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/1420970597/nexus-mail/internal/modules/mailingest"
+	"github.com/1420970597/nexus-mail/internal/modules/risk"
 	"github.com/1420970597/nexus-mail/internal/platform/config"
 	"github.com/1420970597/nexus-mail/internal/platform/database"
 )
@@ -28,6 +29,11 @@ func main() {
 	if err := repo.EnsureSchema(ctx); err != nil {
 		log.Fatalf("ensure mail-ingest schema: %v", err)
 	}
+	riskRepo := risk.NewRepository(db.Pool)
+	riskService := risk.NewService(riskRepo)
+	if err := riskService.EnsureReady(ctx); err != nil {
+		log.Fatalf("ensure risk schema: %v", err)
+	}
 	storage, err := mailingest.NewMinIOStorage(cfg.MinIOEndpoint, cfg.MinIOAccessKey, cfg.MinIOSecretKey, cfg.MinIOUseSSL, cfg.MinIORawBucket)
 	if err != nil {
 		log.Fatalf("init minio storage: %v", err)
@@ -40,7 +46,7 @@ func main() {
 		log.Fatalf("init rabbitmq publisher: %v", err)
 	}
 	defer publisher.Close()
-	server := mailingest.NewServer(service, repo, storage, publisher, log.Default())
+	server := mailingest.NewServerWithRiskEvaluator(service, repo, storage, publisher, risk.SenderEvaluatorAdapter{Service: riskService}, log.Default())
 	ln, err := net.Listen("tcp", ":"+cfg.MailIngestPort)
 	if err != nil {
 		log.Fatal(err)
