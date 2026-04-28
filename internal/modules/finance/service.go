@@ -13,6 +13,12 @@ type repository interface {
 	SupplierOverview(ctx context.Context, supplierID int64) (WalletOverview, []SupplierSettlementEntry, error)
 	AdminAdjustWallet(ctx context.Context, adminID, userID, amount int64, reason string) (WalletOverview, error)
 	AdminWalletUsers(ctx context.Context) ([]WalletOverview, error)
+	ListSupplierCostProfiles(ctx context.Context, supplierID int64) ([]SupplierCostProfile, error)
+	UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error)
+	SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error)
+	CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error)
+	ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error)
+	ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error)
 }
 
 type Service struct {
@@ -54,4 +60,67 @@ func (s *Service) AdminAdjustWallet(ctx context.Context, adminID int64, input Ad
 
 func (s *Service) AdminWalletUsers(ctx context.Context) ([]WalletOverview, error) {
 	return s.repo.AdminWalletUsers(ctx)
+}
+
+func (s *Service) ListSupplierCostProfiles(ctx context.Context, supplierID int64) ([]SupplierCostProfile, error) {
+	return s.repo.ListSupplierCostProfiles(ctx, supplierID)
+}
+
+func (s *Service) UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error) {
+	input.ProjectKey = strings.TrimSpace(strings.ToLower(input.ProjectKey))
+	input.Currency = strings.TrimSpace(strings.ToUpper(input.Currency))
+	input.Status = strings.TrimSpace(strings.ToLower(input.Status))
+	input.Notes = strings.TrimSpace(input.Notes)
+	if input.ProjectKey == "" {
+		return SupplierCostProfile{}, fmt.Errorf("project_key 不能为空")
+	}
+	if input.CostPerSuccess < 0 || input.CostPerTimeout < 0 {
+		return SupplierCostProfile{}, fmt.Errorf("成本金额不能为负数")
+	}
+	if input.Currency == "" {
+		input.Currency = "CNY"
+	}
+	if input.Status == "" {
+		input.Status = "active"
+	}
+	return s.repo.UpsertSupplierCostProfile(ctx, supplierID, input)
+}
+
+func (s *Service) SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error) {
+	return s.repo.SupplierReport(ctx, supplierID)
+}
+
+func (s *Service) CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error) {
+	reason = strings.TrimSpace(reason)
+	actorRole = strings.TrimSpace(strings.ToLower(actorRole))
+	if orderID <= 0 {
+		return OrderDispute{}, fmt.Errorf("order_id 无效")
+	}
+	if reason == "" {
+		return OrderDispute{}, fmt.Errorf("争议原因不能为空")
+	}
+	return s.repo.CreateOrderDispute(ctx, actorID, orderID, actorRole, reason)
+}
+
+func (s *Service) ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error) {
+	return s.repo.ListOrderDisputes(ctx, supplierID, adminView)
+}
+
+func (s *Service) ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error) {
+	input.Status = strings.TrimSpace(strings.ToLower(input.Status))
+	input.ResolutionType = strings.TrimSpace(strings.ToLower(input.ResolutionType))
+	input.ResolutionNote = strings.TrimSpace(input.ResolutionNote)
+	if disputeID <= 0 {
+		return OrderDispute{}, fmt.Errorf("争议单 ID 无效")
+	}
+	if input.Status != "resolved" && input.Status != "rejected" {
+		return OrderDispute{}, fmt.Errorf("status 仅支持 resolved 或 rejected")
+	}
+	if input.Status == "resolved" && input.ResolutionType == "" {
+		input.ResolutionType = "manual_adjustment"
+	}
+	if input.RefundAmount < 0 {
+		return OrderDispute{}, fmt.Errorf("refund_amount 不能为负数")
+	}
+	return s.repo.ResolveOrderDispute(ctx, adminID, disputeID, input)
 }

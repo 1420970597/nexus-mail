@@ -7,19 +7,30 @@ import (
 )
 
 type stubRepo struct {
-	wallet         WalletOverview
-	transactions   []WalletTransaction
-	settlements    []SupplierSettlementEntry
-	users          []WalletOverview
-	amount         int64
-	note           string
-	userID         int64
-	adminID        int64
-	adjustUserID   int64
-	adjustAmount   int64
-	adjustReason   string
-	walletErr      error
-	transactionErr error
+	wallet             WalletOverview
+	transactions       []WalletTransaction
+	settlements        []SupplierSettlementEntry
+	users              []WalletOverview
+	costProfiles       []SupplierCostProfile
+	reportRows         []SupplierReportRow
+	disputes           []OrderDispute
+	dispute            OrderDispute
+	amount             int64
+	note               string
+	userID             int64
+	adminID            int64
+	adjustUserID       int64
+	adjustAmount       int64
+	adjustReason       string
+	costProfileInput   UpsertSupplierCostProfileInput
+	disputeActorID     int64
+	disputeOrderID     int64
+	disputeActorRole   string
+	disputeReason      string
+	resolveDisputeID   int64
+	resolveDisputeData ResolveOrderDisputeInput
+	walletErr          error
+	transactionErr     error
 }
 
 func (s *stubRepo) WalletOverview(context.Context, int64) (WalletOverview, error) {
@@ -51,6 +62,48 @@ func (s *stubRepo) AdminAdjustWallet(_ context.Context, adminID, userID, amount 
 
 func (s *stubRepo) AdminWalletUsers(context.Context) ([]WalletOverview, error) {
 	return s.users, s.walletErr
+}
+
+func (s *stubRepo) ListSupplierCostProfiles(context.Context, int64) ([]SupplierCostProfile, error) {
+	return s.costProfiles, s.walletErr
+}
+
+func (s *stubRepo) UpsertSupplierCostProfile(_ context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error) {
+	s.userID = supplierID
+	s.costProfileInput = input
+	if s.walletErr != nil {
+		return SupplierCostProfile{}, s.walletErr
+	}
+	return SupplierCostProfile{SupplierID: supplierID, ProjectKey: input.ProjectKey, Currency: input.Currency, Status: input.Status}, nil
+}
+
+func (s *stubRepo) SupplierReport(context.Context, int64) ([]SupplierReportRow, error) {
+	return s.reportRows, s.walletErr
+}
+
+func (s *stubRepo) CreateOrderDispute(_ context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error) {
+	s.disputeActorID = actorID
+	s.disputeOrderID = orderID
+	s.disputeActorRole = actorRole
+	s.disputeReason = reason
+	if s.walletErr != nil {
+		return OrderDispute{}, s.walletErr
+	}
+	return s.dispute, nil
+}
+
+func (s *stubRepo) ListOrderDisputes(context.Context, int64, bool) ([]OrderDispute, error) {
+	return s.disputes, s.walletErr
+}
+
+func (s *stubRepo) ResolveOrderDispute(_ context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error) {
+	s.adminID = adminID
+	s.resolveDisputeID = disputeID
+	s.resolveDisputeData = input
+	if s.walletErr != nil {
+		return OrderDispute{}, s.walletErr
+	}
+	return s.dispute, nil
 }
 
 func TestTopUpWalletValidatesAmountAndTrimsNote(t *testing.T) {
@@ -103,5 +156,58 @@ func TestWalletOverviewPropagatesRepositoryError(t *testing.T) {
 	_, err := service.WalletOverview(context.Background(), 5)
 	if err == nil || err.Error() != "boom" {
 		t.Fatalf("expected propagated error, got %v", err)
+	}
+}
+
+func TestUpsertSupplierCostProfileNormalizesInput(t *testing.T) {
+	repo := &stubRepo{}
+	service := NewService(repo)
+	_, err := service.UpsertSupplierCostProfile(context.Background(), 12, UpsertSupplierCostProfileInput{
+		ProjectKey:     "  DISCORD ",
+		CostPerSuccess: 500,
+		CostPerTimeout: 100,
+		Currency:       " cny ",
+		Status:         " ACTIVE ",
+		Notes:          "  note  ",
+	})
+	if err != nil {
+		t.Fatalf("UpsertSupplierCostProfile() error = %v", err)
+	}
+	if repo.costProfileInput.ProjectKey != "discord" || repo.costProfileInput.Currency != "CNY" || repo.costProfileInput.Status != "active" || repo.costProfileInput.Notes != "note" {
+		t.Fatalf("unexpected normalized input: %#v", repo.costProfileInput)
+	}
+}
+
+func TestCreateOrderDisputeValidatesReason(t *testing.T) {
+	service := NewService(&stubRepo{})
+	if _, err := service.CreateOrderDispute(context.Background(), 1, 0, "user", "x"); err == nil {
+		t.Fatal("expected invalid order id error")
+	}
+	if _, err := service.CreateOrderDispute(context.Background(), 1, 10, "user", "   "); err == nil {
+		t.Fatal("expected empty reason error")
+	}
+}
+
+func TestCreateOrderDisputePassesNormalizedValues(t *testing.T) {
+	repo := &stubRepo{dispute: OrderDispute{ID: 3, OrderID: 10}}
+	service := NewService(repo)
+	_, err := service.CreateOrderDispute(context.Background(), 7, 10, " Supplier ", "  验证码错误 ")
+	if err != nil {
+		t.Fatalf("CreateOrderDispute() error = %v", err)
+	}
+	if repo.disputeActorID != 7 || repo.disputeOrderID != 10 || repo.disputeActorRole != "supplier" || repo.disputeReason != "验证码错误" {
+		t.Fatalf("unexpected dispute repo call: %#v", repo)
+	}
+}
+
+func TestResolveOrderDisputeDefaultsResolutionType(t *testing.T) {
+	repo := &stubRepo{dispute: OrderDispute{ID: 8}}
+	service := NewService(repo)
+	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: " RESOLVED ", RefundAmount: 200})
+	if err != nil {
+		t.Fatalf("ResolveOrderDispute() error = %v", err)
+	}
+	if repo.resolveDisputeID != 8 || repo.resolveDisputeData.Status != "resolved" || repo.resolveDisputeData.ResolutionType != "manual_adjustment" {
+		t.Fatalf("unexpected resolve repo call: %#v", repo.resolveDisputeData)
 	}
 }

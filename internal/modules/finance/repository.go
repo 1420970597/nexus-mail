@@ -15,6 +15,8 @@ type Repository struct {
 
 func NewRepository(pool *pgxpool.Pool) *Repository { return &Repository{pool: pool} }
 
+const disputeRefundType = "dispute_refund"
+
 func (r *Repository) EnsureSchema(ctx context.Context) error {
 	if r == nil || r.pool == nil {
 		return nil
@@ -56,6 +58,39 @@ CREATE TABLE IF NOT EXISTS supplier_settlement_entries (
 );
 CREATE INDEX IF NOT EXISTS idx_supplier_settlement_entries_supplier_id_created_at
   ON supplier_settlement_entries(supplier_id, created_at DESC);
+CREATE TABLE IF NOT EXISTS supplier_cost_profiles (
+  id BIGSERIAL PRIMARY KEY,
+  supplier_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_key TEXT NOT NULL,
+  cost_per_success BIGINT NOT NULL DEFAULT 0,
+  cost_per_timeout BIGINT NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CNY',
+  status TEXT NOT NULL DEFAULT 'active',
+  notes TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(supplier_id, project_key)
+);
+CREATE INDEX IF NOT EXISTS idx_supplier_cost_profiles_supplier_id_project_key
+  ON supplier_cost_profiles(supplier_id, project_key);
+CREATE TABLE IF NOT EXISTS order_disputes (
+  id BIGSERIAL PRIMARY KEY,
+  order_id BIGINT NOT NULL UNIQUE,
+  supplier_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_key TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'open',
+  reason TEXT NOT NULL,
+  resolution_type TEXT NOT NULL DEFAULT '',
+  resolution_note TEXT NOT NULL DEFAULT '',
+  refund_amount BIGINT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_order_disputes_supplier_id_created_at
+  ON order_disputes(supplier_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_disputes_status_updated_at
+  ON order_disputes(status, updated_at DESC);
 `)
 	return err
 }
@@ -81,6 +116,23 @@ SELECT id, 0, 0
 FROM users
 WHERE role IN ('supplier', 'admin')
 ON CONFLICT (supplier_id) DO NOTHING;
+
+INSERT INTO supplier_cost_profiles (supplier_id, project_key, cost_per_success, cost_per_timeout, currency, status, notes)
+SELECT id,
+       x.project_key,
+       x.cost_per_success,
+       x.cost_per_timeout,
+       'CNY',
+       'active',
+       x.notes
+FROM users
+CROSS JOIN (VALUES
+  ('discord', 500, 120, '默认 Discord 成本模型'),
+  ('google', 900, 180, '默认 Google 成本模型'),
+  ('tiktok', 700, 150, '默认 TikTok 成本模型')
+) AS x(project_key, cost_per_success, cost_per_timeout, notes)
+WHERE email = 'supplier@nexus-mail.local'
+ON CONFLICT (supplier_id, project_key) DO NOTHING;
 `)
 	return err
 }
@@ -249,6 +301,306 @@ ORDER BY u.id ASC
 		items = append(items, item)
 	}
 	return items, rows.Err()
+}
+
+func (r *Repository) ListSupplierCostProfiles(ctx context.Context, supplierID int64) ([]SupplierCostProfile, error) {
+	rows, err := r.pool.Query(ctx, `
+SELECT id, supplier_id, project_key, cost_per_success, cost_per_timeout, currency, status, notes, updated_at
+FROM supplier_cost_profiles
+WHERE supplier_id = $1
+ORDER BY project_key ASC
+`, supplierID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SupplierCostProfile
+	for rows.Next() {
+		var item SupplierCostProfile
+		if err := rows.Scan(&item.ID, &item.SupplierID, &item.ProjectKey, &item.CostPerSuccess, &item.CostPerTimeout, &item.Currency, &item.Status, &item.Notes, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error) {
+	var projectExists bool
+	if err := r.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM projects WHERE key = $1 AND is_active = TRUE)`, input.ProjectKey).Scan(&projectExists); err != nil {
+		return SupplierCostProfile{}, err
+	}
+	if !projectExists {
+		return SupplierCostProfile{}, fmt.Errorf("project_key 不存在或未启用")
+	}
+	var item SupplierCostProfile
+	err := r.pool.QueryRow(ctx, `
+INSERT INTO supplier_cost_profiles (supplier_id, project_key, cost_per_success, cost_per_timeout, currency, status, notes, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+ON CONFLICT (supplier_id, project_key) DO UPDATE
+SET cost_per_success = EXCLUDED.cost_per_success,
+    cost_per_timeout = EXCLUDED.cost_per_timeout,
+    currency = EXCLUDED.currency,
+    status = EXCLUDED.status,
+    notes = EXCLUDED.notes,
+    updated_at = NOW()
+RETURNING id, supplier_id, project_key, cost_per_success, cost_per_timeout, currency, status, notes, updated_at
+`, supplierID, input.ProjectKey, input.CostPerSuccess, input.CostPerTimeout, input.Currency, input.Status, input.Notes).Scan(
+		&item.ID,
+		&item.SupplierID,
+		&item.ProjectKey,
+		&item.CostPerSuccess,
+		&item.CostPerTimeout,
+		&item.Currency,
+		&item.Status,
+		&item.Notes,
+		&item.UpdatedAt,
+	)
+	return item, err
+}
+
+func (r *Repository) SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error) {
+	rows, err := r.pool.Query(ctx, `
+SELECT
+  p.key,
+  COUNT(DISTINCT o.id) AS total_orders,
+  COUNT(DISTINCT CASE WHEN o.status = 'FINISHED' THEN o.id END) AS finished_orders,
+  COUNT(DISTINCT CASE WHEN o.status = 'TIMEOUT' THEN o.id END) AS timeout_orders,
+  COUNT(DISTINCT d.order_id) AS disputed_orders,
+  COALESCE(SUM(CASE WHEN o.status = 'FINISHED' THEN o.quoted_price ELSE 0 END), 0) AS gross_revenue,
+  COALESCE(SUM(CASE
+    WHEN o.status = 'FINISHED' THEN cp.cost_per_success
+    WHEN o.status = 'TIMEOUT' THEN cp.cost_per_timeout
+    ELSE 0
+  END), 0) AS modeled_cost,
+  COALESCE(SUM(CASE WHEN o.status = 'FINISHED' THEN o.quoted_price ELSE 0 END), 0) -
+  COALESCE(SUM(CASE
+    WHEN o.status = 'FINISHED' THEN cp.cost_per_success
+    WHEN o.status = 'TIMEOUT' THEN cp.cost_per_timeout
+    ELSE 0
+  END), 0) AS estimated_gross_pnl
+FROM activation_orders o
+JOIN projects p ON p.id = o.project_id
+JOIN resource_domains rd ON rd.id = o.domain_id
+LEFT JOIN supplier_cost_profiles cp ON cp.supplier_id = rd.supplier_id AND cp.project_key = p.key
+LEFT JOIN order_disputes d ON d.order_id = o.id AND d.status IN ('open', 'resolved')
+WHERE rd.supplier_id = $1
+GROUP BY p.key
+ORDER BY p.key ASC
+`, supplierID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SupplierReportRow
+	for rows.Next() {
+		var item SupplierReportRow
+		if err := rows.Scan(&item.ProjectKey, &item.TotalOrders, &item.FinishedOrders, &item.TimeoutOrders, &item.DisputedOrders, &item.GrossRevenue, &item.ModeledCost, &item.EstimatedGrossPnL); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return OrderDispute{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var item OrderDispute
+	var currentStatus string
+	err = tx.QueryRow(ctx, `
+SELECT o.id, o.user_id, rd.supplier_id, p.key, o.status
+FROM activation_orders o
+JOIN resource_domains rd ON rd.id = o.domain_id
+JOIN projects p ON p.id = o.project_id
+WHERE o.id = $1
+FOR UPDATE
+`, orderID).Scan(&item.OrderID, &item.UserID, &item.SupplierID, &item.ProjectKey, &currentStatus)
+	if err != nil {
+		return OrderDispute{}, err
+	}
+	if actorRole == "user" && item.UserID != actorID {
+		return OrderDispute{}, fmt.Errorf("仅订单所属用户可发起争议")
+	}
+	if actorRole == "supplier" && item.SupplierID != actorID {
+		return OrderDispute{}, fmt.Errorf("仅订单所属供应商可发起争议")
+	}
+	if currentStatus != "FINISHED" && currentStatus != "TIMEOUT" {
+		return OrderDispute{}, fmt.Errorf("当前订单状态不允许发起争议")
+	}
+	err = tx.QueryRow(ctx, `
+INSERT INTO order_disputes (order_id, supplier_id, user_id, project_key, status, reason, updated_at)
+VALUES ($1, $2, $3, $4, 'open', $5, NOW())
+ON CONFLICT (order_id) DO UPDATE
+SET reason = EXCLUDED.reason,
+    status = 'open',
+    resolution_type = '',
+    resolution_note = '',
+    refund_amount = 0,
+    resolved_at = NULL,
+    updated_at = NOW()
+RETURNING id, order_id, project_key, supplier_id, user_id, status, reason, resolution_type, resolution_note, refund_amount, created_at, updated_at, resolved_at
+`, item.OrderID, item.SupplierID, item.UserID, item.ProjectKey, reason).Scan(
+		&item.ID,
+		&item.OrderID,
+		&item.ProjectKey,
+		&item.SupplierID,
+		&item.UserID,
+		&item.Status,
+		&item.Reason,
+		&item.ResolutionType,
+		&item.ResolutionNote,
+		&item.RefundAmount,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.ResolvedAt,
+	)
+	if err != nil {
+		return OrderDispute{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return OrderDispute{}, err
+	}
+	return item, nil
+}
+
+func (r *Repository) ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error) {
+	query := `
+SELECT id, order_id, project_key, supplier_id, user_id, status, reason, resolution_type, resolution_note, refund_amount, created_at, updated_at, resolved_at
+FROM order_disputes`
+	var rows pgx.Rows
+	var err error
+	if adminView {
+		query += ` ORDER BY updated_at DESC, id DESC LIMIT 100`
+		rows, err = r.pool.Query(ctx, query)
+	} else {
+		query += ` WHERE supplier_id = $1 ORDER BY updated_at DESC, id DESC LIMIT 100`
+		rows, err = r.pool.Query(ctx, query, supplierID)
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]OrderDispute, 0)
+	for rows.Next() {
+		var item OrderDispute
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.ProjectKey, &item.SupplierID, &item.UserID, &item.Status, &item.Reason, &item.ResolutionType, &item.ResolutionNote, &item.RefundAmount, &item.CreatedAt, &item.UpdatedAt, &item.ResolvedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return OrderDispute{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var item OrderDispute
+	err = tx.QueryRow(ctx, `
+SELECT id, order_id, project_key, supplier_id, user_id, status, reason, resolution_type, resolution_note, refund_amount, created_at, updated_at, resolved_at
+FROM order_disputes
+WHERE id = $1
+FOR UPDATE
+`, disputeID).Scan(
+		&item.ID,
+		&item.OrderID,
+		&item.ProjectKey,
+		&item.SupplierID,
+		&item.UserID,
+		&item.Status,
+		&item.Reason,
+		&item.ResolutionType,
+		&item.ResolutionNote,
+		&item.RefundAmount,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.ResolvedAt,
+	)
+	if err != nil {
+		return OrderDispute{}, err
+	}
+
+	if item.Status != "open" {
+		return OrderDispute{}, fmt.Errorf("争议单已处理，禁止重复结算")
+	}
+
+	if input.Status == "resolved" && input.RefundAmount > 0 {
+		if item.RefundAmount > 0 || item.ResolvedAt != nil {
+			return OrderDispute{}, fmt.Errorf("争议单已退款，禁止重复退款")
+		}
+		var quotedPrice int64
+		if err := tx.QueryRow(ctx, `SELECT quoted_price FROM activation_orders WHERE id = $1`, item.OrderID).Scan(&quotedPrice); err != nil {
+			return OrderDispute{}, err
+		}
+		if input.RefundAmount > quotedPrice {
+			return OrderDispute{}, fmt.Errorf("refund_amount 不能超过订单实付金额")
+		}
+		if err := ensureWalletRowTx(ctx, tx, item.UserID); err != nil {
+			return OrderDispute{}, err
+		}
+		if _, err := tx.Exec(ctx, `UPDATE user_wallets SET available_balance = available_balance + $2, updated_at = NOW() WHERE user_id = $1`, item.UserID, input.RefundAmount); err != nil {
+			return OrderDispute{}, err
+		}
+		note := fmt.Sprintf("争议单退款（dispute_id=%d admin_id=%d）", item.ID, adminID)
+		if _, err := tx.Exec(ctx, `INSERT INTO wallet_transactions (user_id, order_id, type, direction, amount, balance_type, note) VALUES ($1, $2, $3, 'credit', $4, 'available', $5)`, item.UserID, item.OrderID, disputeRefundType, input.RefundAmount, note); err != nil {
+			return OrderDispute{}, err
+		}
+		if _, err := tx.Exec(ctx, `
+UPDATE supplier_settlement_ledger
+SET pending_amount = GREATEST(pending_amount - $2, 0), updated_at = NOW()
+WHERE supplier_id = $1
+`, item.SupplierID, input.RefundAmount); err != nil {
+			return OrderDispute{}, err
+		}
+		if _, err := tx.Exec(ctx, `
+INSERT INTO supplier_settlement_entries (supplier_id, order_id, amount, status, note)
+VALUES ($1, $2, $3, 'reversed', $4)
+`, item.SupplierID, item.OrderID, -input.RefundAmount, note); err != nil {
+			return OrderDispute{}, err
+		}
+	}
+
+	err = tx.QueryRow(ctx, `
+UPDATE order_disputes
+SET status = $2,
+    resolution_type = $3,
+    resolution_note = $4,
+    refund_amount = $5,
+    updated_at = NOW(),
+	    resolved_at = CASE WHEN $2 IN ('resolved', 'rejected') THEN NOW() ELSE resolved_at END
+WHERE id = $1
+RETURNING id, order_id, project_key, supplier_id, user_id, status, reason, resolution_type, resolution_note, refund_amount, created_at, updated_at, resolved_at
+`, disputeID, input.Status, input.ResolutionType, input.ResolutionNote, input.RefundAmount).Scan(
+		&item.ID,
+		&item.OrderID,
+		&item.ProjectKey,
+		&item.SupplierID,
+		&item.UserID,
+		&item.Status,
+		&item.Reason,
+		&item.ResolutionType,
+		&item.ResolutionNote,
+		&item.RefundAmount,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.ResolvedAt,
+	)
+	if err != nil {
+		return OrderDispute{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return OrderDispute{}, err
+	}
+	return item, nil
 }
 
 func (r *Repository) ensureWalletRow(ctx context.Context, userID int64) error {

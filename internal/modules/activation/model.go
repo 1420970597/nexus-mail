@@ -59,6 +59,7 @@ type ProviderAccount struct {
 	BridgeEndpoint   string     `json:"bridge_endpoint,omitempty"`
 	BridgeLabel      string     `json:"bridge_label,omitempty"`
 	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
 }
 
 type ProjectOffering struct {
@@ -150,7 +151,6 @@ type CreateMailboxInput struct {
 type SubmitActivationResultInput struct {
 	ExtractionType  string `json:"extraction_type"`
 	ExtractionValue string `json:"extraction_value"`
-	Finalize        bool   `json:"finalize"`
 }
 
 type ActivationResult struct {
