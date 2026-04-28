@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS provider_accounts (
   secret_ref TEXT NOT NULL DEFAULT '',
   bridge_endpoint TEXT NOT NULL DEFAULT '',
   bridge_label TEXT NOT NULL DEFAULT '',
-  health_status TEXT NOT NULL DEFAULT '',
+  health_status TEXT NOT NULL DEFAULT 'unknown',
   health_reason TEXT NOT NULL DEFAULT '',
   token_expires_at TIMESTAMPTZ,
   health_checked_at TIMESTAMPTZ,
@@ -66,10 +66,85 @@ CREATE TABLE IF NOT EXISTS provider_accounts (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS access_token TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS refresh_token TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS credential_secret TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS secret_ref TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS bridge_endpoint TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS bridge_label TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS health_status TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS health_reason TEXT;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS token_expires_at TIMESTAMPTZ;
+ALTER TABLE provider_accounts
   ADD COLUMN IF NOT EXISTS health_checked_at TIMESTAMPTZ;
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
 UPDATE provider_accounts
-SET health_checked_at = COALESCE(health_checked_at, created_at)
-WHERE health_checked_at IS NULL;
+SET access_token = COALESCE(access_token, ''),
+    refresh_token = COALESCE(refresh_token, ''),
+    credential_secret = COALESCE(credential_secret, ''),
+    secret_ref = COALESCE(secret_ref, ''),
+    bridge_endpoint = COALESCE(bridge_endpoint, ''),
+    bridge_label = COALESCE(bridge_label, ''),
+    health_status = COALESCE(NULLIF(health_status, ''), 'unknown'),
+    health_reason = COALESCE(health_reason, ''),
+    health_checked_at = COALESCE(health_checked_at, created_at),
+    updated_at = COALESCE(updated_at, created_at, NOW())
+WHERE access_token IS NULL
+   OR refresh_token IS NULL
+   OR credential_secret IS NULL
+   OR secret_ref IS NULL
+   OR bridge_endpoint IS NULL
+   OR bridge_label IS NULL
+   OR health_status IS NULL
+   OR health_status = ''
+   OR health_reason IS NULL
+   OR health_checked_at IS NULL
+   OR updated_at IS NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN access_token SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN refresh_token SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN credential_secret SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN secret_ref SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN bridge_endpoint SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN bridge_label SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN health_status SET DEFAULT 'unknown';
+ALTER TABLE provider_accounts
+  ALTER COLUMN health_reason SET DEFAULT '';
+ALTER TABLE provider_accounts
+  ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE provider_accounts
+  ALTER COLUMN access_token SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN refresh_token SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN credential_secret SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN secret_ref SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN bridge_endpoint SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN bridge_label SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN health_status SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN health_reason SET NOT NULL;
+ALTER TABLE provider_accounts
+  ALTER COLUMN updated_at SET NOT NULL;
 CREATE TABLE IF NOT EXISTS mailbox_pool (
   id BIGSERIAL PRIMARY KEY,
   domain_id BIGINT REFERENCES resource_domains(id) ON DELETE CASCADE,
@@ -888,7 +963,7 @@ func (r *Repository) queryDomains(ctx context.Context, supplierID int64) ([]Doma
 }
 
 func (r *Repository) QueryProviderAccounts(ctx context.Context, supplierID int64) ([]ProviderAccount, error) {
-	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label, health_status, health_reason, token_expires_at, health_checked_at, created_at, created_at AS updated_at FROM provider_accounts`
+	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label, health_status, health_reason, token_expires_at, health_checked_at, created_at, updated_at FROM provider_accounts`
 	var rows pgx.Rows
 	var err error
 	if supplierID > 0 {
