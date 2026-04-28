@@ -61,9 +61,15 @@ CREATE TABLE IF NOT EXISTS provider_accounts (
   health_status TEXT NOT NULL DEFAULT '',
   health_reason TEXT NOT NULL DEFAULT '',
   token_expires_at TIMESTAMPTZ,
+  health_checked_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE provider_accounts
+  ADD COLUMN IF NOT EXISTS health_checked_at TIMESTAMPTZ;
+UPDATE provider_accounts
+SET health_checked_at = COALESCE(health_checked_at, created_at)
+WHERE health_checked_at IS NULL;
 CREATE TABLE IF NOT EXISTS mailbox_pool (
   id BIGSERIAL PRIMARY KEY,
   domain_id BIGINT REFERENCES resource_domains(id) ON DELETE CASCADE,
@@ -152,8 +158,8 @@ ON CONFLICT (name) DO NOTHING
 WITH supplier AS (
   SELECT id FROM users WHERE email = 'supplier@nexus-mail.local' LIMIT 1
 )
-INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label)
-SELECT supplier.id, x.provider, x.source_type, x.auth_mode, x.protocol_mode, x.identifier, 'active', x.host, x.port, x.refresh_token, x.credential_secret, x.secret_ref, x.bridge_endpoint, x.bridge_label
+INSERT INTO provider_accounts (supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label, updated_at)
+SELECT supplier.id, x.provider, x.source_type, x.auth_mode, x.protocol_mode, x.identifier, 'active', x.host, x.port, x.refresh_token, x.credential_secret, x.secret_ref, x.bridge_endpoint, x.bridge_label, NOW()
 FROM supplier,
      (VALUES
        ('gmail', 'public_mailbox_account', 'oauth2', 'imap_pull', 'gmail-demo@nexus-mail.local', 'imap.gmail.com', 993, 'gmail-refresh-demo', '', '', '', ''),
@@ -788,7 +794,7 @@ JOIN mailbox_pool m ON m.id = o.mailbox_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.status = $1 AND o.updated_at <= $2
-FOR UPDATE
+FOR UPDATE OF o, m
 `, OrderStatusReady, now.UTC().Add(-finalizeAfter))
 	if err != nil {
 		return 0, err
@@ -882,7 +888,7 @@ func (r *Repository) queryDomains(ctx context.Context, supplierID int64) ([]Doma
 }
 
 func (r *Repository) QueryProviderAccounts(ctx context.Context, supplierID int64) ([]ProviderAccount, error) {
-	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label, health_status, health_reason, token_expires_at, created_at, updated_at FROM provider_accounts`
+	query := `SELECT id, supplier_id, provider, source_type, auth_mode, protocol_mode, identifier, status, host, port, access_token, refresh_token, credential_secret, secret_ref, bridge_endpoint, bridge_label, health_status, health_reason, token_expires_at, health_checked_at, created_at, created_at AS updated_at FROM provider_accounts`
 	var rows pgx.Rows
 	var err error
 	if supplierID > 0 {
@@ -899,7 +905,7 @@ func (r *Repository) QueryProviderAccounts(ctx context.Context, supplierID int64
 	var items []ProviderAccount
 	for rows.Next() {
 		var item ProviderAccount
-		if err := rows.Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.Host, &item.Port, &item.AccessToken, &item.RefreshToken, &item.CredentialSecret, &item.SecretRef, &item.BridgeEndpoint, &item.BridgeLabel, &item.HealthStatus, &item.HealthReason, &item.TokenExpiresAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.SupplierID, &item.Provider, &item.SourceType, &item.AuthMode, &item.ProtocolMode, &item.Identifier, &item.Status, &item.Host, &item.Port, &item.AccessToken, &item.RefreshToken, &item.CredentialSecret, &item.SecretRef, &item.BridgeEndpoint, &item.BridgeLabel, &item.HealthStatus, &item.HealthReason, &item.TokenExpiresAt, &item.HealthCheckedAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)
@@ -929,6 +935,7 @@ SET health_status = $2,
     access_token = CASE WHEN $4 = '' THEN access_token ELSE $4 END,
     refresh_token = CASE WHEN $5 = '' THEN refresh_token ELSE $5 END,
     token_expires_at = $6,
+    health_checked_at = NOW(),
     updated_at = NOW()
 WHERE id = $1
 `, accountID, input.Status, input.Reason, input.AccessToken, input.RefreshToken, input.TokenExpiresAt)
