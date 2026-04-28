@@ -8,24 +8,25 @@ import (
 )
 
 type apiKeyStubRepo struct {
-	items            []APIKey
-	audit            []APIKeyAuditEntry
-	created          APIKey
-	plaintext        string
-	createErr        error
-	revokeItem       APIKey
-	revokeErr        error
-	createdName      string
-	createdUID       int64
-	createdScopes    []string
-	createdWhitelist []string
-	revokedID        int64
-	revokedUID       int64
-	validatedKey     string
-	validatedItem    APIKey
-	validateErr      error
-	auditAuthErr     error
-	lastAuditEvent   APIKeyAuthAuditEvent
+	items                []APIKey
+	audit                []APIKeyAuditEntry
+	created              APIKey
+	plaintext            string
+	createErr            error
+	revokeItem           APIKey
+	revokeErr            error
+	createdName          string
+	createdUID           int64
+	createdScopes        []string
+	createdWhitelist     []string
+	revokedID            int64
+	revokedUID           int64
+	validatedKey         string
+	validatedItem        APIKey
+	validateErr          error
+	auditAuthErr         error
+	lastAuditEvent       APIKeyAuthAuditEvent
+	lastAdminAuditFilter *AdminAuditFilter
 }
 
 func (s *apiKeyStubRepo) CreateAPIKey(_ context.Context, userID int64, name string, scopes []string, whitelist []string) (APIKey, string, error) {
@@ -53,6 +54,12 @@ func (s *apiKeyStubRepo) RevokeAPIKey(_ context.Context, userID, id int64) (APIK
 }
 
 func (s *apiKeyStubRepo) ListAPIKeyAudit(context.Context, int64) ([]APIKeyAuditEntry, error) {
+	return s.audit, nil
+}
+
+func (s *apiKeyStubRepo) ListAdminAudit(_ context.Context, filter AdminAuditFilter) ([]APIKeyAuditEntry, error) {
+	copyFilter := filter
+	s.lastAdminAuditFilter = &copyFilter
 	return s.audit, nil
 }
 
@@ -176,6 +183,15 @@ func TestAuthenticateAPIKeyRejectsNonWhitelistedIPAndRecordsAudit(t *testing.T) 
 	}
 }
 
+func TestAuthenticateAPIKeyAcceptsIPv4AddressAgainstIPv4CIDRStoredAsCanonicalNetwork(t *testing.T) {
+	repo := &apiKeyStubRepo{validatedItem: APIKey{ID: 10, UserID: 7, Name: "cidr", Scopes: []string{"activation:read"}, Whitelist: []string{"127.0.0.0/24"}, Status: "active"}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	_, _, err := service.AuthenticateAPIKey(context.Background(), "nmx_key", "127.0.0.1", "activation:read")
+	if err != nil {
+		t.Fatalf("expected IPv4 CIDR whitelist to allow 127.0.0.1, got %v", err)
+	}
+}
+
 func TestAuthenticateAPIKeyPropagatesValidationFailureAndRecordsAudit(t *testing.T) {
 	repo := &apiKeyStubRepo{validateErr: errors.New("API Key 无效")}
 	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
@@ -185,5 +201,47 @@ func TestAuthenticateAPIKeyPropagatesValidationFailureAndRecordsAudit(t *testing
 	}
 	if repo.lastAuditEvent.Outcome != APIKeyAuthOutcomeDeniedInvalid {
 		t.Fatalf("expected invalid-key audit, got %#v", repo.lastAuditEvent)
+	}
+}
+
+func TestListAdminAuditNormalizesFilterAndCapsLimit(t *testing.T) {
+	repo := &apiKeyStubRepo{audit: []APIKeyAuditEntry{{ID: 1, Action: "success"}}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	userID := int64(7)
+	apiKeyID := int64(11)
+	items, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{
+		UserID:    &userID,
+		APIKeyID:  &apiKeyID,
+		ActorType: " SYSTEM ",
+		Action:    " SUCCESS ",
+		Limit:     999,
+	})
+	if err != nil {
+		t.Fatalf("ListAdminAudit() error = %v", err)
+	}
+	if len(items) != 1 || items[0].ID != 1 {
+		t.Fatalf("unexpected items: %#v", items)
+	}
+	if repo.lastAdminAuditFilter == nil {
+		t.Fatal("expected repo filter to be captured")
+	}
+	if repo.lastAdminAuditFilter.ActorType != "system" || repo.lastAdminAuditFilter.Action != "success" || repo.lastAdminAuditFilter.Limit != 200 {
+		t.Fatalf("unexpected normalized filter: %#v", repo.lastAdminAuditFilter)
+	}
+}
+
+func TestListAdminAuditRejectsUnsupportedActorType(t *testing.T) {
+	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
+	_, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{ActorType: "robot"})
+	if err == nil || err.Error() != "actor_type 仅支持 user 或 system" {
+		t.Fatalf("expected invalid actor_type error, got %v", err)
+	}
+}
+
+func TestListAdminAuditRejectsUnsupportedAction(t *testing.T) {
+	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
+	_, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{Action: "drop_table"})
+	if err == nil || err.Error() != "action 不受支持" {
+		t.Fatalf("expected invalid action error, got %v", err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,44 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.POST("/api-keys", h.authRequired(), h.createAPIKey)
 	rg.GET("/api-keys/audit", h.authRequired(), h.apiKeyAudit)
 	rg.POST("/api-keys/:id/revoke", h.authRequired(), h.revokeAPIKey)
+}
+
+func (h *Handler) adminAudit(c *gin.Context) {
+	filter := AdminAuditFilter{ActorType: c.Query("actor_type"), Action: c.Query("action")}
+	if raw := strings.TrimSpace(c.Query("user_id")); raw != "" {
+		value, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || value <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 user_id"})
+			return
+		}
+		filter.UserID = &value
+	}
+	if raw := strings.TrimSpace(c.Query("api_key_id")); raw != "" {
+		value, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || value <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 api_key_id"})
+			return
+		}
+		filter.APIKeyID = &value
+	}
+	if raw := strings.TrimSpace(c.Query("limit")); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil || value <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 limit"})
+			return
+		}
+		filter.Limit = value
+	}
+	items, err := h.service.ListAdminAudit(c.Request.Context(), filter)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func (h *Handler) AdminAudit(c *gin.Context) {
+	h.adminAudit(c)
 }
 
 func (h *Handler) register(c *gin.Context) {

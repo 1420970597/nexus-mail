@@ -67,6 +67,9 @@ CREATE TABLE IF NOT EXISTS api_key_audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_api_key_audit_logs_user_id_created_at ON api_key_audit_logs(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_key_audit_logs_created_at_id ON api_key_audit_logs(created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_api_key_audit_logs_api_key_id_created_at ON api_key_audit_logs(api_key_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_key_audit_logs_action_actor_type_created_at ON api_key_audit_logs(action, actor_type, created_at DESC);
 ALTER TABLE api_key_audit_logs ADD COLUMN IF NOT EXISTS api_key_id BIGINT REFERENCES api_keys(id) ON DELETE SET NULL;
 DO $$
 BEGIN

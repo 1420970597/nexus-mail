@@ -54,3 +54,39 @@ func (s *Service) ListAPIKeyAudit(ctx context.Context, userID int64) ([]APIKeyAu
 	}
 	return repo.ListAPIKeyAudit(ctx, userID)
 }
+
+func (s *Service) ListAdminAudit(ctx context.Context, filter AdminAuditFilter) ([]APIKeyAuditEntry, error) {
+	repo := s.apiKeyRepo
+	if repo == nil {
+		return nil, fmt.Errorf("API Key 存储尚未初始化")
+	}
+	filter.ActorType = strings.TrimSpace(strings.ToLower(filter.ActorType))
+	filter.Action = strings.TrimSpace(strings.ToLower(filter.Action))
+	if filter.UserID != nil && *filter.UserID <= 0 {
+		return nil, fmt.Errorf("user_id 无效")
+	}
+	if filter.APIKeyID != nil && *filter.APIKeyID <= 0 {
+		return nil, fmt.Errorf("api_key_id 无效")
+	}
+	if filter.ActorType != "" {
+		switch filter.ActorType {
+		case "user", "system":
+		default:
+			return nil, fmt.Errorf("actor_type 仅支持 user 或 system")
+		}
+	}
+	if filter.Action != "" {
+		switch filter.Action {
+		case "create", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist":
+		default:
+			return nil, fmt.Errorf("action 不受支持")
+		}
+	}
+	if filter.Limit <= 0 {
+		filter.Limit = 50
+	}
+	if filter.Limit > 200 {
+		filter.Limit = 200
+	}
+	return repo.ListAdminAudit(ctx, filter)
+}

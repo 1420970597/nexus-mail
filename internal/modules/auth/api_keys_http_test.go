@@ -129,3 +129,75 @@ func TestAuthRequiredRejectsAPIKeyOutsideWhitelist(t *testing.T) {
 		t.Fatalf("expected 403, got %d: %s", w.Code, w.Body.String())
 	}
 }
+
+func TestAdminAuditEndpointRequiresAdminAndAppliesFilters(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &apiKeyStubRepo{audit: []APIKeyAuditEntry{{ID: 21, UserID: 7, Action: "success", ActorType: "system", Note: "scope=activation:read"}}}
+	service := NewService(nil, repo, "test-secret", time.Hour, 24*time.Hour)
+	handler := NewHandler(service)
+	r := gin.New()
+	r.GET("/api/v1/admin/audit", handler.authRequired(), RequireRoles(RoleAdmin), handler.AdminAudit)
+
+	adminSessionID, err := generateTokenID()
+	if err != nil {
+		t.Fatalf("generate admin token id: %v", err)
+	}
+	adminToken, err := service.issueToken(User{ID: 9, Email: "admin@nexus-mail.local", Role: RoleAdmin}, adminSessionID)
+	if err != nil {
+		t.Fatalf("issue admin token: %v", err)
+	}
+	userSessionID, err := generateTokenID()
+	if err != nil {
+		t.Fatalf("generate user token id: %v", err)
+	}
+	userToken, err := service.issueToken(User{ID: 7, Email: "user@nexus-mail.local", Role: RoleUser}, userSessionID)
+	if err != nil {
+		t.Fatalf("issue user token: %v", err)
+	}
+
+	t.Run("admin can query audit", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/audit?user_id=7&action=SUCCESS&actor_type=SYSTEM&limit=500", nil)
+		req.Header.Set("Authorization", "Bearer "+adminToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+		}
+		if repo.lastAdminAuditFilter == nil {
+			t.Fatal("expected admin filter to be forwarded")
+		}
+		if repo.lastAdminAuditFilter.UserID == nil || *repo.lastAdminAuditFilter.UserID != 7 || repo.lastAdminAuditFilter.Action != "success" || repo.lastAdminAuditFilter.ActorType != "system" || repo.lastAdminAuditFilter.Limit != 200 {
+			t.Fatalf("unexpected filter: %#v", repo.lastAdminAuditFilter)
+		}
+	})
+
+	t.Run("regular user forbidden", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/audit", nil)
+		req.Header.Set("Authorization", "Bearer "+userToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusForbidden {
+			t.Fatalf("expected 403, got %d: %s", w.Code, w.Body.String())
+		}
+	})
+
+	t.Run("invalid user id rejected", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/audit?user_id=abc", nil)
+		req.Header.Set("Authorization", "Bearer "+adminToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+		}
+	})
+
+	t.Run("invalid limit rejected", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/audit?limit=0", nil)
+		req.Header.Set("Authorization", "Bearer "+adminToken)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		if w.Code != http.StatusBadRequest {
+			t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+		}
+	})
+}

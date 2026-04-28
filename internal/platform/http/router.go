@@ -86,9 +86,7 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 		admin.GET("/risk", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "admin risk center"})
 		})
-		admin.GET("/audit", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "admin audit logs"})
-		})
+		admin.GET("/audit", authHandler.AdminAudit)
 	}
 
 	return r

@@ -100,8 +100,20 @@ func ensureAPIKeyWhitelist(item APIKey, clientIP string) error {
 		if allowedIP := net.ParseIP(entry); allowedIP != nil && allowedIP.Equal(ip) {
 			return nil
 		}
-		if _, network, err := net.ParseCIDR(entry); err == nil && network.Contains(ip) {
-			return nil
+		if _, network, err := net.ParseCIDR(entry); err == nil {
+			if network.Contains(ip) {
+				return nil
+			}
+			if mapped := ip.To4(); mapped != nil {
+				if network.Contains(mapped) {
+					return nil
+				}
+			}
+			if v4InV6 := ip.To16(); v4InV6 != nil && ip.To4() != nil {
+				if network.Contains(v4InV6) {
+					return nil
+				}
+			}
 		}
 	}
 	return ErrAPIKeyDeniedIP

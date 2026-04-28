@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -127,6 +128,54 @@ WHERE user_id = $1
 ORDER BY created_at DESC, id DESC
 LIMIT 100
 `, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]APIKeyAuditEntry, 0)
+	for rows.Next() {
+		var item APIKeyAuditEntry
+		if err := rows.Scan(&item.ID, &item.UserID, &item.APIKeyID, &item.Action, &item.ActorType, &item.Note, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) ListAdminAudit(ctx context.Context, filter AdminAuditFilter) ([]APIKeyAuditEntry, error) {
+	conditions := make([]string, 0, 4)
+	args := make([]any, 0, 5)
+	argPos := 1
+	if filter.UserID != nil {
+		conditions = append(conditions, "user_id = $"+strconv.Itoa(argPos))
+		args = append(args, *filter.UserID)
+		argPos++
+	}
+	if filter.APIKeyID != nil {
+		conditions = append(conditions, "api_key_id = $"+strconv.Itoa(argPos))
+		args = append(args, *filter.APIKeyID)
+		argPos++
+	}
+	if filter.ActorType != "" {
+		conditions = append(conditions, "actor_type = $"+strconv.Itoa(argPos))
+		args = append(args, filter.ActorType)
+		argPos++
+	}
+	if filter.Action != "" {
+		conditions = append(conditions, "action = $"+strconv.Itoa(argPos))
+		args = append(args, filter.Action)
+		argPos++
+	}
+	query := `
+SELECT id, user_id, api_key_id, action, actor_type, note, created_at
+FROM api_key_audit_logs`
+	if len(conditions) > 0 {
+		query += "\nWHERE " + strings.Join(conditions, " AND ")
+	}
+	query += "\nORDER BY created_at DESC, id DESC\nLIMIT $" + strconv.Itoa(argPos)
+	args = append(args, filter.Limit)
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

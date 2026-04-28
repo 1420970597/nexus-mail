@@ -25,6 +25,14 @@ type APIKeyAuditEntry struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type AdminAuditFilter struct {
+	UserID    *int64
+	APIKeyID  *int64
+	ActorType string
+	Action    string
+	Limit     int
+}
+
 type CreateAPIKeyInput struct {
 	Name      string   `json:"name"`
 	Scopes    []string `json:"scopes"`
