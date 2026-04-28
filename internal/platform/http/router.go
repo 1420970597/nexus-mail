@@ -55,6 +55,11 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 			})
 		})
 
+		activationHandler := activation.NewHandler(app.ActivationService)
+		apiKeyWrite := api.Group("")
+		apiKeyWrite.Use(authHandler.AuthRequiredForAPIKeyScope("activation:write"))
+		activationHandler.RegisterAPIKeyWriteRoutes(apiKeyWrite)
+
 		secure := api.Group("")
 		secure.Use(authHandler.AuthRequiredForRoutes())
 		secure.GET("/dashboard/overview", func(c *gin.Context) {
@@ -72,8 +77,9 @@ func NewRouter(app *bootstrap.App) *gin.Engine {
 			})
 		})
 
-		activationHandler := activation.NewHandler(app.ActivationService)
 		activationHandler.RegisterRoutes(secure)
+		activationHandler.RegisterOrderRoutes(secure)
+		activationHandler.RegisterSupplierAdminRoutes(secure)
 		financeHandler := finance.NewHandler(app.FinanceService, app.Config.AppEnv == "development")
 		financeHandler.RegisterRoutes(secure)
 		webhookHandler := webhook.NewHandler(app.WebhookService)

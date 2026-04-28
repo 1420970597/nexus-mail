@@ -14,6 +14,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
   schemas:
     ErrorResponse:
       type: object
@@ -576,6 +580,34 @@ paths:
                 properties:
                   order:
                     $ref: '#/components/schemas/ActivationOrder'
+  /orders/activations/api-key:
+    post:
+      summary: 使用 API Key 创建激活订单
+      description: |
+        面向商业 API 客户的下单入口，必须使用 `X-API-Key`，且 API Key 需要包含 `activation:write` scope。
+        该入口复用激活订单创建契约，返回当前 API Key 所属用户的新订单。
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateActivationOrderRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/ActivationOrder'
+        '403':
+          description: API Key 无权限或 IP 白名单不匹配
+        '429':
+          description: API Key 运行时限流
   /orders/activations/{id}:
     get:
       summary: 获取激活订单详情

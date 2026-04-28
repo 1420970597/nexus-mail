@@ -42,6 +42,16 @@ func TestPing(t *testing.T) {
 	}
 }
 
+func TestAPIKeyActivationWriteRouteIsRegistered(t *testing.T) {
+	r := NewRouter(testApp())
+	for _, route := range r.Routes() {
+		if route.Method == http.MethodPost && route.Path == "/api/v1/orders/activations/api-key" {
+			return
+		}
+	}
+	t.Fatalf("expected POST /api/v1/orders/activations/api-key route to be registered for activation:write API keys")
+}
+
 func testApp() *bootstrap.App {
 	return &bootstrap.App{
 		AuthService:    auth.NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour),

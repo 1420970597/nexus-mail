@@ -18,14 +18,22 @@ func NewHandler(service *Service) *Handler { return &Handler{service: service} }
 func (h *Handler) RegisterRoutes(secure *gin.RouterGroup) {
 	secure.GET("/projects", h.listProjects)
 	secure.GET("/projects/inventory", h.listInventory)
+}
 
+func (h *Handler) RegisterOrderRoutes(secure *gin.RouterGroup) {
 	secure.GET("/orders/activations", h.listOrders)
 	secure.POST("/orders/activations", h.createOrder)
 	secure.GET("/orders/activations/:id", h.getOrder)
 	secure.GET("/orders/activations/:id/result", h.getResult)
 	secure.POST("/orders/activations/:id/finish", h.finishOrder)
 	secure.POST("/orders/activations/:id/cancel", h.cancelOrder)
+}
 
+func (h *Handler) RegisterAPIKeyWriteRoutes(apiKeyWrite *gin.RouterGroup) {
+	apiKeyWrite.POST("/orders/activations/api-key", h.createOrder)
+}
+
+func (h *Handler) RegisterSupplierAdminRoutes(secure *gin.RouterGroup) {
 	supplier := secure.Group("/supplier/resources")
 	supplier.Use(auth.RequireRoles(auth.RoleSupplier, auth.RoleAdmin))
 	supplier.GET("/overview", h.supplierOverview)
