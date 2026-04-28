@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -379,7 +380,7 @@ RETURNING id, supplier_id, project_key, cost_per_success, cost_per_timeout, curr
 	return item, nil
 }
 
-func (r *Repository) SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error) {
+func (r *Repository) SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput, fromDate, toDate *time.Time) ([]SupplierReportRow, error) {
 	rows, err := r.pool.Query(ctx, `
 SELECT
   p.key,
@@ -402,15 +403,15 @@ SELECT
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 JOIN resource_domains rd ON rd.id = o.domain_id
-LEFT JOIN supplier_cost_profiles cp ON cp.supplier_id = rd.supplier_id AND cp.project_key = p.key
+LEFT JOIN supplier_cost_profiles cp ON cp.supplier_id = rd.supplier_id AND cp.project_key = p.key AND cp.status = 'active'
 LEFT JOIN order_disputes d ON d.order_id = o.id AND d.status IN ('open', 'resolved', 'rejected')
 WHERE rd.supplier_id = $1
-  AND ($2 = '' OR o.created_at >= $2::date)
-  AND ($3 = '' OR o.created_at < ($3::date + interval '1 day'))
+  AND ($2::date IS NULL OR o.created_at >= $2::date)
+  AND ($3::date IS NULL OR o.created_at < ($3::date + interval '1 day'))
 GROUP BY p.key
 ORDER BY p.key ASC
 LIMIT $4
-`, supplierID, input.From, input.To, input.Limit)
+`, supplierID, fromDate, toDate, input.Limit)
 	if err != nil {
 		return nil, err
 	}

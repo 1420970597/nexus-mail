@@ -3,7 +3,9 @@ package finance
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
+	"time"
 )
 
 type stubRepo struct {
@@ -13,6 +15,8 @@ type stubRepo struct {
 	users              []WalletOverview
 	costProfiles       []SupplierCostProfile
 	reportInput        SupplierReportInput
+	reportFromDate     *time.Time
+	reportToDate       *time.Time
 	disputes           []OrderDispute
 	dispute            OrderDispute
 	amount             int64
@@ -78,9 +82,11 @@ func (s *stubRepo) UpsertSupplierCostProfile(_ context.Context, supplierID int64
 	}
 	return SupplierCostProfile{SupplierID: supplierID, ProjectKey: input.ProjectKey, Currency: input.Currency, Status: input.Status}, nil
 }
-func (s *stubRepo) SupplierReport(_ context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error) {
+func (s *stubRepo) SupplierReport(_ context.Context, supplierID int64, input SupplierReportInput, fromDate, toDate *time.Time) ([]SupplierReportRow, error) {
 	s.userID = supplierID
 	s.reportInput = input
+	s.reportFromDate = fromDate
+	s.reportToDate = toDate
 	return []SupplierReportRow{{ProjectKey: "discord", TotalOrders: 3}}, s.walletErr
 }
 
@@ -187,6 +193,38 @@ func TestUpsertSupplierCostProfileNormalizesInput(t *testing.T) {
 		t.Fatalf("UpsertSupplierCostProfile() error = %v", err)
 	}
 	if repo.costProfileInput.ProjectKey != "discord" || repo.costProfileInput.Currency != "CNY" || repo.costProfileInput.Status != "active" || repo.costProfileInput.Notes != "note" {
+		t.Fatalf("unexpected normalized input: %#v", repo.costProfileInput)
+	}
+}
+
+func TestUpsertSupplierCostProfileRejectsInvalidStatusCurrencyAndOversizedNotes(t *testing.T) {
+	service := NewService(&stubRepo{})
+	cases := []struct {
+		name  string
+		input UpsertSupplierCostProfileInput
+	}{
+		{name: "bad status", input: UpsertSupplierCostProfileInput{ProjectKey: "discord", CostPerSuccess: 1, CostPerTimeout: 1, Currency: "CNY", Status: "deleted"}},
+		{name: "bad currency", input: UpsertSupplierCostProfileInput{ProjectKey: "discord", CostPerSuccess: 1, CostPerTimeout: 1, Currency: "CNY1", Status: "active"}},
+		{name: "long notes", input: UpsertSupplierCostProfileInput{ProjectKey: "discord", CostPerSuccess: 1, CostPerTimeout: 1, Currency: "CNY", Status: "active", Notes: strings.Repeat("x", 501)}},
+		{name: "long project key", input: UpsertSupplierCostProfileInput{ProjectKey: strings.Repeat("a", 65), CostPerSuccess: 1, CostPerTimeout: 1, Currency: "CNY", Status: "active"}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := service.UpsertSupplierCostProfile(context.Background(), 12, tc.input); err == nil {
+				t.Fatal("expected validation error")
+			}
+		})
+	}
+}
+
+func TestUpsertSupplierCostProfileAllowsInactiveStatus(t *testing.T) {
+	repo := &stubRepo{}
+	service := NewService(repo)
+	_, err := service.UpsertSupplierCostProfile(context.Background(), 12, UpsertSupplierCostProfileInput{ProjectKey: "discord", CostPerSuccess: 1, CostPerTimeout: 1, Currency: "USD", Status: "inactive"})
+	if err != nil {
+		t.Fatalf("UpsertSupplierCostProfile() error = %v", err)
+	}
+	if repo.costProfileInput.Status != "inactive" || repo.costProfileInput.Currency != "USD" {
 		t.Fatalf("unexpected normalized input: %#v", repo.costProfileInput)
 	}
 }

@@ -708,12 +708,41 @@ paths:
           description: 成本模型列表
     post:
       summary: 新增或更新当前供应商项目成本模型
-      description: 仅供应商角色可维护自己的成本模型；更新动作会写入 update_supplier_cost_profile 审计，管理员可通过 /admin/audit?action=update_supplier_cost_profile 查询。
+      description: 仅供应商角色可维护自己的成本模型；project_key 最长 64 字符，cost_per_success/cost_per_timeout 必须非负，currency 为空时默认 CNY 且必须为 3 位币种代码，status 仅支持 active/inactive；inactive 成本模型会保留但不参与供应商报表 modeled_cost 计算。更新动作会写入 update_supplier_cost_profile 审计，管理员可通过 /admin/audit?action=update_supplier_cost_profile 查询。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [project_key, cost_per_success, cost_per_timeout]
+              properties:
+                project_key:
+                  type: string
+                  maxLength: 64
+                cost_per_success:
+                  type: integer
+                  minimum: 0
+                cost_per_timeout:
+                  type: integer
+                  minimum: 0
+                currency:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  default: CNY
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  default: active
+                notes:
+                  type: string
+                  maxLength: 500
       responses:
         '200':
           description: 成本模型已保存
         '400':
-          description: project_key 无效、成本为负或请求参数无效
+          description: project_key 无效或超过 64 字符、成本为负、currency 非 3 位币种代码、status 非 active/inactive、notes 超过 500 字符或请求参数无效
           content:
             application/json:
               schema:

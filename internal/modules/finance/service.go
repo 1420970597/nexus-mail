@@ -16,7 +16,7 @@ type repository interface {
 	AdminWalletUsers(ctx context.Context) ([]WalletOverview, error)
 	ListSupplierCostProfiles(ctx context.Context, supplierID int64) ([]SupplierCostProfile, error)
 	UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error)
-	SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error)
+	SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput, fromDate, toDate *time.Time) ([]SupplierReportRow, error)
 	SettleSupplierPending(ctx context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error)
 	CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error)
 	ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error)
@@ -82,14 +82,26 @@ func (s *Service) UpsertSupplierCostProfile(ctx context.Context, supplierID int6
 	if input.ProjectKey == "" {
 		return SupplierCostProfile{}, fmt.Errorf("project_key 不能为空")
 	}
+	if len(input.ProjectKey) > 64 {
+		return SupplierCostProfile{}, fmt.Errorf("project_key 长度不能超过 64")
+	}
 	if input.CostPerSuccess < 0 || input.CostPerTimeout < 0 {
 		return SupplierCostProfile{}, fmt.Errorf("成本金额不能为负数")
 	}
 	if input.Currency == "" {
 		input.Currency = "CNY"
 	}
+	if len(input.Currency) != 3 {
+		return SupplierCostProfile{}, fmt.Errorf("currency 必须为 3 位币种代码")
+	}
 	if input.Status == "" {
 		input.Status = "active"
+	}
+	if input.Status != "active" && input.Status != "inactive" {
+		return SupplierCostProfile{}, fmt.Errorf("status 仅支持 active 或 inactive")
+	}
+	if len(input.Notes) > 500 {
+		return SupplierCostProfile{}, fmt.Errorf("notes 长度不能超过 500")
 	}
 	return s.repo.UpsertSupplierCostProfile(ctx, supplierID, input)
 }
@@ -120,7 +132,17 @@ func (s *Service) SupplierReport(ctx context.Context, supplierID int64, input Su
 			return nil, ValidationError{Message: "from 不能晚于 to"}
 		}
 	}
-	return s.repo.SupplierReport(ctx, supplierID, input)
+	fromDate := (*time.Time)(nil)
+	toDate := (*time.Time)(nil)
+	if input.From != "" {
+		parsed, _ := time.Parse("2006-01-02", input.From)
+		fromDate = &parsed
+	}
+	if input.To != "" {
+		parsed, _ := time.Parse("2006-01-02", input.To)
+		toDate = &parsed
+	}
+	return s.repo.SupplierReport(ctx, supplierID, input, fromDate, toDate)
 }
 
 func (s *Service) SettleSupplierPending(ctx context.Context, adminID int64, input SettleSupplierPendingInput) (SupplierSettlementPayout, error) {

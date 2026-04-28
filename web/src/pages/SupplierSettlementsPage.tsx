@@ -116,12 +116,12 @@ export function SupplierSettlementsPage() {
       </Card>
       <Card title="供应商成本模型" style={{ width: '100%' }} loading={loading}>
         <Form form={costForm} layout="horizontal" labelPosition="left" initValues={{ currency: 'CNY', status: 'active' }}>
-          <Form.Input field="project_key" label="项目键" rules={[{ required: true, message: '请输入项目键' }]} />
-          <Form.InputNumber field="cost_per_success" label="成功成本（分）" rules={[{ required: true, message: '请输入成功成本' }]} style={{ width: '100%' }} />
-          <Form.InputNumber field="cost_per_timeout" label="超时成本（分）" rules={[{ required: true, message: '请输入超时成本' }]} style={{ width: '100%' }} />
-          <Form.Input field="currency" label="币种" />
-          <Form.Input field="status" label="状态" />
-          <Form.Input field="notes" label="备注" />
+          <Form.Input field="project_key" label="项目键" maxLength={64} rules={[{ required: true, message: '请输入项目键' }]} />
+          <Form.InputNumber field="cost_per_success" label="成功成本（分）" min={0} rules={[{ required: true, message: '请输入成功成本' }]} style={{ width: '100%' }} />
+          <Form.InputNumber field="cost_per_timeout" label="超时成本（分）" min={0} rules={[{ required: true, message: '请输入超时成本' }]} style={{ width: '100%' }} />
+          <Form.Input field="currency" label="币种" maxLength={3} rules={[{ required: true, message: '请输入 3 位币种代码' }]} />
+          <Form.Select field="status" label="状态" optionList={[{ label: '启用', value: 'active' }, { label: '停用', value: 'inactive' }]} />
+          <Form.TextArea field="notes" label="备注" maxCount={500} />
           <Button type="primary" theme="solid" onClick={handleSaveProfile}>保存成本模型</Button>
         </Form>
         <Table
