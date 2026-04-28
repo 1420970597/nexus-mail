@@ -463,6 +463,24 @@ components:
         pending_settlement:
           type: integer
           description: 当前供应商待结算余额，单位分。
+        order_total:
+          type: integer
+          description: 该供应商关联的全部激活订单数。
+        finished_orders:
+          type: integer
+          description: 该供应商已完成激活订单数。
+        timeout_orders:
+          type: integer
+          description: 该供应商超时激活订单数。
+        canceled_orders:
+          type: integer
+          description: 该供应商取消激活订单数。
+        gross_revenue:
+          type: integer
+          description: 该供应商已完成订单 final_price 合计，单位分。
+        completion_rate_bps:
+          type: integer
+          description: 该供应商完成订单数 / 总订单数，单位 bps（10000 = 100%）。
     AdminOverviewResponse:
       type: object
       properties:

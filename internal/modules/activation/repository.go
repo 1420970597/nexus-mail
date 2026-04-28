@@ -192,6 +192,9 @@ CREATE TABLE IF NOT EXISTS activation_orders (
 CREATE INDEX IF NOT EXISTS idx_activation_orders_user_id_created_at ON activation_orders(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activation_orders_status_updated_at ON activation_orders(status, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activation_orders_domain_id_created_at ON activation_orders(domain_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activation_orders_created_at_id ON activation_orders(created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_mailbox_pool_account_id ON mailbox_pool(account_id);
+CREATE INDEX IF NOT EXISTS idx_provider_accounts_supplier_id_id ON provider_accounts(supplier_id, id);
 CREATE INDEX IF NOT EXISTS idx_resource_domains_supplier_id_id ON resource_domains(supplier_id, id);
 `)
 	return err
@@ -597,6 +600,7 @@ RETURNING id, order_no, user_id, project_id, domain_id, mailbox_id, status,
 	order.ProjectKey = project.Key
 	order.ProjectName = project.Name
 	order.DomainName = offering.DomainName
+	order.SupplierID = offering.SupplierID
 	order.EmailAddress = mailbox.Address
 	if err := addWalletTransactionTx(ctx, tx, userID, order.ID, "freeze", "debit", offering.Price, "available", "创建订单冻结余额"); err != nil {
 		return ActivationOrder{}, err
@@ -615,13 +619,14 @@ func (r *Repository) ListActivationOrdersByUser(ctx context.Context, userID int6
 	rows, err := r.pool.Query(ctx, `
 SELECT
   o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
-  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  COALESCE(d.name, ''), o.mailbox_id, COALESCE(pa.supplier_id, d.supplier_id, 0), m.address, o.status, o.quoted_price,
   o.final_price, o.extraction_type, o.extraction_value,
   o.created_at, o.updated_at, o.expires_at, o.canceled_at
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.user_id = $1
 ORDER BY o.created_at DESC, o.id DESC
 `, userID)
@@ -632,7 +637,7 @@ ORDER BY o.created_at DESC, o.id DESC
 	var items []ActivationOrder
 	for rows.Next() {
 		var item ActivationOrder
-		if err := rows.Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.SupplierID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)
@@ -644,13 +649,14 @@ func (r *Repository) ListAllActivationOrders(ctx context.Context) ([]ActivationO
 	rows, err := r.pool.Query(ctx, `
 SELECT
   o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
-  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  COALESCE(d.name, ''), o.mailbox_id, COALESCE(pa.supplier_id, d.supplier_id, 0), m.address, o.status, o.quoted_price,
   o.final_price, o.extraction_type, o.extraction_value,
   o.created_at, o.updated_at, o.expires_at, o.canceled_at
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 ORDER BY o.created_at DESC, o.id DESC
 `)
 	if err != nil {
@@ -660,7 +666,7 @@ ORDER BY o.created_at DESC, o.id DESC
 	var items []ActivationOrder
 	for rows.Next() {
 		var item ActivationOrder
-		if err := rows.Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.SupplierID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt); err != nil {
 			return nil, err
 		}
 		items = append(items, item)
@@ -668,20 +674,62 @@ ORDER BY o.created_at DESC, o.id DESC
 	return items, rows.Err()
 }
 
+func (r *Repository) ListSupplierOperationalMetrics(ctx context.Context) ([]SupplierOperationalMetric, error) {
+	rows, err := r.pool.Query(ctx, `
+WITH order_suppliers AS (
+  SELECT COALESCE(pa.supplier_id, d.supplier_id, 0) AS supplier_id,
+         UPPER(TRIM(o.status)) AS status,
+         o.final_price
+  FROM activation_orders o
+  JOIN mailbox_pool m ON m.id = o.mailbox_id
+  LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+  LEFT JOIN resource_domains d ON d.id = o.domain_id
+)
+SELECT supplier_id,
+       COUNT(*)::int AS order_total,
+       COUNT(*) FILTER (WHERE status = 'FINISHED')::int AS finished_orders,
+       COUNT(*) FILTER (WHERE status = 'TIMEOUT')::int AS timeout_orders,
+       COUNT(*) FILTER (WHERE status = 'CANCELED')::int AS canceled_orders,
+       COALESCE(SUM(final_price) FILTER (WHERE status = 'FINISHED'), 0)::bigint AS gross_revenue,
+       CASE WHEN COUNT(*) = 0 THEN 0 ELSE (COUNT(*) FILTER (WHERE status = 'FINISHED') * 10000 / COUNT(*))::int END AS completion_rate_bps
+FROM order_suppliers
+WHERE supplier_id > 0
+GROUP BY supplier_id
+ORDER BY supplier_id ASC
+`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SupplierOperationalMetric
+	for rows.Next() {
+		var item SupplierOperationalMetric
+		if err := rows.Scan(&item.SupplierID, &item.OrderTotal, &item.FinishedOrders, &item.TimeoutOrders, &item.CanceledOrders, &item.GrossRevenue, &item.CompletionRateBps); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 func (r *Repository) GetActivationOrderForUser(ctx context.Context, userID, orderID int64) (ActivationOrder, error) {
 	var item ActivationOrder
 	err := r.pool.QueryRow(ctx, `
 SELECT
   o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
-  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  COALESCE(d.name, ''), o.mailbox_id, COALESCE(pa.supplier_id, d.supplier_id, 0), m.address, o.status, o.quoted_price,
   o.final_price, o.extraction_type, o.extraction_value,
   o.created_at, o.updated_at, o.expires_at, o.canceled_at
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.user_id = $1 AND o.id = $2
-`, userID, orderID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
+`, userID, orderID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.SupplierID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
 	return item, err
 }
 
@@ -690,15 +738,16 @@ func (r *Repository) TouchActivationOrderPolling(ctx context.Context, userID, or
 	err := r.pool.QueryRow(ctx, `
 SELECT
   o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
-  COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+  COALESCE(d.name, ''), o.mailbox_id, COALESCE(pa.supplier_id, d.supplier_id, 0), m.address, o.status, o.quoted_price,
   o.final_price, o.extraction_type, o.extraction_value,
   o.created_at, NOW(), o.expires_at, o.canceled_at
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.user_id = $1 AND o.id = $2
-`, userID, orderID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
+`, userID, orderID).Scan(&item.ID, &item.OrderNo, &item.UserID, &item.ProjectID, &item.ProjectKey, &item.ProjectName, &item.DomainID, &item.DomainName, &item.MailboxID, &item.SupplierID, &item.EmailAddress, &item.Status, &item.QuotedPrice, &item.FinalPrice, &item.ExtractionType, &item.ExtractionValue, &item.CreatedAt, &item.UpdatedAt, &item.ExpiresAt, &item.CanceledAt)
 	if err != nil {
 		return ActivationOrder{}, err
 	}
@@ -757,8 +806,8 @@ func (r *Repository) FinishActivationOrder(ctx context.Context, userID, orderID 
 SELECT o.id, o.user_id, o.mailbox_id, o.quoted_price, o.status, COALESCE(pa.supplier_id, d.supplier_id, 0)
 FROM activation_orders o
 JOIN mailbox_pool m ON m.id = o.mailbox_id
-LEFT JOIN resource_domains d ON d.id = o.domain_id
 LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
 WHERE o.id = $1 AND o.user_id = $2
 FOR UPDATE OF o, m
 `, orderID, userID).Scan(&orderIDDB, &orderUserID, &mailboxID, &quotedPrice, &status, &supplierID)
@@ -802,18 +851,18 @@ func (r *Repository) SubmitActivationResult(ctx context.Context, supplierID, ord
 	var orderSupplierID int64
 	err = tx.QueryRow(ctx, `
 SELECT o.id, o.order_no, o.user_id, o.project_id, p.key, p.name, o.domain_id,
-       COALESCE(d.name, ''), o.mailbox_id, m.address, o.status, o.quoted_price,
+       COALESCE(d.name, ''), o.mailbox_id, COALESCE(pa.supplier_id, d.supplier_id, 0), m.address, o.status, o.quoted_price,
        o.final_price, o.extraction_type, o.extraction_value,
        o.created_at, o.updated_at, o.expires_at, o.canceled_at,
        COALESCE(pa.supplier_id, d.supplier_id, 0)
 FROM activation_orders o
 JOIN projects p ON p.id = o.project_id
 JOIN mailbox_pool m ON m.id = o.mailbox_id
-LEFT JOIN resource_domains d ON d.id = o.domain_id
 LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
 WHERE o.id = $1
 FOR UPDATE OF o, m
-`, orderID).Scan(&order.ID, &order.OrderNo, &order.UserID, &order.ProjectID, &order.ProjectKey, &order.ProjectName, &order.DomainID, &order.DomainName, &order.MailboxID, &order.EmailAddress, &currentStatus, &order.QuotedPrice, &order.FinalPrice, &order.ExtractionType, &order.ExtractionValue, &order.CreatedAt, &order.UpdatedAt, &order.ExpiresAt, &order.CanceledAt, &orderSupplierID)
+`, orderID).Scan(&order.ID, &order.OrderNo, &order.UserID, &order.ProjectID, &order.ProjectKey, &order.ProjectName, &order.DomainID, &order.DomainName, &order.MailboxID, &order.SupplierID, &order.EmailAddress, &currentStatus, &order.QuotedPrice, &order.FinalPrice, &order.ExtractionType, &order.ExtractionValue, &order.CreatedAt, &order.UpdatedAt, &order.ExpiresAt, &order.CanceledAt, &orderSupplierID)
 	if err != nil {
 		return ActivationOrder{}, err
 	}
@@ -1021,8 +1070,8 @@ ORDER BY o.id ASC
 SELECT o.id, o.user_id, o.mailbox_id, o.quoted_price, o.status, COALESCE(pa.supplier_id, d.supplier_id, 0)
 FROM activation_orders o
 JOIN mailbox_pool m ON m.id = o.mailbox_id
-LEFT JOIN resource_domains d ON d.id = o.domain_id
 LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
 WHERE o.id = $1
 FOR UPDATE OF o, m
 `, orderID).Scan(&order.orderID, &order.userID, &order.mailboxID, &order.quoted, &order.status, &order.supplierID)
@@ -1168,7 +1217,7 @@ LEFT JOIN resource_domains d ON d.id = m.domain_id`
 	var rows pgx.Rows
 	var err error
 	if supplierID > 0 {
-		query += ` WHERE (a.supplier_id = $1 OR d.supplier_id = $1) ORDER BY m.id ASC`
+		query += ` WHERE COALESCE(a.supplier_id, d.supplier_id, 0) = $1 ORDER BY m.id ASC`
 		rows, err = r.pool.Query(ctx, query, supplierID)
 	} else {
 		query += ` ORDER BY m.id ASC`

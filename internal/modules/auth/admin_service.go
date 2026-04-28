@@ -32,6 +32,19 @@ func (s *Service) BuildAdminOverview(
 	disputes []DashboardDispute,
 	audit []APIKeyAuditEntry,
 ) map[string]any {
+	supplierMetrics := BuildSupplierOperationalMetrics(orders)
+	return s.BuildAdminOverviewWithSupplierMetrics(ctx, projects, orders, walletUsers, disputes, audit, supplierMetrics)
+}
+
+func (s *Service) BuildAdminOverviewWithSupplierMetrics(
+	ctx context.Context,
+	projects []DashboardProject,
+	orders []DashboardOrder,
+	walletUsers []DashboardWalletUser,
+	disputes []DashboardDispute,
+	audit []APIKeyAuditEntry,
+	supplierMetrics []AdminSupplierSummary,
+) map[string]any {
 	summary := BuildDashboardSummary(ctx, projects, orders, walletUsers, disputes, audit)
 	recentAudit := latestAuditEntries(audit, 5)
 	users := make([]User, 0, len(walletUsers))
@@ -41,7 +54,7 @@ func (s *Service) BuildAdminOverview(
 	return map[string]any{
 		"generated_at": time.Now().UTC(),
 		"summary":      summary,
-		"suppliers":    BuildAdminSupplierSummaries(users, walletUsers),
+		"suppliers":    BuildAdminSupplierSummaries(users, walletUsers, supplierMetrics),
 		"recent_audit": recentAudit,
 	}
 }

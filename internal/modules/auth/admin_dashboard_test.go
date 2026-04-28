@@ -105,16 +105,31 @@ func TestBuildAdminSupplierSummariesKeepsSupplierScopeAndWalletMetrics(t *testin
 		{UserID: 4, PendingSettlement: 3400},
 		{UserID: 99, PendingSettlement: 9999},
 	}
+	orders := []DashboardOrder{
+		{ID: 1, SupplierID: 2, Status: "FINISHED", FinalPrice: 500},
+		{ID: 2, SupplierID: 2, Status: "TIMEOUT"},
+		{ID: 3, SupplierID: 4, Status: "FINISHED", FinalPrice: 1700},
+		{ID: 4, SupplierID: 4, Status: "CANCELED"},
+		{ID: 5, SupplierID: 4, Status: "READY"},
+		{ID: 6, SupplierID: 99, Status: "FINISHED", FinalPrice: 9999},
+	}
+	metrics := BuildSupplierOperationalMetrics(orders)
 
-	items := BuildAdminSupplierSummaries(users, wallets)
+	items := BuildAdminSupplierSummaries(users, wallets, metrics)
 	if len(items) != 2 {
 		t.Fatalf("expected only supplier users, got %#v", items)
 	}
 	if items[0].UserID != 4 || items[0].Email != "supplier-b@nexus-mail.local" || items[0].PendingSettlement != 3400 {
 		t.Fatalf("expected highest pending settlement first, got %#v", items[0])
 	}
+	if items[0].OrderTotal != 3 || items[0].FinishedOrders != 1 || items[0].CanceledOrders != 1 || items[0].GrossRevenue != 1700 || items[0].CompletionRateBps != 3333 {
+		t.Fatalf("unexpected first supplier operational metrics: %#v", items[0])
+	}
 	if items[1].UserID != 2 || items[1].PendingSettlement != 1200 {
 		t.Fatalf("unexpected second supplier summary: %#v", items[1])
+	}
+	if items[1].OrderTotal != 2 || items[1].FinishedOrders != 1 || items[1].TimeoutOrders != 1 || items[1].GrossRevenue != 500 || items[1].CompletionRateBps != 5000 {
+		t.Fatalf("unexpected second supplier operational metrics: %#v", items[1])
 	}
 }
 

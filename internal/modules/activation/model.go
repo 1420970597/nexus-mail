@@ -98,6 +98,7 @@ type ActivationOrder struct {
 	DomainID        int64      `json:"domain_id"`
 	DomainName      string     `json:"domain_name"`
 	MailboxID       int64      `json:"mailbox_id"`
+	SupplierID      int64      `json:"supplier_id"`
 	EmailAddress    string     `json:"email_address"`
 	Status          string     `json:"status"`
 	QuotedPrice     int64      `json:"quoted_price"`
@@ -108,6 +109,16 @@ type ActivationOrder struct {
 	UpdatedAt       time.Time  `json:"updated_at"`
 	ExpiresAt       time.Time  `json:"expires_at"`
 	CanceledAt      *time.Time `json:"canceled_at,omitempty"`
+}
+
+type SupplierOperationalMetric struct {
+	SupplierID        int64
+	OrderTotal        int
+	FinishedOrders    int
+	TimeoutOrders     int
+	CanceledOrders    int
+	GrossRevenue      int64
+	CompletionRateBps int
 }
 
 type CreateActivationOrderInput struct {

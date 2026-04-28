@@ -10,7 +10,9 @@ import (
 type stubRepo struct {
 	order               ActivationOrder
 	allOrders           []ActivationOrder
+	supplierMetrics     []SupplierOperationalMetric
 	listAllOrdersCalled bool
+	listMetricsCalled   bool
 	providerAccountIn   CreateProviderAccountInput
 	mailboxIn           CreateMailboxInput
 	updatedProjectIn    UpdateProjectInput
@@ -53,6 +55,10 @@ func (s *stubRepo) ListActivationOrdersByUser(context.Context, int64) ([]Activat
 func (s *stubRepo) ListAllActivationOrders(context.Context) ([]ActivationOrder, error) {
 	s.listAllOrdersCalled = true
 	return s.allOrders, nil
+}
+func (s *stubRepo) ListSupplierOperationalMetrics(context.Context) ([]SupplierOperationalMetric, error) {
+	s.listMetricsCalled = true
+	return s.supplierMetrics, nil
 }
 func (s *stubRepo) GetActivationOrderForUser(context.Context, int64, int64) (ActivationOrder, error) {
 	return ActivationOrder{}, nil
@@ -162,6 +168,22 @@ func TestListAllActivationOrdersDelegatesToRepository(t *testing.T) {
 	}
 	if len(items) != 2 || items[0].ID != 1 || items[1].UserID != 8 {
 		t.Fatalf("unexpected orders: %#v", items)
+	}
+}
+
+func TestListSupplierOperationalMetricsDelegatesToRepository(t *testing.T) {
+	repo := &stubRepo{supplierMetrics: []SupplierOperationalMetric{{SupplierID: 2, OrderTotal: 3, FinishedOrders: 2, GrossRevenue: 2400, CompletionRateBps: 6666}}}
+	service := NewService(repo)
+
+	items, err := service.ListSupplierOperationalMetrics(context.Background())
+	if err != nil {
+		t.Fatalf("ListSupplierOperationalMetrics() error = %v", err)
+	}
+	if !repo.listMetricsCalled {
+		t.Fatal("expected service to delegate to repository ListSupplierOperationalMetrics")
+	}
+	if len(items) != 1 || items[0].SupplierID != 2 || items[0].OrderTotal != 3 || items[0].CompletionRateBps != 6666 {
+		t.Fatalf("unexpected metrics: %#v", items)
 	}
 }
 

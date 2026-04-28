@@ -111,6 +111,12 @@ type AdminSupplierSummary struct {
 	Email             string `json:"email"`
 	Role              string `json:"role"`
 	PendingSettlement int64  `json:"pending_settlement"`
+	OrderTotal        int    `json:"order_total"`
+	FinishedOrders    int    `json:"finished_orders"`
+	TimeoutOrders     int    `json:"timeout_orders"`
+	CanceledOrders    int    `json:"canceled_orders"`
+	GrossRevenue      int64  `json:"gross_revenue"`
+	CompletionRateBps int    `json:"completion_rate_bps"`
 }
 
 type DashboardDispute struct {
@@ -216,22 +222,69 @@ func rateBps(numerator, denominator int) int {
 	return int(int64(numerator) * 10000 / int64(denominator))
 }
 
-func BuildAdminSupplierSummaries(users []User, walletUsers []DashboardWalletUser) []AdminSupplierSummary {
+func BuildSupplierOperationalMetrics(orders []DashboardOrder) []AdminSupplierSummary {
+	bySupplier := make(map[int64]*AdminSupplierSummary)
+	for _, order := range orders {
+		if order.SupplierID <= 0 {
+			continue
+		}
+		item := bySupplier[order.SupplierID]
+		if item == nil {
+			item = &AdminSupplierSummary{UserID: order.SupplierID}
+			bySupplier[order.SupplierID] = item
+		}
+		item.OrderTotal++
+		switch strings.ToUpper(strings.TrimSpace(order.Status)) {
+		case "FINISHED":
+			item.FinishedOrders++
+			item.GrossRevenue += order.FinalPrice
+		case "TIMEOUT":
+			item.TimeoutOrders++
+		case "CANCELED":
+			item.CanceledOrders++
+		}
+	}
+	items := make([]AdminSupplierSummary, 0, len(bySupplier))
+	for _, item := range bySupplier {
+		item.CompletionRateBps = rateBps(item.FinishedOrders, item.OrderTotal)
+		items = append(items, *item)
+	}
+	sort.SliceStable(items, func(i, j int) bool { return items[i].UserID < items[j].UserID })
+	return items
+}
+
+func BuildAdminSupplierSummaries(users []User, walletUsers []DashboardWalletUser, metrics []AdminSupplierSummary) []AdminSupplierSummary {
 	pendingByUser := make(map[int64]int64, len(walletUsers))
 	for _, wallet := range walletUsers {
 		pendingByUser[wallet.UserID] = wallet.PendingSettlement
+	}
+	supplierMetrics := make(map[int64]AdminSupplierSummary, len(metrics))
+	for _, item := range metrics {
+		if item.UserID <= 0 {
+			continue
+		}
+		supplierMetrics[item.UserID] = item
 	}
 	items := make([]AdminSupplierSummary, 0)
 	for _, user := range users {
 		if user.Role != RoleSupplier {
 			continue
 		}
-		items = append(items, AdminSupplierSummary{
+		item := AdminSupplierSummary{
 			UserID:            user.ID,
 			Email:             user.Email,
 			Role:              string(user.Role),
 			PendingSettlement: pendingByUser[user.ID],
-		})
+		}
+		if metrics, ok := supplierMetrics[user.ID]; ok {
+			item.OrderTotal = metrics.OrderTotal
+			item.FinishedOrders = metrics.FinishedOrders
+			item.TimeoutOrders = metrics.TimeoutOrders
+			item.CanceledOrders = metrics.CanceledOrders
+			item.GrossRevenue = metrics.GrossRevenue
+			item.CompletionRateBps = metrics.CompletionRateBps
+		}
+		items = append(items, item)
 	}
 	sort.SliceStable(items, func(i, j int) bool {
 		if items[i].PendingSettlement == items[j].PendingSettlement {

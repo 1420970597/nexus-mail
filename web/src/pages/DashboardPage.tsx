@@ -97,6 +97,10 @@ export function DashboardPage() {
                 { title: '供应商 ID', dataIndex: 'user_id', key: 'user_id' },
                 { title: '邮箱', dataIndex: 'email', key: 'email' },
                 { title: '待结算金额', dataIndex: 'pending_settlement', key: 'pending_settlement', render: (value) => amountLabel(Number(value || 0)) },
+                { title: '订单数', dataIndex: 'order_total', key: 'order_total' },
+                { title: '完成/超时/取消', key: 'status_breakdown', render: (_, record) => `${record.finished_orders}/${record.timeout_orders}/${record.canceled_orders}` },
+                { title: '完成率', dataIndex: 'completion_rate_bps', key: 'completion_rate_bps', render: (value) => percentLabel(Number(value || 0)) },
+                { title: '完成流水', dataIndex: 'gross_revenue', key: 'gross_revenue', render: (value) => amountLabel(Number(value || 0)) },
               ]}
             />
           </Card>

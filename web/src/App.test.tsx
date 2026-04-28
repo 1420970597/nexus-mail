@@ -67,7 +67,7 @@ describe('App', () => {
       },
       recent_audit: [{ id: 1, user_id: 3, api_key_id: 9, action: 'denied_whitelist', actor_type: 'system', note: 'blocked', created_at: '2026-04-28T00:00:00Z' }],
       suppliers: [
-        { user_id: 2, email: 'supplier@nexus-mail.local', role: 'supplier', pending_settlement: 1500 },
+        { user_id: 2, email: 'supplier@nexus-mail.local', role: 'supplier', pending_settlement: 1500, order_total: 5, finished_orders: 3, timeout_orders: 1, canceled_orders: 1, gross_revenue: 3600, completion_rate_bps: 6000 },
       ],
     })
     mockedGetAdminRisk.mockResolvedValue({

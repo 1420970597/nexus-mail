@@ -42,6 +42,12 @@ export interface AdminSupplierSummary {
   email: string
   role: string
   pending_settlement: number
+  order_total: number
+  finished_orders: number
+  timeout_orders: number
+  canceled_orders: number
+  gross_revenue: number
+  completion_rate_bps: number
 }
 
 export interface AdminOverviewResponse {
