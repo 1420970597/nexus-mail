@@ -123,6 +123,26 @@ func TestCreateAPIKeyRejectsInvalidWhitelist(t *testing.T) {
 	}
 }
 
+func TestCreateAPIKeyDefaultsEmptyScopesToActivationRead(t *testing.T) {
+	repo := &apiKeyStubRepo{created: APIKey{ID: 1, Name: "默认密钥"}, plaintext: "nmx_test"}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	_, _, err := service.CreateAPIKey(context.Background(), 7, CreateAPIKeyInput{Name: "默认密钥"})
+	if err != nil {
+		t.Fatalf("CreateAPIKey() error = %v", err)
+	}
+	if len(repo.createdScopes) != 1 || repo.createdScopes[0] != "activation:read" {
+		t.Fatalf("expected default activation:read scope, got %#v", repo.createdScopes)
+	}
+}
+
+func TestCreateAPIKeyRejectsOnlyBlankScopes(t *testing.T) {
+	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
+	_, _, err := service.CreateAPIKey(context.Background(), 1, CreateAPIKeyInput{Name: "x", Scopes: []string{" ", "\t"}})
+	if err == nil || err.Error() != "API Key scopes 不能全为空" {
+		t.Fatalf("expected blank scopes validation error, got %v", err)
+	}
+}
+
 func TestCreateAPIKeyRejectsEmptyName(t *testing.T) {
 	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
 	_, _, err := service.CreateAPIKey(context.Background(), 1, CreateAPIKeyInput{Name: "   "})

@@ -11,10 +11,10 @@ import (
 )
 
 var allowedAPIKeyScopes = map[string]struct{}{
-	"activation:read": {},
+	"activation:read":  {},
 	"activation:write": {},
-	"finance:read":    {},
-	"finance:write":   {},
+	"finance:read":     {},
+	"finance:write":    {},
 }
 
 func generateAPIKeyPlaintext() (string, string, string, error) {
@@ -52,6 +52,9 @@ func normalizeScopes(items []string) []string {
 }
 
 func validateScopes(items []string) ([]string, error) {
+	if len(items) == 0 {
+		return []string{"activation:read"}, nil
+	}
 	normalizedInput := make([]string, 0, len(items))
 	for _, item := range items {
 		value := strings.TrimSpace(strings.ToLower(item))
@@ -62,6 +65,9 @@ func validateScopes(items []string) ([]string, error) {
 		if _, ok := allowedAPIKeyScopes[value]; !ok {
 			return nil, fmt.Errorf("存在不支持的 scope: %s", value)
 		}
+	}
+	if len(normalizedInput) == 0 {
+		return nil, fmt.Errorf("API Key scopes 不能全为空")
 	}
 	return normalizeScopes(normalizedInput), nil
 }
