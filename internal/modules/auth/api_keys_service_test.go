@@ -285,6 +285,21 @@ func TestListAdminAuditRejectsUnsupportedActorType(t *testing.T) {
 	}
 }
 
+func TestListAdminAuditAcceptsRateLimitDenialAction(t *testing.T) {
+	repo := &apiKeyStubRepo{audit: []APIKeyAuditEntry{{ID: 2, Action: "denied_rate_limit"}}}
+	service := NewService(nil, repo, "secret", time.Hour, 24*time.Hour)
+	items, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{Action: " DENIED_RATE_LIMIT "})
+	if err != nil {
+		t.Fatalf("ListAdminAudit() error = %v", err)
+	}
+	if len(items) != 1 || items[0].Action != "denied_rate_limit" {
+		t.Fatalf("unexpected items: %#v", items)
+	}
+	if repo.lastAdminAuditFilter == nil || repo.lastAdminAuditFilter.Action != "denied_rate_limit" {
+		t.Fatalf("expected denied_rate_limit filter to be forwarded, got %#v", repo.lastAdminAuditFilter)
+	}
+}
+
 func TestListAdminAuditRejectsUnsupportedAction(t *testing.T) {
 	service := NewService(nil, &apiKeyStubRepo{}, "secret", time.Hour, 24*time.Hour)
 	_, err := service.ListAdminAudit(context.Background(), AdminAuditFilter{Action: "drop_table"})

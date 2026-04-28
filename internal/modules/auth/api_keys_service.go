@@ -77,7 +77,7 @@ func (s *Service) ListAdminAudit(ctx context.Context, filter AdminAuditFilter) (
 	}
 	if filter.Action != "" {
 		switch filter.Action {
-		case "create", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist":
+		case "create", "revoke", "success", "denied_invalid", "denied_scope", "denied_whitelist", "denied_rate_limit":
 		default:
 			return nil, fmt.Errorf("action 不受支持")
 		}
