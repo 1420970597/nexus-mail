@@ -1,6 +1,6 @@
 import { Button, Card, Form, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
 import { useEffect, useState } from 'react'
-import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, OrderDispute, WalletOverview } from '../services/finance'
+import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, settleSupplierPending, OrderDispute, WalletOverview } from '../services/finance'
 
 function disputeStatusColor(status: string) {
   switch (status) {
@@ -18,6 +18,7 @@ export function AdminUsersPage() {
   const [disputes, setDisputes] = useState<OrderDispute[]>([])
   const [loading, setLoading] = useState(true)
   const [form] = Form.useForm()
+  const [settlementForm] = Form.useForm()
   const [disputeForm] = Form.useForm()
 
   const load = async () => {
@@ -47,6 +48,19 @@ export function AdminUsersPage() {
     } catch (error: any) {
       if (error?.name === 'ValidationError') return
       Toast.error(error?.response?.data?.error ?? '调账失败')
+    }
+  }
+
+  const handleSettleSupplier = async () => {
+    try {
+      const values = await settlementForm.validate()
+      const result = await settleSupplierPending(Number(values.supplier_id), values.reason)
+      Toast.success(`结算成功：¥${(Number(result.payout.settled_amount) / 100).toFixed(2)}，流水 ${result.payout.entry_count} 条`)
+      settlementForm.reset()
+      await load()
+    } catch (error: any) {
+      if (error?.name === 'ValidationError') return
+      Toast.error(error?.response?.data?.error ?? '供应商结算失败')
     }
   }
 
@@ -80,6 +94,14 @@ export function AdminUsersPage() {
           <Form.InputNumber field="amount" label="金额（分）" rules={[{ required: true, message: '请输入调账金额' }]} style={{ width: '100%' }} />
           <Form.Input field="reason" label="原因" rules={[{ required: true, message: '请输入调账原因' }]} />
           <Button type="primary" theme="solid" onClick={handleAdjust}>执行调账</Button>
+        </Form>
+      </Card>
+      <Card title="供应商待结算确认" style={{ width: '100%' }}>
+        <Typography.Paragraph>将供应商 pending 流水一次性标记为 settled，并把待结算余额迁移到已结算余额；操作会写入 settle_supplier_pending 审计。</Typography.Paragraph>
+        <Form form={settlementForm} layout="horizontal" labelPosition="left">
+          <Form.InputNumber field="supplier_id" label="供应商用户 ID" rules={[{ required: true, message: '请输入供应商用户 ID' }]} style={{ width: '100%' }} />
+          <Form.Input field="reason" label="结算说明" rules={[{ required: true, message: '请输入结算说明' }]} />
+          <Button type="primary" theme="solid" onClick={handleSettleSupplier}>确认结算</Button>
         </Form>
       </Card>
       <Card title="争议单处理" style={{ width: '100%' }}>

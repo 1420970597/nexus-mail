@@ -16,6 +16,7 @@ type repository interface {
 	ListSupplierCostProfiles(ctx context.Context, supplierID int64) ([]SupplierCostProfile, error)
 	UpsertSupplierCostProfile(ctx context.Context, supplierID int64, input UpsertSupplierCostProfileInput) (SupplierCostProfile, error)
 	SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error)
+	SettleSupplierPending(ctx context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error)
 	CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error)
 	ListOrderDisputes(ctx context.Context, supplierID int64, adminView bool) ([]OrderDispute, error)
 	ResolveOrderDispute(ctx context.Context, adminID, disputeID int64, input ResolveOrderDisputeInput) (OrderDispute, error)
@@ -88,6 +89,17 @@ func (s *Service) UpsertSupplierCostProfile(ctx context.Context, supplierID int6
 
 func (s *Service) SupplierReport(ctx context.Context, supplierID int64) ([]SupplierReportRow, error) {
 	return s.repo.SupplierReport(ctx, supplierID)
+}
+
+func (s *Service) SettleSupplierPending(ctx context.Context, adminID int64, input SettleSupplierPendingInput) (SupplierSettlementPayout, error) {
+	input.Reason = strings.TrimSpace(input.Reason)
+	if input.SupplierID <= 0 {
+		return SupplierSettlementPayout{}, fmt.Errorf("supplier_id 无效")
+	}
+	if input.Reason == "" {
+		input.Reason = "管理员确认供应商结算"
+	}
+	return s.repo.SettleSupplierPending(ctx, adminID, input.SupplierID, input.Reason)
 }
 
 func (s *Service) CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error) {

@@ -78,9 +78,18 @@ func (s *stubRepo) UpsertSupplierCostProfile(_ context.Context, supplierID int64
 	}
 	return SupplierCostProfile{SupplierID: supplierID, ProjectKey: input.ProjectKey, Currency: input.Currency, Status: input.Status}, nil
 }
-
 func (s *stubRepo) SupplierReport(context.Context, int64) ([]SupplierReportRow, error) {
 	return s.reportRows, s.walletErr
+}
+
+func (s *stubRepo) SettleSupplierPending(_ context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error) {
+	s.adminID = adminID
+	s.userID = supplierID
+	s.note = reason
+	if s.walletErr != nil {
+		return SupplierSettlementPayout{}, s.walletErr
+	}
+	return SupplierSettlementPayout{SupplierID: supplierID, SettledAmount: 1200, Reason: reason}, nil
 }
 
 func (s *stubRepo) CreateOrderDispute(_ context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error) {
@@ -177,6 +186,29 @@ func TestUpsertSupplierCostProfileNormalizesInput(t *testing.T) {
 	}
 	if repo.costProfileInput.ProjectKey != "discord" || repo.costProfileInput.Currency != "CNY" || repo.costProfileInput.Status != "active" || repo.costProfileInput.Notes != "note" {
 		t.Fatalf("unexpected normalized input: %#v", repo.costProfileInput)
+	}
+}
+
+func TestSettleSupplierPendingValidatesSupplierID(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.SettleSupplierPending(context.Background(), 9, SettleSupplierPendingInput{SupplierID: 0, Reason: "x"})
+	if err == nil {
+		t.Fatal("expected invalid supplier_id error")
+	}
+}
+
+func TestSettleSupplierPendingDefaultsAndTrimsReason(t *testing.T) {
+	repo := &stubRepo{}
+	service := NewService(repo)
+	payout, err := service.SettleSupplierPending(context.Background(), 9, SettleSupplierPendingInput{SupplierID: 7, Reason: "  月度结算  "})
+	if err != nil {
+		t.Fatalf("SettleSupplierPending() error = %v", err)
+	}
+	if payout.SupplierID != 7 || payout.SettledAmount != 1200 {
+		t.Fatalf("unexpected payout: %#v", payout)
+	}
+	if repo.adminID != 9 || repo.userID != 7 || repo.note != "月度结算" {
+		t.Fatalf("unexpected repo call: admin=%d supplier=%d reason=%q", repo.adminID, repo.userID, repo.note)
 	}
 }
 

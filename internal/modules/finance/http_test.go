@@ -95,6 +95,37 @@ func TestCreateDisputeEndpointCreatesDisputeForOrder(t *testing.T) {
 	}
 }
 
+func TestAdminSettleSupplierPendingEndpointReturnsPayout(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &stubRepo{}
+	handler := NewHandler(NewService(repo), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 9, Email: "admin@nexus-mail.local", Role: auth.RoleAdmin}))
+	handler.RegisterRoutes(secure)
+
+	body, _ := json.Marshal(SettleSupplierPendingInput{SupplierID: 7, Reason: "  月度结算  "})
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/supplier-settlements", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var payload struct {
+		Payout SupplierSettlementPayout `json:"payout"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if payload.Payout.SupplierID != 7 || payload.Payout.SettledAmount != 1200 {
+		t.Fatalf("unexpected payout: %#v", payload.Payout)
+	}
+	if repo.adminID != 9 || repo.userID != 7 || repo.note != "月度结算" {
+		t.Fatalf("unexpected repo call: %#v", repo)
+	}
+}
+
 func TestResolveDisputeEndpointReturnsUpdatedDispute(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &stubRepo{dispute: OrderDispute{ID: 8, Status: "resolved", ResolutionType: "refund", RefundAmount: 200}}

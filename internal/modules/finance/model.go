@@ -33,16 +33,26 @@ type SupplierSettlementEntry struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+type SupplierSettlementPayout struct {
+	SupplierID     int64     `json:"supplier_id"`
+	SettledAmount  int64     `json:"settled_amount"`
+	PendingBalance int64     `json:"pending_balance"`
+	SettledBalance int64     `json:"settled_balance"`
+	EntryCount     int64     `json:"entry_count"`
+	Reason         string    `json:"reason"`
+	SettledAt      time.Time `json:"settled_at"`
+}
+
 type SupplierCostProfile struct {
-	ID              int64     `json:"id"`
-	SupplierID      int64     `json:"supplier_id"`
-	ProjectKey      string    `json:"project_key"`
-	CostPerSuccess  int64     `json:"cost_per_success"`
-	CostPerTimeout  int64     `json:"cost_per_timeout"`
-	Currency        string    `json:"currency"`
-	Status          string    `json:"status"`
-	Notes           string    `json:"notes"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID             int64     `json:"id"`
+	SupplierID     int64     `json:"supplier_id"`
+	ProjectKey     string    `json:"project_key"`
+	CostPerSuccess int64     `json:"cost_per_success"`
+	CostPerTimeout int64     `json:"cost_per_timeout"`
+	Currency       string    `json:"currency"`
+	Status         string    `json:"status"`
+	Notes          string    `json:"notes"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type SupplierReportRow struct {
@@ -81,6 +91,11 @@ type AdminAdjustmentInput struct {
 	UserID int64  `json:"user_id"`
 	Amount int64  `json:"amount"`
 	Reason string `json:"reason"`
+}
+
+type SettleSupplierPendingInput struct {
+	SupplierID int64  `json:"supplier_id"`
+	Reason     string `json:"reason"`
 }
 
 type UpsertSupplierCostProfileInput struct {

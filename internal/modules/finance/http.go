@@ -37,6 +37,7 @@ func (h *Handler) RegisterRoutes(secure *gin.RouterGroup) {
 	admin.Use(auth.RequireRoles(auth.RoleAdmin))
 	admin.GET("/wallet-users", h.adminWalletUsers)
 	admin.POST("/wallet-adjustments", h.adminAdjustWallet)
+	admin.POST("/supplier-settlements", h.adminSettleSupplierPending)
 	admin.GET("/disputes", h.listAdminDisputes)
 	admin.POST("/disputes/:id/resolve", h.resolveDispute)
 }
@@ -112,6 +113,21 @@ func (h *Handler) adminAdjustWallet(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"wallet": wallet})
+}
+
+func (h *Handler) adminSettleSupplierPending(c *gin.Context) {
+	user := c.MustGet("currentUser").(auth.User)
+	var input SettleSupplierPendingInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+	payout, err := h.service.SettleSupplierPending(c.Request.Context(), user.ID, input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"payout": payout})
 }
 
 func (h *Handler) supplierCostProfiles(c *gin.Context) {

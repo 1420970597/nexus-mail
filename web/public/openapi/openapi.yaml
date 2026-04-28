@@ -171,6 +171,32 @@ components:
           type: integer
         reason:
           type: string
+    SettleSupplierPendingRequest:
+      type: object
+      required: [supplier_id, reason]
+      properties:
+        supplier_id:
+          type: integer
+        reason:
+          type: string
+    SupplierSettlementPayout:
+      type: object
+      properties:
+        supplier_id:
+          type: integer
+        settled_amount:
+          type: integer
+        pending_balance:
+          type: integer
+        settled_balance:
+          type: integer
+        entry_count:
+          type: integer
+        reason:
+          type: string
+        settled_at:
+          type: string
+          format: date-time
     APIKey:
       type: object
       properties:
@@ -851,6 +877,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /admin/supplier-settlements:
+    post:
+      summary: 管理员确认供应商待结算款
+      description: 将指定供应商的 pending 结算流水原子标记为 settled，并把 supplier_settlement_ledger.pending_amount 迁移到 settled_amount；若账本金额与 pending 流水合计不一致会拒绝处理。成功后写入 settle_supplier_pending 审计，管理员可通过 /admin/audit?action=settle_supplier_pending 查询。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleSupplierPendingRequest'
+      responses:
+        '200':
+          description: 结算确认成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payout:
+                    $ref: '#/components/schemas/SupplierSettlementPayout'
+        '400':
+          description: supplier_id 无效、暂无待结算金额或账本/流水不一致
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /wallet/disputes/{orderID}:
     post:
       summary: 用户对自己的订单发起争议
@@ -891,7 +943,7 @@ paths:
   /admin/audit:
     get:
       summary: 管理员审计日志查询
-      description: 支持按 action、actor_type、user_id、api_key_id 与 limit 过滤；action 覆盖 API Key 生命周期、鉴权拒绝、风控规则更新以及 Phase 4 财务运营动作（admin_wallet_adjustment、update_supplier_cost_profile、resolve_dispute）。
+      description: 支持按 action、actor_type、user_id、api_key_id 与 limit 过滤；action 覆盖 API Key 生命周期、鉴权拒绝、风控规则更新以及 Phase 4 财务运营动作（admin_wallet_adjustment、update_supplier_cost_profile、settle_supplier_pending、resolve_dispute）。
       parameters:
         - in: query
           name: action

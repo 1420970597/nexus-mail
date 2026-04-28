@@ -58,6 +58,8 @@ CREATE TABLE IF NOT EXISTS supplier_settlement_entries (
 );
 CREATE INDEX IF NOT EXISTS idx_supplier_settlement_entries_supplier_id_created_at
   ON supplier_settlement_entries(supplier_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_supplier_settlement_entries_supplier_status_id
+  ON supplier_settlement_entries(supplier_id, status, id);
 CREATE TABLE IF NOT EXISTS supplier_cost_profiles (
   id BIGSERIAL PRIMARY KEY,
   supplier_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -419,6 +421,86 @@ ORDER BY p.key ASC
 		items = append(items, item)
 	}
 	return items, rows.Err()
+}
+
+func (r *Repository) SettleSupplierPending(ctx context.Context, adminID, supplierID int64, reason string) (SupplierSettlementPayout, error) {
+	reason = strings.TrimSpace(reason)
+	if reason == "" {
+		reason = "管理员确认供应商结算"
+	}
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var supplierRole string
+	if err := tx.QueryRow(ctx, `SELECT role FROM users WHERE id = $1 FOR UPDATE`, supplierID).Scan(&supplierRole); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	if supplierRole != "supplier" {
+		return SupplierSettlementPayout{}, fmt.Errorf("supplier_id 必须指向供应商用户")
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_ledger (supplier_id) VALUES ($1) ON CONFLICT (supplier_id) DO NOTHING`, supplierID); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+
+	var payout SupplierSettlementPayout
+	var pendingAmount int64
+	payout.SupplierID = supplierID
+	payout.Reason = reason
+	if err := tx.QueryRow(ctx, `
+SELECT pending_amount, settled_amount, NOW()
+FROM supplier_settlement_ledger
+WHERE supplier_id = $1
+FOR UPDATE
+`, supplierID).Scan(&pendingAmount, &payout.SettledBalance, &payout.SettledAt); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	if pendingAmount <= 0 {
+		return SupplierSettlementPayout{}, fmt.Errorf("供应商暂无待结算金额")
+	}
+	var pendingEntryAmount int64
+	if err := tx.QueryRow(ctx, `SELECT COALESCE(SUM(amount), 0) FROM supplier_settlement_entries WHERE supplier_id = $1 AND status = 'pending'`, supplierID).Scan(&pendingEntryAmount); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	if pendingEntryAmount != pendingAmount {
+		return SupplierSettlementPayout{}, fmt.Errorf("供应商待结算账本与流水不一致，请先人工核对")
+	}
+
+	if err := tx.QueryRow(ctx, `
+WITH updated AS (
+  UPDATE supplier_settlement_entries
+  SET status = 'settled', note = CASE WHEN note = '' THEN $2 ELSE note || '；' || $2 END
+  WHERE supplier_id = $1 AND status = 'pending'
+  RETURNING id
+)
+SELECT COUNT(*) FROM updated
+`, supplierID, reason).Scan(&payout.EntryCount); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	if payout.EntryCount == 0 {
+		return SupplierSettlementPayout{}, fmt.Errorf("供应商暂无可结算流水")
+	}
+	if _, err := tx.Exec(ctx, `
+UPDATE supplier_settlement_ledger
+SET pending_amount = 0,
+    settled_amount = settled_amount + $2,
+    updated_at = NOW()
+WHERE supplier_id = $1
+`, supplierID, pendingAmount); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	payout.SettledAmount = pendingAmount
+	payout.PendingBalance = 0
+	payout.SettledBalance += pendingAmount
+	if err := recordFinanceAuditTx(ctx, tx, adminID, "settle_supplier_pending", fmt.Sprintf("供应商结算 supplier_id=%d amount=%d entries=%d reason=%s", supplierID, payout.SettledAmount, payout.EntryCount, reason)); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return SupplierSettlementPayout{}, err
+	}
+	return payout, nil
 }
 
 func (r *Repository) CreateOrderDispute(ctx context.Context, actorID, orderID int64, actorRole, reason string) (OrderDispute, error) {

@@ -31,6 +31,16 @@ export interface SupplierSettlementEntry {
   created_at: string
 }
 
+export interface SupplierSettlementPayout {
+  supplier_id: number
+  settled_amount: number
+  pending_balance: number
+  settled_balance: number
+  entry_count: number
+  reason: string
+  settled_at: string
+}
+
 export interface SupplierCostProfile {
   id: number
   supplier_id: number
@@ -134,6 +144,11 @@ export async function getAdminWalletUsers() {
 
 export async function adminAdjustWallet(userId: number, amount: number, reason: string) {
   const { data } = await api.post<{ wallet: WalletOverview }>('/admin/wallet-adjustments', { user_id: userId, amount, reason })
+  return data
+}
+
+export async function settleSupplierPending(supplierId: number, reason: string) {
+  const { data } = await api.post<{ payout: SupplierSettlementPayout }>('/admin/supplier-settlements', { supplier_id: supplierId, reason })
   return data
 }
 

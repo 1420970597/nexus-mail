@@ -686,10 +686,7 @@ FOR UPDATE OF o, m
 		return ActivationOrder{}, err
 	}
 	if supplierID > 0 {
-		if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_ledger (supplier_id, pending_amount, settled_amount, updated_at) VALUES ($1, $2, 0, NOW()) ON CONFLICT (supplier_id) DO UPDATE SET pending_amount = supplier_settlement_ledger.pending_amount + EXCLUDED.pending_amount, updated_at = NOW()`, supplierID, quotedPrice); err != nil {
-			return ActivationOrder{}, err
-		}
-		if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_entries (supplier_id, order_id, amount, status, note) VALUES ($1, $2, $3, 'pending', '订单完成待结算')`, supplierID, orderID, quotedPrice); err != nil {
+		if err := addPendingSupplierSettlementTx(ctx, tx, supplierID, orderID, quotedPrice, "订单完成待结算"); err != nil {
 			return ActivationOrder{}, err
 		}
 	}
@@ -891,77 +888,99 @@ FOR UPDATE
 
 func (r *Repository) FinalizeReadyActivationOrders(ctx context.Context, now time.Time, finalizeAfter time.Duration) (int64, error) {
 	rows, err := r.pool.Query(ctx, `
-SELECT o.id, o.user_id, o.mailbox_id, o.quoted_price, COALESCE(pa.supplier_id, d.supplier_id, 0)
+SELECT o.id
 FROM activation_orders o
-JOIN mailbox_pool m ON m.id = o.mailbox_id
-LEFT JOIN resource_domains d ON d.id = o.domain_id
-LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.status = $1 AND o.updated_at <= $2
-FOR UPDATE OF o, m
+ORDER BY o.id ASC
 `, OrderStatusReady, now.UTC().Add(-finalizeAfter))
 	if err != nil {
 		return 0, err
 	}
 	defer rows.Close()
-	var ready []struct {
-		orderID    int64
-		userID     int64
-		mailboxID  int64
-		quoted     int64
-		supplierID int64
-	}
+	var ready []int64
 	for rows.Next() {
-		var item struct {
-			orderID    int64
-			userID     int64
-			mailboxID  int64
-			quoted     int64
-			supplierID int64
-		}
-		if err := rows.Scan(&item.orderID, &item.userID, &item.mailboxID, &item.quoted, &item.supplierID); err != nil {
+		var orderID int64
+		if err := rows.Scan(&orderID); err != nil {
 			return 0, err
 		}
-		ready = append(ready, item)
+		ready = append(ready, orderID)
 	}
 	if err := rows.Err(); err != nil {
 		return 0, err
 	}
-	for _, order := range ready {
+	var finalized int64
+	for _, orderID := range ready {
 		tx, err := r.pool.Begin(ctx)
 		if err != nil {
-			return 0, err
+			return finalized, err
 		}
-		if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, final_price = CASE WHEN final_price = 0 THEN quoted_price ELSE final_price END, updated_at = NOW() WHERE id = $1`, order.orderID, OrderStatusFinished); err != nil {
+		var order struct {
+			orderID    int64
+			userID     int64
+			mailboxID  int64
+			quoted     int64
+			status     string
+			supplierID int64
+		}
+		err = tx.QueryRow(ctx, `
+SELECT o.id, o.user_id, o.mailbox_id, o.quoted_price, o.status, COALESCE(pa.supplier_id, d.supplier_id, 0)
+FROM activation_orders o
+JOIN mailbox_pool m ON m.id = o.mailbox_id
+LEFT JOIN resource_domains d ON d.id = o.domain_id
+LEFT JOIN provider_accounts pa ON pa.id = m.account_id
+WHERE o.id = $1
+FOR UPDATE OF o, m
+`, orderID).Scan(&order.orderID, &order.userID, &order.mailboxID, &order.quoted, &order.status, &order.supplierID)
+		if err != nil {
 			_ = tx.Rollback(ctx)
-			return 0, err
+			return finalized, err
+		}
+		if order.status != OrderStatusReady {
+			_ = tx.Rollback(ctx)
+			continue
+		}
+		if _, err := tx.Exec(ctx, `UPDATE activation_orders SET status = $2, final_price = CASE WHEN final_price = 0 THEN quoted_price ELSE final_price END, updated_at = NOW() WHERE id = $1 AND status = $3`, order.orderID, OrderStatusFinished, OrderStatusReady); err != nil {
+			_ = tx.Rollback(ctx)
+			return finalized, err
 		}
 		if _, err := tx.Exec(ctx, `UPDATE mailbox_pool SET status = 'used' WHERE id = $1`, order.mailboxID); err != nil {
 			_ = tx.Rollback(ctx)
-			return 0, err
+			return finalized, err
 		}
 		if err := moveWalletBalanceTx(ctx, tx, order.userID, 0, -order.quoted); err != nil {
 			_ = tx.Rollback(ctx)
-			return 0, err
+			return finalized, err
 		}
 		if err := addWalletTransactionTx(ctx, tx, order.userID, order.orderID, "auto_finish", "debit", order.quoted, "frozen", "自动完结扣除冻结余额"); err != nil {
 			_ = tx.Rollback(ctx)
-			return 0, err
+			return finalized, err
 		}
 		if order.supplierID > 0 {
-			if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_ledger (supplier_id, pending_amount, settled_amount, updated_at) VALUES ($1, $2, 0, NOW()) ON CONFLICT (supplier_id) DO UPDATE SET pending_amount = supplier_settlement_ledger.pending_amount + EXCLUDED.pending_amount, updated_at = NOW()`, order.supplierID, order.quoted); err != nil {
+			if err := addPendingSupplierSettlementTx(ctx, tx, order.supplierID, order.orderID, order.quoted, "系统自动完结待结算"); err != nil {
 				_ = tx.Rollback(ctx)
-				return 0, err
-			}
-			if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_entries (supplier_id, order_id, amount, status, note) VALUES ($1, $2, $3, 'pending', '系统自动完结待结算')`, order.supplierID, order.orderID, order.quoted); err != nil {
-				_ = tx.Rollback(ctx)
-				return 0, err
+				return finalized, err
 			}
 		}
 		if err := tx.Commit(ctx); err != nil {
-			return 0, err
+			return finalized, err
 		}
+		finalized++
 	}
-	return int64(len(ready)), nil
+	return finalized, nil
+}
+
+func addPendingSupplierSettlementTx(ctx context.Context, tx pgx.Tx, supplierID, orderID, amount int64, note string) error {
+	if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_ledger (supplier_id, pending_amount, settled_amount, updated_at) VALUES ($1, 0, 0, NOW()) ON CONFLICT (supplier_id) DO NOTHING`, supplierID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `SELECT supplier_id FROM supplier_settlement_ledger WHERE supplier_id = $1 FOR UPDATE`, supplierID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO supplier_settlement_entries (supplier_id, order_id, amount, status, note) VALUES ($1, $2, $3, 'pending', $4)`, supplierID, orderID, amount, note); err != nil {
+		return err
+	}
+	_, err := tx.Exec(ctx, `UPDATE supplier_settlement_ledger SET pending_amount = pending_amount + $2, updated_at = NOW() WHERE supplier_id = $1`, supplierID, amount)
+	return err
 }
 
 func (r *Repository) queryDomains(ctx context.Context, supplierID int64) ([]Domain, error) {
