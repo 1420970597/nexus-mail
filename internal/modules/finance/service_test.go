@@ -205,7 +205,7 @@ func TestCreateOrderDisputePassesNormalizedValues(t *testing.T) {
 func TestResolveOrderDisputeDefaultsResolutionType(t *testing.T) {
 	repo := &stubRepo{dispute: OrderDispute{ID: 8}}
 	service := NewService(repo)
-	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: " RESOLVED ", RefundAmount: 200})
+	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: " RESOLVED ", ResolutionNote: "人工确认"})
 	if err != nil {
 		t.Fatalf("ResolveOrderDispute() error = %v", err)
 	}
@@ -219,5 +219,25 @@ func TestResolveOrderDisputeRejectsRefundAmountWhenRejected(t *testing.T) {
 	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: "rejected", RefundAmount: 1})
 	if err == nil {
 		t.Fatal("expected rejected dispute refund validation error")
+	}
+}
+
+func TestResolveOrderDisputeRequiresRefundTypeWhenRefunding(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: "resolved", ResolutionType: "manual_adjustment", RefundAmount: 100})
+	if err == nil {
+		t.Fatal("expected refund resolution_type validation error")
+	}
+}
+
+func TestResolveOrderDisputeAllowsNormalizedRefundType(t *testing.T) {
+	repo := &stubRepo{dispute: OrderDispute{ID: 8}}
+	service := NewService(repo)
+	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: "resolved", ResolutionType: " REFUND ", RefundAmount: 100})
+	if err != nil {
+		t.Fatalf("ResolveOrderDispute() error = %v", err)
+	}
+	if repo.resolveDisputeData.ResolutionType != "refund" || repo.resolveDisputeData.RefundAmount != 100 {
+		t.Fatalf("expected normalized refund type to pass through, got %#v", repo.resolveDisputeData)
 	}
 }
