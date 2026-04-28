@@ -322,9 +322,17 @@ SELECT po.domain_id
 FROM project_offerings po
 JOIN resource_domains d ON d.id = po.domain_id AND d.status = 'active'
 WHERE po.project_id = $1
+  AND EXISTS (
+    SELECT 1
+    FROM mailbox_pool m
+    WHERE m.domain_id = po.domain_id
+      AND m.project_key = $2
+      AND m.status = 'available'
+      AND m.source_type = po.source_type
+  )
 ORDER BY po.priority ASC, po.id ASC
 LIMIT 1
-`, project.ID).Scan(&domainID); err != nil {
+`, project.ID, project.Key).Scan(&domainID); err != nil {
 			if err == pgx.ErrNoRows {
 				return ActivationOrder{}, fmt.Errorf("库存不足")
 			}

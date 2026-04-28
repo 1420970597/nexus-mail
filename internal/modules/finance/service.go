@@ -119,6 +119,9 @@ func (s *Service) ResolveOrderDispute(ctx context.Context, adminID, disputeID in
 	if input.Status == "resolved" && input.ResolutionType == "" {
 		input.ResolutionType = "manual_adjustment"
 	}
+	if input.Status == "rejected" && input.RefundAmount != 0 {
+		return OrderDispute{}, fmt.Errorf("驳回争议时 refund_amount 必须为 0")
+	}
 	if input.RefundAmount < 0 {
 		return OrderDispute{}, fmt.Errorf("refund_amount 不能为负数")
 	}

@@ -48,7 +48,8 @@ func (s *stubRepo) TopUpWallet(_ context.Context, userID int64, amount int64, no
 	return s.wallet, s.walletErr
 }
 
-func (s *stubRepo) SupplierOverview(context.Context, int64) (WalletOverview, []SupplierSettlementEntry, error) {
+func (s *stubRepo) SupplierOverview(_ context.Context, supplierID int64) (WalletOverview, []SupplierSettlementEntry, error) {
+	s.userID = supplierID
 	return s.wallet, s.settlements, s.walletErr
 }
 
@@ -64,7 +65,8 @@ func (s *stubRepo) AdminWalletUsers(context.Context) ([]WalletOverview, error) {
 	return s.users, s.walletErr
 }
 
-func (s *stubRepo) ListSupplierCostProfiles(context.Context, int64) ([]SupplierCostProfile, error) {
+func (s *stubRepo) ListSupplierCostProfiles(_ context.Context, supplierID int64) ([]SupplierCostProfile, error) {
+	s.userID = supplierID
 	return s.costProfiles, s.walletErr
 }
 
@@ -209,5 +211,13 @@ func TestResolveOrderDisputeDefaultsResolutionType(t *testing.T) {
 	}
 	if repo.resolveDisputeID != 8 || repo.resolveDisputeData.Status != "resolved" || repo.resolveDisputeData.ResolutionType != "manual_adjustment" {
 		t.Fatalf("unexpected resolve repo call: %#v", repo.resolveDisputeData)
+	}
+}
+
+func TestResolveOrderDisputeRejectsRefundAmountWhenRejected(t *testing.T) {
+	service := NewService(&stubRepo{})
+	_, err := service.ResolveOrderDispute(context.Background(), 9, 8, ResolveOrderDisputeInput{Status: "rejected", RefundAmount: 1})
+	if err == nil {
+		t.Fatal("expected rejected dispute refund validation error")
 	}
 }

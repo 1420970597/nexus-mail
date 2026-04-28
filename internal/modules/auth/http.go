@@ -99,12 +99,13 @@ func (h *Handler) menu(c *gin.Context) {
 
 func (h *Handler) authRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if !strings.HasPrefix(authHeader, "Bearer ") {
+		authHeader := strings.TrimSpace(c.GetHeader("Authorization"))
+		if len(authHeader) < len("Bearer ") || !strings.EqualFold(authHeader[:len("Bearer ")], "Bearer ") {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "缺少认证令牌"})
 			return
 		}
-		user, err := h.service.ParseToken(c.Request.Context(), strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer ")))
+		token := strings.TrimSpace(authHeader[len("Bearer "):])
+		user, err := h.service.ParseToken(c.Request.Context(), token)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
