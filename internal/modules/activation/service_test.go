@@ -109,6 +109,19 @@ func (s *stubRepo) FinalizeReadyActivationOrders(_ context.Context, _ time.Time,
 	return s.finalizeCount, nil
 }
 
+func TestFinishActivationOrderDelegatesToRepository(t *testing.T) {
+	repo := &stubRepo{finishResp: ActivationOrder{ID: 8, Status: OrderStatusFinished, FinalPrice: 1200}}
+	service := NewService(repo)
+
+	order, err := service.FinishActivationOrder(context.Background(), 3, 8)
+	if err != nil {
+		t.Fatalf("FinishActivationOrder() error = %v", err)
+	}
+	if order.ID != 8 || order.Status != OrderStatusFinished || order.FinalPrice != 1200 {
+		t.Fatalf("unexpected finish order response: %#v", order)
+	}
+}
+
 func TestGetActivationResultIncludesPollingHints(t *testing.T) {
 	repo := &stubRepo{order: ActivationOrder{ID: 12, Status: OrderStatusWaitingEmail, ExpiresAt: time.Now().Add(25 * time.Second), ExtractionType: "code"}}
 	service := NewService(repo)

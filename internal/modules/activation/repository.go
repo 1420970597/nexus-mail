@@ -556,7 +556,7 @@ JOIN mailbox_pool m ON m.id = o.mailbox_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.id = $1 AND o.user_id = $2
-FOR UPDATE
+FOR UPDATE OF o, m
 `, orderID, userID).Scan(&orderIDDB, &orderUserID, &mailboxID, &quotedPrice, &status, &supplierID)
 	if err != nil {
 		return ActivationOrder{}, err
@@ -611,7 +611,7 @@ JOIN mailbox_pool m ON m.id = o.mailbox_id
 LEFT JOIN resource_domains d ON d.id = o.domain_id
 LEFT JOIN provider_accounts pa ON pa.id = m.account_id
 WHERE o.id = $1
-FOR UPDATE
+FOR UPDATE OF o, m
 `, orderID).Scan(&order.ID, &order.OrderNo, &order.UserID, &order.ProjectID, &order.ProjectKey, &order.ProjectName, &order.DomainID, &order.DomainName, &order.MailboxID, &order.EmailAddress, &currentStatus, &order.QuotedPrice, &order.FinalPrice, &order.ExtractionType, &order.ExtractionValue, &order.CreatedAt, &order.UpdatedAt, &order.ExpiresAt, &order.CanceledAt, &orderSupplierID)
 	if err != nil {
 		return ActivationOrder{}, err
