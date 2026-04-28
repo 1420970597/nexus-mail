@@ -29,6 +29,7 @@ func TestBuildDashboardSummaryAggregatesKeyAdminMetrics(t *testing.T) {
 		{ID: 3, Action: "success"},
 		{ID: 4, Action: "denied_scope"},
 		{ID: 5, Action: "denied_whitelist"},
+		{ID: 6, Action: "denied_rate_limit"},
 	}
 
 	summary := BuildDashboardSummary(context.Background(), projects, orders, walletUsers, disputes, audit)
@@ -47,7 +48,7 @@ func TestBuildDashboardSummaryAggregatesKeyAdminMetrics(t *testing.T) {
 	if summary.Suppliers.Total != 3 {
 		t.Fatalf("expected 3 supplier/admin principals, got %d", summary.Suppliers.Total)
 	}
-	if summary.Audit.DeniedWhitelist != 1 || summary.Audit.DeniedScope != 1 || summary.Audit.Total != 5 {
+	if summary.Audit.DeniedWhitelist != 1 || summary.Audit.DeniedScope != 1 || summary.Audit.DeniedRateLimit != 1 || summary.Audit.Total != 6 {
 		t.Fatalf("unexpected audit summary: %#v", summary.Audit)
 	}
 	if summary.SupplierSettlements.PendingAmount != 1500 {
@@ -65,13 +66,13 @@ func TestBuildRiskSignalsRanksHighAndMediumSignals(t *testing.T) {
 		{ID: 6, UserID: 4, SupplierID: 2, Status: "READY"},
 	}
 	disputes := []DashboardDispute{{ID: 1, Status: "open"}}
-	audit := []APIKeyAuditEntry{{ID: 1, Action: "denied_whitelist"}, {ID: 2, Action: "denied_scope"}, {ID: 3, Action: "denied_invalid"}}
+	audit := []APIKeyAuditEntry{{ID: 1, Action: "denied_whitelist"}, {ID: 2, Action: "denied_scope"}, {ID: 3, Action: "denied_invalid"}, {ID: 4, Action: "denied_rate_limit"}}
 
 	summary, signals := BuildRiskSignals(context.Background(), orders, disputes, audit)
 	if summary.OpenDisputes != 1 || summary.TimeoutOrders != 2 || summary.CanceledOrders != 2 {
 		t.Fatalf("unexpected risk summary counters: %#v", summary)
 	}
-	if summary.DeniedWhitelist != 1 || summary.DeniedScope != 1 || summary.DeniedInvalid != 1 {
+	if summary.DeniedWhitelist != 1 || summary.DeniedScope != 1 || summary.DeniedInvalid != 1 || summary.DeniedRateLimit != 1 {
 		t.Fatalf("unexpected auth risk counters: %#v", summary)
 	}
 	if len(signals) == 0 {

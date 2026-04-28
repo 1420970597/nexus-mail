@@ -58,15 +58,18 @@ describe('App', () => {
         disputes: { total: 2, open: 1, resolved: 1, rejected: 0 },
         projects: { total: 2, active: 1, inactive: 1 },
         suppliers: { total: 2 },
-        audit: { total: 3, create: 1, revoke: 0, success: 1, denied_invalid: 0, denied_scope: 0, denied_whitelist: 1 },
+        audit: { total: 4, create: 1, revoke: 0, success: 1, denied_invalid: 0, denied_scope: 0, denied_whitelist: 1, denied_rate_limit: 1 },
         supplier_settlements: { pending_amount: 1500 },
       },
       recent_audit: [{ id: 1, user_id: 3, api_key_id: 9, action: 'denied_whitelist', actor_type: 'system', note: 'blocked', created_at: '2026-04-28T00:00:00Z' }],
     })
     mockedGetAdminRisk.mockResolvedValue({
       generated_at: '2026-04-28T00:00:00Z',
-      summary: { open_disputes: 1, denied_whitelist: 1, denied_scope: 0, denied_invalid: 0, timeout_orders: 2, canceled_orders: 1, high_risk_signal_count: 1, medium_risk_signal_count: 1 },
-      signals: [{ category: 'auth', severity: 'high', count: 1, title: 'API Key 白名单拦截频繁', detail: '最近审计中检测到 1 次 denied_whitelist 事件' }],
+      summary: { open_disputes: 1, denied_whitelist: 1, denied_scope: 0, denied_invalid: 0, denied_rate_limit: 1, timeout_orders: 2, canceled_orders: 1, high_risk_signal_count: 2, medium_risk_signal_count: 1 },
+      signals: [
+        { category: 'auth', severity: 'high', count: 1, title: 'API Key 白名单拦截频繁', detail: '最近审计中检测到 1 次 denied_whitelist 事件' },
+        { category: 'auth', severity: 'high', count: 1, title: 'API Key 触发限流', detail: '最近审计中检测到 1 次 denied_rate_limit 事件，可能存在异常高频访问或客户端重试风暴' },
+      ],
     })
     mockedGetAdminAudit.mockResolvedValue({ items: [{ id: 1, user_id: 3, api_key_id: 9, action: 'success', actor_type: 'system', note: 'scope ok', created_at: '2026-04-28T00:00:00Z' }] })
   })
@@ -125,5 +128,7 @@ describe('App', () => {
     )
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     expect(await screen.findByText('API Key 白名单拦截频繁')).toBeInTheDocument()
+    expect(await screen.findByText('API Key 触发限流')).toBeInTheDocument()
+    expect(await screen.findByText('限流拦截')).toBeInTheDocument()
   })
 })

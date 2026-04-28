@@ -32,6 +32,7 @@ export function AdminRiskPage() {
       <Row gutter={16} style={{ width: '100%' }}>
         <Col span={6}><Card title="开放争议单">{summary?.open_disputes ?? 0}</Card></Col>
         <Col span={6}><Card title="白名单拦截">{summary?.denied_whitelist ?? 0}</Card></Col>
+        <Col span={6}><Card title="限流拦截">{summary?.denied_rate_limit ?? 0}</Card></Col>
         <Col span={6}><Card title="高风险信号">{summary?.high_risk_signal_count ?? 0}</Card></Col>
         <Col span={6}><Card title="中风险信号">{summary?.medium_risk_signal_count ?? 0}</Card></Col>
       </Row>

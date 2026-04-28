@@ -69,6 +69,7 @@ export function DashboardPage() {
               <Tag color="green">完成订单：{adminSummary.orders.finished}</Tag>
               <Tag color="orange">取消订单：{adminSummary.orders.canceled}</Tag>
               <Tag color="red">白名单拦截：{adminSummary.audit.denied_whitelist}</Tag>
+              <Tag color="red">限流拦截：{adminSummary.audit.denied_rate_limit}</Tag>
             </Space>
           </Card>
           <Card title="最近审计事件" style={{ width: '100%' }}>

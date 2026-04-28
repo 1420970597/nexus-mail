@@ -23,7 +23,7 @@ export interface AdminDashboardSummary {
   disputes: { total: number; open: number; resolved: number; rejected: number }
   projects: { total: number; active: number; inactive: number }
   suppliers: { total: number }
-  audit: { total: number; create: number; revoke: number; success: number; denied_invalid: number; denied_scope: number; denied_whitelist: number }
+  audit: { total: number; create: number; revoke: number; success: number; denied_invalid: number; denied_scope: number; denied_whitelist: number; denied_rate_limit: number }
   supplier_settlements: { pending_amount: number }
 }
 
@@ -56,6 +56,7 @@ export interface AdminRiskSummary {
   denied_whitelist: number
   denied_scope: number
   denied_invalid: number
+  denied_rate_limit: number
   timeout_orders: number
   canceled_orders: number
   high_risk_signal_count: number

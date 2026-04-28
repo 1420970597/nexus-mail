@@ -41,6 +41,7 @@ type DashboardSummary struct {
 		DeniedInvalid   int `json:"denied_invalid"`
 		DeniedScope     int `json:"denied_scope"`
 		DeniedWhitelist int `json:"denied_whitelist"`
+		DeniedRateLimit int `json:"denied_rate_limit"`
 	} `json:"audit"`
 	SupplierSettlements struct {
 		PendingAmount int64 `json:"pending_amount"`
@@ -60,6 +61,7 @@ type RiskSummary struct {
 	DeniedWhitelist       int `json:"denied_whitelist"`
 	DeniedScope           int `json:"denied_scope"`
 	DeniedInvalid         int `json:"denied_invalid"`
+	DeniedRateLimit       int `json:"denied_rate_limit"`
 	TimeoutOrders         int `json:"timeout_orders"`
 	CanceledOrders        int `json:"canceled_orders"`
 	HighRiskSignalCount   int `json:"high_risk_signal_count"`
@@ -163,6 +165,8 @@ func BuildDashboardSummary(
 			summary.Audit.DeniedScope++
 		case "denied_whitelist":
 			summary.Audit.DeniedWhitelist++
+		case "denied_rate_limit":
+			summary.Audit.DeniedRateLimit++
 		}
 	}
 	summary.Audit.Total = len(audit)
@@ -208,6 +212,8 @@ func BuildRiskSignals(
 			summary.DeniedScope++
 		case "denied_invalid":
 			summary.DeniedInvalid++
+		case "denied_rate_limit":
+			summary.DeniedRateLimit++
 		}
 	}
 
@@ -226,6 +232,7 @@ func BuildRiskSignals(
 
 	appendSignal("dispute", "high", summary.OpenDisputes, "存在未处理争议单", fmt.Sprintf("当前共有 %d 笔 open 争议单待管理员处理", summary.OpenDisputes))
 	appendSignal("auth", "high", summary.DeniedWhitelist, "API Key 白名单拦截频繁", fmt.Sprintf("最近审计中检测到 %d 次 denied_whitelist 事件", summary.DeniedWhitelist))
+	appendSignal("auth", "high", summary.DeniedRateLimit, "API Key 触发限流", fmt.Sprintf("最近审计中检测到 %d 次 denied_rate_limit 事件，可能存在异常高频访问或客户端重试风暴", summary.DeniedRateLimit))
 	appendSignal("auth", "medium", summary.DeniedScope, "API Key 权限越权尝试", fmt.Sprintf("最近审计中检测到 %d 次 denied_scope 事件", summary.DeniedScope))
 	appendSignal("auth", "medium", summary.DeniedInvalid, "存在无效 API Key 请求", fmt.Sprintf("最近审计中检测到 %d 次 denied_invalid 事件", summary.DeniedInvalid))
 	appendSignal("order", "medium", summary.TimeoutOrders, "超时订单需要关注", fmt.Sprintf("当前共有 %d 笔 TIMEOUT 订单", summary.TimeoutOrders))
