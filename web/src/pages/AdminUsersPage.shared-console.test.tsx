@@ -1,0 +1,104 @@
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import { AdminUsersPage } from './AdminUsersPage'
+import * as financeService from '../services/finance'
+
+vi.mock('../services/finance', async () => {
+  const actual = await vi.importActual<typeof import('../services/finance')>('../services/finance')
+  return {
+    ...actual,
+    getAdminWalletUsers: vi.fn(),
+    getAdminDisputes: vi.fn(),
+    adminAdjustWallet: vi.fn(),
+    settleSupplierPending: vi.fn(),
+    resolveAdminDispute: vi.fn(),
+  }
+})
+
+const mockedGetAdminWalletUsers = vi.mocked(financeService.getAdminWalletUsers)
+const mockedGetAdminDisputes = vi.mocked(financeService.getAdminDisputes)
+const mockedAdminAdjustWallet = vi.mocked(financeService.adminAdjustWallet)
+const mockedSettleSupplierPending = vi.mocked(financeService.settleSupplierPending)
+const mockedResolveAdminDispute = vi.mocked(financeService.resolveAdminDispute)
+
+describe('AdminUsersPage shared-console admin workbench', () => {
+  beforeEach(() => {
+    mockedGetAdminWalletUsers.mockResolvedValue({
+      items: [
+        {
+          user_id: 10,
+          email: 'user@example.com',
+          available_balance: 12000,
+          frozen_balance: 2000,
+          pending_settlement: 4000,
+        },
+      ],
+    } as any)
+    mockedGetAdminDisputes.mockResolvedValue({
+      items: [
+        {
+          id: 8,
+          order_id: 101,
+          user_id: 10,
+          supplier_id: 22,
+          project_key: 'discord',
+          status: 'open',
+          reason: '超时',
+          resolution_type: '',
+          refund_amount: 0,
+        },
+      ],
+    } as any)
+    mockedAdminAdjustWallet.mockResolvedValue({} as any)
+    mockedSettleSupplierPending.mockResolvedValue({ payout: { settled_amount: 5600, entry_count: 2 } } as any)
+    mockedResolveAdminDispute.mockResolvedValue({} as any)
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders admin operations metrics and shared-console guidance', async () => {
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('管理员运营台')).toBeInTheDocument()
+    expect(screen.getByText('钱包总余额')).toBeInTheDocument()
+    expect(screen.getByText('待结算总额')).toBeInTheDocument()
+    expect(screen.getByText('开放争议')).toBeInTheDocument()
+    expect(screen.getByText('钱包用户数')).toBeInTheDocument()
+  })
+
+  it('submits wallet adjustment, settlement and dispute resolution flows', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('用户管理')).toBeInTheDocument()
+
+    await user.type(screen.getAllByLabelText('用户 ID')[0], '10')
+    await user.type(screen.getByLabelText('金额（分）'), '500')
+    await user.type(screen.getAllByLabelText('原因')[0], 'manual bonus')
+    await user.type(screen.getByPlaceholderText('请输入：确认调账'), '确认调账')
+    await user.click(screen.getByRole('button', { name: '执行调账' }))
+    await waitFor(() => expect(mockedAdminAdjustWallet).toHaveBeenCalledWith(10, 500, 'manual bonus', '确认调账'))
+
+    await user.type(screen.getByLabelText('供应商用户 ID'), '22')
+    await user.type(screen.getByPlaceholderText('例如：月度结算'), 'monthly payout')
+    await user.type(screen.getByPlaceholderText('请输入：确认结算'), '确认结算')
+    await user.click(screen.getAllByRole('button', { name: '确认结算' })[0])
+    await waitFor(() => expect(mockedSettleSupplierPending).toHaveBeenCalledWith(22, 'monthly payout', '确认结算'))
+
+    await user.type(screen.getByLabelText('争议单 ID'), '8')
+    await user.click(screen.getByRole('button', { name: '处理争议单' }))
+    await waitFor(() => expect(mockedResolveAdminDispute).toHaveBeenCalled())
+  })
+})

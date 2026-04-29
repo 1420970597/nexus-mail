@@ -3,7 +3,10 @@ import {
   IconActivity,
   IconArticle,
   IconBell,
+  IconFile,
   IconHistogram,
+  IconTickCircle,
+  IconUser,
   IconSafe,
   IconServer,
 } from '@douyinfe/semi-icons'
@@ -77,9 +80,27 @@ const routeTitleMap: Record<string, string> = {
 
 const quickActions = [
   {
+    path: '/projects',
+    label: '项目市场',
+    icon: <IconFile />,
+    roles: ['user', 'supplier', 'admin'],
+  },
+  {
+    path: '/balance',
+    label: '余额中心',
+    icon: <IconTickCircle />,
+    roles: ['user', 'supplier', 'admin'],
+  },
+  {
     path: '/admin/risk',
     label: '风控中心',
     icon: <IconSafe />,
+    roles: ['admin'],
+  },
+  {
+    path: '/admin/users',
+    label: '用户运营',
+    icon: <IconUser />,
     roles: ['admin'],
   },
   {

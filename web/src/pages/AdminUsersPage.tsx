@@ -1,5 +1,6 @@
-import { Button, Card, Form, Select, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { useEffect, useState } from 'react'
+import { Banner, Button, Card, Col, Form, Row, Select, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
+import { IconAlertTriangle, IconPulse, IconSafe, IconUser } from '@douyinfe/semi-icons'
+import { useEffect, useMemo, useState } from 'react'
 import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, settleSupplierPending, OrderDispute, WalletOverview } from '../services/finance'
 
 function disputeStatusColor(status: string) {
@@ -11,6 +12,31 @@ function disputeStatusColor(status: string) {
     default:
       return 'orange'
   }
+}
+
+function amountLabel(value: number) {
+  return `¥${(Number(value || 0) / 100).toFixed(2)}`
+}
+
+function MetricCard({ title, value, description, icon }: { title: string; value: string; description: string; icon: JSX.Element }) {
+  return (
+    <Card
+      style={{
+        flex: '1 1 220px',
+        minWidth: 220,
+        borderRadius: 20,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}
+      bodyStyle={{ padding: 18 }}
+    >
+      <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+        <Tag color="grey" prefixIcon={icon}>{title}</Tag>
+        <Typography.Title heading={4} style={{ margin: 0, color: '#f7f8f8' }}>{value}</Typography.Title>
+        <Typography.Text style={{ color: 'rgba(208,214,224,0.72)' }}>{description}</Typography.Text>
+      </Space>
+    </Card>
+  )
 }
 
 export function buildDisputeResolutionPayload(values: {
@@ -113,31 +139,71 @@ export function AdminUsersPage() {
     }
   }
 
+  const walletTotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.available_balance || 0), 0), [items])
+  const pendingSettlementTotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.pending_settlement || 0), 0), [items])
+  const openDisputes = useMemo(() => disputes.filter((item) => item.status === 'open').length, [disputes])
+
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
-      <div>
-        <Typography.Title heading={3}>用户管理</Typography.Title>
-        <Typography.Paragraph>管理员可查看钱包余额、执行调账，并处理供应商/用户提交的订单争议。</Typography.Paragraph>
-      </div>
-      <Card title="管理员调账" style={{ width: '100%' }}>
-        <Form form={form} layout="horizontal" labelPosition="left">
-          <Form.InputNumber field="user_id" label="用户 ID" rules={[{ required: true, message: '请输入用户 ID' }]} style={{ width: '100%' }} />
-          <Form.InputNumber field="amount" label="金额（分）" rules={[{ required: true, message: '请输入调账金额' }]} style={{ width: '100%' }} />
-          <Form.Input field="reason" label="原因" rules={[{ required: true, message: '请输入调账原因' }]} />
-          <Form.Input field="confirmation_phrase" label="二次确认" placeholder="请输入：确认调账" rules={[{ required: true, message: '请输入确认短语：确认调账' }]} />
-          <Button type="primary" theme="solid" onClick={handleAdjust}>执行调账</Button>
-        </Form>
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 24,
+          background: 'linear-gradient(135deg, rgba(94,106,210,0.18) 0%, rgba(15,16,17,0.96) 58%, rgba(8,9,10,0.98) 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+        bodyStyle={{ padding: 24 }}
+      >
+        <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+          <Tag color="red" shape="circle">管理员运营台</Tag>
+          <div>
+            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>用户管理</Typography.Title>
+            <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
+              在共享控制台中集中执行钱包调账、供应商待结算确认与订单争议处理，确保资金、争议和供应商结算都在单一运营壳内闭环。
+            </Typography.Paragraph>
+          </div>
+          <Space wrap>
+            <Tag color="grey" prefixIcon={<IconUser />}>管理员高危动作统一保留在同一控制台</Tag>
+            <Tag color="grey" prefixIcon={<IconSafe />}>调账 / 结算都要求二次确认短语</Tag>
+          </Space>
+        </Space>
       </Card>
-      <Card title="供应商待结算确认" style={{ width: '100%' }}>
-        <Typography.Paragraph>将供应商 pending 流水一次性标记为 settled，并把待结算余额迁移到已结算余额；操作会写入 settle_supplier_pending 审计。</Typography.Paragraph>
-        <Form form={settlementForm} layout="horizontal" labelPosition="left">
-          <Form.InputNumber field="supplier_id" label="供应商用户 ID" rules={[{ required: true, message: '请输入供应商用户 ID' }]} style={{ width: '100%' }} />
-          <Form.Input field="reason" label="结算说明" rules={[{ required: true, message: '请输入结算说明' }]} />
-          <Form.Input field="confirmation_phrase" label="二次确认" placeholder="请输入：确认结算" rules={[{ required: true, message: '请输入确认短语：确认结算' }]} />
-          <Button type="primary" theme="solid" onClick={handleSettleSupplier}>确认结算</Button>
-        </Form>
-      </Card>
-      <Card title="争议单处理" style={{ width: '100%' }}>
+
+      <Space wrap style={{ width: '100%' }} spacing={16}>
+        <MetricCard title="钱包总余额" value={amountLabel(walletTotal)} description="当前钱包用户可用余额总和" icon={<IconPulse />} />
+        <MetricCard title="待结算总额" value={amountLabel(pendingSettlementTotal)} description="等待管理员确认结算的供应商金额" icon={<IconSafe />} />
+        <MetricCard title="开放争议" value={String(openDisputes)} description="当前筛选结果中的待处理争议数" icon={<IconAlertTriangle />} />
+        <MetricCard title="钱包用户数" value={String(items.length)} description="已进入钱包体系的用户主体数量" icon={<IconUser />} />
+      </Space>
+
+      <Banner type="info" fullMode={false} description="建议流程：先看争议与待结算总额，再执行调账或结算；所有高危动作完成后可继续前往审计页追踪。" />
+
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        <Col xs={24} xl={12}>
+          <Card title="管理员调账" style={{ width: '100%', borderRadius: 24 }}>
+            <Form form={form} layout="horizontal" labelPosition="left">
+              <Form.InputNumber field="user_id" label="用户 ID" rules={[{ required: true, message: '请输入用户 ID' }]} style={{ width: '100%' }} />
+              <Form.InputNumber field="amount" label="金额（分）" rules={[{ required: true, message: '请输入调账金额' }]} style={{ width: '100%' }} />
+              <Form.Input field="reason" label="原因" rules={[{ required: true, message: '请输入调账原因' }]} />
+              <Form.Input field="confirmation_phrase" label="二次确认" placeholder="请输入：确认调账" rules={[{ required: true, message: '请输入确认短语：确认调账' }]} />
+              <Button type="primary" theme="solid" onClick={handleAdjust}>执行调账</Button>
+            </Form>
+          </Card>
+        </Col>
+        <Col xs={24} xl={12}>
+          <Card title="供应商待结算确认" style={{ width: '100%', borderRadius: 24 }}>
+            <Typography.Paragraph>将供应商 pending 流水一次性标记为 settled，并把待结算余额迁移到已结算余额；操作会写入 settle_supplier_pending 审计。</Typography.Paragraph>
+            <Form form={settlementForm} layout="horizontal" labelPosition="left">
+              <Form.InputNumber field="supplier_id" label="供应商用户 ID" rules={[{ required: true, message: '请输入供应商用户 ID' }]} style={{ width: '100%' }} />
+              <Form.Input field="reason" label="结算说明" placeholder="例如：月度结算" rules={[{ required: true, message: '请输入结算说明' }]} />
+              <Form.Input field="confirmation_phrase" label="二次确认" placeholder="请输入：确认结算" rules={[{ required: true, message: '请输入确认短语：确认结算' }]} />
+              <Button type="primary" theme="solid" onClick={handleSettleSupplier}>确认结算</Button>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card title="争议单处理" style={{ width: '100%', borderRadius: 24 }}>
         <Typography.Paragraph>退款金额大于 0 时必须选择“原路退款”，驳回争议时退款金额必须为 0；处理后会写入 resolve_dispute 审计。</Typography.Paragraph>
         <Form form={disputeForm} layout="horizontal" labelPosition="left" initValues={{ status: 'resolved', resolution_type: 'manual_adjustment', refund_amount: 0 }}>
           <Form.InputNumber field="dispute_id" label="争议单 ID" rules={[{ required: true, message: '请输入争议单 ID' }]} style={{ width: '100%' }} />
@@ -154,7 +220,8 @@ export function AdminUsersPage() {
           <Button type="primary" theme="solid" onClick={handleResolveDispute}>处理争议单</Button>
         </Form>
       </Card>
-      <Card title="争议单列表" style={{ width: '100%' }} loading={loading}>
+
+      <Card title="争议单列表" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
         <Form layout="horizontal" labelPosition="left" initValues={disputeDraft}>
           <Form.Input
             field="status"
@@ -188,11 +255,12 @@ export function AdminUsersPage() {
             { title: '状态', dataIndex: 'status', key: 'status', render: (value) => <Tag color={disputeStatusColor(String(value))}>{String(value)}</Tag> },
             { title: '争议原因', dataIndex: 'reason', key: 'reason' },
             { title: '处理类型', dataIndex: 'resolution_type', key: 'resolution_type', render: (value) => value || '—' },
-            { title: '退款金额', dataIndex: 'refund_amount', key: 'refund_amount', render: (value) => `¥${(Number(value) / 100).toFixed(2)}` },
+            { title: '退款金额', dataIndex: 'refund_amount', key: 'refund_amount', render: (value) => amountLabel(Number(value)) },
           ]}
         />
       </Card>
-      <Card title="钱包用户列表" style={{ width: '100%' }} loading={loading}>
+
+      <Card title="钱包用户列表" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
         <Table
           pagination={false}
           rowKey="user_id"
@@ -200,9 +268,9 @@ export function AdminUsersPage() {
           columns={[
             { title: '用户 ID', dataIndex: 'user_id', key: 'user_id' },
             { title: '邮箱', dataIndex: 'email', key: 'email' },
-            { title: '可用余额', dataIndex: 'available_balance', key: 'available_balance', render: (value) => `¥${(Number(value) / 100).toFixed(2)}` },
-            { title: '冻结余额', dataIndex: 'frozen_balance', key: 'frozen_balance', render: (value) => `¥${(Number(value) / 100).toFixed(2)}` },
-            { title: '待结算', dataIndex: 'pending_settlement', key: 'pending_settlement', render: (value) => `¥${(Number(value || 0) / 100).toFixed(2)}` },
+            { title: '可用余额', dataIndex: 'available_balance', key: 'available_balance', render: (value) => amountLabel(Number(value)) },
+            { title: '冻结余额', dataIndex: 'frozen_balance', key: 'frozen_balance', render: (value) => amountLabel(Number(value)) },
+            { title: '待结算', dataIndex: 'pending_settlement', key: 'pending_settlement', render: (value) => amountLabel(Number(value || 0)) },
           ]}
         />
       </Card>
