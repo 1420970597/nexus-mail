@@ -36,6 +36,27 @@ const sessionItems = [
   },
 ]
 
+const onboardingChecklist = [
+  {
+    title: '1. 先进入项目市场',
+    description: '确认真实库存、成功率与价格，再决定是否立即下单。',
+    path: '/projects',
+    button: '打开项目市场',
+  },
+  {
+    title: '2. 回到订单中心',
+    description: '下单后在共享控制台中追踪邮箱分配、提取结果和订单终态。',
+    path: '/orders',
+    button: '查看订单中心',
+  },
+  {
+    title: '3. 完成 API 接入准备',
+    description: '继续进入 API Keys、Webhook 与 API 文档，完成程序化接入联调。',
+    path: '/api-keys',
+    button: '管理 API Keys',
+  },
+]
+
 function shortcutCardStyle(accent: string) {
   return {
     height: '100%',
@@ -187,6 +208,45 @@ export function SettingsPage() {
           />
         </Space>
       </Card>
+
+      {user?.role === 'user' ? (
+        <Card title="首次使用清单" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+          <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+            <Banner
+              type="info"
+              fullMode={false}
+              description="新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。"
+              style={{ width: '100%' }}
+            />
+            <Row gutter={[16, 16]} style={{ width: '100%' }}>
+              {onboardingChecklist.map((item) => (
+                <Col xs={24} md={8} key={item.title}>
+                  <Card
+                    style={{
+                      height: '100%',
+                      borderRadius: 20,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.94) 100%)',
+                      border: '1px solid rgba(94,106,210,0.12)',
+                      boxShadow: '0 16px 36px rgba(15, 23, 42, 0.06)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Typography.Title heading={5} style={{ margin: 0 }}>{item.title}</Typography.Title>
+                      <Typography.Paragraph style={{ margin: 0, color: '#475569', minHeight: 66 }}>
+                        {item.description}
+                      </Typography.Paragraph>
+                      <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                        {item.button}
+                      </Button>
+                    </Space>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Space>
+        </Card>
+      ) : null}
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={8}>

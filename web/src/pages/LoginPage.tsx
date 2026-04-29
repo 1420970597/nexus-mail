@@ -59,6 +59,21 @@ const capabilityHighlights = [
   '同一套控制台布局会按角色扩展菜单，不需要切换多个后台。',
 ]
 
+const firstRunChecklist = [
+  {
+    title: '第 1 步：浏览项目市场',
+    description: '先进入真实项目市场，对照库存、成功率与价格挑选可售资源。',
+  },
+  {
+    title: '第 2 步：回到订单中心',
+    description: '下单后在共享控制台里跟踪邮箱分配、提取结果与订单终态。',
+  },
+  {
+    title: '第 3 步：完成 API 接入准备',
+    description: '继续进入 API Keys、Webhook 与 API 文档，完成程序化接入与回调联调。',
+  },
+]
+
 const devAccounts = [
   'admin@nexus-mail.local / Admin123!',
   'supplier@nexus-mail.local / Supplier123!',
@@ -203,6 +218,26 @@ export function LoginPage() {
                       ))}
                     </ul>
                   </div>
+                  <Card
+                    bodyStyle={{ padding: 16 }}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(2, 6, 23, 0.28)',
+                      border: '1px solid rgba(125, 211, 252, 0.18)',
+                    }}
+                  >
+                    <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                      <Typography.Text style={{ color: '#e0f2fe', fontWeight: 600 }}>新用户首次进入控制台后的最短路径</Typography.Text>
+                      {firstRunChecklist.map((item) => (
+                        <div key={item.title}>
+                          <Typography.Text style={{ color: '#f8fafc', fontWeight: 600 }}>{item.title}</Typography.Text>
+                          <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.7)', margin: '4px 0 0' }}>
+                            {item.description}
+                          </Typography.Paragraph>
+                        </div>
+                      ))}
+                    </Space>
+                  </Card>
                   <Button
                     theme="solid"
                     type="primary"
@@ -297,7 +332,7 @@ export function LoginPage() {
                   <Banner
                     type="success"
                     fullMode={false}
-                    description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局。"
+                    description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局，并先按“项目市场 → 订单中心 → API 接入”完成首轮引导。"
                     style={{ width: '100%' }}
                   />
                 )}

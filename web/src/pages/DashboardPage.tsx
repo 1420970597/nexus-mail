@@ -12,6 +12,40 @@ import { useNavigate } from 'react-router-dom'
 import { getAdminOverview, getDashboardOverview, AdminOverviewResponse, DashboardOverviewResponse } from '../services/auth'
 import { useAuthStore } from '../store/authStore'
 
+const userFirstRunStorageKey = 'nexus-mail-user-first-run-dismissed'
+
+interface FirstRunStep {
+  key: string
+  title: string
+  description: string
+  path: string
+  action: string
+}
+
+const firstRunSteps: FirstRunStep[] = [
+  {
+    key: 'projects',
+    title: '先去项目市场确认真实库存',
+    description: '浏览项目、库存、成功率与价格，明确当前可以采购的资源组合。',
+    path: '/projects',
+    action: '打开项目市场',
+  },
+  {
+    key: 'orders',
+    title: '回到订单中心追踪执行结果',
+    description: '下单后在同一控制台里跟踪邮箱分配、提取结果、READY/FINISHED 等真实状态。',
+    path: '/orders',
+    action: '查看订单中心',
+  },
+  {
+    key: 'integrate',
+    title: '完成 API 接入准备',
+    description: '继续进入 API Keys、Webhook 与 API 文档，完成自动化接入与回调联调准备。',
+    path: '/api-keys',
+    action: '管理 API Keys',
+  },
+]
+
 function amountLabel(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
 }
@@ -200,6 +234,19 @@ export function DashboardPage() {
   const [overview, setOverview] = useState<DashboardOverviewResponse | null>(null)
   const [adminOverview, setAdminOverview] = useState<AdminOverviewResponse | null>(null)
   const [message, setMessage] = useState('正在加载概览数据...')
+  const [showUserFirstRun, setShowUserFirstRun] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+    if (user?.role !== 'user') {
+      setShowUserFirstRun(false)
+      return
+    }
+    const dismissed = window.localStorage.getItem(userFirstRunStorageKey) === 'true'
+    setShowUserFirstRun(!dismissed)
+  }, [user?.role])
 
   useEffect(() => {
     let active = true
@@ -229,6 +276,13 @@ export function DashboardPage() {
   const missionSteps = useMemo(() => roleMissionSteps(user?.role), [user?.role])
   const roleSurfaceItems = useMemo(() => roleSurface(user?.role), [user?.role])
 
+  const dismissUserFirstRun = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(userFirstRunStorageKey, 'true')
+    }
+    setShowUserFirstRun(false)
+  }
+
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
@@ -257,6 +311,71 @@ export function DashboardPage() {
             description={message}
             style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#d0d6e0' }}
           />
+          {user?.role === 'user' && showUserFirstRun ? (
+            <Card
+              style={{
+                width: '100%',
+                borderRadius: 22,
+                background: 'linear-gradient(135deg, rgba(14,165,233,0.18) 0%, rgba(15,23,42,0.92) 55%, rgba(15,16,17,0.98) 100%)',
+                border: '1px solid rgba(125,211,252,0.24)',
+                boxShadow: '0 22px 52px rgba(2, 6, 23, 0.22)',
+              }}
+              bodyStyle={{ padding: 22 }}
+            >
+              <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+                  <Space vertical align="start" spacing={8}>
+                    <Tag color="cyan" shape="circle">新注册用户首轮引导</Tag>
+                    <div>
+                      <Typography.Title heading={4} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
+                        先按“项目市场 → 订单中心 → API 接入”走通首次使用路径
+                      </Typography.Title>
+                      <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.82)', margin: 0, maxWidth: 860 }}>
+                        你当前默认身份是普通用户。请先在共享控制台内完成首次采购与接入准备；若后续被授予供应商或管理员角色，菜单会在同一套工作台中继续扩展。
+                      </Typography.Paragraph>
+                    </div>
+                  </Space>
+                  <Button theme="borderless" style={{ color: '#d0d6e0' }} onClick={dismissUserFirstRun}>
+                    暂时收起引导
+                  </Button>
+                </Space>
+
+                <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                  {firstRunSteps.map((step, index) => (
+                    <Col xs={24} lg={8} key={step.key}>
+                      <Card
+                        style={{
+                          height: '100%',
+                          borderRadius: 18,
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                        }}
+                        bodyStyle={{ padding: 18 }}
+                      >
+                        <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                          <Tag color="blue">步骤 {index + 1}</Tag>
+                          <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
+                            {step.title}
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
+                            {step.description}
+                          </Typography.Paragraph>
+                          <Button type="primary" theme="solid" onClick={() => navigate(step.path)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
+                            {step.action}
+                          </Button>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+
+                <Space wrap>
+                  <Tag color="grey">统一控制台内完成首次使用，不跳转独立新手后台</Tag>
+                  <Tag color="grey">供应商 / 管理员能力属于后续角色扩展，不影响当前首轮路径</Tag>
+                </Space>
+              </Space>
+            </Card>
+          ) : null}
           <Row gutter={[16, 16]} style={{ width: '100%' }}>
             {actions.map((item) => (
               <Col xs={24} lg={8} key={item.title}>

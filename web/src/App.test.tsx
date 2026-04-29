@@ -213,6 +213,72 @@ describe('App', () => {
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
   })
 
+  it('shows first-run onboarding guidance for default user dashboard and allows dismissing it', async () => {
+    const user = userEvent.setup()
+    window.localStorage.removeItem('nexus-mail-user-first-run-dismissed')
+    setSession('user')
+
+    renderApp(['/'])
+
+    expect(await screen.findByText('新注册用户首轮引导')).toBeInTheDocument()
+    expect(screen.getByText('先按“项目市场 → 订单中心 → API 接入”走通首次使用路径')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '打开项目市场' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: '查看订单中心' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: '管理 API Keys' }).length).toBeGreaterThan(0)
+
+    await user.click(screen.getByRole('button', { name: '暂时收起引导' }))
+    await waitFor(() => expect(screen.queryByText('新注册用户首轮引导')).not.toBeInTheDocument())
+    expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('true')
+  })
+
+  it('does not show first-run onboarding guidance for supplier dashboard', async () => {
+    window.localStorage.removeItem('nexus-mail-user-first-run-dismissed')
+    setSession('supplier')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'supplier',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+      ],
+    })
+
+    renderApp(['/'])
+
+    expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
+    expect(screen.queryByText('新注册用户首轮引导')).not.toBeInTheDocument()
+  })
+
+  it('shows onboarding checklist on settings page for default user only', async () => {
+    setSession('user')
+
+    renderApp(['/settings'])
+
+    expect(await screen.findByText('首次使用清单')).toBeInTheDocument()
+    expect(screen.getByText('1. 先进入项目市场')).toBeInTheDocument()
+    expect(screen.getByText('2. 回到订单中心')).toBeInTheDocument()
+    expect(screen.getByText('3. 完成 API 接入准备')).toBeInTheDocument()
+  })
+
+  it('hides onboarding checklist on settings page for admin role', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+      ],
+    })
+
+    renderApp(['/settings'])
+
+    expect(await screen.findAllByText('设置中心')).toBeTruthy()
+    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
+  })
+
   it('renders profile page with role-specific operation guidance instead of placeholder actions', async () => {
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
