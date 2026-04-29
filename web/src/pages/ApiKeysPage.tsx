@@ -1,6 +1,10 @@
-import { Banner, Button, Card, Form, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { useEffect, useState } from 'react'
+import { Banner, Button, Card, Empty, Form, Modal, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
+import { IconArticle, IconSafe, IconServer, IconShield, IconTickCircle } from '@douyinfe/semi-icons'
+import { useEffect, useMemo, useState } from 'react'
 import { APIKeyAuditEntry, APIKeyRecord, createAPIKey, getAPIKeyAudit, getAPIKeys, revokeAPIKey } from '../services/apiKeys'
+import { useAuthStore } from '../store/authStore'
+
+const PLAINTEXT_VISIBILITY_MS = 5 * 60 * 1000
 
 function statusColor(status: string) {
   switch (status) {
@@ -13,11 +17,76 @@ function statusColor(status: string) {
   }
 }
 
+function roleCopy(role?: string) {
+  switch (role) {
+    case 'admin':
+      return {
+        badge: '管理员视角',
+        title: '平台接入与审计工作台',
+        description: '集中管理 API Key 生命周期、白名单与审计轨迹，辅助排查限流、白名单拒绝与高危接入动作。',
+        tips: ['关注 create / revoke / denied_rate_limit / denied_whitelist 审计轨迹', '为运维联调保留精确 scopes，避免过宽权限'],
+      }
+    case 'supplier':
+      return {
+        badge: '供应商视角',
+        title: '供给系统 API 接入工作台',
+        description: '为供货侧系统配置最小权限 API Key、白名单与调用审计，保持供给链路与共享控制台一致。',
+        tips: ['优先设置固定出口 IP 白名单，降低供货系统凭证暴露面', '按供货能力拆分不同 scopes，避免跨业务混用'],
+      }
+    default:
+      return {
+        badge: '用户视角',
+        title: '开发者 API 接入工作台',
+        description: '完成创建、复制、权限规划与白名单维护，再结合 API 文档与 Webhook 页面打通真实接入链路。',
+        tips: ['先创建只读或最小写权限 Key，再逐步扩大 scopes', '创建后立即复制明文 Key；列表里只保留预览值'],
+      }
+  }
+}
+
+function normalizeCSVInput(raw: unknown) {
+  return String(raw || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function roleStatLabel(role?: string) {
+  switch (role) {
+    case 'admin':
+      return '需重点排查的接入凭证'
+    case 'supplier':
+      return '供货系统当前启用凭证'
+    default:
+      return '当前可用于集成的凭证'
+  }
+}
+
+function latestAuditLabel(items: APIKeyAuditEntry[]) {
+  if (items.length === 0) {
+    return '暂无审计记录'
+  }
+  return items[0].action
+}
+
+function latestUsedAt(items: APIKeyRecord[]) {
+  let latest = ''
+  for (const item of items) {
+    if (item.last_used_at && item.last_used_at > latest) {
+      latest = item.last_used_at
+    }
+  }
+  return latest || '—'
+}
+
 export function ApiKeysPage() {
+  const { user } = useAuthStore()
   const [items, setItems] = useState<APIKeyRecord[]>([])
   const [audit, setAudit] = useState<APIKeyAuditEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [createdKey, setCreatedKey] = useState<string>('')
+  const [createdKeyExpiresAt, setCreatedKeyExpiresAt] = useState<number | null>(null)
+  const [revokingID, setRevokingID] = useState<number | null>(null)
   const [form] = Form.useForm()
 
   const load = async () => {
@@ -37,57 +106,168 @@ export function ApiKeysPage() {
     void load()
   }, [])
 
+  useEffect(() => {
+    if (!createdKey || createdKeyExpiresAt === null) {
+      return
+    }
+
+    const remaining = createdKeyExpiresAt - Date.now()
+    if (remaining <= 0) {
+      setCreatedKey('')
+      setCreatedKeyExpiresAt(null)
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      setCreatedKey('')
+      setCreatedKeyExpiresAt(null)
+    }, remaining)
+
+    return () => window.clearTimeout(timer)
+  }, [createdKey, createdKeyExpiresAt])
+
+  const copy = useMemo(() => roleCopy(user?.role), [user?.role])
+  const activeKeys = useMemo(() => items.filter((item) => item.status === 'active'), [items])
+  const revokedKeys = useMemo(() => items.filter((item) => item.status === 'revoked'), [items])
+  const whitelistProtectedCount = useMemo(
+    () => activeKeys.filter((item) => Array.isArray(item.whitelist) && item.whitelist.length > 0).length,
+    [activeKeys],
+  )
+  const latestUsed = useMemo(() => latestUsedAt(items), [items])
+
   const handleCreate = async () => {
     try {
       const values = await form.validate()
-      const scopes = String(values.scopes || '')
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean)
-      const whitelist = String(values.whitelist || '')
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean)
+      const scopes = normalizeCSVInput(values.scopes)
+      const whitelist = normalizeCSVInput(values.whitelist)
+      setSubmitting(true)
       const res = await createAPIKey({
-        name: values.name,
+        name: String(values.name || '').trim(),
         scopes,
         whitelist,
       })
       setCreatedKey(res.plaintext_key)
-      Toast.success('API Key 已创建')
+      setCreatedKeyExpiresAt(Date.now() + PLAINTEXT_VISIBILITY_MS)
+      Toast.success('API Key 已创建，请立即复制明文密钥')
       form.reset()
       await load()
     } catch (error: any) {
       if (error?.name === 'ValidationError') return
       Toast.error(error?.response?.data?.error ?? '创建 API Key 失败')
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  const handleRevoke = async (id: number) => {
+  const handleRevoke = async (record: APIKeyRecord) => {
+    const confirmed = await new Promise<boolean>((resolve) => {
+      Modal.confirm({
+        title: `确认撤销 API Key「${record.name}」？`,
+        content: '撤销后该 Key 将无法继续访问受保护接口，请确认调用方已完成切换。',
+        okText: '确认撤销',
+        cancelText: '取消',
+        onOk: () => resolve(true),
+        onCancel: () => resolve(false),
+      })
+    })
+
+    if (!confirmed) {
+      return
+    }
+
     try {
-      await revokeAPIKey(id)
+      setRevokingID(record.id)
+      await revokeAPIKey(record.id)
       Toast.success('API Key 已撤销')
       await load()
     } catch (error: any) {
       Toast.error(error?.response?.data?.error ?? '撤销 API Key 失败')
+    } finally {
+      setRevokingID(null)
     }
   }
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
-      <div>
-        <Typography.Title heading={3}>API Keys</Typography.Title>
-        <Typography.Paragraph>管理对外 API 密钥、权限范围和 IP 白名单，完成 Phase 5 第一批交付。</Typography.Paragraph>
-      </div>
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 24,
+          background: 'linear-gradient(135deg, rgba(94,106,210,0.16) 0%, rgba(15,16,17,0.96) 58%, rgba(8,9,10,0.98) 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+        bodyStyle={{ padding: 24 }}
+      >
+        <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+          <Tag color="cyan" shape="circle">
+            {copy.badge}
+          </Tag>
+          <div>
+            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>
+              {copy.title}
+            </Typography.Title>
+            <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
+              {copy.description}
+            </Typography.Paragraph>
+          </div>
+          <Space wrap>
+            {copy.tips.map((tip) => (
+              <Tag key={tip} color="grey" prefixIcon={<IconSafe />}>
+                {tip}
+              </Tag>
+            ))}
+          </Space>
+        </Space>
+      </Card>
+
+      <Space wrap style={{ width: '100%' }} spacing={16}>
+        <MetricCard title="活跃 Key" value={String(activeKeys.length)} description={roleStatLabel(user?.role)} icon={<IconTickCircle />} />
+        <MetricCard title="已撤销" value={String(revokedKeys.length)} description="可追溯但不可继续调用" icon={<IconShield />} />
+        <MetricCard title="白名单保护" value={String(whitelistProtectedCount)} description="已绑定出口 IP / CIDR 的活跃 Key" icon={<IconServer />} />
+        <MetricCard title="最近使用" value={latestUsed} description={`最近审计动作：${latestAuditLabel(audit)}`} icon={<IconArticle />} wide />
+      </Space>
 
       <Banner
         type="info"
         fullMode={false}
-        description="新建后仅展示一次明文密钥，请立即复制保存；后续页面仅显示预览值。"
+        description="新建后仅展示一次明文密钥，请立即复制保存；后续列表仅显示 key_preview。若需要程序化回调，请继续前往 Webhook 设置与 API 文档。"
       />
 
       {createdKey ? (
-        <Banner type="success" fullMode={false} description={`本次创建的明文 Key：${createdKey}`} />
+        <Banner
+          type="success"
+          fullMode={false}
+          closeIcon={null}
+          description={`本次创建的明文 Key：${createdKey}`}
+          actions={
+            <Space>
+              <Button
+                theme="light"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(createdKey)
+                    Toast.success('明文 API Key 已复制')
+                    setCreatedKey('')
+                    setCreatedKeyExpiresAt(null)
+                  } catch {
+                    Toast.error('复制失败，请手动复制后关闭')
+                  }
+                }}
+              >
+                复制并隐藏
+              </Button>
+              <Button
+                theme="borderless"
+                onClick={() => {
+                  setCreatedKey('')
+                  setCreatedKeyExpiresAt(null)
+                }}
+              >
+                关闭
+              </Button>
+            </Space>
+          }
+        />
       ) : null}
 
       <Card title="创建 API Key" style={{ width: '100%' }}>
@@ -95,33 +275,82 @@ export function ApiKeysPage() {
           <Form.Input field="name" label="名称" rules={[{ required: true, message: '请输入名称' }]} />
           <Form.Input field="scopes" label="权限范围" placeholder="activation:read, finance:write" />
           <Form.Input field="whitelist" label="IP 白名单" placeholder="127.0.0.1,10.0.0.0/24" />
-          <Button type="primary" theme="solid" onClick={handleCreate}>创建新密钥</Button>
+          <Button type="primary" theme="solid" loading={submitting} onClick={handleCreate}>
+            创建新密钥
+          </Button>
         </Form>
       </Card>
 
       <Card title="当前密钥" style={{ width: '100%' }} loading={loading}>
-        <Table
-          pagination={false}
-          dataSource={items}
-          rowKey="id"
-          columns={[
-            { title: '名称', dataIndex: 'name', key: 'name' },
-            { title: 'Key 预览', dataIndex: 'key_preview', key: 'key_preview' },
-            { title: '权限范围', dataIndex: 'scopes', key: 'scopes', render: (value) => (Array.isArray(value) && value.length > 0 ? value.join(', ') : '—') },
-            { title: 'IP 白名单', dataIndex: 'whitelist', key: 'whitelist', render: (value) => (Array.isArray(value) && value.length > 0 ? value.join(', ') : '未限制') },
-            { title: '状态', dataIndex: 'status', key: 'status', render: (value) => <Tag color={statusColor(String(value))}>{String(value)}</Tag> },
-            { title: '最近使用', dataIndex: 'last_used_at', key: 'last_used_at', render: (value) => value || '—' },
-            {
-              title: '操作',
-              key: 'action',
-              render: (_, record: APIKeyRecord) => (
-                <Button disabled={record.status !== 'active'} theme="borderless" type="danger" onClick={() => void handleRevoke(record.id)}>
-                  撤销
-                </Button>
-              ),
-            },
-          ]}
-        />
+        {items.length === 0 ? (
+          <Empty description="暂无 API Key，先创建第一个凭证完成接入。" />
+        ) : (
+          <Table
+            pagination={false}
+            dataSource={items}
+            rowKey="id"
+            columns={[
+              { title: '名称', dataIndex: 'name', key: 'name' },
+              { title: 'Key 预览', dataIndex: 'key_preview', key: 'key_preview' },
+              {
+                title: '权限范围',
+                dataIndex: 'scopes',
+                key: 'scopes',
+                render: (value) =>
+                  Array.isArray(value) && value.length > 0 ? (
+                    <Space wrap>
+                      {value.map((scope: string) => (
+                        <Tag key={scope} color="cyan">
+                          {scope}
+                        </Tag>
+                      ))}
+                    </Space>
+                  ) : (
+                    '—'
+                  ),
+              },
+              {
+                title: 'IP 白名单',
+                dataIndex: 'whitelist',
+                key: 'whitelist',
+                render: (value) =>
+                  Array.isArray(value) && value.length > 0 ? (
+                    <Space wrap>
+                      {value.map((item: string) => (
+                        <Tag key={item} color="grey">
+                          {item}
+                        </Tag>
+                      ))}
+                    </Space>
+                  ) : (
+                    <Tag color="blue">未限制</Tag>
+                  ),
+              },
+              {
+                title: '状态',
+                dataIndex: 'status',
+                key: 'status',
+                render: (value) => <Tag color={statusColor(String(value))}>{String(value)}</Tag>,
+              },
+              { title: '最近使用', dataIndex: 'last_used_at', key: 'last_used_at', render: (value) => value || '—' },
+              {
+                title: '操作',
+                key: 'action',
+                render: (_, record: APIKeyRecord) => (
+                  <Button
+                    disabled={record.status !== 'active'}
+                    loading={revokingID === record.id}
+                    theme="borderless"
+                    type="danger"
+                    onClick={() => void handleRevoke(record)}
+                  >
+                    撤销
+                  </Button>
+                ),
+              },
+            ]}
+          />
+        )}
       </Card>
 
       <Card title="审计日志" style={{ width: '100%' }} loading={loading}>
@@ -130,14 +359,50 @@ export function ApiKeysPage() {
           dataSource={audit}
           rowKey="id"
           columns={[
-            { title: '审计 ID', dataIndex: 'id', key: 'id' },
+            { title: '时间', dataIndex: 'created_at', key: 'created_at' },
             { title: '动作', dataIndex: 'action', key: 'action' },
             { title: '主体', dataIndex: 'actor_type', key: 'actor_type' },
-            { title: '说明', dataIndex: 'note', key: 'note' },
-            { title: '时间', dataIndex: 'created_at', key: 'created_at' },
+            { title: '备注', dataIndex: 'note', key: 'note', render: (value) => value || '—' },
           ]}
         />
       </Card>
     </Space>
+  )
+}
+
+function MetricCard({
+  title,
+  value,
+  description,
+  icon,
+  wide,
+}: {
+  title: string
+  value: string
+  description: string
+  icon: JSX.Element
+  wide?: boolean
+}) {
+  return (
+    <Card
+      style={{
+        flex: wide ? '1 1 320px' : '1 1 220px',
+        minWidth: wide ? 320 : 220,
+        borderRadius: 20,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}
+      bodyStyle={{ padding: 18 }}
+    >
+      <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+        <Tag color="grey" prefixIcon={icon}>
+          {title}
+        </Tag>
+        <Typography.Title heading={4} style={{ margin: 0, color: '#f7f8f8' }}>
+          {value}
+        </Typography.Title>
+        <Typography.Text style={{ color: 'rgba(208,214,224,0.72)' }}>{description}</Typography.Text>
+      </Space>
+    </Card>
   )
 }
