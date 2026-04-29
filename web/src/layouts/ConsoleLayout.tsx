@@ -1,5 +1,12 @@
 import { Avatar, Button, Breadcrumb, Layout, Space, Tag, Typography } from '@douyinfe/semi-ui'
-import { IconArticle, IconHistogram } from '@douyinfe/semi-icons'
+import {
+  IconActivity,
+  IconArticle,
+  IconBell,
+  IconHistogram,
+  IconSafe,
+  IconServer,
+} from '@douyinfe/semi-icons'
 import { ReactNode, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AppSidebar } from '../components/AppSidebar'
@@ -68,8 +75,52 @@ const routeTitleMap: Record<string, string> = {
   '/docs': 'API 文档',
 }
 
+const quickActions = [
+  {
+    path: '/admin/risk',
+    label: '风控中心',
+    icon: <IconSafe />,
+    roles: ['admin'],
+  },
+  {
+    path: '/admin/audit',
+    label: '审计日志',
+    icon: <IconActivity />,
+    roles: ['admin'],
+  },
+  {
+    path: '/supplier/domains',
+    label: '域名管理',
+    icon: <IconServer />,
+    roles: ['supplier', 'admin'],
+  },
+  {
+    path: '/orders',
+    label: '订单中心',
+    icon: <IconHistogram />,
+    roles: ['user', 'supplier', 'admin'],
+  },
+  {
+    path: '/docs',
+    label: 'API 文档',
+    icon: <IconArticle />,
+    roles: ['user', 'supplier', 'admin'],
+  },
+]
+
 function resolveRouteTitle(pathname: string) {
   return routeTitleMap[pathname] ?? titleFromPath(pathname)
+}
+
+function roleIntro(role?: string) {
+  switch (role) {
+    case 'admin':
+      return '统一查看运营、风控与审计链路，避免在多个独立后台之间切换。'
+    case 'supplier':
+      return '在同一控制台内管理域名池、供货规则与结算观察。'
+    default:
+      return '在共享壳中完成采购、订单追踪、API 接入与回调配置。'
+  }
 }
 
 export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
@@ -88,24 +139,32 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
     return items
   }, [location.pathname])
 
+  const visibleQuickActions = useMemo(
+    () => quickActions.filter((item) => item.roles.includes(user?.role ?? 'user') && item.path !== location.pathname),
+    [location.pathname, user?.role],
+  )
+
   return (
     <Layout
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%)',
+        background:
+          'radial-gradient(circle at top left, rgba(94, 106, 210, 0.16), transparent 24%), radial-gradient(circle at top right, rgba(113, 112, 255, 0.12), transparent 18%), linear-gradient(180deg, #09090b 0%, #111827 100%)',
       }}
     >
       <Sider
         style={{
-          background: 'linear-gradient(180deg, #0f172a 0%, #111827 52%, #172554 100%)',
-          borderRight: '1px solid rgba(148,163,184,0.12)',
-          boxShadow: '8px 0 32px rgba(15, 23, 42, 0.16)',
+          background: 'linear-gradient(180deg, rgba(8, 9, 10, 0.98) 0%, rgba(15, 16, 17, 0.98) 48%, rgba(25, 26, 27, 0.98) 100%)',
+          borderRight: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '16px 0 48px rgba(0, 0, 0, 0.28)',
           position: 'sticky',
           top: 0,
           height: '100vh',
-          width: 248,
-          flex: '0 0 248px',
-          maxWidth: 248,
+          width: 264,
+          flex: '0 0 264px',
+          maxWidth: 264,
+          minWidth: 264,
+          overflow: 'hidden',
         }}
       >
         <AppSidebar />
@@ -113,60 +172,98 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
       <Layout>
         <Header
           style={{
-            background: 'rgba(255,255,255,0.76)',
-            borderBottom: '1px solid rgba(148,163,184,0.16)',
+            background: 'rgba(8, 9, 10, 0.68)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
             backdropFilter: 'blur(18px)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            gap: 16,
-            padding: '0 28px',
-            height: 76,
+            gap: 20,
+            padding: '18px 28px',
+            minHeight: 96,
+            height: 'auto',
           }}
         >
-          <Space vertical spacing={4} align="start">
-            <Breadcrumb routes={breadcrumbRoutes} />
-            <Space spacing={8} align="center">
-              <Typography.Title heading={5} style={{ margin: 0 }}>
+          <Space vertical spacing={8} align="start" style={{ flex: 1, minWidth: 0 }}>
+            <Breadcrumb routes={breadcrumbRoutes} style={{ color: 'rgba(208,214,224,0.72)' }} />
+            <Space spacing={10} align="center" wrap>
+              <Typography.Title
+                heading={5}
+                style={{
+                  margin: 0,
+                  color: '#f7f8f8',
+                  fontWeight: 600,
+                  letterSpacing: '-0.18px',
+                }}
+              >
                 {resolveRouteTitle(location.pathname)}
               </Typography.Title>
               <Tag color={roleColor(user?.role)}>{roleLabel(user?.role)}</Tag>
+              <Tag color="cyan" prefixIcon={<IconHistogram />}>单一登录后控制台</Tag>
             </Space>
+            <Typography.Text style={{ color: 'rgba(208,214,224,0.74)', fontSize: 13, lineHeight: 1.6 }}>
+              {roleIntro(user?.role)}
+            </Typography.Text>
           </Space>
-          <Space align="center" spacing={12}>
-            <Tag color="cyan" prefixIcon={<IconHistogram />}>单一登录后控制台</Tag>
-            <Button theme="borderless" icon={<IconArticle />} onClick={() => navigate('/docs')}>
-              使用说明
-            </Button>
+          <Space align="center" spacing={12} wrap style={{ justifyContent: 'flex-end' }}>
+            {visibleQuickActions.slice(0, 3).map((item) => (
+              <Button
+                key={item.path}
+                icon={item.icon}
+                theme="borderless"
+                style={{
+                  color: '#d0d6e0',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 10,
+                }}
+                onClick={() => navigate(item.path)}
+              >
+                {item.label}
+              </Button>
+            ))}
             <Space
               align="center"
               spacing={10}
               style={{
-                padding: '8px 12px',
+                padding: '10px 14px',
                 borderRadius: 18,
-                background: 'rgba(255,255,255,0.88)',
-                border: '1px solid rgba(148,163,184,0.18)',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: 'rgba(0,0,0,0.2) 0px 0px 0px 1px',
               }}
             >
               <Avatar size="small" color="blue">
                 {(user?.email?.[0] ?? 'N').toUpperCase()}
               </Avatar>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{user?.email ?? '未登录用户'}</div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{roleLabel(user?.role)}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#f7f8f8' }}>{user?.email ?? '未登录用户'}</div>
+                <div style={{ fontSize: 12, color: 'rgba(138,143,152,0.96)' }}>{roleLabel(user?.role)}</div>
               </div>
             </Space>
-            <Button onClick={onLogout}>退出登录</Button>
+            <Button
+              theme="solid"
+              type="primary"
+              icon={<IconBell />}
+              style={{
+                background: '#5e6ad2',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+              onClick={onLogout}
+            >
+              退出登录
+            </Button>
           </Space>
         </Header>
         <Content style={{ padding: 28, background: 'transparent' }}>
           <div
             style={{
-              minHeight: 'calc(100vh - 132px)',
+              minHeight: 'calc(100vh - 156px)',
               borderRadius: 28,
-              background: 'rgba(255,255,255,0.76)',
-              border: '1px solid rgba(148,163,184,0.12)',
-              boxShadow: '0 22px 60px rgba(15, 23, 42, 0.08)',
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.92) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: 'rgba(0,0,0,0.28) 0px 16px 48px',
               padding: 24,
             }}
           >

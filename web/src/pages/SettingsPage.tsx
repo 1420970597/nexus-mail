@@ -1,4 +1,12 @@
 import { Banner, Button, Card, Col, Descriptions, Row, Space, Tag, Typography } from '@douyinfe/semi-ui'
+import {
+  IconArticle,
+  IconBolt,
+  IconSafe,
+  IconServer,
+  IconSetting,
+  IconUser,
+} from '@douyinfe/semi-icons'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
@@ -9,6 +17,8 @@ interface ShortcutCard {
   button: string
   path: string
   tag: string
+  accent: string
+  icon: JSX.Element
 }
 
 const sessionItems = [
@@ -26,6 +36,16 @@ const sessionItems = [
   },
 ]
 
+function shortcutCardStyle(accent: string) {
+  return {
+    height: '100%',
+    borderRadius: 20,
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.94) 100%)',
+    border: `1px solid ${accent}`,
+    boxShadow: '0 16px 36px rgba(15, 23, 42, 0.06)',
+  }
+}
+
 export function SettingsPage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -38,6 +58,8 @@ export function SettingsPage() {
         button: '查看个人资料',
         path: '/profile',
         tag: '基础入口',
+        accent: 'rgba(94,106,210,0.2)',
+        icon: <IconUser />,
       },
       {
         title: 'API 接入入口',
@@ -45,6 +67,8 @@ export function SettingsPage() {
         button: '管理 API Keys',
         path: '/api-keys',
         tag: '集成入口',
+        accent: 'rgba(16,185,129,0.18)',
+        icon: <IconArticle />,
       },
     ]
 
@@ -57,6 +81,8 @@ export function SettingsPage() {
             button: '前往风控中心',
             path: '/admin/risk',
             tag: '管理员',
+            accent: 'rgba(239,68,68,0.16)',
+            icon: <IconSafe />,
           },
           {
             title: '审计追踪',
@@ -64,6 +90,8 @@ export function SettingsPage() {
             button: '查看审计日志',
             path: '/admin/audit',
             tag: '管理员',
+            accent: 'rgba(249,115,22,0.18)',
+            icon: <IconBolt />,
           },
           {
             title: 'Webhook 观测',
@@ -71,6 +99,8 @@ export function SettingsPage() {
             button: '打开 Webhook 设置',
             path: '/webhooks',
             tag: '管理员',
+            accent: 'rgba(14,165,233,0.18)',
+            icon: <IconServer />,
           },
           ...common,
         ]
@@ -82,6 +112,8 @@ export function SettingsPage() {
             button: '查看供应商资源',
             path: '/supplier/resources',
             tag: '供应商',
+            accent: 'rgba(16,185,129,0.18)',
+            icon: <IconServer />,
           },
           {
             title: '供货与结算闭环',
@@ -89,6 +121,8 @@ export function SettingsPage() {
             button: '前往供应商结算',
             path: '/supplier/settlements',
             tag: '供应商',
+            accent: 'rgba(94,106,210,0.18)',
+            icon: <IconSetting />,
           },
           ...common,
         ]
@@ -100,6 +134,8 @@ export function SettingsPage() {
             button: '前往项目市场',
             path: '/projects',
             tag: '用户',
+            accent: 'rgba(14,165,233,0.18)',
+            icon: <IconServer />,
           },
           {
             title: '订单与回调观察',
@@ -107,6 +143,8 @@ export function SettingsPage() {
             button: '查看订单中心',
             path: '/orders',
             tag: '用户',
+            accent: 'rgba(94,106,210,0.18)',
+            icon: <IconBolt />,
           },
           ...common,
         ]
@@ -115,19 +153,31 @@ export function SettingsPage() {
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
-      <div>
-        <Typography.Title heading={3}>设置中心</Typography.Title>
-        <Typography.Paragraph>
-          将设置页收敛为真实可达的控制台运行入口、会话说明与角色快捷导航，而不是展示无后端契约支撑的规划性表单。
-        </Typography.Paragraph>
-      </div>
-
-      <Banner
-        type="info"
-        fullMode={false}
-        description="这里聚焦当前已交付的真实入口：会话轮换、角色壳切换、API 文档、风控/审计/Webhook/供货运营，不展示会误导用户的伪设置项。"
-        style={{ width: '100%' }}
-      />
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 24,
+          background: 'linear-gradient(135deg, rgba(94,106,210,0.14) 0%, rgba(255,255,255,0.98) 58%)',
+          border: '1px solid rgba(148,163,184,0.16)',
+        }}
+        bodyStyle={{ padding: 24 }}
+      >
+        <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+          <Tag color="cyan" shape="circle">Console Shortcuts</Tag>
+          <div>
+            <Typography.Title heading={3}>设置中心</Typography.Title>
+            <Typography.Paragraph style={{ marginBottom: 0, color: '#475569', maxWidth: 820 }}>
+              把设置页收敛成真实可执行的控制台捷径与会话说明，而不是展示无后端契约支撑的规划性表单；继续保持 single-console 体验。
+            </Typography.Paragraph>
+          </div>
+          <Banner
+            type="info"
+            fullMode={false}
+            description="这里聚焦当前已交付的真实入口：会话轮换、角色壳切换、API 文档、风控/审计/Webhook/供货运营，不展示会误导用户的伪设置项。"
+            style={{ width: '100%' }}
+          />
+        </Space>
+      </Card>
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={8}>
@@ -151,22 +201,14 @@ export function SettingsPage() {
             <Row gutter={[16, 16]}>
               {shortcuts.map((item) => (
                 <Col xs={24} md={12} key={item.title}>
-                  <Card
-                    style={{
-                      height: '100%',
-                      borderRadius: 20,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.94) 100%)',
-                      border: '1px solid rgba(148,163,184,0.16)',
-                      boxShadow: '0 16px 36px rgba(15, 23, 42, 0.06)',
-                    }}
-                    bodyStyle={{ padding: 18 }}
-                  >
+                  <Card style={shortcutCardStyle(item.accent)} bodyStyle={{ padding: 18 }}>
                     <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                       <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
                         <Typography.Title heading={5} style={{ margin: 0 }}>{item.title}</Typography.Title>
                         <Tag color="cyan">{item.tag}</Tag>
                       </Space>
-                      <Typography.Paragraph style={{ margin: 0, color: '#475569' }}>{item.description}</Typography.Paragraph>
+                      <Tag color="grey" prefixIcon={item.icon}>{item.button}</Tag>
+                      <Typography.Paragraph style={{ margin: 0, color: '#475569', minHeight: 72 }}>{item.description}</Typography.Paragraph>
                       <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
                         {item.button}
                       </Button>
