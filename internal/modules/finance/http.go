@@ -163,7 +163,15 @@ func (h *Handler) upsertSupplierCostProfile(c *gin.Context) {
 
 func (h *Handler) supplierReports(c *gin.Context) {
 	user := c.MustGet("currentUser").(auth.User)
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "0"))
+	limit := 0
+	if rawLimit := strings.TrimSpace(c.Query("limit")); rawLimit != "" {
+		parsedLimit, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "limit 必须为整数"})
+			return
+		}
+		limit = parsedLimit
+	}
 	items, err := h.service.SupplierReport(c.Request.Context(), user.ID, SupplierReportInput{
 		From:  c.Query("from"),
 		To:    c.Query("to"),

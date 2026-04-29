@@ -1000,15 +1000,14 @@ paths:
           required: false
           schema:
             type: integer
-            minimum: 1
-            maximum: 200
+            minimum: 0
             default: 100
-          description: 返回项目数量上限，服务端最大 200。
+          description: 返回项目数量上限；缺省或 0 使用默认 100，超过 200 时服务端按 200 截断，小于 0 或非整数返回 400。
       responses:
         '200':
           description: 项目报表列表
         '400':
-          description: 日期格式无效或 from 晚于 to
+          description: 日期格式无效、from 晚于 to、limit 非整数或 limit 为负数
           content:
             application/json:
               schema:

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -92,20 +93,88 @@ func TestSupplierReportsEndpointAppliesFilters(t *testing.T) {
 		t.Fatalf("unexpected report input: supplier=%d input=%#v", repo.userID, repo.reportInput)
 	}
 }
-
 func TestSupplierReportsEndpointRejectsInvalidFilter(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	handler := NewHandler(NewService(&stubRepo{}), true)
+	repo := &stubRepo{}
+	handler := NewHandler(NewService(repo), true)
 	r := gin.New()
 	secure := r.Group("/api/v1")
 	secure.Use(mockAuth(auth.User{ID: 7, Email: "supplier@nexus-mail.local", Role: auth.RoleSupplier}))
 	handler.RegisterRoutes(secure)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/supplier/reports?from=2026/04/01", nil)
+	for _, tc := range []struct {
+		name         string
+		target       string
+		wantFragment string
+	}{
+		{name: "invalid from date", target: "/api/v1/supplier/reports?from=2026/04/01", wantFragment: "from 必须使用 YYYY-MM-DD 格式"},
+		{name: "invalid to date", target: "/api/v1/supplier/reports?to=2026/04/28", wantFragment: "to 必须使用 YYYY-MM-DD 格式"},
+		{name: "from after to", target: "/api/v1/supplier/reports?from=2026-04-28&to=2026-04-01", wantFragment: "from 不能晚于 to"},
+		{name: "non integer limit", target: "/api/v1/supplier/reports?limit=abc", wantFragment: "limit 必须为整数"},
+		{name: "negative limit", target: "/api/v1/supplier/reports?limit=-1", wantFragment: "limit 不能为负数"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.target, nil)
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+			if w.Code != http.StatusBadRequest {
+				t.Fatalf("%s: expected 400, got %d: %s", tc.target, w.Code, w.Body.String())
+			}
+			if !strings.Contains(w.Body.String(), tc.wantFragment) {
+				t.Fatalf("%s: expected body to contain %q, got %s", tc.target, tc.wantFragment, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestSupplierReportsEndpointRejectsRegularUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	handler := NewHandler(NewService(&stubRepo{}), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 2, Email: "user@nexus-mail.local", Role: auth.RoleUser}))
+	handler.RegisterRoutes(secure)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/supplier/reports", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestSupplierReportsEndpointLimitBoundaries(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &stubRepo{}
+	handler := NewHandler(NewService(repo), true)
+	r := gin.New()
+	secure := r.Group("/api/v1")
+	secure.Use(mockAuth(auth.User{ID: 7, Email: "supplier@nexus-mail.local", Role: auth.RoleSupplier}))
+	handler.RegisterRoutes(secure)
+
+	for _, tc := range []struct {
+		name      string
+		target    string
+		wantLimit int
+	}{
+		{name: "blank uses default", target: "/api/v1/supplier/reports?limit=%20%20", wantLimit: 100},
+		{name: "empty uses default", target: "/api/v1/supplier/reports?limit=", wantLimit: 100},
+		{name: "zero uses default", target: "/api/v1/supplier/reports?limit=0", wantLimit: 100},
+		{name: "one stays one", target: "/api/v1/supplier/reports?limit=1", wantLimit: 1},
+		{name: "trimmed max stays max", target: "/api/v1/supplier/reports?limit=%20%20200%20", wantLimit: 200},
+		{name: "above max is capped", target: "/api/v1/supplier/reports?limit=201", wantLimit: 200},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.target, nil)
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+			if w.Code != http.StatusOK {
+				t.Fatalf("%s: expected 200, got %d: %s", tc.target, w.Code, w.Body.String())
+			}
+			if repo.reportInput.Limit != tc.wantLimit {
+				t.Fatalf("%s: expected limit %d, got %d", tc.target, tc.wantLimit, repo.reportInput.Limit)
+			}
+		})
 	}
 }
 

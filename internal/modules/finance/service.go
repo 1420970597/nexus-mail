@@ -118,6 +118,9 @@ func (s *Service) UpsertSupplierCostProfile(ctx context.Context, supplierID int6
 func (s *Service) SupplierReport(ctx context.Context, supplierID int64, input SupplierReportInput) ([]SupplierReportRow, error) {
 	input.From = strings.TrimSpace(input.From)
 	input.To = strings.TrimSpace(input.To)
+	if input.Limit < 0 {
+		return nil, ValidationError{Message: "limit 不能为负数"}
+	}
 	if input.Limit <= 0 {
 		input.Limit = 100
 	}

@@ -29,6 +29,15 @@ func TestSupplierReportNormalizesDateRangeAndLimit(t *testing.T) {
 	if repo.reportInput.Limit != 200 {
 		t.Fatalf("expected capped report limit 200, got %d", repo.reportInput.Limit)
 	}
+	if repo.reportFromDate == nil || repo.reportToDate == nil {
+		t.Fatalf("expected parsed date pointers, got from=%v to=%v", repo.reportFromDate, repo.reportToDate)
+	}
+	if got := repo.reportFromDate.Format("2006-01-02"); got != "2026-04-01" {
+		t.Fatalf("expected parsed from date 2026-04-01, got %s", got)
+	}
+	if got := repo.reportToDate.Format("2006-01-02"); got != "2026-04-28" {
+		t.Fatalf("expected parsed to date 2026-04-28, got %s", got)
+	}
 }
 
 func TestSupplierReportRejectsInvalidDateRange(t *testing.T) {
@@ -49,5 +58,36 @@ func TestSupplierReportDefaultsLimit(t *testing.T) {
 	}
 	if repo.reportInput.Limit != 100 {
 		t.Fatalf("expected default limit 100, got %d", repo.reportInput.Limit)
+	}
+}
+
+func TestSupplierReportLimitBoundaries(t *testing.T) {
+	cases := []struct {
+		name      string
+		limit     int
+		wantLimit int
+	}{
+		{name: "zero uses default", limit: 0, wantLimit: 100},
+		{name: "one stays one", limit: 1, wantLimit: 1},
+		{name: "max stays max", limit: 200, wantLimit: 200},
+		{name: "above max is capped", limit: 201, wantLimit: 200},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := &stubRepo{}
+			service := NewService(repo)
+			if _, err := service.SupplierReport(context.Background(), 12, SupplierReportInput{Limit: tc.limit}); err != nil {
+				t.Fatalf("SupplierReport() error = %v", err)
+			}
+			if repo.reportInput.Limit != tc.wantLimit {
+				t.Fatalf("expected limit %d, got %d", tc.wantLimit, repo.reportInput.Limit)
+			}
+		})
+	}
+
+	service := NewService(&stubRepo{})
+	if _, err := service.SupplierReport(context.Background(), 12, SupplierReportInput{Limit: -1}); err == nil {
+		t.Fatal("expected negative limit validation error")
 	}
 }
