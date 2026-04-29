@@ -48,6 +48,26 @@ function formatTime(value?: string) {
   return value && value.trim() ? value : '—'
 }
 
+function formatCount(value: number) {
+  return String(Number(value || 0))
+}
+
+function latestDeliveryTimestamp(deliveries: Record<number, WebhookDeliveryRecord[]>) {
+  let latest = ''
+  for (const items of Object.values(deliveries)) {
+    for (const item of items) {
+      if (item.status !== 'sent') {
+        continue
+      }
+      const candidate = item.delivered_at && item.delivered_at.trim() ? item.delivered_at : item.updated_at
+      if (candidate > latest) {
+        latest = candidate
+      }
+    }
+  }
+  return latest || '—'
+}
+
 function roleCopy(role?: string) {
   switch (role) {
     case 'admin':
@@ -118,12 +138,17 @@ export function WebhooksPage() {
       const endpoints = await getWebhookEndpoints()
       setItems(endpoints.items)
 
-      const targetEndpointID = selectedEndpointID ?? (endpoints.items.length > 0 ? endpoints.items[0].id : null)
+      const endpointIDs = endpoints.items.map((item) => item.id)
+      const uniqueIDs = Array.from(new Set([selectedEndpointID, ...endpointIDs].filter((value): value is number => typeof value === 'number' && Number.isFinite(value))))
 
-      if (targetEndpointID) {
-        const res = await getWebhookDeliveries(targetEndpointID)
-        setDeliveries((current) => ({ ...current, [targetEndpointID]: res.items }))
-        setExpandedRows([targetEndpointID])
+      if (uniqueIDs.length > 0) {
+        const responses = await Promise.all(uniqueIDs.map(async (id) => ({ id, res: await getWebhookDeliveries(id) })))
+        const nextDeliveries = responses.reduce<Record<number, WebhookDeliveryRecord[]>>((current, item) => {
+          current[item.id] = item.res.items
+          return current
+        }, {})
+        setDeliveries(nextDeliveries)
+        setExpandedRows(selectedEndpointID ? [selectedEndpointID] : [uniqueIDs[0]])
       } else {
         setDeliveries({})
         setExpandedRows([])
@@ -219,6 +244,12 @@ export function WebhooksPage() {
 
     return { total, sent, failed }
   }, [deliveries])
+  const activeEndpoints = useMemo(() => items.filter((item) => item.status === 'active'), [items])
+  const latestDelivery = useMemo(() => latestDeliveryTimestamp(deliveries), [deliveries])
+  const attentionCount = useMemo(
+    () => Object.values(deliveries).reduce((count, endpointDeliveries) => count + endpointDeliveries.filter((item) => item.status === 'failed' || item.status === 'pending').length, 0),
+    [deliveries],
+  )
 
   const endpointColumns = useMemo(
     () => [
@@ -250,6 +281,18 @@ export function WebhooksPage() {
       { title: '密钥预览', dataIndex: 'secret_preview', key: 'secret_preview' },
       { title: '创建时间', dataIndex: 'created_at', key: 'created_at' },
       {
+        title: '回调健康度',
+        key: 'health',
+        render: (_: unknown, record: WebhookEndpointRecord) => {
+          const endpointDeliveries = deliveries[record.id] ?? []
+          const hasFailed = endpointDeliveries.some((item) => item.status === 'failed')
+          const hasPending = endpointDeliveries.some((item) => item.status === 'pending')
+          const healthLabel = record.status !== 'active' ? 'disabled' : hasFailed ? '异常' : hasPending ? '排队中' : '稳定'
+          const healthColor = record.status !== 'active' ? 'grey' : hasFailed ? 'red' : hasPending ? 'blue' : 'green'
+          return <Tag color={healthColor}>{healthLabel}</Tag>
+        },
+      },
+      {
         title: '操作',
         key: 'action',
         render: (_: unknown, record: WebhookEndpointRecord) => (
@@ -276,7 +319,7 @@ export function WebhooksPage() {
         ),
       },
     ],
-    [expandedRows, testingID],
+    [deliveries, expandedRows, testingID],
   )
 
   const hasEndpoints = items.length > 0
@@ -315,10 +358,10 @@ export function WebhooksPage() {
       </Card>
 
       <Space wrap style={{ width: '100%' }} spacing={16}>
-        <MetricCard title="当前 endpoints" value={String(items.length)} description="已登记的回调目标数" icon={<IconServer />} />
-        <MetricCard title="已缓存投递" value={String(deliveryStats.total)} description="当前页面已加载的最近 delivery 数" icon={<IconActivity />} />
-        <MetricCard title="成功投递" value={String(deliveryStats.sent)} description="最近已成功送达的回调记录" icon={<IconBolt />} />
-        <MetricCard title="失败投递" value={String(deliveryStats.failed)} description="需要排查 last_error 或重试链路" icon={<IconArticle />} />
+        <MetricCard title="端点总数" value={formatCount(items.length)} description={`活跃 ${formatCount(activeEndpoints.length)} / 已停用 ${formatCount(items.length - activeEndpoints.length)}`} icon={<IconServer />} />
+        <MetricCard title="投递成功" value={formatCount(deliveryStats.sent)} description={`已聚合 ${formatCount(deliveryStats.total)} 条最近 delivery`} icon={<IconBolt />} />
+        <MetricCard title="失败 / 排队中" value={formatCount(attentionCount)} description="优先排查 failed，并观察 pending 队列消化情况" icon={<IconActivity />} />
+        <MetricCard title="最近回调" value={latestDelivery} description="最近一次成功送达的回调时间" icon={<IconArticle />} />
       </Space>
 
       <Banner
@@ -384,6 +427,14 @@ export function WebhooksPage() {
             创建 Webhook endpoint
           </Button>
         </Form>
+      </Card>
+
+      <Card title="接入流程" style={{ width: '100%' }}>
+        <Space vertical align="start" spacing={12}>
+          <Tag color="cyan">1. 创建公网 HTTPS endpoint 并复制签名密钥</Tag>
+          <Tag color="blue">2. 在消费端校验签名、记录 event_id / payload 并做好幂等</Tag>
+          <Tag color="orange">3. 使用“发送测试投递”验证 202 入队、异步回调与错误重试链路</Tag>
+        </Space>
       </Card>
 
       <Card title="当前 endpoint" style={{ width: '100%' }} loading={loading}>

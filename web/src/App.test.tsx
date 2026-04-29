@@ -309,6 +309,56 @@ describe('App', () => {
     await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledWith(11))
   })
 
+  it('renders admin risk page with real widgets', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+      ],
+    })
+
+    renderApp(['/admin/risk'])
+
+    expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
+    expect(screen.getByText('规则命中概览')).toBeInTheDocument()
+    expect(screen.getByText('处置建议')).toBeInTheDocument()
+    expect(screen.getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
+    expect(screen.getByText('高风险')).toBeInTheDocument()
+  })
+
+  it('renders admin audit page with filters and highlighted denied actions', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+      ],
+    })
+    mockedGetAdminAudit.mockResolvedValueOnce({
+      items: [
+        { id: 1, user_id: 3, api_key_id: 9, action: 'denied_whitelist', actor_type: 'system', note: 'blocked', created_at: '2026-04-28T00:00:00Z' },
+        { id: 2, user_id: 3, api_key_id: 9, action: 'success', actor_type: 'user', note: 'scope ok', created_at: '2026-04-28T00:01:00Z' },
+      ],
+    })
+
+    renderApp(['/admin/audit'])
+
+    expect(await screen.findByText('审计回放与追踪')).toBeInTheDocument()
+    expect(screen.getByText('高风险动作')).toBeInTheDocument()
+    expect(screen.getAllByText('denied_whitelist').length).toBeGreaterThan(0)
+    expect(screen.getByText('blocked')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
+  })
+
   it('blocks supplier routes for plain users', async () => {
     setSession('user')
     renderApp(['/supplier/resources'])
@@ -339,21 +389,4 @@ describe('App', () => {
     expect(await screen.findByText('鉴权拒绝总数：2')).toBeInTheDocument()
   })
 
-  it('renders admin risk page with real widgets', async () => {
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-      ],
-    })
-    renderApp(['/admin/risk'])
-    expect(await screen.findByText('API Key 白名单拦截频繁')).toBeInTheDocument()
-    expect(await screen.findByText('API Key 触发限流')).toBeInTheDocument()
-    expect(await screen.findByText('高风险信号')).toBeInTheDocument()
-    expect(await screen.findByText('API Key 异常访问检测')).toBeInTheDocument()
-  })
 })
