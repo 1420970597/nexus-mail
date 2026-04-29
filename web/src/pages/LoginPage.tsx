@@ -1,5 +1,5 @@
-import { Banner, Button, Card, Col, Form, Row, Space, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { IconLock, IconMail, IconSafe, IconUserGroup } from '@douyinfe/semi-icons'
+import { Banner, Button, Card, Col, Divider, Form, Row, Space, Tag, Toast, Typography } from '@douyinfe/semi-ui'
+import { IconArrowRight, IconLock, IconMail, IconSafe, IconUserGroup } from '@douyinfe/semi-icons'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, register } from '../services/auth'
@@ -16,7 +16,7 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   register: {
     title: '注册 Nexus-Mail',
     button: '创建账户并进入控制台',
-    helper: '先完成注册，再在同一套控制台中按角色解锁更多功能区。',
+    helper: '仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。',
   },
 }
 
@@ -38,6 +38,27 @@ const featureCards = [
   },
 ]
 
+const journeyCards = [
+  {
+    title: '用户路径',
+    description: '注册并登录后，可在共享控制台中从项目市场、订单中心、API Keys 与 Webhook 开始采购和集成。',
+  },
+  {
+    title: '供应商路径',
+    description: '如账号已被授予供应商角色，可在同一控制台继续进入域名管理、供货规则、资源与结算页面。',
+  },
+  {
+    title: '管理员路径',
+    description: '如账号已被授予管理员角色，可在同一控制台进入风控、审计、供应商管理与共享接入入口。',
+  },
+]
+
+const capabilityHighlights = [
+  '注册接口保持仅 email / password 契约，不新增伪字段。',
+  '登录后实际可见菜单与工作台能力，以账号当前角色和服务端返回权限为准。',
+  '同一套控制台布局会按角色扩展菜单，不需要切换多个后台。',
+]
+
 const devAccounts = [
   'admin@nexus-mail.local / Admin123!',
   'supplier@nexus-mail.local / Supplier123!',
@@ -52,6 +73,11 @@ export function LoginPage() {
   const [error, setError] = useState('')
 
   const copy = useMemo(() => modeCopy[mode], [mode])
+
+  const switchMode = (nextMode: AuthMode) => {
+    setMode(nextMode)
+    setError('')
+  }
 
   const onSubmit = async (values: { email: string; password: string; confirm_password?: string }) => {
     const email = String(values.email || '').trim()
@@ -128,6 +154,66 @@ export function LoginPage() {
                   </Col>
                 ))}
               </Row>
+
+              <Card
+                bodyStyle={{ padding: 20 }}
+                style={{
+                  width: '100%',
+                  background: 'rgba(15, 23, 42, 0.66)',
+                  border: '1px solid rgba(96, 165, 250, 0.24)',
+                  boxShadow: '0 18px 44px rgba(2, 6, 23, 0.24)',
+                  backdropFilter: 'blur(14px)',
+                }}
+              >
+                <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                  <div>
+                    <Typography.Title heading={4} style={{ color: '#f8fafc', marginBottom: 8 }}>
+                      注册后默认进入共享控制台
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.78)', margin: 0 }}>
+                      先完成账户创建，再根据真实角色权限展开不同菜单与页面；不拆分多个登录入口，也不引入额外注册字段。
+                    </Typography.Paragraph>
+                  </div>
+                  <Row gutter={[12, 12]} style={{ width: '100%' }}>
+                    {journeyCards.map((item) => (
+                      <Col xs={24} xl={8} key={item.title}>
+                        <Card
+                          bodyStyle={{ padding: 16 }}
+                          style={{
+                            height: '100%',
+                            background: 'rgba(2, 6, 23, 0.28)',
+                            border: '1px solid rgba(148, 163, 184, 0.16)',
+                          }}
+                        >
+                          <Typography.Title heading={6} style={{ color: '#e0f2fe', marginBottom: 8 }}>
+                            {item.title}
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.7)', margin: 0 }}>
+                            {item.description}
+                          </Typography.Paragraph>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                  <div style={{ width: '100%' }}>
+                    <Typography.Text style={{ color: '#bfdbfe', fontWeight: 600 }}>注册后默认能力说明</Typography.Text>
+                    <ul style={{ margin: '12px 0 0', paddingLeft: 18, color: 'rgba(226,232,240,0.74)' }}>
+                      {capabilityHighlights.map((item) => (
+                        <li key={item} style={{ marginBottom: 8 }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Button
+                    theme="solid"
+                    type="primary"
+                    icon={<IconArrowRight />}
+                    onClick={() => switchMode('register')}
+                  >
+                    立即注册，进入共享控制台
+                  </Button>
+                </Space>
+              </Card>
+
               {import.meta.env.DEV ? (
                 <Banner
                   type="info"
@@ -192,13 +278,29 @@ export function LoginPage() {
                     background: '#eef2ff',
                   }}
                 >
-                  <Button theme={mode === 'login' ? 'solid' : 'borderless'} type={mode === 'login' ? 'primary' : 'tertiary'} onClick={() => { setMode('login'); setError('') }}>
+                  <Button theme={mode === 'login' ? 'solid' : 'borderless'} type={mode === 'login' ? 'primary' : 'tertiary'} onClick={() => switchMode('login')}>
                     登录
                   </Button>
-                  <Button theme={mode === 'register' ? 'solid' : 'borderless'} type={mode === 'register' ? 'primary' : 'tertiary'} onClick={() => { setMode('register'); setError('') }}>
+                  <Button theme={mode === 'register' ? 'solid' : 'borderless'} type={mode === 'register' ? 'primary' : 'tertiary'} onClick={() => switchMode('register')}>
                     注册
                   </Button>
                 </div>
+
+                {mode === 'login' ? (
+                  <Banner
+                    type="info"
+                    fullMode={false}
+                    description="已有账号可直接进入共享控制台；若首次使用，可先注册并在同一壳内按角色扩展工作台。"
+                    style={{ width: '100%' }}
+                  />
+                ) : (
+                  <Banner
+                    type="success"
+                    fullMode={false}
+                    description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局。"
+                    style={{ width: '100%' }}
+                  />
+                )}
 
                 <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }}>
                   <Form.Input
@@ -229,6 +331,7 @@ export function LoginPage() {
                   </Button>
                 </Form>
 
+                <Divider margin="12px" />
                 <Typography.Text type="tertiary">
                   登录后进入同一套控制台布局；菜单与页面能力由角色控制，而不是拆分多个独立后台。
                 </Typography.Text>

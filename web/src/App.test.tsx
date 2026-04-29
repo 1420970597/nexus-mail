@@ -183,6 +183,21 @@ describe('App', () => {
     expect(screen.getByText('邮件接码业务的统一运营控制台')).toBeInTheDocument()
   })
 
+  it('shows register journey guidance and role entry descriptions on the login shell', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    renderApp(['/login'])
+
+    expect(screen.getByText('注册后默认进入共享控制台')).toBeInTheDocument()
+    expect(screen.getByText('用户路径')).toBeInTheDocument()
+    expect(screen.getByText('如账号已被授予供应商角色，可在同一控制台继续进入域名管理、供货规则、资源与结算页面。')).toBeInTheDocument()
+    expect(screen.getByText('登录后实际可见菜单与工作台能力，以账号当前角色和服务端返回权限为准。')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
+    expect(screen.getByText('仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。')).toBeInTheDocument()
+  })
+
   it('supports switching to register and submitting registration', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
@@ -237,6 +252,33 @@ describe('App', () => {
     renderApp(['/profile'])
 
     await user.click(await screen.findByRole('button', { name: '前往域名管理' }))
+    expect(window.sessionStorage.getItem('nexus-mail-menu')).toContain('/supplier/domains')
+  })
+
+  it('renders dashboard with role mission panel and navigable next actions for supplier', async () => {
+    const user = userEvent.setup()
+    setSession('supplier')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'supplier',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+        { key: 'supplier-offerings', label: '供货规则', path: '/supplier/offerings' },
+        { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+      ],
+    })
+
+    renderApp(['/'])
+
+    expect(await screen.findByText('角色工作台导引')).toBeInTheDocument()
+    expect(screen.getByText('供应商主任务')).toBeInTheDocument()
+    expect(screen.getByText('共享壳中的角色菜单映射')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '调整供货规则' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
     expect(window.sessionStorage.getItem('nexus-mail-menu')).toContain('/supplier/domains')
   })
 

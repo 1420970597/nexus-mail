@@ -1,4 +1,4 @@
-import { Banner, Button, Card, Col, Empty, Row, Space, Table, Tag, Typography } from '@douyinfe/semi-ui'
+import { Banner, Button, Card, Col, Empty, Row, Space, Table, Tag, Timeline, Typography } from '@douyinfe/semi-ui'
 import {
   IconActivity,
   IconArticle,
@@ -39,6 +39,18 @@ interface RoleAction {
   accent: string
 }
 
+interface RoleMissionStep {
+  key: string
+  title: string
+  description: string
+}
+
+interface RoleSurfaceItem {
+  label: string
+  route: string
+  summary: string
+}
+
 function roleActions(role?: string): RoleAction[] {
   switch (role) {
     case 'admin':
@@ -59,15 +71,15 @@ function roleActions(role?: string): RoleAction[] {
           icon: <IconSafe />,
           accent: 'rgba(239, 68, 68, 0.24)',
         },
-      {
-        title: '共享接入入口',
-        description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
-        path: '/webhooks',
-        button: '打开 Webhook 工作台',
-        icon: <IconArticle />,
-        accent: 'rgba(14, 165, 233, 0.24)',
-      },
-]
+        {
+          title: '共享接入入口',
+          description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
+          path: '/webhooks',
+          button: '打开 Webhook 工作台',
+          icon: <IconArticle />,
+          accent: 'rgba(14, 165, 233, 0.24)',
+        },
+      ]
     case 'supplier':
       return [
         {
@@ -125,6 +137,63 @@ function roleActions(role?: string): RoleAction[] {
   }
 }
 
+function roleHeadline(role?: string) {
+  switch (role) {
+    case 'admin':
+      return '管理员主任务'
+    case 'supplier':
+      return '供应商主任务'
+    default:
+      return '用户主任务'
+  }
+}
+
+function roleMissionSteps(role?: string): RoleMissionStep[] {
+  switch (role) {
+    case 'admin':
+      return [
+        { key: 'overview', title: '先看经营概览', description: '确认争议、超时订单、待结算金额与鉴权拒绝率是否异常。' },
+        { key: 'risk', title: '再进风控与审计', description: '沿着风控中心和审计日志定位高风险动作与供应商表现。' },
+        { key: 'operate', title: '最后回到运营入口', description: '进入供应商管理或 Webhook 工作台继续处理履约和接入联动。' },
+      ]
+    case 'supplier':
+      return [
+        { key: 'domains', title: '维护域名池', description: '优先检查域名池、Catch-All 覆盖与可用性，稳定供给起点。' },
+        { key: 'offerings', title: '调整供货规则', description: '根据库存、成功率与履约结果回到供货规则页优化价格和可售状态。' },
+        { key: 'settlements', title: '关注结算结果', description: '在供应商结算页追踪待结算余额与产出效率，形成供给闭环。' },
+      ]
+    default:
+      return [
+        { key: 'projects', title: '浏览项目市场', description: '先确认真实库存、定价与可售项目，再进入采购流程。' },
+        { key: 'orders', title: '跟踪订单执行', description: '在订单中心查看邮箱分配、提取结果与完成状态。' },
+        { key: 'integrate', title: '完成 API 集成', description: '继续配置 API Keys、Webhook 与文档访问，打通系统接入。' },
+      ]
+  }
+}
+
+function roleSurface(role?: string): RoleSurfaceItem[] {
+  switch (role) {
+    case 'admin':
+      return [
+        { label: '基础工作台', route: '/', summary: '总览、共享入口与实时概览都从这里开始。' },
+        { label: '管理员扩展', route: '/admin/risk', summary: '风控中心、审计日志、供应商管理等管理动作在此展开。' },
+        { label: '共享接入', route: '/webhooks', summary: 'Webhook 与 API 文档仍留在共享控制台内。' },
+      ]
+    case 'supplier':
+      return [
+        { label: '基础工作台', route: '/', summary: '总览页先聚合供给侧最重要的下一步动作。' },
+        { label: '供应商扩展', route: '/supplier/domains', summary: '域名池、资源、供货规则与结算围绕供给闭环展开。' },
+        { label: '共享接入', route: '/settings', summary: '设置中心继续连接 Webhook、API Keys 与共享会话说明。' },
+      ]
+    default:
+      return [
+        { label: '基础工作台', route: '/', summary: '总览页负责把采购、订单与集成入口组织在同一壳里。' },
+        { label: '采购执行', route: '/projects', summary: '项目市场与订单中心承接真实购买链路。' },
+        { label: '集成入口', route: '/api-keys', summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' },
+      ]
+  }
+}
+
 export function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -157,6 +226,8 @@ export function DashboardPage() {
   const adminSummary = adminOverview?.summary
   const topSupplier = useMemo(() => adminOverview?.suppliers?.[0], [adminOverview])
   const actions = useMemo(() => roleActions(user?.role), [user?.role])
+  const missionSteps = useMemo(() => roleMissionSteps(user?.role), [user?.role])
+  const roleSurfaceItems = useMemo(() => roleSurface(user?.role), [user?.role])
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -208,6 +279,57 @@ export function DashboardPage() {
           </Row>
         </Space>
       </Card>
+
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        <Col xs={24} xl={14}>
+          <Card style={metricCardStyle('rgba(94,106,210,0.24)')} bodyStyle={{ padding: 22 }}>
+            <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+              <div>
+                <Tag color="blue">角色工作台导引</Tag>
+                <Typography.Title heading={4} style={{ margin: '12px 0 6px', color: '#f7f8f8' }}>
+                  {roleHeadline(user?.role)}
+                </Typography.Title>
+                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                  基于现有真实路由组织接下来的执行顺序，帮助当前角色在共享壳中快速进入主任务。
+                </Typography.Paragraph>
+              </div>
+              <Timeline mode="left">
+                {missionSteps.map((step) => (
+                  <Timeline.Item key={step.key} time={step.title}>
+                    <Typography.Text style={{ color: 'rgba(208,214,224,0.72)' }}>{step.description}</Typography.Text>
+                  </Timeline.Item>
+                ))}
+              </Timeline>
+            </Space>
+          </Card>
+        </Col>
+        <Col xs={24} xl={10}>
+          <Card style={metricCardStyle('rgba(14,165,233,0.24)')} bodyStyle={{ padding: 22 }}>
+            <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+              <div>
+                <Tag color="cyan">共享壳中的角色菜单映射</Tag>
+                <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
+                  同一控制台布局下，不同角色通过菜单分组进入不同任务页；以下跳转全部对应现有真实路由。
+                </Typography.Paragraph>
+              </div>
+              {roleSurfaceItems.map((item) => (
+                <Card key={item.label} bodyStyle={{ padding: 16 }} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                    <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                      <Typography.Text strong style={{ color: '#f7f8f8' }}>{item.label}</Typography.Text>
+                      <Tag color="grey">{item.route}</Tag>
+                    </Space>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>{item.summary}</Typography.Paragraph>
+                    <Button theme="borderless" type="primary" onClick={() => navigate(item.route)}>
+                      打开该工作台
+                    </Button>
+                  </Space>
+                </Card>
+              ))}
+            </Space>
+          </Card>
+        </Col>
+      </Row>
 
       <Row gutter={16} style={{ width: '100%' }}>
         <Col span={8}>
