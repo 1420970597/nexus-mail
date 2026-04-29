@@ -220,14 +220,14 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('新注册用户首轮引导')).toBeInTheDocument()
+    expect(await screen.findByText('普通用户首轮引导')).toBeInTheDocument()
     expect(screen.getByText('先按“项目市场 → 订单中心 → API 接入”走通首次使用路径')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '打开项目市场' })).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: '查看订单中心' }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('button', { name: '管理 API Keys' }).length).toBeGreaterThan(0)
 
     await user.click(screen.getByRole('button', { name: '暂时收起引导' }))
-    await waitFor(() => expect(screen.queryByText('新注册用户首轮引导')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('普通用户首轮引导')).not.toBeInTheDocument())
     expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('true')
   })
 
@@ -247,7 +247,7 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
-    expect(screen.queryByText('新注册用户首轮引导')).not.toBeInTheDocument()
+    expect(screen.queryByText('普通用户首轮引导')).not.toBeInTheDocument()
   })
 
   it('shows onboarding checklist on settings page for default user only', async () => {

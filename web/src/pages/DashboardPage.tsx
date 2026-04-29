@@ -325,7 +325,7 @@ export function DashboardPage() {
               <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
                   <Space vertical align="start" spacing={8}>
-                    <Tag color="cyan" shape="circle">新注册用户首轮引导</Tag>
+                    <Tag color="cyan" shape="circle">普通用户首轮引导</Tag>
                     <div>
                       <Typography.Title heading={4} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
                         先按“项目市场 → 订单中心 → API 接入”走通首次使用路径
