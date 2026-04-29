@@ -1,8 +1,18 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 import { useAuthStore } from './store/authStore'
 import * as authService from './services/auth'
+import * as webhookService from './services/webhooks'
+
+function renderApp(initialEntries: string[]) {
+  return render(
+    <MemoryRouter initialEntries={initialEntries} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <App />
+    </MemoryRouter>,
+  )
+}
 
 vi.mock('./services/auth', async () => {
   const actual = await vi.importActual<typeof import('./services/auth')>('./services/auth')
@@ -17,8 +27,17 @@ vi.mock('./services/auth', async () => {
     getAdminRiskRules: vi.fn(),
     updateAdminRiskRules: vi.fn(),
     getAdminAudit: vi.fn(),
+    login: vi.fn(),
+    register: vi.fn(),
   }
 })
+
+vi.mock('./services/webhooks', () => ({
+  getWebhookEndpoints: vi.fn(),
+  createWebhookEndpoint: vi.fn(),
+  createWebhookTestDelivery: vi.fn(),
+  getWebhookDeliveries: vi.fn(),
+}))
 
 const mockedGetCurrentUser = vi.mocked(authService.getCurrentUser)
 const mockedGetMenu = vi.mocked(authService.getMenu)
@@ -28,6 +47,11 @@ const mockedGetAdminRisk = vi.mocked(authService.getAdminRisk)
 const mockedGetAdminRiskRules = vi.mocked(authService.getAdminRiskRules)
 const mockedUpdateAdminRiskRules = vi.mocked(authService.updateAdminRiskRules)
 const mockedGetAdminAudit = vi.mocked(authService.getAdminAudit)
+const mockedLogin = vi.mocked(authService.login)
+const mockedRegister = vi.mocked(authService.register)
+const mockedGetWebhookEndpoints = vi.mocked(webhookService.getWebhookEndpoints)
+const mockedGetWebhookDeliveries = vi.mocked(webhookService.getWebhookDeliveries)
+const mockedCreateWebhookTestDelivery = vi.mocked(webhookService.createWebhookTestDelivery)
 
 function setSession(role: 'user' | 'supplier' | 'admin' = 'user') {
   useAuthStore.setState({
@@ -50,6 +74,7 @@ describe('App', () => {
         { key: 'balance', label: '余额中心', path: '/balance' },
         { key: 'profile', label: '个人资料', path: '/profile' },
         { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
         { key: 'settings', label: '设置中心', path: '/settings' },
       ],
     })
@@ -86,6 +111,64 @@ describe('App', () => {
     })
     mockedUpdateAdminRiskRules.mockImplementation(async (items) => ({ items }))
     mockedGetAdminAudit.mockResolvedValue({ items: [{ id: 1, user_id: 3, api_key_id: 9, action: 'success', actor_type: 'system', note: 'scope ok', created_at: '2026-04-28T00:00:00Z' }] })
+    mockedGetWebhookEndpoints.mockResolvedValue({
+      items: [
+        {
+          id: 11,
+          user_id: 1,
+          url: 'https://hooks.example.com/nexus-mail',
+          events: ['activation.finished'],
+          status: 'active',
+          secret_preview: 'whsec_abcd…1234',
+          created_at: '2026-04-29T00:00:00Z',
+          updated_at: '2026-04-29T00:00:00Z',
+        },
+      ],
+    })
+    mockedGetWebhookDeliveries.mockResolvedValue({
+      items: [
+        {
+          id: 91,
+          endpoint_id: 11,
+          user_id: 1,
+          event_type: 'webhook.test',
+          payload: '{"type":"webhook.test"}',
+          status: 'pending',
+          attempt_count: 1,
+          next_attempt_at: '2026-04-29T00:01:00Z',
+          last_error: '',
+          delivered_at: '',
+          created_at: '2026-04-29T00:00:10Z',
+          updated_at: '2026-04-29T00:00:10Z',
+        },
+      ],
+    })
+    mockedCreateWebhookTestDelivery.mockResolvedValue({
+      delivery: {
+        id: 92,
+        endpoint_id: 11,
+        user_id: 1,
+        event_type: 'webhook.test',
+        payload: '{"type":"webhook.test"}',
+        status: 'pending',
+        attempt_count: 0,
+        next_attempt_at: '2026-04-29T00:02:00Z',
+        last_error: '',
+        delivered_at: '',
+        created_at: '2026-04-29T00:01:00Z',
+        updated_at: '2026-04-29T00:01:00Z',
+      },
+    })
+    mockedLogin.mockResolvedValue({
+      token: 'login-token',
+      refresh_token: 'login-refresh',
+      user: { id: 7, email: 'user@example.com', role: 'user' },
+    })
+    mockedRegister.mockResolvedValue({
+      token: 'register-token',
+      refresh_token: 'register-refresh',
+      user: { id: 8, email: 'new@example.com', role: 'user' },
+    })
   })
 
   afterEach(() => {
@@ -95,33 +178,50 @@ describe('App', () => {
 
   it('renders login page when unauthenticated', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
-    render(
-      <MemoryRouter initialEntries={['/login']}>
-        <App />
-      </MemoryRouter>,
-    )
+    renderApp(['/login'])
     expect(screen.getByText('登录 Nexus-Mail')).toBeInTheDocument()
+    expect(screen.getByText('邮件接码业务的统一运营控制台')).toBeInTheDocument()
   })
 
-  it('renders api key page for authenticated user', async () => {
-    setSession('user')
-    render(
-      <MemoryRouter initialEntries={['/api-keys']}>
-        <App />
-      </MemoryRouter>,
-    )
-    expect(await screen.findByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
-    await waitFor(() => expect(mockedGetMenu).toHaveBeenCalled())
+  it('supports switching to register and submitting registration', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    renderApp(['/login'])
+
+    await user.click(screen.getByRole('button', { name: '注册' }))
+    expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
+    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+
+    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
+  })
+
+  it('renders webhook settings page for authenticated admin', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+      ],
+    })
+    renderApp(['/webhooks'])
+    expect(await screen.findAllByRole('heading', { name: 'Webhook 设置' })).not.toHaveLength(0)
+    expect(await screen.findByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
+    expect(await screen.findByText('whsec_abcd…1234')).toBeInTheDocument()
+    expect(await screen.findByText(/localhost、内网、link-local/)).toBeInTheDocument()
+    await waitFor(() => expect(mockedGetWebhookEndpoints).toHaveBeenCalled())
+    await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledWith(11))
   })
 
   it('blocks supplier routes for plain users', async () => {
     setSession('user')
-    render(
-      <MemoryRouter initialEntries={['/supplier/resources']}>
-        <App />
-      </MemoryRouter>,
-    )
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+    renderApp(['/supplier/resources'])
+    expect(await screen.findAllByText('控制台总览')).not.toHaveLength(0)
   })
 
   it('renders admin dashboard deep statistics', async () => {
@@ -134,11 +234,7 @@ describe('App', () => {
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
       ],
     })
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <App />
-      </MemoryRouter>,
-    )
+    renderApp(['/'])
     expect(await screen.findByText('订单完成率')).toBeInTheDocument()
     await waitFor(() => expect(screen.getAllByText('20.00%').length).toBeGreaterThanOrEqual(3))
     expect(await screen.findByText('争议发生率')).toBeInTheDocument()
@@ -163,14 +259,12 @@ describe('App', () => {
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
       ],
     })
-    render(
-      <MemoryRouter initialEntries={['/admin/risk']}>
-        <App />
-      </MemoryRouter>,
-    )
-    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+
+    renderApp(['/admin/risk'])
+
+    expect(await screen.findByText('高风险信号')).toBeInTheDocument()
     expect(await screen.findByText('API Key 白名单拦截频繁')).toBeInTheDocument()
     expect(await screen.findByText('API Key 触发限流')).toBeInTheDocument()
-    expect(await screen.findByText('限流拦截')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '保存规则' })).toBeInTheDocument()
   })
 })

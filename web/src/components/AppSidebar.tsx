@@ -1,6 +1,7 @@
-import { Nav } from '@douyinfe/semi-ui'
+import { Nav, Tag, Typography } from '@douyinfe/semi-ui'
 import {
   IconActivity,
+  IconArticle,
   IconBolt,
   IconComponent,
   IconHome,
@@ -21,6 +22,7 @@ const iconMap: Record<string, JSX.Element> = {
   balance: <IconPriceTag />,
   profile: <IconUser />,
   'api-keys': <IconSafe />,
+  webhooks: <IconBolt />,
   settings: <IconSetting />,
   'supplier-domains': <IconServer />,
   'supplier-resources': <IconPriceTag />,
@@ -31,7 +33,7 @@ const iconMap: Record<string, JSX.Element> = {
   'admin-pricing': <IconPriceTag />,
   'admin-risk': <IconSafe />,
   'admin-audit': <IconActivity />,
-  docs: <IconSetting />,
+  docs: <IconArticle />,
 }
 
 function fallbackMenu(role?: string): MenuItem[] {
@@ -59,10 +61,22 @@ function fallbackMenu(role?: string): MenuItem[] {
       { key: 'admin-pricing', label: '价格策略', path: '/admin/pricing' },
       { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
       { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+      { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
     )
   }
   base.push({ key: 'docs', label: 'API 文档', path: '/docs' })
   return base
+}
+
+function roleMeta(role?: string) {
+  switch (role) {
+    case 'admin':
+      return { label: '管理员', color: 'red' as const, description: '风控 / 审计 / 运营配置' }
+    case 'supplier':
+      return { label: '供应商', color: 'green' as const, description: '资源供给 / 供货规则 / 结算' }
+    default:
+      return { label: '用户', color: 'blue' as const, description: '采购 / API 接入 / Webhook' }
+  }
 }
 
 export function AppSidebar() {
@@ -79,16 +93,32 @@ export function AppSidebar() {
     }))
   }, [menu, user?.role])
 
+  const meta = roleMeta(user?.role)
+
   return (
-    <div style={{ height: '100%', color: '#fff' }}>
-      <div style={{ padding: '20px 16px', fontSize: 20, fontWeight: 700, color: '#fff' }}>Nexus-Mail</div>
+    <div style={{ height: '100%', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '24px 18px 18px' }}>
+        <Typography.Title heading={4} style={{ color: '#f8fafc', margin: 0 }}>
+          Nexus-Mail
+        </Typography.Title>
+        <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>Shared Console</Typography.Text>
+        <div style={{ marginTop: 14 }}>
+          <Tag color={meta.color}>{meta.label}</Tag>
+        </div>
+        <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.72)', marginTop: 12, marginBottom: 0, fontSize: 12, lineHeight: 1.6 }}>
+          {meta.description}
+        </Typography.Paragraph>
+      </div>
       <Nav
         selectedKeys={[location.pathname]}
-        style={{ maxWidth: '100%', height: 'calc(100% - 72px)', background: 'transparent' }}
+        style={{ maxWidth: '100%', flex: 1, background: 'transparent' }}
         items={items}
         onSelect={(data) => navigate(String(data.itemKey))}
         footer={{ collapseButton: false }}
       />
+      <div style={{ padding: '0 18px 18px', color: 'rgba(148,163,184,0.88)', fontSize: 12 }}>
+        单一登录后控制台 · 按角色扩展菜单
+      </div>
     </div>
   )
 }

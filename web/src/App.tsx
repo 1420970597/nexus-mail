@@ -8,6 +8,7 @@ import { PlaceholderPage } from './pages/PlaceholderPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ApiKeysPage } from './pages/ApiKeysPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { WebhooksPage } from './pages/WebhooksPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { BalancePage } from './pages/BalancePage'
@@ -82,6 +83,7 @@ function Shell() {
         <Route path="/balance" element={<BalancePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/api-keys" element={<ApiKeysPage />} />
+        <Route path="/webhooks" element={<AdminRoute><WebhooksPage /></AdminRoute>} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/supplier/domains" element={<SupplierRoute><PlaceholderPage title="域名管理" description="供应商域名池、Catch-All 与 MX 策略将在此统一管理。" /></SupplierRoute>} />
         <Route path="/supplier/resources" element={<SupplierRoute><SupplierResourcesPage /></SupplierRoute>} />
