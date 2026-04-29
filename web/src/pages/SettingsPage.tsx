@@ -70,6 +70,15 @@ export function SettingsPage() {
         accent: 'rgba(16,185,129,0.18)',
         icon: <IconArticle />,
       },
+      {
+        title: 'Webhook 回调工作台',
+        description: '在共享控制台中直接维护 endpoint、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。',
+        button: '打开 Webhook 设置',
+        path: '/webhooks',
+        tag: '共享入口',
+        accent: 'rgba(14,165,233,0.18)',
+        icon: <IconBolt />,
+      },
     ]
 
     switch (user?.role) {

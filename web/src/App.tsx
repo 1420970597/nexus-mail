@@ -84,7 +84,7 @@ function Shell() {
         <Route path="/balance" element={<BalancePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/api-keys" element={<ApiKeysPage />} />
-        <Route path="/webhooks" element={<AdminRoute><WebhooksPage /></AdminRoute>} />
+        <Route path="/webhooks" element={<WebhooksPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/supplier/domains" element={<SupplierRoute><SupplierDomainsPage /></SupplierRoute>} />
         <Route path="/supplier/resources" element={<SupplierRoute><SupplierResourcesPage /></SupplierRoute>} />

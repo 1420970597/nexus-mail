@@ -114,6 +114,15 @@ describe('WebhooksPage', () => {
     expect(screen.getByText(/优先使用固定公网出口服务承接回调/)).toBeInTheDocument()
   })
 
+  it('renders role-specific guidance for admin role', async () => {
+    seedRole('admin')
+    render(<WebhooksPage />)
+
+    expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
+    expect(screen.getByText('管理员视角')).toBeInTheDocument()
+    expect(screen.getByText(/重点关注 failed \/ pending 重试链路/)).toBeInTheDocument()
+  })
+
   it('queues test delivery and reloads deliveries', async () => {
     const user = userEvent.setup()
     render(<WebhooksPage />)

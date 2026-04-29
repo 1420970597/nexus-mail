@@ -33,7 +33,7 @@ describe('AppSidebar', () => {
     await renderSidebarAndWait(<AppSidebar />)
 
     expect(screen.getByText('域名管理')).toBeInTheDocument()
-    expect(screen.queryByText('Webhook 设置')).not.toBeInTheDocument()
+    expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
     expect(screen.getByText('供应商结算')).toBeInTheDocument()
     expect(screen.getByText('供应商')).toBeInTheDocument()
     expect(screen.getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()

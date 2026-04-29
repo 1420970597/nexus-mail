@@ -59,15 +59,15 @@ function roleActions(role?: string): RoleAction[] {
           icon: <IconSafe />,
           accent: 'rgba(239, 68, 68, 0.24)',
         },
-        {
-          title: '共享接入入口',
-          description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
-          path: '/docs',
-          button: '查看 API 文档',
-          icon: <IconArticle />,
-          accent: 'rgba(14, 165, 233, 0.24)',
-        },
-      ]
+      {
+        title: '共享接入入口',
+        description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
+        path: '/webhooks',
+        button: '打开 Webhook 工作台',
+        icon: <IconArticle />,
+        accent: 'rgba(14, 165, 233, 0.24)',
+      },
+]
     case 'supplier':
       return [
         {

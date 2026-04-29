@@ -45,6 +45,7 @@ function fallbackMenu(role?: string): MenuItem[] {
     { key: 'balance', label: '余额中心', path: '/balance' },
     { key: 'profile', label: '个人资料', path: '/profile' },
     { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+    { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
     { key: 'settings', label: '设置中心', path: '/settings' },
   ]
   if (role === 'supplier' || role === 'admin') {
@@ -62,7 +63,6 @@ function fallbackMenu(role?: string): MenuItem[] {
       { key: 'admin-pricing', label: '价格策略', path: '/admin/pricing' },
       { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
       { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-      { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
     )
   }
   base.push({ key: 'docs', label: 'API 文档', path: '/docs' })
@@ -81,9 +81,9 @@ function roleMeta(role?: string) {
 }
 
 function groupedMenu(source: MenuItem[]) {
-  const userItems = source.filter((item) => ['/','/projects','/orders','/balance','/profile','/api-keys','/settings','/docs'].includes(item.path))
+  const userItems = source.filter((item) => ['/','/projects','/orders','/balance','/profile','/api-keys','/webhooks','/settings','/docs'].includes(item.path))
   const supplierItems = source.filter((item) => item.path.startsWith('/supplier/'))
-  const adminItems = source.filter((item) => item.path.startsWith('/admin/') || item.path === '/webhooks')
+  const adminItems = source.filter((item) => item.path.startsWith('/admin/'))
   return { userItems, supplierItems, adminItems }
 }
 

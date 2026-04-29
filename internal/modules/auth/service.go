@@ -146,12 +146,14 @@ func (s *Service) MenuForRole(role Role) []MenuItem {
 		{Key: "balance", Label: "余额中心", Path: "/balance"},
 		{Key: "profile", Label: "个人资料", Path: "/profile"},
 		{Key: "api-keys", Label: "API Keys", Path: "/api-keys"},
+		{Key: "webhooks", Label: "Webhook 设置", Path: "/webhooks"},
 		{Key: "settings", Label: "设置中心", Path: "/settings"},
 	}
 	if role == RoleSupplier || role == RoleAdmin {
 		items = append(items,
 			MenuItem{Key: "supplier-domains", Label: "域名管理", Path: "/supplier/domains"},
 			MenuItem{Key: "supplier-resources", Label: "供应商资源", Path: "/supplier/resources"},
+			MenuItem{Key: "supplier-offerings", Label: "供货规则", Path: "/supplier/offerings"},
 			MenuItem{Key: "supplier-settlements", Label: "供应商结算", Path: "/supplier/settlements"},
 		)
 	}
@@ -162,7 +164,6 @@ func (s *Service) MenuForRole(role Role) []MenuItem {
 			MenuItem{Key: "admin-pricing", Label: "价格策略", Path: "/admin/pricing"},
 			MenuItem{Key: "admin-risk", Label: "风控中心", Path: "/admin/risk"},
 			MenuItem{Key: "admin-audit", Label: "审计日志", Path: "/admin/audit"},
-			MenuItem{Key: "webhooks", Label: "Webhook 设置", Path: "/webhooks"},
 		)
 	}
 	items = append(items, MenuItem{Key: "docs", Label: "API 文档", Path: "/docs"})
