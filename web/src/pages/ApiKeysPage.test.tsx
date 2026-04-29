@@ -9,6 +9,7 @@ vi.mock('../services/apiKeys', () => ({
   getAPIKeys: vi.fn(),
   createAPIKey: vi.fn(),
   revokeAPIKey: vi.fn(),
+  updateAPIKeyWhitelist: vi.fn(),
   getAPIKeyAudit: vi.fn(),
 }))
 
@@ -27,6 +28,7 @@ vi.mock('@douyinfe/semi-ui', async () => {
 const mockedGetAPIKeys = vi.mocked(apiKeyService.getAPIKeys)
 const mockedCreateAPIKey = vi.mocked(apiKeyService.createAPIKey)
 const mockedRevokeAPIKey = vi.mocked(apiKeyService.revokeAPIKey)
+const mockedUpdateAPIKeyWhitelist = vi.mocked(apiKeyService.updateAPIKeyWhitelist)
 const mockedGetAPIKeyAudit = vi.mocked(apiKeyService.getAPIKeyAudit)
 const mockedModalConfirm = vi.mocked(Modal.confirm)
 
@@ -103,6 +105,19 @@ describe('ApiKeysPage', () => {
         updated_at: '2026-01-01T00:00:00Z',
       },
     })
+    mockedUpdateAPIKeyWhitelist.mockResolvedValue({
+      api_key: {
+        id: 1,
+        name: '默认密钥',
+        key_preview: 'nmx_abcd...1234',
+        scopes: ['activation:read'],
+        whitelist: ['172.18.0.1', '10.0.0.0/24'],
+        status: 'active',
+        last_used_at: '2026-01-02T00:00:00Z',
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-03T00:00:00Z',
+      },
+    })
   })
 
   afterEach(() => {
@@ -114,8 +129,8 @@ describe('ApiKeysPage', () => {
     seedRole('supplier')
     render(<ApiKeysPage />)
 
-    expect(await screen.findByText('供给系统 API 接入工作台')).toBeInTheDocument()
-    expect(screen.getByText('供应商视角')).toBeInTheDocument()
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(screen.getByText('共享控制台 · 供应商扩展')).toBeInTheDocument()
     expect(screen.getByText(/优先设置固定出口 IP 白名单/)).toBeInTheDocument()
   })
 
@@ -126,7 +141,7 @@ describe('ApiKeysPage', () => {
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     await user.type(screen.getByLabelText('名称'), '新密钥')
     await user.type(screen.getByLabelText('权限范围'), ' finance:write , , activation:read ')
-    await user.type(screen.getByLabelText('IP 白名单'), ' 10.0.0.0/24, ,127.0.0.1 ')
+    await user.type(screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24'), ' 10.0.0.0/24, ,127.0.0.1 ')
     await user.click(screen.getByRole('button', { name: '创建新密钥' }))
 
     await waitFor(() =>
@@ -159,6 +174,57 @@ describe('ApiKeysPage', () => {
 
     await waitFor(() => expect(mockedRevokeAPIKey).toHaveBeenCalledWith(1))
     expect(mockedGetAPIKeys).toHaveBeenCalledTimes(2)
+  })
+
+  it('updates whitelist with normalized entries and reloads list', async () => {
+    const user = userEvent.setup()
+
+    render(<ApiKeysPage />)
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
+    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    expect((whitelistInput as HTMLInputElement).value).toContain('127.0.0.1')
+    await user.clear(whitelistInput)
+    await user.type(whitelistInput, ' 172.18.0.1 , , 10.0.0.0/24 ')
+    await user.click(screen.getByRole('button', { name: '保存白名单' }))
+
+    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['172.18.0.1', '10.0.0.0/24']))
+    expect(mockedGetAPIKeys).toHaveBeenCalledTimes(2)
+    await waitFor(() => expect(screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24')).toBeInTheDocument())
+  })
+
+  it('allows clearing whitelist to remove restrictions', async () => {
+    const user = userEvent.setup()
+
+    render(<ApiKeysPage />)
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
+    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    await user.clear(whitelistInput)
+    await user.click(screen.getByRole('button', { name: '保存白名单' }))
+
+    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, []))
+  })
+
+  it('shows backend error when whitelist update fails', async () => {
+    const user = userEvent.setup()
+    mockedUpdateAPIKeyWhitelist.mockRejectedValueOnce({
+      response: { data: { error: 'IP 白名单仅支持合法 IP 或 CIDR' } },
+    })
+
+    render(<ApiKeysPage />)
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
+    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    await user.clear(whitelistInput)
+    await user.type(whitelistInput, 'not-an-ip')
+    await user.click(screen.getByRole('button', { name: '保存白名单' }))
+
+    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['not-an-ip']))
+    expect(await screen.findByText('IP 白名单仅支持合法 IP 或 CIDR')).toBeInTheDocument()
   })
 
   it('does not revoke when modal confirm is cancelled', async () => {

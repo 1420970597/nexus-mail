@@ -39,6 +39,11 @@ export async function revokeAPIKey(id: number) {
   return data
 }
 
+export async function updateAPIKeyWhitelist(id: number, whitelist: string[]) {
+  const { data } = await api.patch<{ api_key: APIKeyRecord }>(`/api-keys/${id}/whitelist`, { whitelist })
+  return data
+}
+
 export async function getAPIKeyAudit() {
   const { data } = await api.get<{ items: APIKeyAuditEntry[] }>('/api-keys/audit')
   return data

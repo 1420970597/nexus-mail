@@ -1,7 +1,7 @@
 import { Banner, Button, Card, Empty, Form, Modal, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { IconArticle, IconSafe, IconServer, IconShield, IconTickCircle } from '@douyinfe/semi-icons'
+import { IconArticle, IconEdit, IconSafe, IconServer, IconShield, IconTickCircle } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
-import { APIKeyAuditEntry, APIKeyRecord, createAPIKey, getAPIKeyAudit, getAPIKeys, revokeAPIKey } from '../services/apiKeys'
+import { APIKeyAuditEntry, APIKeyRecord, createAPIKey, getAPIKeyAudit, getAPIKeys, revokeAPIKey, updateAPIKeyWhitelist } from '../services/apiKeys'
 import { useAuthStore } from '../store/authStore'
 
 const PLAINTEXT_VISIBILITY_MS = 5 * 60 * 1000
@@ -21,21 +21,21 @@ function roleCopy(role?: string) {
   switch (role) {
     case 'admin':
       return {
-        badge: '管理员视角',
-        title: '平台接入与审计工作台',
-        description: '集中管理 API Key 生命周期、白名单与审计轨迹，辅助排查限流、白名单拒绝与高危接入动作。',
+        badge: '共享控制台 · 管理员扩展',
+        title: '开发者 API 接入工作台',
+        description: '在同一套共享控制台中继续管理 API Key 生命周期、白名单与审计轨迹，辅助排查限流、白名单拒绝与高危接入动作。',
         tips: ['关注 create / revoke / denied_rate_limit / denied_whitelist 审计轨迹', '为运维联调保留精确 scopes，避免过宽权限'],
       }
     case 'supplier':
       return {
-        badge: '供应商视角',
-        title: '供给系统 API 接入工作台',
-        description: '为供货侧系统配置最小权限 API Key、白名单与调用审计，保持供给链路与共享控制台一致。',
+        badge: '共享控制台 · 供应商扩展',
+        title: '开发者 API 接入工作台',
+        description: '在同一套共享控制台中为供货侧系统配置最小权限 API Key、白名单与调用审计，保持供给链路与共享布局一致。',
         tips: ['优先设置固定出口 IP 白名单，降低供货系统凭证暴露面', '按供货能力拆分不同 scopes，避免跨业务混用'],
       }
     default:
       return {
-        badge: '用户视角',
+        badge: '共享控制台 · 基础接入',
         title: '开发者 API 接入工作台',
         description: '完成创建、复制、权限规划与白名单维护，再结合 API 文档与 Webhook 页面打通真实接入链路。',
         tips: ['先创建只读或最小写权限 Key，再逐步扩大 scopes', '创建后立即复制明文 Key；列表里只保留预览值'],
@@ -83,11 +83,14 @@ export function ApiKeysPage() {
   const [items, setItems] = useState<APIKeyRecord[]>([])
   const [audit, setAudit] = useState<APIKeyAuditEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [updatingWhitelist, setUpdatingWhitelist] = useState(false)
   const [createdKey, setCreatedKey] = useState<string>('')
   const [createdKeyExpiresAt, setCreatedKeyExpiresAt] = useState<number | null>(null)
   const [revokingID, setRevokingID] = useState<number | null>(null)
+  const [editingWhitelistID, setEditingWhitelistID] = useState<number | null>(null)
   const [form] = Form.useForm()
+  const [whitelistForm] = Form.useForm<{ whitelist: string }>()
 
   const load = async () => {
     setLoading(true)
@@ -140,7 +143,7 @@ export function ApiKeysPage() {
       const values = await form.validate()
       const scopes = normalizeCSVInput(values.scopes)
       const whitelist = normalizeCSVInput(values.whitelist)
-      setSubmitting(true)
+      setCreating(true)
       const res = await createAPIKey({
         name: String(values.name || '').trim(),
         scopes,
@@ -155,7 +158,7 @@ export function ApiKeysPage() {
       if (error?.name === 'ValidationError') return
       Toast.error(error?.response?.data?.error ?? '创建 API Key 失败')
     } finally {
-      setSubmitting(false)
+      setCreating(false)
     }
   }
 
@@ -184,6 +187,36 @@ export function ApiKeysPage() {
       Toast.error(error?.response?.data?.error ?? '撤销 API Key 失败')
     } finally {
       setRevokingID(null)
+    }
+  }
+
+  const openWhitelistEditor = (record: APIKeyRecord) => {
+    whitelistForm.setValues({ whitelist: (record.whitelist || []).join(', ') })
+    setEditingWhitelistID(record.id)
+  }
+
+  const closeWhitelistEditor = () => {
+    setEditingWhitelistID(null)
+    whitelistForm.reset()
+  }
+
+  const handleWhitelistUpdate = async () => {
+    if (editingWhitelistID === null) {
+      return
+    }
+    try {
+      const values = await whitelistForm.validate()
+      const whitelist = normalizeCSVInput(values.whitelist)
+      setUpdatingWhitelist(true)
+      await updateAPIKeyWhitelist(editingWhitelistID, whitelist)
+      Toast.success('API Key 白名单已更新')
+      closeWhitelistEditor()
+      await load()
+    } catch (error: any) {
+      if (error?.name === 'ValidationError') return
+      Toast.error(error?.response?.data?.error ?? '更新 API Key 白名单失败')
+    } finally {
+      setUpdatingWhitelist(false)
     }
   }
 
@@ -275,7 +308,7 @@ export function ApiKeysPage() {
           <Form.Input field="name" label="名称" rules={[{ required: true, message: '请输入名称' }]} />
           <Form.Input field="scopes" label="权限范围" placeholder="activation:read, finance:write" />
           <Form.Input field="whitelist" label="IP 白名单" placeholder="127.0.0.1,10.0.0.0/24" />
-          <Button type="primary" theme="solid" loading={submitting} onClick={handleCreate}>
+          <Button type="primary" theme="solid" loading={creating} onClick={handleCreate}>
             创建新密钥
           </Button>
         </Form>
@@ -337,20 +370,51 @@ export function ApiKeysPage() {
                 title: '操作',
                 key: 'action',
                 render: (_, record: APIKeyRecord) => (
-                  <Button
-                    disabled={record.status !== 'active'}
-                    loading={revokingID === record.id}
-                    theme="borderless"
-                    type="danger"
-                    onClick={() => void handleRevoke(record)}
-                  >
-                    撤销
-                  </Button>
+                  <Space>
+                    <Button
+                      disabled={record.status !== 'active'}
+                      icon={<IconEdit />}
+                      theme="borderless"
+                      onClick={() => openWhitelistEditor(record)}
+                    >
+                      编辑白名单
+                    </Button>
+                    <Button
+                      disabled={record.status !== 'active'}
+                      loading={revokingID === record.id}
+                      theme="borderless"
+                      type="danger"
+                      onClick={() => void handleRevoke(record)}
+                    >
+                      撤销
+                    </Button>
+                  </Space>
                 ),
               },
             ]}
           />
         )}
+      </Card>
+
+      <Card title="编辑 API Key 白名单" style={{ width: '100%', borderRadius: 20, display: editingWhitelistID !== null ? 'block' : 'none' }}>
+        <Space vertical align="start" style={{ width: '100%' }} spacing={16}>
+          <Typography.Paragraph style={{ margin: 0, color: '#475569' }}>
+            请输入合法的 IP 或 CIDR，使用英文逗号分隔。留空表示移除白名单限制。
+          </Typography.Paragraph>
+          <Form form={whitelistForm} layout="vertical" style={{ width: '100%' }}>
+            <Form.Input
+              field="whitelist"
+              label="IP 白名单"
+              placeholder="172.18.0.1,10.0.0.0/24"
+            />
+          </Form>
+          <Space>
+            <Button theme="solid" type="primary" loading={updatingWhitelist} onClick={() => void handleWhitelistUpdate()}>
+              保存白名单
+            </Button>
+            <Button theme="borderless" onClick={closeWhitelistEditor}>取消</Button>
+          </Space>
+        </Space>
       </Card>
 
       <Card title="审计日志" style={{ width: '100%' }} loading={loading}>
