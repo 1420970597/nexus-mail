@@ -4,7 +4,6 @@ import { AdminRoute, ProtectedRoute, SupplierRoute } from './components/Protecte
 import { ConsoleLayout } from './layouts/ConsoleLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
-import { PlaceholderPage } from './pages/PlaceholderPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ApiKeysPage } from './pages/ApiKeysPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -15,8 +14,10 @@ import { BalancePage } from './pages/BalancePage'
 import { SupplierResourcesPage } from './pages/SupplierResourcesPage'
 import { SupplierOfferingsPage } from './pages/SupplierOfferingsPage'
 import { SupplierSettlementsPage } from './pages/SupplierSettlementsPage'
+import { SupplierDomainsPage } from './pages/SupplierDomainsPage'
 import { AdminProjectsPage } from './pages/AdminProjectsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
+import { AdminSuppliersPage } from './pages/AdminSuppliersPage'
 import { ApiDocsPage } from './pages/ApiDocsPage'
 import { AdminRiskPage } from './pages/AdminRiskPage'
 import { AdminAuditPage } from './pages/AdminAuditPage'
@@ -85,12 +86,12 @@ function Shell() {
         <Route path="/api-keys" element={<ApiKeysPage />} />
         <Route path="/webhooks" element={<AdminRoute><WebhooksPage /></AdminRoute>} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/supplier/domains" element={<SupplierRoute><PlaceholderPage title="域名管理" description="供应商域名池、Catch-All 与 MX 策略将在此统一管理。" /></SupplierRoute>} />
+        <Route path="/supplier/domains" element={<SupplierRoute><SupplierDomainsPage /></SupplierRoute>} />
         <Route path="/supplier/resources" element={<SupplierRoute><SupplierResourcesPage /></SupplierRoute>} />
         <Route path="/supplier/offerings" element={<SupplierRoute><SupplierOfferingsPage /></SupplierRoute>} />
         <Route path="/supplier/settlements" element={<SupplierRoute><SupplierSettlementsPage /></SupplierRoute>} />
         <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-        <Route path="/admin/suppliers" element={<AdminRoute><PlaceholderPage title="供应商管理" description="管理员供应商审核、评级与启停控制将在此实现。" /></AdminRoute>} />
+        <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliersPage /></AdminRoute>} />
         <Route path="/admin/pricing" element={<AdminRoute><AdminProjectsPage /></AdminRoute>} />
         <Route path="/admin/risk" element={<AdminRoute><AdminRiskPage /></AdminRoute>} />
         <Route path="/admin/audit" element={<AdminRoute><AdminAuditPage /></AdminRoute>} />

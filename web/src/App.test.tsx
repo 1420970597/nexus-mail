@@ -244,7 +244,7 @@ describe('App', () => {
     expect(await screen.findByText('鉴权拒绝率')).toBeInTheDocument()
     expect(await screen.findByText('50.00%')).toBeInTheDocument()
     expect(await screen.findByText('供应商待结算排行')).toBeInTheDocument()
-    expect(await screen.findByText('supplier@nexus-mail.local')).toBeInTheDocument()
+    expect((await screen.findAllByText('supplier@nexus-mail.local')).length).toBeGreaterThanOrEqual(1)
     expect(await screen.findByText('鉴权拒绝总数：2')).toBeInTheDocument()
   })
 
