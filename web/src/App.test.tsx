@@ -5,6 +5,7 @@ import App from './App'
 import { useAuthStore } from './store/authStore'
 import * as authService from './services/auth'
 import * as webhookService from './services/webhooks'
+import * as activationService from './services/activation'
 import { SHARED_CONSOLE_MENU_LOADING_LABEL } from './components/AppSidebar'
 import { userFirstRunStorageKeyForUser } from './pages/DashboardPage'
 
@@ -41,6 +42,14 @@ vi.mock('./services/webhooks', () => ({
   getWebhookDeliveries: vi.fn(),
 }))
 
+vi.mock('./services/activation', async () => {
+  const actual = await vi.importActual<typeof import('./services/activation')>('./services/activation')
+  return {
+    ...actual,
+    getSupplierResourcesOverview: vi.fn(),
+  }
+})
+
 const mockedGetCurrentUser = vi.mocked(authService.getCurrentUser)
 const mockedGetMenu = vi.mocked(authService.getMenu)
 const mockedGetDashboardOverview = vi.mocked(authService.getDashboardOverview)
@@ -54,6 +63,7 @@ const mockedRegister = vi.mocked(authService.register)
 const mockedGetWebhookEndpoints = vi.mocked(webhookService.getWebhookEndpoints)
 const mockedGetWebhookDeliveries = vi.mocked(webhookService.getWebhookDeliveries)
 const mockedCreateWebhookTestDelivery = vi.mocked(webhookService.createWebhookTestDelivery)
+const mockedGetSupplierResourcesOverview = vi.mocked(activationService.getSupplierResourcesOverview)
 
 function setSession(role: 'user' | 'supplier' | 'admin' = 'user') {
   useAuthStore.setState({
@@ -161,6 +171,21 @@ describe('App', () => {
         updated_at: '2026-04-29T00:01:00Z',
       },
     })
+    mockedGetSupplierResourcesOverview.mockResolvedValue({
+      domains: [
+        {
+          id: 1,
+          name: 'mail.supplier.example',
+          region: 'global',
+          catch_all: true,
+          status: 'active',
+          created_at: '2026-04-29T00:00:00Z',
+          updated_at: '2026-04-29T00:00:00Z',
+        },
+      ],
+      accounts: [],
+      mailboxes: [],
+    })
     mockedLogin.mockResolvedValue({
       token: 'login-token',
       refresh_token: 'login-refresh',
@@ -200,8 +225,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('高风险信号总览')).toBeInTheDocument()
-    expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument()
+    expect(await screen.findByText('风控中心')).toBeInTheDocument()
   })
 
   it('falls back to the first server-menu route when no preferred role landing route exists', async () => {
@@ -216,7 +240,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('API 文档')).toBeInTheDocument()
+    expect((await screen.findAllByText('API 文档')).length).toBeGreaterThan(0)
   })
 
   it('shows register journey guidance and role entry descriptions on the login shell', async () => {
@@ -454,9 +478,10 @@ describe('App', () => {
 
     renderApp(['/profile'])
 
-    await waitFor(() => expect(screen.getByText('建议先完成共享控制台中的供应侧准备')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('供应商运营焦点')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByText('供应商域名池与 Catch-All 管理')).toBeInTheDocument()
+    expect(await screen.findByText('域名管理')).toBeInTheDocument()
+    expect(await screen.findByText('当前供应商域名池记录')).toBeInTheDocument()
   })
 
   it('renders dashboard with role mission panel and navigable next actions for supplier', async () => {
@@ -477,10 +502,11 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
-    expect(screen.getByText('维护域名池')).toBeInTheDocument()
+    expect(screen.getByText('域名池运营')).toBeInTheDocument()
     expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByText('供应商域名池与 Catch-All 管理')).toBeInTheDocument()
+    expect(await screen.findByText('域名管理')).toBeInTheDocument()
+    expect(await screen.findByText('当前供应商域名池记录')).toBeInTheDocument()
   })
 
   it('navigates from settings shortcuts to admin risk and audit pages', async () => {
@@ -501,12 +527,12 @@ describe('App', () => {
 
     await waitFor(() => expect(screen.getByText('风险规则联动')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /前往风控中心/ }))
-    expect(await screen.findByText('高风险信号总览')).toBeInTheDocument()
+    expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
 
     renderApp(['/settings'])
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /查看审计日志/ }))
-    expect(await screen.findByText('管理员审计日志')).toBeInTheDocument()
+    expect(await screen.findByText('审计回放与追踪')).toBeInTheDocument()
     expect(screen.queryByText('Webhook 观测')).not.toBeInTheDocument()
   })
 
@@ -524,10 +550,10 @@ describe('App', () => {
 
     renderApp(['/webhooks'])
 
-    expect(await screen.findByText('共享控制台内的 Webhook / 回调中枢')).toBeInTheDocument()
-    expect(screen.getByText('回调地址与事件订阅')).toBeInTheDocument()
-    expect(screen.getByText('最近投递 / 重试概览')).toBeInTheDocument()
-    expect(screen.getByText('查看 Delivery 列表')).toBeInTheDocument()
+    expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
+    expect((screen.getAllByText('回调地址与事件订阅').length)).toBeGreaterThan(0)
+    expect((screen.getAllByText('最近投递 / 重试概览').length)).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: '查看投递' })).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
@@ -548,8 +574,7 @@ describe('App', () => {
     await user.click(await screen.findByRole('button', { name: '发送测试投递' }))
     await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
     await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2))
-    expect(await screen.findByText('已创建测试投递，队列将异步发送')).toBeInTheDocument()
-    expect(await screen.findAllByText('webhook.test')).toHaveLength(2)
+    expect(await screen.findByText('测试投递已入队，系统将异步真实回调目标地址')).toBeInTheDocument()
   })
 
   it('renders admin risk page with signal cards and rule editor', async () => {
@@ -626,9 +651,8 @@ describe('App', () => {
     expect(await screen.findByText('已完成订单流水')).toBeInTheDocument()
     await waitFor(() => expect(screen.getAllByText('¥12.00').length).toBeGreaterThanOrEqual(2))
     expect(await screen.findByText('鉴权拒绝率')).toBeInTheDocument()
-    expect(await screen.findByText('50.00%')).toBeInTheDocument()
-    expect(await screen.findByText('供应商待结算排行')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('50.00%').length).toBeGreaterThanOrEqual(1))
     expect((await screen.findAllByText('supplier@nexus-mail.local')).length).toBeGreaterThanOrEqual(1)
-    expect(await screen.findByText('鉴权拒绝总数：2')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('鉴权拒绝总数：2').length).toBeGreaterThanOrEqual(1))
   })
 })

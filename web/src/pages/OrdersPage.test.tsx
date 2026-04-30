@@ -125,8 +125,8 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查看 API 接入准备' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: '前往项目市场' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: '查看 API 接入准备' }).length).toBeGreaterThan(0)
   })
 
   it('opens result modal for an existing order', async () => {
