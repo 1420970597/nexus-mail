@@ -6,6 +6,8 @@ import {
   IconSafe,
   IconServer,
   IconSetting,
+  IconArrowRight,
+  IconRotate,
 } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -13,6 +15,13 @@ import { getAdminOverview, getDashboardOverview, AdminOverviewResponse, Dashboar
 import { useAuthStore } from '../store/authStore'
 
 const userFirstRunStorageKey = 'nexus-mail-user-first-run-dismissed'
+
+const sharedFirstRunRoutes = {
+  projects: '/projects',
+  orders: '/orders',
+  apiKeys: '/api-keys',
+  settings: '/settings',
+} as const
 
 interface FirstRunStep {
   key: string
@@ -22,26 +31,62 @@ interface FirstRunStep {
   action: string
 }
 
+interface FirstRunMissionCard {
+  key: string
+  title: string
+  description: string
+  tag: string
+  path: string
+  button: string
+}
+
+const firstRunMissionCards: FirstRunMissionCard[] = [
+  {
+    key: 'procurement',
+    title: '先完成基础采购路径',
+    description: '从项目市场确认真实库存与价格，再进入订单中心完成首次下单与结果追踪。',
+    tag: 'Shared Console',
+    path: sharedFirstRunRoutes.projects,
+    button: '前往项目市场开始采购',
+  },
+  {
+    key: 'integration',
+    title: '继续准备 API 接入',
+    description: '在同一套深色工作台里继续进入 API Keys、Webhook 与 API 文档，完成自动化联调。',
+    tag: 'Integration',
+    path: sharedFirstRunRoutes.apiKeys,
+    button: '管理 API Keys',
+  },
+  {
+    key: 'roles',
+    title: '后续角色能力仍在同一壳内扩展',
+    description: '如果后续被服务端授予供应商或管理员角色，菜单会按权限扩展，不需要切换独立后台。',
+    tag: 'Role-aware',
+    path: sharedFirstRunRoutes.settings,
+    button: '查看角色与控制台说明',
+  },
+]
+
 const firstRunSteps: FirstRunStep[] = [
   {
     key: 'projects',
     title: '先去项目市场确认真实库存',
     description: '浏览项目、库存、成功率与价格，明确当前可以采购的资源组合。',
-    path: '/projects',
+    path: sharedFirstRunRoutes.projects,
     action: '打开项目市场',
   },
   {
     key: 'orders',
     title: '回到订单中心追踪执行结果',
     description: '下单后在同一控制台里跟踪邮箱分配、提取结果、READY/FINISHED 等真实状态。',
-    path: '/orders',
+    path: sharedFirstRunRoutes.orders,
     action: '查看订单中心',
   },
   {
     key: 'integrate',
     title: '完成 API 接入准备',
     description: '继续进入 API Keys、Webhook 与 API 文档，完成自动化接入与回调联调准备。',
-    path: '/api-keys',
+    path: sharedFirstRunRoutes.apiKeys,
     action: '管理 API Keys',
   },
 ]
@@ -315,30 +360,65 @@ export function DashboardPage() {
             <Card
               style={{
                 width: '100%',
-                borderRadius: 22,
-                background: 'linear-gradient(135deg, rgba(14,165,233,0.18) 0%, rgba(15,23,42,0.92) 55%, rgba(15,16,17,0.98) 100%)',
+                borderRadius: 24,
+                background: 'linear-gradient(135deg, rgba(94,106,210,0.24) 0%, rgba(15,23,42,0.96) 54%, rgba(8,9,10,0.98) 100%)',
                 border: '1px solid rgba(125,211,252,0.24)',
-                boxShadow: '0 22px 52px rgba(2, 6, 23, 0.22)',
+                boxShadow: '0 26px 60px rgba(2, 6, 23, 0.28)',
               }}
-              bodyStyle={{ padding: 22 }}
+              bodyStyle={{ padding: 24 }}
             >
-              <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+              <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
                   <Space vertical align="start" spacing={8}>
-                    <Tag color="cyan" shape="circle">普通用户首轮引导</Tag>
+                    <Tag color="cyan" shape="circle">First Run Mission</Tag>
                     <div>
-                      <Typography.Title heading={4} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
-                        先按“项目市场 → 订单中心 → API 接入”走通首次使用路径
+                      <Typography.Title heading={3} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
+                        欢迎进入共享控制台
                       </Typography.Title>
                       <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.82)', margin: 0, maxWidth: 860 }}>
-                        你当前默认身份是普通用户。请先在共享控制台内完成首次采购与接入准备；若后续被授予供应商或管理员角色，菜单会在同一套工作台中继续扩展。
+                        当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。
                       </Typography.Paragraph>
                     </div>
                   </Space>
-                  <Button theme="borderless" style={{ color: '#d0d6e0' }} onClick={dismissUserFirstRun}>
-                    暂时收起引导
+                  <Button theme="borderless" icon={<IconRotate />} style={{ color: '#d0d6e0' }} onClick={dismissUserFirstRun}>
+                    稍后再看
                   </Button>
                 </Space>
+
+                <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                  {firstRunMissionCards.map((card) => (
+                    <Col xs={24} xl={8} key={card.key}>
+                      <Card
+                        style={{
+                          height: '100%',
+                          borderRadius: 20,
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                        }}
+                        bodyStyle={{ padding: 18 }}
+                      >
+                        <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                          <Tag color="grey">{card.tag}</Tag>
+                          <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
+                            {card.title}
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
+                            {card.description}
+                          </Typography.Paragraph>
+                          <Button
+                            type="primary"
+                            theme="solid"
+                            icon={<IconArrowRight />}
+                            onClick={() => navigate(card.path)}
+                            style={{ background: '#5e6ad2', borderRadius: 10 }}
+                          >
+                            {card.button}
+                          </Button>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
 
                 <Row gutter={[16, 16]} style={{ width: '100%' }}>
                   {firstRunSteps.map((step, index) => (
@@ -347,8 +427,8 @@ export function DashboardPage() {
                         style={{
                           height: '100%',
                           borderRadius: 18,
-                          background: 'rgba(255,255,255,0.04)',
-                          border: '1px solid rgba(255,255,255,0.08)',
+                          background: 'rgba(2,6,23,0.32)',
+                          border: '1px solid rgba(255,255,255,0.06)',
                         }}
                         bodyStyle={{ padding: 18 }}
                       >
@@ -360,7 +440,7 @@ export function DashboardPage() {
                           <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
                             {step.description}
                           </Typography.Paragraph>
-                          <Button type="primary" theme="solid" onClick={() => navigate(step.path)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
+                          <Button type="primary" theme="borderless" onClick={() => navigate(step.path)} style={{ color: '#93c5fd' }}>
                             {step.action}
                           </Button>
                         </Space>

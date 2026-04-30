@@ -6,10 +6,19 @@ import {
   IconServer,
   IconSetting,
   IconUser,
+  IconRotate,
 } from '@douyinfe/semi-icons'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
+
+const userFirstRunStorageKey = 'nexus-mail-user-first-run-dismissed'
+
+const sharedFirstRunRoutes = {
+  projects: '/projects',
+  orders: '/orders',
+  apiKeys: '/api-keys',
+} as const
 
 interface ShortcutCard {
   title: string
@@ -40,19 +49,19 @@ const onboardingChecklist = [
   {
     title: '1. 先进入项目市场',
     description: '确认真实库存、成功率与价格，再决定是否立即下单。',
-    path: '/projects',
+    path: sharedFirstRunRoutes.projects,
     button: '打开项目市场',
   },
   {
     title: '2. 回到订单中心',
     description: '下单后在共享控制台中追踪邮箱分配、提取结果和订单终态。',
-    path: '/orders',
+    path: sharedFirstRunRoutes.orders,
     button: '查看订单中心',
   },
   {
     title: '3. 完成 API 接入准备',
     description: '继续进入 API Keys、Webhook 与 API 文档，完成程序化接入联调。',
-    path: '/api-keys',
+    path: sharedFirstRunRoutes.apiKeys,
     button: '管理 API Keys',
   },
 ]
@@ -70,6 +79,13 @@ function shortcutCardStyle(accent: string) {
 export function SettingsPage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
+
+  const reopenUserFirstRun = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(userFirstRunStorageKey, 'false')
+    }
+    navigate('/')
+  }
 
   const shortcuts = useMemo<ShortcutCard[]>(() => {
     const common: ShortcutCard[] = [
@@ -218,6 +234,9 @@ export function SettingsPage() {
               description="新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。"
               style={{ width: '100%' }}
             />
+            <Button icon={<IconRotate />} theme="solid" type="primary" onClick={reopenUserFirstRun}>
+              重新打开首轮引导
+            </Button>
             <Row gutter={[16, 16]} style={{ width: '100%' }}>
               {onboardingChecklist.map((item) => (
                 <Col xs={24} md={8} key={item.title}>

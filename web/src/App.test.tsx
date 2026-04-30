@@ -198,19 +198,71 @@ describe('App', () => {
     expect(screen.getByText('仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。')).toBeInTheDocument()
   })
 
-  it('supports switching to register and submitting registration', async () => {
+  it('shows role-aware first-run mission cards after registration and navigates into the shared console', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    mockedRegister.mockResolvedValueOnce({
+      token: 'register-token',
+      refresh_token: 'register-refresh',
+      user: { id: 8, email: 'new@example.com', role: 'user' },
+    })
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 8, email: 'new@example.com', role: 'user' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
+
     renderApp(['/login'])
 
-    await user.click(screen.getByRole('button', { name: '注册' }))
-    expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
     await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
 
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    expect(screen.getByText('先完成基础采购路径')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /稍后再看/ })).toBeInTheDocument()
+    expect(screen.getByText('继续准备 API 接入')).toBeInTheDocument()
+    expect(screen.getByText('如果后续被服务端授予供应商或管理员角色，菜单会按权限扩展，不需要切换独立后台。')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /前往项目市场开始采购/ }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: '管理 API Keys' }).length).toBeGreaterThan(0)
+    expect(screen.queryByText('供应商主任务')).not.toBeInTheDocument()
+    expect(screen.queryByText('管理员主任务')).not.toBeInTheDocument()
+  })
+
+  it('keeps settings guidance entry available after dismissing first-run mission cards for default user', async () => {
+    const user = userEvent.setup()
+    window.localStorage.removeItem('nexus-mail-user-first-run-dismissed')
+    setSession('user')
+
+    const dashboardView = renderApp(['/'])
+
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /稍后再看/ }))
+    await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
+    expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('true')
+
+    dashboardView.unmount()
+    renderApp(['/settings'])
+
+    await waitFor(() => expect(screen.getByText('首次使用清单')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /重新打开首轮引导/ }))
+    expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('false')
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
+    expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
+
   })
 
   it('shows first-run onboarding guidance for default user dashboard and allows dismissing it', async () => {
@@ -220,14 +272,14 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('普通用户首轮引导')).toBeInTheDocument()
-    expect(screen.getByText('先按“项目市场 → 订单中心 → API 接入”走通首次使用路径')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '打开项目市场' })).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '查看订单中心' }).length).toBeGreaterThan(0)
-    expect(screen.getAllByRole('button', { name: '管理 API Keys' }).length).toBeGreaterThan(0)
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
+    expect(screen.getByText('先完成基础采购路径')).toBeInTheDocument()
+    expect(screen.getByText('继续准备 API 接入')).toBeInTheDocument()
+    expect(screen.getByText('后续角色能力仍在同一壳内扩展')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '暂时收起引导' }))
-    await waitFor(() => expect(screen.queryByText('普通用户首轮引导')).not.toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: /稍后再看/ }))
+    await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
     expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('true')
   })
 
