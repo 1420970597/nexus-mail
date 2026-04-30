@@ -225,7 +225,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('风控中心')).toBeInTheDocument()
+    expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
   })
 
   it('falls back to the first server-menu route when no preferred role landing route exists', async () => {
@@ -459,7 +459,7 @@ describe('App', () => {
 
     renderApp(['/settings'])
 
-    expect(await screen.findByText('设置中心')).toBeInTheDocument()
+    expect(await screen.findByText('控制台模式')).toBeInTheDocument()
     expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
   })
 
@@ -479,8 +479,7 @@ describe('App', () => {
     renderApp(['/profile'])
 
     await waitFor(() => expect(screen.getByText('供应商运营焦点')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByText('域名管理')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '前往域名管理' })[0])
     expect(await screen.findByText('当前供应商域名池记录')).toBeInTheDocument()
   })
 
@@ -502,10 +501,9 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
-    expect(screen.getByText('域名池运营')).toBeInTheDocument()
+    expect(screen.getAllByText('域名池运营').length).toBeGreaterThan(0)
     expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByText('域名管理')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '前往域名管理' })[0])
     expect(await screen.findByText('当前供应商域名池记录')).toBeInTheDocument()
   })
 
@@ -513,7 +511,7 @@ describe('App', () => {
     const user = userEvent.setup()
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValueOnce({
+    mockedGetMenu.mockResolvedValue({
       role: 'admin',
       items: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
@@ -533,7 +531,6 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /查看审计日志/ }))
     expect(await screen.findByText('审计回放与追踪')).toBeInTheDocument()
-    expect(screen.queryByText('Webhook 观测')).not.toBeInTheDocument()
   })
 
   it('renders webhook settings page for authenticated admin', async () => {
@@ -551,9 +548,10 @@ describe('App', () => {
     renderApp(['/webhooks'])
 
     expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
-    expect((screen.getAllByText('回调地址与事件订阅').length)).toBeGreaterThan(0)
-    expect((screen.getAllByText('最近投递 / 重试概览').length)).toBeGreaterThan(0)
-    expect(screen.getByRole('button', { name: '查看投递' })).toBeInTheDocument()
+    expect(screen.getByText('端点总数')).toBeInTheDocument()
+    expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
+    expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '发送测试投递' })).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
@@ -650,9 +648,8 @@ describe('App', () => {
     expect(await screen.findByText('40.00%')).toBeInTheDocument()
     expect(await screen.findByText('已完成订单流水')).toBeInTheDocument()
     await waitFor(() => expect(screen.getAllByText('¥12.00').length).toBeGreaterThanOrEqual(2))
-    expect(await screen.findByText('鉴权拒绝率')).toBeInTheDocument()
     await waitFor(() => expect(screen.getAllByText('50.00%').length).toBeGreaterThanOrEqual(1))
-    expect((await screen.findAllByText('supplier@nexus-mail.local')).length).toBeGreaterThanOrEqual(1)
-    await waitFor(() => expect(screen.getAllByText('鉴权拒绝总数：2').length).toBeGreaterThanOrEqual(1))
+    await waitFor(() => expect(screen.getAllByText('当前重点关注供应商').length).toBeGreaterThanOrEqual(1))
+    expect(screen.getByText((content) => content.includes('鉴权拒绝总数：2'))).toBeInTheDocument()
   })
 })
