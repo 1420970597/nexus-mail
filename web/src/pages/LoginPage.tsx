@@ -74,6 +74,24 @@ const firstRunChecklist = [
   },
 ]
 
+const integrationStages = [
+  {
+    eyebrow: 'Shared Console',
+    title: '先发放最小权限 API Key',
+    description: '注册完成后建议立即创建首个 API Key、绑定出口白名单，并继续接入 Webhook / API 文档。',
+  },
+  {
+    eyebrow: 'Integration',
+    title: '再验证 Webhook 回调',
+    description: '在同一套深色控制台里配置回调 endpoint、测试 delivery，并观察异步投递状态。',
+  },
+  {
+    eyebrow: 'Docs',
+    title: '最后回到 API 文档',
+    description: '沿着 Registration → API Keys → Webhooks → Docs 的单一登录后路径完成首次自动化接入。',
+  },
+]
+
 const devAccounts = [
   'admin@nexus-mail.local / Admin123!',
   'supplier@nexus-mail.local / Supplier123!',
@@ -218,6 +236,30 @@ export function LoginPage() {
                       ))}
                     </ul>
                   </div>
+                  <Row gutter={[12, 12]} style={{ width: '100%' }}>
+                    {integrationStages.map((item) => (
+                      <Col xs={24} md={8} key={item.title}>
+                        <Card
+                          bodyStyle={{ padding: 16 }}
+                          style={{
+                            height: '100%',
+                            background: 'rgba(15, 23, 42, 0.34)',
+                            border: '1px solid rgba(125, 211, 252, 0.16)',
+                          }}
+                        >
+                          <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                            <Tag color="cyan">{item.eyebrow}</Tag>
+                            <Typography.Title heading={6} style={{ color: '#f8fafc', margin: 0 }}>
+                              {item.title}
+                            </Typography.Title>
+                            <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.72)', margin: 0 }}>
+                              {item.description}
+                            </Typography.Paragraph>
+                          </Space>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
                   <Card
                     bodyStyle={{ padding: 16 }}
                     style={{
