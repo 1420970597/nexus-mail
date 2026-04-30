@@ -141,6 +141,7 @@ export function OrdersPage() {
             <Space wrap>
               <Tag color="grey" prefixIcon={<IconMail />}>下单后回到此页追踪邮箱与验证码提取</Tag>
               <Tag color="grey" prefixIcon={<IconActivity />}>READY / FINISHED / TIMEOUT 全部来自真实 API 返回</Tag>
+              {canOpenApiKeys ? <Tag color="blue">接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用</Tag> : null}
             </Space>
           </Space>
         </Card>

@@ -144,4 +144,41 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('订单结果 · ORD-1')).toBeInTheDocument()
     expect(screen.getAllByText('123456').length).toBeGreaterThan(0)
   })
+
+  it('renders the first-run order journey card so users know what to do after purchasing', async () => {
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('订单中心')).toBeInTheDocument()
+    expect(screen.getByText('履约说明')).toBeInTheDocument()
+    expect(screen.getByText('READY 后完成订单')).toBeInTheDocument()
+    expect(screen.getByText('异常时看结果面板')).toBeInTheDocument()
+    expect(screen.getByText('订单为空时的下一步')).toBeInTheDocument()
+    expect(screen.getByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).toBeInTheDocument()
+  })
+
+  it('hides the API continuation CTA when the server menu does not expose API key management', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+      ],
+    })
+
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('订单中心')).toBeInTheDocument()
+    expect(screen.queryByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).not.toBeInTheDocument()
+  })
 })

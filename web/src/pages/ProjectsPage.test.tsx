@@ -134,4 +134,51 @@ describe('ProjectsPage', () => {
     expect(screen.getByRole('button', { name: '重新拉取库存' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
+
+  it('renders procurement mission guidance that keeps first-run purchasing inside the shared console', async () => {
+    render(
+      <MemoryRouter>
+        <ProjectsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('采购动作提示')).toBeInTheDocument()
+    expect(screen.getByText('先挑库存，再下单')).toBeInTheDocument()
+    expect(screen.getByText('下单后下一步')).toBeInTheDocument()
+    expect(screen.getByText('共享控制台回退路径')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
+  })
+
+  it('shows an integration CTA in the hero so newly registered users can continue API onboarding from the market view', async () => {
+    render(
+      <MemoryRouter>
+        <ProjectsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('项目市场')).toBeInTheDocument()
+    expect(screen.getByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).toBeInTheDocument()
+  })
+
+  it('hides the docs continuation CTA when the server menu does not expose docs access', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+      ],
+    })
+
+    render(
+      <MemoryRouter>
+        <ProjectsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('项目市场')).toBeInTheDocument()
+    expect(screen.queryByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).not.toBeInTheDocument()
+  })
 })

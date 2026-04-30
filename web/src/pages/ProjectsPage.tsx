@@ -115,6 +115,7 @@ export function ProjectsPage() {
           <Space wrap>
             <Tag color="grey" prefixIcon={<IconBriefStroked />}>单一登录后控制台 · 用户工作台</Tag>
             <Tag color="grey" prefixIcon={<IconServer />}>库存与来源来自真实 `/projects/inventory` 返回</Tag>
+            {canOpenDocs ? <Tag color="blue">继续 API 接入准备：文档与密钥配置仍留在同一控制台</Tag> : null}
           </Space>
         </Space>
       </Card>
