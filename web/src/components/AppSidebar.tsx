@@ -1,43 +1,10 @@
 import { Nav, Space, Tag, Typography } from '@douyinfe/semi-ui'
-import {
-  IconActivity,
-  IconArticle,
-  IconBolt,
-  IconComponent,
-  IconHome,
-  IconHistogram,
-  IconPriceTag,
-  IconSafe,
-  IconSetting,
-  IconServer,
-  IconUser,
-} from '@douyinfe/semi-icons'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { groupedConsolePaths, resolveRouteDefinition } from '../utils/consoleNavigation'
 import { MenuItem, useAuthStore } from '../store/authStore'
 
 export const SHARED_CONSOLE_MENU_LOADING_LABEL = '正在同步服务端菜单权限...'
-
-const iconMap: Record<string, JSX.Element> = {
-  dashboard: <IconHome />,
-  projects: <IconComponent />,
-  orders: <IconHistogram />,
-  balance: <IconPriceTag />,
-  profile: <IconUser />,
-  'api-keys': <IconSafe />,
-  webhooks: <IconBolt />,
-  settings: <IconSetting />,
-  'supplier-domains': <IconServer />,
-  'supplier-resources': <IconPriceTag />,
-  'supplier-offerings': <IconBolt />,
-  'supplier-settlements': <IconActivity />,
-  'admin-users': <IconUser />,
-  'admin-suppliers': <IconServer />,
-  'admin-pricing': <IconPriceTag />,
-  'admin-risk': <IconSafe />,
-  'admin-audit': <IconActivity />,
-  docs: <IconArticle />,
-}
 
 function roleMeta(role?: string) {
   switch (role) {
@@ -51,9 +18,10 @@ function roleMeta(role?: string) {
 }
 
 function groupedMenu(source: MenuItem[]) {
-  const userItems = source.filter((item) => ['/','/projects','/orders','/balance','/profile','/api-keys','/webhooks','/settings','/docs'].includes(item.path))
-  const supplierItems = source.filter((item) => item.path.startsWith('/supplier/'))
-  const adminItems = source.filter((item) => item.path.startsWith('/admin/'))
+  const groups = groupedConsolePaths()
+  const userItems = source.filter((item) => groups.shared.includes(item.path))
+  const supplierItems = source.filter((item) => groups.supplier.includes(item.path))
+  const adminItems = source.filter((item) => groups.admin.includes(item.path))
   return { userItems, supplierItems, adminItems }
 }
 
@@ -61,7 +29,7 @@ function toNavItems(items: MenuItem[]) {
   return items.map((item) => ({
     itemKey: item.path,
     text: item.label,
-    icon: iconMap[item.key] ?? <IconSetting />,
+    icon: resolveRouteDefinition(item.path)?.icon,
   }))
 }
 

@@ -1,18 +1,9 @@
 import { Avatar, Button, Breadcrumb, Layout, Space, Tag, Typography } from '@douyinfe/semi-ui'
-import {
-  IconActivity,
-  IconArticle,
-  IconBell,
-  IconFile,
-  IconHistogram,
-  IconTickCircle,
-  IconUser,
-  IconSafe,
-  IconServer,
-} from '@douyinfe/semi-icons'
+import { IconBell, IconHistogram } from '@douyinfe/semi-icons'
 import { ReactNode, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AppSidebar } from '../components/AppSidebar'
+import { resolveRouteDefinition, resolveRouteTitle, visibleQuickActionPaths } from '../utils/consoleNavigation'
 import { useAuthStore } from '../store/authStore'
 
 const { Sider, Content, Header } = Layout
@@ -46,57 +37,6 @@ function roleColor(role?: string) {
   }
 }
 
-function titleFromPath(pathname: string) {
-  if (pathname === '/') return '控制台总览'
-  const segments = pathname.split('/').filter(Boolean)
-  if (segments.length === 0) return '控制台总览'
-  const raw = segments[segments.length - 1]
-  return raw
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-}
-
-const routeTitleMap: Record<string, string> = {
-  '/': '控制台总览',
-  '/projects': '项目市场',
-  '/orders': '订单中心',
-  '/balance': '余额中心',
-  '/profile': '个人资料',
-  '/api-keys': 'API Keys',
-  '/webhooks': 'Webhook 设置',
-  '/settings': '设置中心',
-  '/supplier/domains': '域名管理',
-  '/supplier/resources': '供应商资源',
-  '/supplier/offerings': '供货规则',
-  '/supplier/settlements': '供应商结算',
-  '/admin/users': '用户管理',
-  '/admin/suppliers': '供应商管理',
-  '/admin/pricing': '价格策略',
-  '/admin/risk': '风控中心',
-  '/admin/audit': '审计日志',
-  '/docs': 'API 文档',
-}
-
-const quickActionIcons: Record<string, JSX.Element> = {
-  '/projects': <IconFile />,
-  '/balance': <IconTickCircle />,
-  '/admin/risk': <IconSafe />,
-  '/admin/users': <IconUser />,
-  '/admin/audit': <IconActivity />,
-  '/supplier/domains': <IconServer />,
-  '/orders': <IconHistogram />,
-  '/docs': <IconArticle />,
-  '/api-keys': <IconSafe />,
-  '/webhooks': <IconActivity />,
-}
-
-const quickActionPriority = ['/projects', '/balance', '/admin/risk', '/admin/users', '/admin/audit', '/supplier/domains', '/orders', '/docs', '/api-keys', '/webhooks']
-
-function resolveRouteTitle(pathname: string) {
-  return routeTitleMap[pathname] ?? titleFromPath(pathname)
-}
-
 function roleIntro(role?: string) {
   switch (role) {
     case 'admin':
@@ -126,14 +66,20 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
 
   const visibleQuickActions = useMemo(
     () =>
-      quickActionPriority
-        .map((path) => menu.find((item) => item.path === path))
-        .filter((item): item is NonNullable<typeof item> => Boolean(item) && item.path !== location.pathname)
-        .map((item) => ({
-          path: item.path,
-          label: item.label,
-          icon: quickActionIcons[item.path] ?? <IconArticle />,
-        })),
+      visibleQuickActionPaths(menu, location.pathname)
+        .map((path) => {
+          const menuItem = menu.find((item) => item.path === path)
+          const route = resolveRouteDefinition(path)
+          if (!menuItem || !route) {
+            return null
+          }
+          return {
+            path: menuItem.path,
+            label: menuItem.label,
+            icon: route.icon,
+          }
+        })
+        .filter((item): item is { path: string; label: string; icon: JSX.Element } => Boolean(item)),
     [location.pathname, menu],
   )
 
