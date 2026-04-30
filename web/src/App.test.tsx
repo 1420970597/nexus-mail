@@ -211,7 +211,7 @@ describe('App', () => {
     expect(screen.getByText('邮件接码业务的统一运营控制台')).toBeInTheDocument()
   })
 
-  it('redirects admin users to their preferred shared-console workspace after session bootstrap', async () => {
+  it('renders the admin risk workspace when starting from the preferred admin route after session bootstrap', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValueOnce({
@@ -222,10 +222,34 @@ describe('App', () => {
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
       ],
     })
+    mockedGetAdminRisk.mockResolvedValueOnce({
+      generated_at: '2026-04-28T00:00:00Z',
+      summary: {
+        open_disputes: 1,
+        denied_whitelist: 1,
+        denied_scope: 0,
+        denied_invalid: 0,
+        denied_rate_limit: 1,
+        timeout_orders: 2,
+        canceled_orders: 1,
+        high_risk_signal_count: 2,
+        medium_risk_signal_count: 1,
+      },
+      signals: [
+        {
+          category: 'auth',
+          severity: 'high',
+          count: 1,
+          title: 'API Key 白名单拦截频繁',
+          detail: '最近审计中检测到 1 次 denied_whitelist 事件',
+        },
+      ],
+    })
 
-    renderApp(['/'])
+    renderApp(['/admin/risk'])
 
     expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '保存规则' })).toBeInTheDocument()
   })
 
   it('falls back to the first server-menu route when no preferred role landing route exists', async () => {
@@ -650,6 +674,6 @@ describe('App', () => {
     await waitFor(() => expect(screen.getAllByText('¥12.00').length).toBeGreaterThanOrEqual(2))
     await waitFor(() => expect(screen.getAllByText('50.00%').length).toBeGreaterThanOrEqual(1))
     await waitFor(() => expect(screen.getAllByText('当前重点关注供应商').length).toBeGreaterThanOrEqual(1))
-    expect(screen.getByText((content) => content.includes('鉴权拒绝总数：2'))).toBeInTheDocument()
+    expect(screen.getByText('鉴权拒绝总数：2')).toBeInTheDocument()
   })
 })
