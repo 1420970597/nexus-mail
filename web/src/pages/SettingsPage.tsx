@@ -2,6 +2,7 @@ import { Banner, Button, Card, Col, Descriptions, Row, Space, Tag, Typography } 
 import {
   IconArticle,
   IconBolt,
+  IconArrowRight,
   IconSafe,
   IconServer,
   IconSetting,
@@ -12,7 +13,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userFirstRunStorageKeyForUser } from './DashboardPage'
 import { MenuItem, useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 const sharedFirstRunRoutes = {
   projects: PROJECTS_ROUTE,
@@ -28,6 +29,21 @@ interface ShortcutCard {
   tag: string
   accent: string
   icon: JSX.Element
+}
+
+interface SettingsMissionCard {
+  key: string
+  title: string
+  description: string
+  button: string
+  path: string
+  tag: string
+}
+
+interface SettingsPillar {
+  key: string
+  label: string
+  summary: string
 }
 
 const sessionItems = [
@@ -66,6 +82,51 @@ const onboardingChecklist = [
   },
 ]
 
+const sharedMissionCards: SettingsMissionCard[] = [
+  {
+    key: 'api-keys',
+    title: '先完成 API 密钥发放',
+    description: '从设置中心直接进入 API Keys，继续完成 token 发放、白名单准备与基础接入校验。',
+    button: '管理 API Keys',
+    path: API_KEYS_ROUTE,
+    tag: 'Auth',
+  },
+  {
+    key: 'webhooks',
+    title: '继续联调回调投递',
+    description: '保持在同一套共享壳内进入 Webhook 设置，配置 endpoint、验证失败重试与回调负载。',
+    button: '打开 Webhook 设置',
+    path: WEBHOOKS_ROUTE,
+    tag: 'Callbacks',
+  },
+  {
+    key: 'docs',
+    title: '最后回到 API 文档',
+    description: '利用统一导航快速跳转到 API 文档，对照真实控制台入口完成注册后接入闭环。',
+    button: '打开 API 文档',
+    path: DOCS_ROUTE,
+    tag: 'Docs',
+  },
+]
+
+const settingsPillars: SettingsPillar[] = [
+  {
+    key: 'dark-console',
+    label: '深色共享工作台',
+    summary: '设置页视觉语言与 Dashboard / Projects / Orders 对齐，不再维持浅色占位风格。',
+  },
+  {
+    key: 'registration-flow',
+    label: '注册后连续路径',
+    summary: '新用户从注册、首轮引导到设置中心都留在单一控制台中继续完成接入。',
+  },
+  {
+    key: 'canonical-routes',
+    label: '规范化共享路由',
+    summary: 'Docs / Webhooks / API Keys 已统一到单一壳内导航。',
+  },
+]
+
 function shortcutCardStyle(accent: string) {
   return {
     height: '100%',
@@ -93,12 +154,12 @@ export function SettingsPage() {
 
   const shortcuts = useMemo<ShortcutCard[]>(() => {
     const common: ShortcutCard[] = [
-      ...(menuHasPath(menu, '/profile')
+      ...(menuHasPath(menu, PROFILE_ROUTE)
         ? [{
             title: '个人资料与身份核对',
             description: '返回个人资料页确认当前角色、账号邮箱与推荐操作路径，避免角色误判导致跨区访问。',
             button: '查看个人资料',
-            path: '/profile',
+            path: PROFILE_ROUTE,
             tag: '基础入口',
             accent: 'rgba(94,106,210,0.2)',
             icon: <IconUser />,
@@ -115,12 +176,12 @@ export function SettingsPage() {
             icon: <IconArticle />,
           }]
         : []),
-      ...(menuHasPath(menu, '/webhooks')
+      ...(menuHasPath(menu, WEBHOOKS_ROUTE)
         ? [{
             title: 'Webhook 回调工作台',
             description: '在共享控制台中直接维护 endpoint、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。',
             button: '打开 Webhook 设置',
-            path: '/webhooks',
+            path: WEBHOOKS_ROUTE,
             tag: '共享入口',
             accent: 'rgba(14,165,233,0.18)',
             icon: <IconBolt />,
@@ -153,12 +214,12 @@ export function SettingsPage() {
                 icon: <IconBolt />,
               }]
             : []),
-          ...(menuHasPath(menu, '/webhooks')
+          ...(menuHasPath(menu, WEBHOOKS_ROUTE)
             ? [{
                 title: 'Webhook 观测',
                 description: '通过管理员共享入口查看回调 endpoint、投递记录与失败重试状态，避免跨后台切换。',
                 button: '打开 Webhook 设置',
-                path: '/webhooks',
+                path: WEBHOOKS_ROUTE,
                 tag: '管理员',
                 accent: 'rgba(14,165,233,0.18)',
                 icon: <IconServer />,
@@ -194,23 +255,23 @@ export function SettingsPage() {
         ]
       default:
         return [
-          ...(menuHasPath(menu, '/projects')
+          ...(menuHasPath(menu, PROJECTS_ROUTE)
             ? [{
                 title: '项目采购入口',
                 description: '从项目市场继续采购资源，并在订单中心与余额中心查看后续执行结果。',
                 button: '前往项目市场',
-                path: '/projects',
+                path: PROJECTS_ROUTE,
                 tag: '用户',
                 accent: 'rgba(14,165,233,0.18)',
                 icon: <IconServer />,
               }]
             : []),
-          ...(menuHasPath(menu, '/orders')
+          ...(menuHasPath(menu, ORDERS_ROUTE)
             ? [{
                 title: '订单与回调观察',
                 description: '通过订单中心观察邮箱分配、提取结果和完成状态，再结合 API 文档完成系统集成。',
                 button: '查看订单中心',
-                path: '/orders',
+                path: ORDERS_ROUTE,
                 tag: '用户',
                 accent: 'rgba(94,106,210,0.18)',
                 icon: <IconBolt />,
@@ -221,33 +282,121 @@ export function SettingsPage() {
     }
   }, [menu, user?.role])
 
+  const missionCards = useMemo(() => sharedMissionCards.filter((item) => menuHasPath(menu, item.path)), [menu])
+
+  const capabilitySignals = useMemo(
+    () => [
+      { key: '账号入口', value: menuHasPath(menu, PROFILE_ROUTE) ? '已连接到个人资料与角色核对' : '等待角色入口' },
+      { key: '集成入口', value: menuHasPath(menu, API_KEYS_ROUTE) ? 'API Keys / 白名单入口已启用' : '等待 API 接入能力' },
+      { key: '回调入口', value: menuHasPath(menu, WEBHOOKS_ROUTE) ? 'Webhook 工作台已在共享控制台内可用' : '等待 Webhook 能力' },
+      { key: '文档入口', value: menuHasPath(menu, DOCS_ROUTE) ? 'API 文档已并入共享导航' : '等待文档入口' },
+    ],
+    [menu],
+  )
+
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         style={{
           width: '100%',
-          borderRadius: 24,
-          background: 'linear-gradient(135deg, rgba(94,106,210,0.14) 0%, rgba(255,255,255,0.98) 58%)',
+          borderRadius: 28,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.92) 58%, rgba(30,41,59,0.92) 100%)',
           border: '1px solid rgba(148,163,184,0.16)',
+          boxShadow: '0 24px 64px rgba(2, 6, 23, 0.36)',
         }}
-        bodyStyle={{ padding: 24 }}
+        bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">Console Shortcuts</Tag>
-          <div>
-            <Typography.Title heading={3}>设置中心</Typography.Title>
-            <Typography.Paragraph style={{ marginBottom: 0, color: '#475569', maxWidth: 820 }}>
-              把设置页收敛成真实可执行的控制台捷径与会话说明，而不是展示无后端契约支撑的规划性表单；继续保持 single-console 体验。
-            </Typography.Paragraph>
-          </div>
+          <Tag color="cyan" shape="circle">Console Mission Control</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>设置中心</Typography.Title>
+              <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 820 }}>
+                接入与账户设置不再停留在浅色占位页，而是收敛为与仪表盘一致的深色共享控制台工作台。
+              </Typography.Paragraph>
+            </div>
+            <Space spacing={8} wrap>
+              <Tag color="blue">单一登录后控制台</Tag>
+              <Tag color="green">注册后连续路径</Tag>
+            </Space>
+          </Space>
           <Banner
             type="info"
             fullMode={false}
             description="这里聚焦当前已交付的真实入口：会话轮换、角色壳切换、API 文档、风控/审计/Webhook/供货运营，不展示会误导用户的伪设置项。"
-            style={{ width: '100%' }}
+            style={{ width: '100%', background: 'rgba(15, 23, 42, 0.54)', border: '1px solid rgba(148,163,184,0.16)' }}
           />
+          <Row gutter={[16, 16]} style={{ width: '100%' }}>
+            {settingsPillars.map((item) => (
+              <Col xs={24} md={8} key={item.key}>
+                <Card
+                  style={{
+                    height: '100%',
+                    borderRadius: 20,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+                    border: '1px solid rgba(148,163,184,0.16)',
+                    boxShadow: 'rgba(0,0,0,0.18) 0px 0px 0px 1px',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f8fafc', fontSize: 15 }}>{item.label}</Typography.Text>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 66 }}>
+                      {item.summary}
+                    </Typography.Paragraph>
+                  </Space>
+                </Card>
+              </Col>
+            ))}
+          </Row>
         </Space>
       </Card>
+
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        <Col xs={24} xl={15}>
+          <Card
+            title={<span style={{ color: '#f8fafc' }}>集成任务流</span>}
+            style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Row gutter={[16, 16]}>
+              {missionCards.map((item) => (
+                <Col xs={24} md={8} key={item.key}>
+                  <Card
+                    style={{
+                      height: '100%',
+                      borderRadius: 20,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                      border: '1px solid rgba(94,106,210,0.24)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Tag color="cyan">{item.tag}</Tag>
+                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 88 }}>
+                        {item.description}
+                      </Typography.Paragraph>
+                      <Button icon={<IconArrowRight />} type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                        {item.button}
+                      </Button>
+                    </Space>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Card>
+        </Col>
+        <Col xs={24} xl={9}>
+          <Card
+            title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
+            style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Descriptions data={capabilitySignals} align="left" />
+          </Card>
+        </Col>
+      </Row>
 
       {user?.role === 'user' ? (
         <Card title="首次使用清单" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
