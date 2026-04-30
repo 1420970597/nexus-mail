@@ -1,8 +1,9 @@
 import { Banner, Button, Card, Col, Descriptions, Row, Space, Tag, Typography } from '@douyinfe/semi-ui'
+import { IconArticle, IconBolt, IconSafe, IconServer } from '@douyinfe/semi-icons'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, PROJECTS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 interface FocusAction {
   label: string
@@ -13,6 +14,15 @@ interface FocusAction {
 interface FocusItem {
   title: string
   description: string
+}
+
+interface CapabilityCard {
+  key: string
+  title: string
+  description: string
+  buttonText: string
+  path: string
+  visible: boolean
 }
 
 function roleColor(role?: string) {
@@ -43,6 +53,8 @@ export function ProfilePage() {
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
   const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const canOpenSupplierDomains = hasMenuPath(menu, '/supplier/domains')
   const canOpenAdminRisk = hasMenuPath(menu, '/admin/risk')
 
@@ -87,16 +99,82 @@ export function ProfilePage() {
     }
   }, [canOpenAdminRisk, canOpenProjects, canOpenSupplierDomains, fallbackRoute, user?.role])
 
+  const capabilityCards = useMemo<CapabilityCard[]>(
+    () => [
+      {
+        key: 'projects',
+        title: '共享采购入口',
+        description: '从账号页继续回到项目市场，保持从身份核对到真实采购的一条主路径。',
+        buttonText: '打开项目市场',
+        path: PROJECTS_ROUTE,
+        visible: canOpenProjects,
+      },
+      {
+        key: 'api-keys',
+        title: 'API 接入控制面',
+        description: '在同一控制台里继续完成 API Keys、白名单与最小权限发放，不拆出独立接入后台。',
+        buttonText: '前往 API Keys',
+        path: API_KEYS_ROUTE,
+        visible: canOpenApiKeys,
+      },
+      {
+        key: 'webhooks',
+        title: '回调联调入口',
+        description: '直接进入 Webhook 设置查看 endpoint、测试投递与失败重试状态。',
+        buttonText: '打开 Webhook 设置',
+        path: WEBHOOKS_ROUTE,
+        visible: canOpenWebhooks,
+      },
+      {
+        key: 'docs',
+        title: 'API 文档入口',
+        description: '通过共享导航进入 /docs，对照真实路由与接入契约继续联调。',
+        buttonText: '打开 API 文档',
+        path: DOCS_ROUTE,
+        visible: canOpenDocs,
+      },
+    ],
+    [canOpenApiKeys, canOpenDocs, canOpenProjects, canOpenWebhooks],
+  )
+
+  const visibleCapabilityCards = capabilityCards.filter((item) => item.visible)
+
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
-      <div>
-        <Typography.Title heading={3}>个人资料</Typography.Title>
-        <Typography.Paragraph>
-          在共享控制台中查看当前账号身份、角色边界与推荐操作路径，确保登录后直接进入与自身职责匹配的真实业务页面。
-        </Typography.Paragraph>
-      </div>
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 28,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.92) 58%, rgba(30,41,59,0.92) 100%)',
+          border: '1px solid rgba(148,163,184,0.16)',
+          boxShadow: '0 24px 64px rgba(2, 6, 23, 0.36)',
+        }}
+        bodyStyle={{ padding: 28 }}
+      >
+        <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+          <Tag color="cyan" shape="circle">Profile Mission Control</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>个人资料</Typography.Title>
+              <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 820 }}>
+                账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。
+              </Typography.Paragraph>
+            </div>
+            <Space spacing={8} wrap>
+              <Tag color="blue">单一登录后控制台</Tag>
+              <Tag color="green">角色差异菜单</Tag>
+            </Space>
+          </Space>
+          <Banner
+            type="info"
+            fullMode={false}
+            description="个人资料页不再只是静态身份展示，而是连接采购、API 接入、Webhook、文档与角色扩展入口的共享账号中枢。"
+            style={{ width: '100%', background: 'rgba(15, 23, 42, 0.54)', border: '1px solid rgba(148,163,184,0.16)' }}
+          />
+        </Space>
+      </Card>
 
-      <Row gutter={16} style={{ width: '100%' }}>
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={10}>
           <Card
             style={{
@@ -155,49 +233,70 @@ export function ProfilePage() {
                 description={`当前推荐动作：${profileScene.action.label}。保持单一登录后控制台，不额外拆分独立后台。`}
                 style={{ width: '100%' }}
               />
-              <Card
-                style={{
-                  width: '100%',
-                  borderRadius: 18,
-                  background: 'linear-gradient(180deg, rgba(248,250,252,0.96) 0%, rgba(241,245,249,0.92) 100%)',
-                  border: '1px solid rgba(148,163,184,0.16)',
-                }}
-                bodyStyle={{ padding: 18 }}
-              >
-                <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                  <Typography.Title heading={5} style={{ margin: 0 }}>同一控制台内的下一步</Typography.Title>
-                  <Typography.Paragraph style={{ margin: 0, color: '#475569' }}>
-                    根据当前菜单权限，你可以直接从资料页回到最关键的共享工作台入口，不需要寻找另一套角色后台。
-                  </Typography.Paragraph>
-                  <Space wrap>
-                    {user?.role === 'user' && canOpenProjects ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate(PROJECTS_ROUTE)}>
-                        打开项目市场
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        <Col xs={24} xl={15}>
+          <Card
+            title={<span style={{ color: '#f8fafc' }}>控制台桥接能力</span>}
+            style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Row gutter={[16, 16]}>
+              {visibleCapabilityCards.map((item) => (
+                <Col xs={24} md={12} key={item.key}>
+                  <Card
+                    style={{
+                      height: '100%',
+                      borderRadius: 20,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                      border: '1px solid rgba(94,106,210,0.24)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
+                        {item.description}
+                      </Typography.Paragraph>
+                      <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                        {item.buttonText}
                       </Button>
-                    ) : null}
-                    {user?.role === 'user' && canOpenApiKeys ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
-                        打开 API Keys
-                      </Button>
-                    ) : null}
-                    {user?.role === 'supplier' && canOpenSupplierDomains ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate('/supplier/domains')}>
-                        打开域名管理
-                      </Button>
-                    ) : null}
-                    {user?.role === 'admin' && canOpenAdminRisk ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate('/admin/risk')}>
-                        打开风控中心
-                      </Button>
-                    ) : null}
-                    {fallbackRoute !== profileScene.action.path ? (
-                      <Button theme="light" type="primary" onClick={() => navigate(fallbackRoute)}>
-                        前往推荐工作台
-                      </Button>
-                    ) : null}
-                  </Space>
-                </Space>
-              </Card>
+                    </Space>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Card>
+        </Col>
+        <Col xs={24} xl={9}>
+          <Card
+            title={<span style={{ color: '#f8fafc' }}>角色扩展说明</span>}
+            style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              <Tag color="grey" prefixIcon={<IconServer />}>{user?.role === 'admin' ? '管理员角色扩展' : user?.role === 'supplier' ? '供应商角色扩展' : '深色共享账号中枢'}</Tag>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.78)' }}>
+                {user?.role === 'admin'
+                  ? '当前账号已被服务端授予管理员角色；高危运营、风控与审计动作继续在同一套共享控制台内完成。'
+                  : user?.role === 'supplier'
+                    ? '当前账号已被服务端授予供应商角色；供给链路仍然挂载在同一套共享控制台内，不切换独立后台。'
+                    : '当前账号默认以用户身份进入共享控制台；如后续被服务端授予供应商或管理员角色，菜单会继续在同一壳内扩展。'}
+              </Typography.Paragraph>
+              <Space wrap>
+                <Tag color="cyan" prefixIcon={<IconSafe />}>最小权限</Tag>
+                <Tag color="blue" prefixIcon={<IconBolt />}>Webhook / API</Tag>
+                <Tag color="green" prefixIcon={<IconArticle />}>单一文档入口</Tag>
+              </Space>
+              {fallbackRoute !== PROFILE_ROUTE ? (
+                <Button theme="borderless" type="primary" onClick={() => navigate(fallbackRoute)}>
+                  返回共享工作台
+                </Button>
+              ) : null}
             </Space>
           </Card>
         </Col>

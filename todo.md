@@ -30,6 +30,10 @@
 - 控制器已通过 `pnpm --dir web test -- src/pages/LoginPage.test.tsx src/pages/ApiKeysPage.test.tsx src/pages/WebhooksPage.test.tsx src/pages/SettingsPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose config` 与 Docker Compose 重建验证当前前端切片可构建、可测试、且未破坏后端主链路。
 - 已完成真实 API 回放：`POST /api/v1/auth/register`、`GET /api/v1/auth/me`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、`POST /api/v1/auth/api-keys`、`PATCH /api/v1/auth/api-keys/:id/whitelist`（非法 400 / 合法 200）、`POST /api/v1/webhooks/endpoints`、`GET /api/v1/webhooks/endpoints`、`POST /api/v1/webhooks/endpoints/:id/test-delivery`、`GET /api/v1/webhooks/endpoints/:id/deliveries`、`GET /api/v1/dashboard/overview/api-key`、`GET /docs`，验证注册后用户确实能沿共享控制台接入链路进入 API Key / Webhook / Docs。
 - 五维评审结论：当前切片可提交；非阻塞后续项为继续减少 Semi UI / Testing Library 的 `act(...)` / `findDOMNode` 噪声，并在下一前端切片里把 Login / Dashboard / Settings / API Keys / Webhooks 的接入叙事进一步统一。
+- 本轮已完成 `ProfilePage` 前端深色共享控制台深化：将个人资料页升级为 **Profile Mission Control**，在单一登录后壳内新增账号中枢头部、角色扩展说明与共享桥接能力卡片，把用户侧采购 / API Keys / Webhooks / Docs 入口与供应商 / 管理员的角色扩展说明统一收敛到同一页，而不引入独立后台或本地角色升级假象。
+- 已补齐 `web/src/pages/ProfilePage.test.tsx`，覆盖：用户视角深色账号中枢与 API Keys / Webhooks / Docs 导航按钮、供应商/管理员角色扩展文案不泄露普通用户采购叙事，并验证回退到共享工作台的入口仍受现有菜单约束。
+- 控制器已通过 `pnpm --dir web test -- src/pages/ProfilePage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose config`、`docker compose up -d --build`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/me`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、`GET /api/v1/projects/inventory`、`GET /api/v1/orders/activations` 与前端 `/profile`、`/api-keys`、`/webhooks`、`/docs` 页面 200 验证 Profile 切片未破坏共享控制台联通性。
+- 本轮五维评审结论：产品/规格、安全/集成、性能/运维通过；测试/可靠性初审指出 capability card 导航断言不足后已立即补测并复验通过；非阻塞后续项为把 `ProfilePage` 中 `'/supplier/domains'`、`'/admin/risk'` 等字面路由继续收敛到共享导航常量，并在后续切片继续减少 Semi UI `findDOMNode` / React Router future warning 噪声。
 
 ## 0. 项目目标
 
