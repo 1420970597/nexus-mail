@@ -42,6 +42,10 @@
 - 已新增 `web/src/pages/AdminProjectsPage.test.tsx`，覆盖：管理员深色价格策略工作台文案与能力矩阵、风控/审计/API Keys 三段式任务卡真实导航，以及项目配置表单提交到 `/api/v1/admin/projects/:id` 的 focused 回归。
 - 控制器已通过 `pnpm --dir web test -- src/pages/AdminProjectsPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `GET /api/v1/auth/menu`、`GET /api/v1/admin/projects`、`GET /api/v1/admin/projects/offerings`、`PATCH /api/v1/admin/projects/:id`（更新后立即 restore）、`GET /api/v1/admin/risk`、`GET /api/v1/admin/audit?limit=5`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`、`GET /docs` 验证管理员价格策略页依赖的共享控制台入口和真实管理端接口契约保持可用。
 - 本轮五维评审结论：产品/规格与代码质量通过；安全/集成、测试/可靠性、性能/运维评审未发现当前前端切片新增阻塞问题。评审中出现的阻塞反馈均来自其他仓库上下文，已按仓库隔离规则判定为污染结果并丢弃，不作为本切片 blocker；当前非阻塞后续项为继续把更多管理页收敛到同级深色壳视觉，并在后续切片处理中长期 chunk 体积告警与 Semi UI `findDOMNode` / React Router future warning 噪声。
+- 本轮已完成新的前端优先切片：`LoginPage` 与 `WebhooksPage` 继续向 new-api 风格深色单壳控制台收敛。登录/注册页新增“注册后首轮接入建议”与三段式 Integration Runway，把注册 → API Keys → Webhooks → Docs 的首轮接入叙事留在同一控制台中；Webhook 页新增普通用户“首轮回调联调建议”卡片，强调 endpoint 创建、test delivery 与按返回投递状态完善接入检查表，避免夸大为固定时限或前端无法证明的后端保证。
+- 已补齐 `web/src/pages/LoginPage.test.tsx`、`web/src/pages/WebhooksPage.test.tsx` focused 回归，覆盖新的共享接入文案、注册 CTA 切换、注册成功落回共享控制台，以及普通用户 Webhook 首轮联调建议卡片展示。
+- 控制器已重新通过 `pnpm --dir web test -- src/pages/LoginPage.test.tsx src/pages/WebhooksPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/me`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、`GET /login` 前端壳可达性，以及 `POST /api/v1/webhooks/endpoints` 的域名不可解析 400 真实错误路径、`GET /api/v1/webhooks/endpoints` 列表查询，验证新的注册后接入叙事未破坏共享控制台与真实 Webhook 契约。
+- 本轮五维评审结论：产品/规格与安全/集成初审曾指出“90 秒 / 15 分钟内完成”及时限式联调承诺会夸大前端无法证明的后端保证，现已改写为“首轮接入建议 / 回调联调建议”并复验通过；代码质量评审通过，仅保留登录页三段 onboarding 区块存在轻微文案重复为非阻塞债务；测试/可靠性评审通过，保留既有 Semi UI `findDOMNode`、Testing Library `act(...)` 与 React Router future warning 噪声为后续清理项；性能/运维评审通过，保留前端大 chunk 告警为后续非阻塞优化项。
 
 ## 0. 项目目标
 

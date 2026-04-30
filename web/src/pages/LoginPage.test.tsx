@@ -65,6 +65,11 @@ describe('LoginPage', () => {
     expect(screen.getByText('先发放最小权限 API Key')).toBeInTheDocument()
     expect(screen.getByText('再验证 Webhook 回调')).toBeInTheDocument()
     expect(screen.getByText('最后回到 API 文档')).toBeInTheDocument()
+    expect(screen.getByText('注册后首轮接入建议')).toBeInTheDocument()
+    expect(screen.getByText('从注册成功、生成首个 API Key、配置白名单，到发起一次 Webhook 测试投递，都建议留在同一深色控制台中逐步完成。')).toBeInTheDocument()
+    expect(screen.getByText('Registration → API Keys')).toBeInTheDocument()
+    expect(screen.getByText('Webhook delivery rehearsal')).toBeInTheDocument()
+    expect(screen.getByText('Docs + replay')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
 

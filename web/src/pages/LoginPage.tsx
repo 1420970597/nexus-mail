@@ -92,6 +92,21 @@ const integrationStages = [
   },
 ]
 
+const integrationRunway = [
+  {
+    title: 'Registration → API Keys',
+    description: '注册成功后立即落到共享控制台，从同一壳里生成首个 API Key 并确认最小权限。',
+  },
+  {
+    title: 'Webhook delivery rehearsal',
+    description: '继续配置白名单与 Webhook endpoint，发起一次真实 test delivery 作为首次联调。',
+  },
+  {
+    title: 'Docs + replay',
+    description: '回到 API 文档核对请求契约，再用真实 API 回放验证集成链路。',
+  },
+]
+
 const devAccounts = [
   'admin@nexus-mail.local / Admin123!',
   'supplier@nexus-mail.local / Supplier123!',
@@ -260,6 +275,42 @@ export function LoginPage() {
                       </Col>
                     ))}
                   </Row>
+                  <Card
+                    bodyStyle={{ padding: 16 }}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%)',
+                      border: '1px solid rgba(56, 189, 248, 0.18)',
+                    }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Tag color="green">注册后首轮接入建议</Tag>
+                      <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
+                        从注册成功、生成首个 API Key、配置白名单，到发起一次 Webhook 测试投递，都建议留在同一深色控制台中逐步完成。
+                      </Typography.Paragraph>
+                      <Row gutter={[12, 12]} style={{ width: '100%' }}>
+                        {integrationRunway.map((item) => (
+                          <Col xs={24} md={8} key={item.title}>
+                            <Card
+                              bodyStyle={{ padding: 16 }}
+                              style={{
+                                height: '100%',
+                                background: 'rgba(2, 6, 23, 0.28)',
+                                border: '1px solid rgba(148, 163, 184, 0.16)',
+                              }}
+                            >
+                              <Typography.Title heading={6} style={{ color: '#f8fafc', marginBottom: 8 }}>
+                                {item.title}
+                              </Typography.Title>
+                              <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.7)', margin: 0 }}>
+                                {item.description}
+                              </Typography.Paragraph>
+                            </Card>
+                          </Col>
+                        ))}
+                      </Row>
+                    </Space>
+                  </Card>
                   <Card
                     bodyStyle={{ padding: 16 }}
                     style={{

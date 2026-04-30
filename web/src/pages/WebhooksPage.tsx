@@ -1,5 +1,6 @@
 import { Banner, Button, Card, Empty, Form, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
 import { IconActivity, IconArticle, IconBolt, IconSafe, IconServer } from '@douyinfe/semi-icons'
+import type { JSX } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   createWebhookEndpoint,
@@ -18,6 +19,21 @@ const WEBHOOK_EVENT_OPTIONS = [
   { label: '激活订单就绪（activation.ready）', value: 'activation.ready' },
   { label: '激活订单超时（activation.timeout）', value: 'activation.timeout' },
   { label: 'Webhook 连通性测试（webhook.test）', value: 'webhook.test' },
+]
+
+const firstHourTimeline = [
+  {
+    title: '1. 创建首个 endpoint',
+    description: '使用公网 HTTPS 地址创建 endpoint，并立即复制 signing secret 到你的消费端配置。',
+  },
+  {
+    title: '2. 验证 test delivery',
+    description: '发送一次 webhook.test，确认 202 入队、异步回调成功或失败重试链路可观测。',
+  },
+  {
+    title: '3. 回到 API 文档/消费端',
+    description: '把 payload、签名校验与错误处理回写到自己的接入检查表，再继续真实 API 回放。',
+  },
 ]
 
 function endpointStatusColor(status: string) {
@@ -369,6 +385,45 @@ export function WebhooksPage() {
         fullMode={false}
         description="Webhook 仅允许公网可达的 https 地址，禁止 localhost、内网、link-local、回环地址与 DNS 解析到私网目标；测试投递返回 202 代表已入队，实际回调由 worker 异步执行。"
       />
+
+      {user?.role === 'user' ? (
+        <Card
+          style={{
+            width: '100%',
+            borderRadius: 24,
+            background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.94) 0%, rgba(12, 18, 30, 0.98) 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.16)',
+          }}
+          bodyStyle={{ padding: 20 }}
+        >
+          <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+            <Tag color="green">注册后首轮回调联调建议</Tag>
+            <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
+              在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。
+            </Typography.Paragraph>
+            <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+              {firstHourTimeline.map((item) => (
+                <Card
+                  key={item.title}
+                  bodyStyle={{ padding: 16 }}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(2, 6, 23, 0.28)',
+                    border: '1px solid rgba(148, 163, 184, 0.16)',
+                  }}
+                >
+                  <Typography.Title heading={6} style={{ color: '#f8fafc', marginBottom: 8 }}>
+                    {item.title}
+                  </Typography.Title>
+                  <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.72)', margin: 0 }}>
+                    {item.description}
+                  </Typography.Paragraph>
+                </Card>
+              ))}
+            </Space>
+          </Space>
+        </Card>
+      ) : null}
 
       {createdSecret ? (
         <Banner

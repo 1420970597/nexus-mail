@@ -259,4 +259,14 @@ describe('WebhooksPage', () => {
     expect(testButtons[1]).toBeDisabled()
     expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2)
   })
+
+  it('shows a shared first-hour integration timeline for plain users', async () => {
+    render(<WebhooksPage />)
+
+    expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    expect(screen.getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。')).toBeInTheDocument()
+    expect(screen.getByText('1. 创建首个 endpoint')).toBeInTheDocument()
+    expect(screen.getByText('2. 验证 test delivery')).toBeInTheDocument()
+    expect(screen.getByText('3. 回到 API 文档/消费端')).toBeInTheDocument()
+  })
 })
