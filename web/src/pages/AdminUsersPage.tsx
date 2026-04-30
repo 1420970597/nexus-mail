@@ -1,7 +1,9 @@
 import { Banner, Button, Card, Col, Form, Row, Select, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { IconAlertTriangle, IconPulse, IconSafe, IconUser } from '@douyinfe/semi-icons'
+import { IconAlertTriangle, IconBolt, IconPulse, IconSafe, IconServer, IconShield, IconUser } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, settleSupplierPending, OrderDispute, WalletOverview } from '../services/finance'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 function disputeStatusColor(status: string) {
   switch (status) {
@@ -39,6 +41,23 @@ function MetricCard({ title, value, description, icon }: { title: string; value:
   )
 }
 
+interface AdminMissionSignal {
+  key: string
+  title: string
+  value: string
+  helper: string
+  color: 'cyan' | 'red' | 'orange' | 'green'
+}
+
+interface AdminActionLane {
+  key: string
+  title: string
+  description: string
+  button: string
+  path: string
+  tag: string
+}
+
 export function buildDisputeResolutionPayload(values: {
   dispute_id: number | string
   status: 'resolved' | 'rejected'
@@ -61,6 +80,7 @@ export function buildDisputeResolutionPayload(values: {
 }
 
 export function AdminUsersPage() {
+  const navigate = useNavigate()
   const [items, setItems] = useState<WalletOverview[]>([])
   const [disputes, setDisputes] = useState<OrderDispute[]>([])
   const [loading, setLoading] = useState(true)
@@ -142,32 +162,180 @@ export function AdminUsersPage() {
   const walletTotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.available_balance || 0), 0), [items])
   const pendingSettlementTotal = useMemo(() => items.reduce((sum, item) => sum + Number(item.pending_settlement || 0), 0), [items])
   const openDisputes = useMemo(() => disputes.filter((item) => item.status === 'open').length, [disputes])
+  const avgWalletBalance = useMemo(() => {
+    if (items.length === 0) return 0
+    return Math.round(walletTotal / items.length)
+  }, [items.length, walletTotal])
+  const refundExposure = useMemo(() => disputes.reduce((sum, item) => sum + Number(item.refund_amount || 0), 0), [disputes])
+
+  const missionSignals = useMemo<AdminMissionSignal[]>(() => [
+    {
+      key: 'wallet',
+      title: '钱包调整面',
+      value: amountLabel(walletTotal),
+      helper: `人均可用余额 ${amountLabel(avgWalletBalance)}`,
+      color: 'cyan',
+    },
+    {
+      key: 'settlement',
+      title: '待结算总额',
+      value: amountLabel(pendingSettlementTotal),
+      helper: '优先处理供应商月度或异常结算',
+      color: 'green',
+    },
+    {
+      key: 'disputes',
+      title: '开放争议',
+      value: String(openDisputes),
+      helper: `当前退款敞口 ${amountLabel(refundExposure)}`,
+      color: 'orange',
+    },
+    {
+      key: 'console',
+      title: '共享控制台联动',
+      value: '账务 / 风控 / 审计',
+      helper: '高危动作、风控与接入留在同一后台闭环',
+      color: 'red',
+    },
+  ], [avgWalletBalance, openDisputes, pendingSettlementTotal, refundExposure, walletTotal])
+
+  const actionLanes = useMemo<AdminActionLane[]>(() => [
+    {
+      key: 'risk',
+      title: '先处理风险与高危动作',
+      description: '调账、结算与争议单处理前，先回看风险信号与异常趋势，避免重复操作放大账务风险。',
+      button: '查看风控中心',
+      path: ADMIN_RISK_ROUTE,
+      tag: 'Risk',
+    },
+    {
+      key: 'audit',
+      title: '再回放审计轨迹',
+      description: '把调账确认短语、结算动作与争议处理事件放在同一时间线里追踪，确保运营与审计一致。',
+      button: '查看审计日志',
+      path: ADMIN_AUDIT_ROUTE,
+      tag: 'Audit',
+    },
+    {
+      key: 'integration',
+      title: '共享接入桥接',
+      description: '完成账务/争议处理后，仍通过 API Keys、Webhook 与文档入口验证外部接入与回调链路，不拆分第二套后台。',
+      button: '打开 API Keys',
+      path: API_KEYS_ROUTE,
+      tag: 'Integration',
+    },
+  ], [])
+
+  const sharedConsoleLinks = useMemo(() => [
+    { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE, icon: <IconSafe /> },
+    { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE, icon: <IconBolt /> },
+    { key: 'docs', label: 'API 文档', path: DOCS_ROUTE, icon: <IconShield /> },
+  ], [])
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         style={{
           width: '100%',
-          borderRadius: 24,
-          background: 'linear-gradient(135deg, rgba(94,106,210,0.18) 0%, rgba(15,16,17,0.96) 58%, rgba(8,9,10,0.98) 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 28,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.92) 58%, rgba(30,41,59,0.92) 100%)',
+          border: '1px solid rgba(148,163,184,0.16)',
+          boxShadow: '0 24px 64px rgba(2, 6, 23, 0.36)',
         }}
-        bodyStyle={{ padding: 24 }}
+        bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="red" shape="circle">管理员运营台</Tag>
-          <div>
-            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>用户管理</Typography.Title>
-            <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
-              在共享控制台中集中执行钱包调账、供应商待结算确认与订单争议处理，确保资金、争议和供应商结算都在单一运营壳内闭环。
-            </Typography.Paragraph>
-          </div>
+          <Tag color="red" shape="circle">Admin Finance Mission Control</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>用户管理</Typography.Title>
+              <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 860 }}>
+                将钱包调账、供应商待结算确认与争议处理收敛到单一深色共享控制台里，围绕风险、审计与共享接入能力形成同一条运营闭环。
+              </Typography.Paragraph>
+            </div>
+            <Space spacing={8} wrap>
+              <Tag color="blue">资金任务编排</Tag>
+              <Tag color="green">共享控制台</Tag>
+            </Space>
+          </Space>
+          <Banner
+            type="info"
+            fullMode={false}
+            description="真实管理员钱包 / 争议 / 结算 API 仍是唯一数据底座；本页只升级为 mission-control 视图，帮助管理员先识别高危动作优先级，再执行二次确认与审计回放。"
+            style={{ width: '100%', background: 'rgba(15, 23, 42, 0.54)', border: '1px solid rgba(148,163,184,0.16)' }}
+          />
           <Space wrap>
-            <Tag color="grey" prefixIcon={<IconUser />}>管理员高危动作统一保留在同一控制台</Tag>
-            <Tag color="grey" prefixIcon={<IconSafe />}>调账 / 结算都要求二次确认短语</Tag>
+            <Tag color="grey" prefixIcon={<IconPulse />}>管理员高危资金动作</Tag>
+            <Tag color="red" prefixIcon={<IconAlertTriangle />}>调账 / 结算要求二次确认短语</Tag>
+            <Tag color="green" prefixIcon={<IconShield />}>争议处理继续写入审计</Tag>
+            <Tag color="blue" prefixIcon={<IconBolt />}>API Keys / Webhook / Docs 仍在同一控制台</Tag>
           </Space>
         </Space>
       </Card>
+
+      <Space wrap style={{ width: '100%' }} spacing={16}>
+        {missionSignals.map((item) => (
+          <Card
+            key={item.key}
+            style={{
+              flex: '1 1 220px',
+              minWidth: 220,
+              borderRadius: 20,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            bodyStyle={{ padding: 18 }}
+          >
+            <Space vertical align="start" spacing={10}>
+              <Tag color={item.color}>{item.title}</Tag>
+              <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>{item.value}</Typography.Title>
+              <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>{item.helper}</Typography.Text>
+            </Space>
+          </Card>
+        ))}
+      </Space>
+
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        <Col xs={24} xl={15}>
+          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }}>
+            <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              {actionLanes.map((item) => (
+                <Card
+                  key={item.key}
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                    border: '1px solid rgba(148,163,184,0.14)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Tag color="blue">{item.tag}</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                    <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>{item.description}</Typography.Text>
+                    <Button theme="solid" type="primary" onClick={() => navigate(item.path)}>{item.button}</Button>
+                  </Space>
+                </Card>
+              ))}
+            </Space>
+          </Card>
+        </Col>
+        <Col xs={24} xl={9}>
+          <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
+            <Space vertical align="start" spacing={12}>
+              <Typography.Paragraph style={{ marginBottom: 0 }}>
+                即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。
+              </Typography.Paragraph>
+              {sharedConsoleLinks.map((item) => (
+                <Tag key={item.key} color="grey" prefixIcon={item.icon}>
+                  {item.label} · {item.path}
+                </Tag>
+              ))}
+            </Space>
+          </Card>
+        </Col>
+      </Row>
 
       <Space wrap style={{ width: '100%' }} spacing={16}>
         <MetricCard title="钱包总余额" value={amountLabel(walletTotal)} description="当前钱包用户可用余额总和" icon={<IconPulse />} />
@@ -176,7 +344,7 @@ export function AdminUsersPage() {
         <MetricCard title="钱包用户数" value={String(items.length)} description="已进入钱包体系的用户主体数量" icon={<IconUser />} />
       </Space>
 
-      <Banner type="info" fullMode={false} description="建议流程：先看争议与待结算总额，再执行调账或结算；所有高危动作完成后可继续前往审计页追踪。" />
+      <Banner type="info" fullMode={false} description="建议流程：先看风险与审计，再执行调账或结算；所有高危动作完成后仍通过共享接入入口回到 API Keys / Webhook / 文档验证外部联动。" />
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={12}>
@@ -260,7 +428,7 @@ export function AdminUsersPage() {
         />
       </Card>
 
-      <Card title="钱包用户列表" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+      <Card title="钱包总览" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
         <Table
           pagination={false}
           rowKey="user_id"
@@ -270,7 +438,7 @@ export function AdminUsersPage() {
             { title: '邮箱', dataIndex: 'email', key: 'email' },
             { title: '可用余额', dataIndex: 'available_balance', key: 'available_balance', render: (value) => amountLabel(Number(value)) },
             { title: '冻结余额', dataIndex: 'frozen_balance', key: 'frozen_balance', render: (value) => amountLabel(Number(value)) },
-            { title: '待结算', dataIndex: 'pending_settlement', key: 'pending_settlement', render: (value) => amountLabel(Number(value || 0)) },
+            { title: '待结算余额', dataIndex: 'pending_settlement', key: 'pending_settlement', render: (value) => amountLabel(Number(value)) },
           ]}
         />
       </Card>

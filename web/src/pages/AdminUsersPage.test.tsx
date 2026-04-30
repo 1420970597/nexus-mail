@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import { fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { AdminUsersPage, buildDisputeResolutionPayload } from './AdminUsersPage'
 import * as financeService from '../services/finance'
 
@@ -93,7 +94,11 @@ describe('AdminUsersPage dispute handling', () => {
   })
 
   it('uses select controls for dispute resolution and submits explicit refund contract', async () => {
-    render(<AdminUsersPage />)
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
     const disputeCard = screen.getByText('争议单处理').closest('.semi-card') as HTMLElement
@@ -150,7 +155,11 @@ describe('AdminUsersPage dispute handling', () => {
   })
 
   it('submits confirmation phrases for high-risk wallet and settlement operations', async () => {
-    render(<AdminUsersPage />)
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
 
     const adjustmentCard = screen.getByText('管理员调账').closest('.semi-card') as HTMLElement
@@ -170,7 +179,11 @@ describe('AdminUsersPage dispute handling', () => {
   })
 
   it('applies explicit admin dispute filters only after clicking query', async () => {
-    render(<AdminUsersPage />)
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
     const listCard = screen.getByText('争议单列表').closest('.semi-card') as HTMLElement
 

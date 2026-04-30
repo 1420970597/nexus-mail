@@ -52,7 +52,6 @@ function routePriorityForRole(route: ConsoleRouteDefinition, role?: string) {
   const base = roleBasePriority(role)
   switch (route.group) {
     case 'admin':
-      return base + route.landingPriority
     case 'supplier':
       return base + route.landingPriority
     default:
@@ -253,87 +252,63 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   },
 ]
 
-export function titleFromPathname(pathname: string) {
-  if (pathname === '/') return '控制台总览'
-  const segments = pathname.split('/').filter(Boolean)
-  if (segments.length === 0) return '控制台总览'
-  const route = consoleRoutes.find((item) => item.path === pathname)
-  if (route) return route.title
-  const raw = segments[segments.length - 1]
-  return raw
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-}
-
 export function resolveRouteDefinition(pathname: string) {
   return consoleRoutes.find((item) => item.path === pathname)
 }
 
 export function resolveRouteTitle(pathname: string) {
-  return resolveRouteDefinition(pathname)?.title ?? titleFromPathname(pathname)
+  if (pathname === DASHBOARD_ROUTE) return '控制台总览'
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length === 0) return '控制台总览'
+  const route = resolveRouteDefinition(pathname)
+  if (route) return route.title
+  return segments[segments.length - 1]
 }
 
-export function firstMenuPath(menu: Array<{ path: string }>) {
+export const titleFromPathname = resolveRouteTitle
+
+export function routesForRole(role?: Role) {
+  if (!role) return consoleRoutes.filter((item) => item.group === 'shared')
+  return consoleRoutes.filter((item) => item.allowedRoles.includes(role))
+}
+
+export function allowedLandingPathsForRole(role?: Role) {
+  return routesForRole(role)
+    .slice()
+    .sort((a, b) => routePriorityForRole(a, role) - routePriorityForRole(b, role))
+    .map((route) => route.path)
+}
+
+export function resolvePreferredConsoleRoute(menu: Array<{ path: string }> = [], role?: Role) {
+  const allowed = routesForRole(role)
+  const menuPaths = new Set(menu.map((item) => item.path))
+  const matchingRoutes = allowed.filter((route) => menuPaths.size === 0 || menuPaths.has(route.path))
+  if (matchingRoutes.length > 0) {
+    const sorted = [...matchingRoutes].sort((a, b) => routePriorityForRole(a, role) - routePriorityForRole(b, role))
+    return sorted[0]?.path ?? DEFAULT_SHARED_ROUTE
+  }
   return menu[0]?.path ?? DEFAULT_SHARED_ROUTE
 }
 
-export function allowedLandingPathsForRole(role?: string) {
-  const effectiveRole: Role = role === 'admin' || role === 'supplier' ? role : 'user'
-  return consoleRoutes
-    .filter((item) => item.allowedRoles.includes(effectiveRole))
-    .sort((a, b) => {
-      const priorityDiff = routePriorityForRole(a, effectiveRole) - routePriorityForRole(b, effectiveRole)
-      if (priorityDiff !== 0) {
-        return priorityDiff
-      }
-      return a.path.localeCompare(b.path)
-    })
-    .map((item) => item.path)
-}
-
-export function resolvePreferredConsoleRoute(menu: Array<{ path: string }>, role?: string) {
-  const allowed = new Set(menu.map((item) => item.path))
-  for (const path of allowedLandingPathsForRole(role)) {
-    if (allowed.has(path)) {
-      return path
-    }
-  }
-  return firstMenuPath(menu)
-}
-
-export function resolvePostAuthLandingRoute(menu: Array<{ path: string }>, role?: string) {
+export function resolvePostAuthLandingRoute(menu: Array<{ path: string }> = [], role?: Role) {
   return resolvePreferredConsoleRoute(menu, role)
 }
 
-export function hasMenuPath(menu: Array<{ path: string }>, path: string) {
+export function visibleQuickActionPaths(role?: Role) {
+  return routesForRole(role)
+    .filter((route) => typeof route.quickActionPriority === 'number')
+    .sort((a, b) => (a.quickActionPriority ?? 0) - (b.quickActionPriority ?? 0))
+    .map((route) => route.path)
+}
+
+export function hasMenuPath(menu: Array<{ path: string }> = [], path: string) {
   return menu.some((item) => item.path === path)
 }
 
 export function groupedConsolePaths() {
   return {
-    shared: consoleRoutes.filter((item) => item.group === 'shared').map((item) => item.path),
-    supplier: consoleRoutes.filter((item) => item.group === 'supplier').map((item) => item.path),
-    admin: consoleRoutes.filter((item) => item.group === 'admin').map((item) => item.path),
+    shared: consoleRoutes.filter((route) => route.group === 'shared').map((route) => route.path),
+    supplier: consoleRoutes.filter((route) => route.group === 'supplier').map((route) => route.path),
+    admin: consoleRoutes.filter((route) => route.group === 'admin').map((route) => route.path),
   }
-}
-
-export function quickActionRoutesForRole(role?: string) {
-  const effectiveRole: Role = role === 'admin' || role === 'supplier' ? role : 'user'
-  return consoleRoutes
-    .filter((item) => item.allowedRoles.includes(effectiveRole) && item.quickActionPriority !== undefined)
-    .sort((a, b) => {
-      const priorityDiff = (a.quickActionPriority ?? 0) - (b.quickActionPriority ?? 0)
-      if (priorityDiff !== 0) {
-        return priorityDiff
-      }
-      return a.path.localeCompare(b.path)
-    })
-}
-
-export function visibleQuickActionPaths(menu: Array<{ path: string }>, currentPath: string, role?: string) {
-  const allowed = new Set(menu.map((item) => item.path))
-  return quickActionRoutesForRole(role)
-    .map((item) => item.path)
-    .filter((path) => path !== currentPath && allowed.has(path))
 }

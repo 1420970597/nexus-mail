@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
 import * as financeService from '../services/finance'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/finance', async () => {
   const actual = await vi.importActual<typeof import('../services/finance')>('../services/finance')
@@ -21,6 +22,19 @@ const mockedGetAdminDisputes = vi.mocked(financeService.getAdminDisputes)
 const mockedAdminAdjustWallet = vi.mocked(financeService.adminAdjustWallet)
 const mockedSettleSupplierPending = vi.mocked(financeService.settleSupplierPending)
 const mockedResolveAdminDispute = vi.mocked(financeService.resolveAdminDispute)
+
+function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Routes>
+        <Route path={ADMIN_USERS_ROUTE} element={<AdminUsersPage />} />
+        <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
+        <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
 
 describe('AdminUsersPage shared-console admin workbench', () => {
   beforeEach(() => {
@@ -59,28 +73,46 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     vi.clearAllMocks()
   })
 
-  it('renders admin operations metrics and shared-console guidance', async () => {
-    render(
-      <MemoryRouter>
-        <AdminUsersPage />
-      </MemoryRouter>,
-    )
+  it('renders admin finance mission-control shell with metrics and shared-console guidance', async () => {
+    renderAdminUsersPage()
 
-    expect(await screen.findByText('管理员运营台')).toBeInTheDocument()
-    expect(screen.getByText('钱包总余额')).toBeInTheDocument()
-    expect(screen.getByText('待结算总额')).toBeInTheDocument()
-    expect(screen.getByText('开放争议')).toBeInTheDocument()
-    expect(screen.getByText('钱包用户数')).toBeInTheDocument()
+    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    expect(screen.getByText('用户管理')).toBeInTheDocument()
+    expect(screen.getByText('钱包调整面')).toBeInTheDocument()
+    expect(screen.getAllByText('待结算总额').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('开放争议').length).toBeGreaterThan(0)
+    expect(screen.getByText('共享控制台联动')).toBeInTheDocument()
+    expect(screen.getByText('管理员主任务流')).toBeInTheDocument()
+    expect(screen.getAllByText('共享接入桥接').length).toBeGreaterThan(0)
+    expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
+    expect(screen.getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
+    expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
+  })
+
+  it('navigates from mission-control actions to risk, audit, and api key pages', async () => {
+    const user = userEvent.setup()
+    renderAdminUsersPage()
+
+    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '查看风控中心' }))
+    expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
+
+    renderAdminUsersPage()
+    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '查看审计日志' }))
+    expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
+
+    renderAdminUsersPage()
+    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
 
   it('submits wallet adjustment, settlement and dispute resolution flows', async () => {
     const user = userEvent.setup()
 
-    render(
-      <MemoryRouter>
-        <AdminUsersPage />
-      </MemoryRouter>,
-    )
+    renderAdminUsersPage()
 
     expect(await screen.findByText('用户管理')).toBeInTheDocument()
 
