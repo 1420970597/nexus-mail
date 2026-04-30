@@ -89,4 +89,46 @@ describe('SupplierDomainsPage', () => {
     await waitFor(() => expect(mockedSuccess).toHaveBeenCalled())
     await waitFor(() => expect(mockedGetSupplierResourcesOverview).toHaveBeenCalledTimes(2))
   })
+
+  it('shows error state when overview loading fails', async () => {
+    mockedGetSupplierResourcesOverview.mockRejectedValue({ response: { data: { error: 'overview failed' } } })
+
+    render(
+      <MemoryRouter>
+        <SupplierDomainsPage />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(mockedError).toHaveBeenCalledWith('overview failed'))
+    expect(await screen.findByText('暂无域名池记录，可先在右侧创建第一条域名。')).toBeInTheDocument()
+    expect(screen.getByText('暂无可统计区域。')).toBeInTheDocument()
+  })
+
+  it('renders summary metrics and top regions from mixed domain payload', async () => {
+    mockedGetSupplierResourcesOverview.mockResolvedValue({
+      domains: [
+        { id: 1, name: 'mail-1.nexus.test', region: 'global', status: 'active', catch_all: true },
+        { id: 2, name: 'mail-2.nexus.test', region: 'global', status: 'inactive', catch_all: false },
+        { id: 3, name: 'mail-3.nexus.test', region: 'hk', status: 'active', catch_all: true },
+        { id: 4, name: 'mail-4.nexus.test', region: '', status: 'active', catch_all: false },
+      ],
+      accounts: [],
+      mailboxes: [],
+    })
+
+    render(
+      <MemoryRouter>
+        <SupplierDomainsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('域名管理')).toBeInTheDocument()
+    expect(screen.getByText('当前供应商域名池记录')).toBeInTheDocument()
+    expect(screen.getByText('可参与供货的域名数量')).toBeInTheDocument()
+    expect(screen.getByText('支持泛收件的域名数量')).toBeInTheDocument()
+    expect(screen.getByText('去重后的 region 数量')).toBeInTheDocument()
+    expect(screen.getByText('global · 2')).toBeInTheDocument()
+    expect(screen.getByText('hk · 1')).toBeInTheDocument()
+    expect(screen.getByText('unknown · 1')).toBeInTheDocument()
+  })
 })
