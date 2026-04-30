@@ -1,36 +1,50 @@
 import { describe, expect, it } from 'vitest'
+import { allowedLandingPathsForRole, resolvePreferredConsoleRoute } from './consoleNavigation'
 
-interface RouteDef {
-  group: 'shared' | 'supplier' | 'admin'
-  landingPriority: number
-  path: string
-}
-
-function routePriorityForRole(route: RouteDef, role?: string) {
-  switch (route.group) {
-    case 'admin':
-      return role === 'admin' ? route.landingPriority : 3000 + route.landingPriority
-    case 'supplier':
-      return role === 'supplier' || role === 'admin' ? route.landingPriority : 2000 + route.landingPriority
-    default:
-      return role === 'user' ? route.landingPriority : 1000 + route.landingPriority
-  }
-}
-
-const supplierDomainRoute: RouteDef = { path: '/supplier/domains', group: 'supplier', landingPriority: 0 }
-const sharedDashboardRoute: RouteDef = { path: '/', group: 'shared', landingPriority: 0 }
-const adminRiskRoute: RouteDef = { path: '/admin/risk', group: 'admin', landingPriority: 0 }
-
-describe('console route priority model', () => {
-  it('prefers admin routes over shared routes for admin users', () => {
-    expect(routePriorityForRole(adminRiskRoute, 'admin')).toBeLessThan(routePriorityForRole(sharedDashboardRoute, 'admin'))
+describe('console navigation landing rules', () => {
+  it('keeps shared dashboard ahead of admin-specific routes for admin users in the current shared-console model', () => {
+    const adminPaths = allowedLandingPathsForRole('admin')
+    expect(adminPaths.indexOf('/')).toBeGreaterThanOrEqual(0)
+    expect(adminPaths.indexOf('/admin/risk')).toBeGreaterThanOrEqual(0)
+    expect(adminPaths.indexOf('/')).toBeLessThan(adminPaths.indexOf('/admin/risk'))
   })
 
-  it('prefers supplier routes over shared routes for supplier users', () => {
-    expect(routePriorityForRole(supplierDomainRoute, 'supplier')).toBeLessThan(routePriorityForRole(sharedDashboardRoute, 'supplier'))
+  it('keeps shared dashboard ahead of supplier-specific routes for supplier users in the current shared-console model', () => {
+    const supplierPaths = allowedLandingPathsForRole('supplier')
+    expect(supplierPaths.indexOf('/')).toBeGreaterThanOrEqual(0)
+    expect(supplierPaths.indexOf('/supplier/domains')).toBeGreaterThanOrEqual(0)
+    expect(supplierPaths.indexOf('/')).toBeLessThan(supplierPaths.indexOf('/supplier/domains'))
   })
 
   it('keeps shared routes ahead of supplier routes for plain users', () => {
-    expect(routePriorityForRole(sharedDashboardRoute, 'user')).toBeLessThan(routePriorityForRole(supplierDomainRoute, 'user'))
+    const userPaths = allowedLandingPathsForRole('user')
+    expect(userPaths.indexOf('/')).toBeGreaterThanOrEqual(0)
+    expect(userPaths.indexOf('/projects')).toBeGreaterThanOrEqual(0)
+    expect(userPaths.includes('/supplier/domains')).toBe(false)
+  })
+
+  it('chooses the first allowed menu path according to the shared-console priority list', () => {
+    expect(
+      resolvePreferredConsoleRoute(
+        [
+          { path: '/admin/risk' },
+          { path: '/' },
+          { path: '/admin/audit' },
+        ],
+        'admin',
+      ),
+    ).toBe('/')
+  })
+
+  it('falls back to the first server menu item when no preferred path is present', () => {
+    expect(
+      resolvePreferredConsoleRoute(
+        [
+          { path: '/custom' },
+          { path: '/fallback' },
+        ],
+        'user',
+      ),
+    ).toBe('/custom')
   })
 })
