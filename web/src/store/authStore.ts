@@ -26,7 +26,6 @@ interface AuthState {
 }
 
 const tokenKey = 'nexus-mail-token'
-const refreshTokenKey = 'nexus-mail-refresh-token'
 const userKey = 'nexus-mail-user'
 const menuKey = 'nexus-mail-menu'
 
@@ -38,21 +37,20 @@ function readSessionValue(key: string) {
 }
 
 const initialToken = readSessionValue(tokenKey)
-const initialRefreshToken = readSessionValue(refreshTokenKey)
 const initialUser = readSessionValue(userKey)
 const initialMenu = readSessionValue(menuKey)
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: initialToken,
-  refreshToken: initialRefreshToken,
+  refreshToken: null,
   user: initialUser ? (JSON.parse(initialUser) as CurrentUser) : null,
   menu: initialMenu ? (JSON.parse(initialMenu) as MenuItem[]) : [],
   setSession: (token, refreshToken, user) => {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem(tokenKey, token)
-      window.sessionStorage.setItem(refreshTokenKey, refreshToken)
       window.sessionStorage.setItem(userKey, JSON.stringify(user))
       window.sessionStorage.removeItem(menuKey)
+      window.sessionStorage.removeItem('nexus-mail-refresh-token')
     }
     set({ token, refreshToken, user, menu: [] })
   },
@@ -75,7 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem(tokenKey)
-      window.sessionStorage.removeItem(refreshTokenKey)
+      window.sessionStorage.removeItem('nexus-mail-refresh-token')
       window.sessionStorage.removeItem(userKey)
       window.sessionStorage.removeItem(menuKey)
     }

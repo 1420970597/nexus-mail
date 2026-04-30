@@ -8,6 +8,12 @@ import * as webhookService from './services/webhooks'
 import * as activationService from './services/activation'
 import { SHARED_CONSOLE_MENU_LOADING_LABEL } from './components/AppSidebar'
 import { userFirstRunStorageKeyForUser } from './pages/DashboardPage'
+import {
+  DEFAULT_LOGIN_ROUTE,
+  SETTINGS_ROUTE,
+  SUPPLIER_DOMAINS_ROUTE,
+  SUPPLIER_RESOURCES_ROUTE,
+} from './utils/consoleNavigation'
 
 function renderApp(initialEntries: string[]) {
   return render(
@@ -204,11 +210,43 @@ describe('App', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders login page when unauthenticated', () => {
+  it('renders login page when unauthenticated', async () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
-    renderApp(['/login'])
-    expect(screen.getByText('登录 Nexus-Mail')).toBeInTheDocument()
+    renderApp([DEFAULT_LOGIN_ROUTE])
+    expect(await screen.findByText('登录 Nexus-Mail')).toBeInTheDocument()
     expect(screen.getByText('邮件接码业务的统一运营控制台')).toBeInTheDocument()
+  })
+
+  it('clears local session on bootstrap failure without revoking refresh session server-side', async () => {
+    setSession('user')
+    mockedGetCurrentUser.mockRejectedValueOnce(new Error('transient bootstrap failure'))
+
+    renderApp(['/'])
+
+    await waitFor(() => {
+      expect(screen.getByText('登录 Nexus-Mail')).toBeInTheDocument()
+    })
+
+    expect(authService.logoutSession).not.toHaveBeenCalled()
+    expect(useAuthStore.getState()).toMatchObject({
+      token: null,
+      refreshToken: null,
+      user: null,
+      menu: [],
+    })
+  })
+
+  it('persists only the access token in sessionStorage when setting a session', () => {
+    useAuthStore.getState().setSession('stored-token', 'stored-refresh-token', {
+      id: 1,
+      email: 'user@nexus-mail.local',
+      role: 'user',
+    })
+
+    expect(window.sessionStorage.getItem('nexus-mail-token')).toBe('stored-token')
+    expect(window.sessionStorage.getItem('nexus-mail-refresh-token')).toBeNull()
+    expect(window.sessionStorage.getItem('nexus-mail-user')).toContain('user@nexus-mail.local')
+    expect(useAuthStore.getState().refreshToken).toBe('stored-refresh-token')
   })
 
   it('renders the admin risk workspace when starting from the preferred admin route after session bootstrap', async () => {
@@ -337,7 +375,7 @@ describe('App', () => {
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
 
     dashboardView.unmount()
-    renderApp(['/settings'])
+    renderApp([SETTINGS_ROUTE])
 
     await waitFor(() => expect(screen.getByText('首次使用清单')).toBeInTheDocument())
     expect(screen.getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
@@ -463,7 +501,7 @@ describe('App', () => {
   it('shows onboarding checklist on settings page for default user only', async () => {
     setSession('user')
 
-    renderApp(['/settings'])
+    renderApp([SETTINGS_ROUTE])
 
     expect(await screen.findByText('首次使用清单')).toBeInTheDocument()
     expect(screen.getByText('重新打开首轮引导')).toBeInTheDocument()
@@ -481,7 +519,7 @@ describe('App', () => {
       ],
     })
 
-    renderApp(['/settings'])
+    renderApp([SETTINGS_ROUTE])
 
     expect(await screen.findByText('控制台模式')).toBeInTheDocument()
     expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
@@ -545,13 +583,13 @@ describe('App', () => {
       ],
     })
 
-    renderApp(['/settings'])
+    renderApp([SETTINGS_ROUTE])
 
     await waitFor(() => expect(screen.getByText('风险规则联动')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /前往风控中心/ }))
     expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
 
-    renderApp(['/settings'])
+    renderApp([SETTINGS_ROUTE])
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /查看审计日志/ }))
     expect(await screen.findByText('审计回放与追踪')).toBeInTheDocument()
@@ -575,7 +613,7 @@ describe('App', () => {
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '发送测试投递' })).toBeInTheDocument()
+    expect(screen.getByText('发送测试投递')).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
@@ -651,7 +689,7 @@ describe('App', () => {
 
   it('blocks supplier routes for plain users', async () => {
     setSession('user')
-    renderApp(['/supplier/resources'])
+    renderApp([SUPPLIER_RESOURCES_ROUTE])
     expect(await screen.findAllByText('控制台总览')).not.toHaveLength(0)
   })
 

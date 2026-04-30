@@ -19,6 +19,23 @@ export interface ConsoleRouteDefinition {
 export const DEFAULT_SHARED_ROUTE = '/'
 export const DEFAULT_LOGIN_ROUTE = '/login'
 export const DASHBOARD_ROUTE = '/'
+export const PROJECTS_ROUTE = '/projects'
+export const ORDERS_ROUTE = '/orders'
+export const BALANCE_ROUTE = '/balance'
+export const PROFILE_ROUTE = '/profile'
+export const API_KEYS_ROUTE = '/api-keys'
+export const WEBHOOKS_ROUTE = '/webhooks'
+export const SETTINGS_ROUTE = '/settings'
+export const SUPPLIER_DOMAINS_ROUTE = '/supplier/domains'
+export const SUPPLIER_RESOURCES_ROUTE = '/supplier/resources'
+export const SUPPLIER_OFFERINGS_ROUTE = '/supplier/offerings'
+export const SUPPLIER_SETTLEMENTS_ROUTE = '/supplier/settlements'
+export const ADMIN_USERS_ROUTE = '/admin/users'
+export const ADMIN_SUPPLIERS_ROUTE = '/admin/suppliers'
+export const ADMIN_PRICING_ROUTE = '/admin/pricing'
+export const ADMIN_RISK_ROUTE = '/admin/risk'
+export const ADMIN_AUDIT_ROUTE = '/admin/audit'
+export const DOCS_ROUTE = '/docs'
 
 function roleBasePriority(role?: string) {
   switch (role) {
@@ -47,7 +64,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'dashboard',
     label: '仪表盘',
-    path: '/',
+    path: DASHBOARD_ROUTE,
     title: '控制台总览',
     group: 'shared',
     icon: <IconHome />,
@@ -57,7 +74,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'projects',
     label: '项目市场',
-    path: '/projects',
+    path: PROJECTS_ROUTE,
     title: '项目市场',
     group: 'shared',
     icon: <IconComponent />,
@@ -68,7 +85,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'orders',
     label: '订单中心',
-    path: '/orders',
+    path: ORDERS_ROUTE,
     title: '订单中心',
     group: 'shared',
     icon: <IconHistogram />,
@@ -79,7 +96,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'balance',
     label: '余额中心',
-    path: '/balance',
+    path: BALANCE_ROUTE,
     title: '余额中心',
     group: 'shared',
     icon: <IconPriceTag />,
@@ -90,7 +107,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'profile',
     label: '个人资料',
-    path: '/profile',
+    path: PROFILE_ROUTE,
     title: '个人资料',
     group: 'shared',
     icon: <IconUser />,
@@ -100,7 +117,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'api-keys',
     label: 'API Keys',
-    path: '/api-keys',
+    path: API_KEYS_ROUTE,
     title: 'API Keys',
     group: 'shared',
     icon: <IconSafe />,
@@ -111,7 +128,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'webhooks',
     label: 'Webhook 设置',
-    path: '/webhooks',
+    path: WEBHOOKS_ROUTE,
     title: 'Webhook 设置',
     group: 'shared',
     icon: <IconBolt />,
@@ -122,7 +139,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'settings',
     label: '设置中心',
-    path: '/settings',
+    path: SETTINGS_ROUTE,
     title: '设置中心',
     group: 'shared',
     icon: <IconSetting />,
@@ -132,7 +149,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'docs',
     label: 'API 文档',
-    path: '/docs',
+    path: DOCS_ROUTE,
     title: 'API 文档',
     group: 'shared',
     icon: <IconArticle />,
@@ -143,7 +160,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'supplier-domains',
     label: '域名管理',
-    path: '/supplier/domains',
+    path: SUPPLIER_DOMAINS_ROUTE,
     title: '域名管理',
     group: 'supplier',
     icon: <IconServer />,
@@ -154,7 +171,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'supplier-resources',
     label: '供应商资源',
-    path: '/supplier/resources',
+    path: SUPPLIER_RESOURCES_ROUTE,
     title: '供应商资源',
     group: 'supplier',
     icon: <IconPriceTag />,
@@ -164,7 +181,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'supplier-offerings',
     label: '供货规则',
-    path: '/supplier/offerings',
+    path: SUPPLIER_OFFERINGS_ROUTE,
     title: '供货规则',
     group: 'supplier',
     icon: <IconBolt />,
@@ -174,7 +191,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'supplier-settlements',
     label: '供应商结算',
-    path: '/supplier/settlements',
+    path: SUPPLIER_SETTLEMENTS_ROUTE,
     title: '供应商结算',
     group: 'supplier',
     icon: <IconActivity />,
@@ -184,7 +201,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'admin-users',
     label: '用户管理',
-    path: '/admin/users',
+    path: ADMIN_USERS_ROUTE,
     title: '用户管理',
     group: 'admin',
     icon: <IconUser />,
@@ -195,7 +212,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'admin-suppliers',
     label: '供应商管理',
-    path: '/admin/suppliers',
+    path: ADMIN_SUPPLIERS_ROUTE,
     title: '供应商管理',
     group: 'admin',
     icon: <IconServer />,
@@ -205,7 +222,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'admin-pricing',
     label: '价格策略',
-    path: '/admin/pricing',
+    path: ADMIN_PRICING_ROUTE,
     title: '价格策略',
     group: 'admin',
     icon: <IconPriceTag />,
@@ -215,7 +232,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'admin-risk',
     label: '风控中心',
-    path: '/admin/risk',
+    path: ADMIN_RISK_ROUTE,
     title: '风控中心',
     group: 'admin',
     icon: <IconSafe />,
@@ -226,7 +243,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   {
     key: 'admin-audit',
     label: '审计日志',
-    path: '/admin/audit',
+    path: ADMIN_AUDIT_ROUTE,
     title: '审计日志',
     group: 'admin',
     icon: <IconActivity />,
