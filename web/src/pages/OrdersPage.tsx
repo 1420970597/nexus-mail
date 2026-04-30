@@ -1,6 +1,7 @@
 import { Banner, Button, Card, Col, Descriptions, Empty, Modal, Row, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
 import { IconActivity, IconClock, IconMail, IconTickCircle } from '@douyinfe/semi-icons'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   ActivationOrder,
   ActivationResultPayload,
@@ -9,6 +10,8 @@ import {
   getActivationOrders,
   getActivationResult,
 } from '../services/activation'
+import { useAuthStore } from '../store/authStore'
+import { hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function statusColor(status: string) {
   switch (status) {
@@ -48,6 +51,8 @@ function MetricCard({ title, value, description, icon }: { title: string; value:
 }
 
 export function OrdersPage() {
+  const navigate = useNavigate()
+  const { user, menu } = useAuthStore()
   const [items, setItems] = useState<ActivationOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<number | null>(null)
@@ -109,6 +114,9 @@ export function OrdersPage() {
   const waitingCount = items.filter((item) => item.status === 'WAITING_EMAIL').length
   const finishedCount = items.filter((item) => item.status === 'FINISHED').length
   const latestMailbox = items.find((item) => item.email_address)?.email_address ?? '—'
+  const canOpenProjects = hasMenuPath(menu, '/projects')
+  const canOpenApiKeys = hasMenuPath(menu, '/api-keys')
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
 
   return (
     <>
@@ -158,7 +166,27 @@ export function OrdersPage() {
                 pagination={false}
                 rowKey="id"
                 dataSource={items}
-                empty={<Empty description="当前暂无订单，可先前往项目市场下单。" />}
+                empty={
+                  <Empty description="当前暂无订单，可先前往项目市场下单。" image={null}>
+                    <Space>
+                      {canOpenProjects ? (
+                        <Button type="primary" theme="solid" onClick={() => navigate('/projects')}>
+                          前往项目市场
+                        </Button>
+                      ) : null}
+                      {canOpenApiKeys ? (
+                        <Button theme="borderless" type="primary" onClick={() => navigate('/api-keys')}>
+                          查看 API 接入准备
+                        </Button>
+                      ) : null}
+                      {fallbackRoute !== '/orders' ? (
+                        <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
+                          返回推荐工作台
+                        </Button>
+                      ) : null}
+                    </Space>
+                  </Empty>
+                }
                 columns={[
                   { title: '订单号', dataIndex: 'order_no', key: 'order_no' },
                   { title: '项目', dataIndex: 'project_name', key: 'project_name' },
@@ -223,6 +251,24 @@ export function OrdersPage() {
                   <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
                     通过“查看结果”确认提取类型、剩余有效期与建议轮询间隔，帮助区分等待邮件与真正失败的场景。
                   </Typography.Paragraph>
+                </Card>
+                <Card style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
+                  <Typography.Title heading={5} style={{ marginTop: 0 }}>订单为空时的下一步</Typography.Title>
+                  <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
+                    如果此页暂时没有订单，优先回到项目市场发起采购；若正在做程序化接入，也可以继续配置 API Keys，再回到共享工作台观察结果。
+                  </Typography.Paragraph>
+                  <Space style={{ marginTop: 12 }}>
+                    {canOpenProjects ? (
+                      <Button type="primary" theme="solid" onClick={() => navigate('/projects')}>
+                        前往项目市场
+                      </Button>
+                    ) : null}
+                    {canOpenApiKeys ? (
+                      <Button theme="borderless" type="primary" onClick={() => navigate('/api-keys')}>
+                        管理 API Keys
+                      </Button>
+                    ) : null}
+                  </Space>
                 </Card>
               </Space>
             </Card>

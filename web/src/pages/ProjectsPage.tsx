@@ -1,7 +1,10 @@
 import { Banner, Button, Card, Col, Empty, Row, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
 import { IconBolt, IconBriefStroked, IconHistogram, IconServer } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { createActivationOrder, getInventory, InventoryItem } from '../services/activation'
+import { useAuthStore } from '../store/authStore'
+import { hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function formatCurrency(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -45,6 +48,8 @@ function MetricCard({
 }
 
 export function ProjectsPage() {
+  const navigate = useNavigate()
+  const { user, menu } = useAuthStore()
   const [items, setItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [creatingKey, setCreatingKey] = useState('')
@@ -68,6 +73,9 @@ export function ProjectsPage() {
   const totalStock = useMemo(() => grouped.reduce((sum, item) => sum + Number(item.stock || 0), 0), [grouped])
   const uniqueProjects = useMemo(() => new Set(grouped.map((item) => item.project_key)).size, [grouped])
   const topSuccess = useMemo(() => grouped.reduce((best, item) => Math.max(best, Number(item.success_rate || 0)), 0), [grouped])
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
+  const canOpenOrders = hasMenuPath(menu, '/orders')
+  const canOpenDocs = hasMenuPath(menu, '/docs')
 
   const handleCreate = async (record: InventoryItem) => {
     setCreatingKey(`${record.project_key}-${record.domain_id}`)
@@ -75,6 +83,9 @@ export function ProjectsPage() {
       const res = await createActivationOrder(record.project_key, record.domain_id)
       Toast.success(`已创建订单 ${res.order.order_no}，邮箱：${res.order.email_address}`)
       await load()
+      if (canOpenOrders) {
+        navigate('/orders')
+      }
     } catch (error: any) {
       Toast.error(error?.response?.data?.error ?? '创建订单失败')
     } finally {
@@ -129,7 +140,28 @@ export function ProjectsPage() {
               pagination={false}
               rowKey={(record?: InventoryItem) => `${record?.project_key ?? 'unknown'}-${record?.domain_id ?? 0}`}
               dataSource={grouped}
-              empty={<Empty description="当前暂无可售库存，请稍后再试或联系管理员补充供给。" />}
+              empty={
+                <Empty
+                  description="当前暂无可售库存，请稍后再试或联系管理员补充供给。"
+                  image={null}
+                >
+                  <Space>
+                    <Button theme="solid" type="primary" onClick={() => void load()}>
+                      重新拉取库存
+                    </Button>
+                    {canOpenDocs ? (
+                      <Button theme="borderless" type="primary" onClick={() => navigate('/docs')}>
+                        查看 API 文档
+                      </Button>
+                    ) : null}
+                    {fallbackRoute !== '/projects' ? (
+                      <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
+                        返回推荐工作台
+                      </Button>
+                    ) : null}
+                  </Space>
+                </Empty>
+              }
               columns={[
                 { title: '项目', dataIndex: 'project_name', key: 'project_name' },
                 { title: '项目键', dataIndex: 'project_key', key: 'project_key', render: (value) => <Tag color="blue">{String(value)}</Tag> },
@@ -172,6 +204,22 @@ export function ProjectsPage() {
                 <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
                   成功创建订单后，直接前往订单中心查看邮箱分配、提取结果和是否 READY / FINISHED，无需跳转到独立后台。
                 </Typography.Paragraph>
+                {canOpenOrders ? (
+                  <Button type="primary" theme="solid" style={{ marginTop: 12 }} onClick={() => navigate('/orders')}>
+                    打开订单中心
+                  </Button>
+                ) : null}
+              </Card>
+              <Card style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
+                <Typography.Title heading={5} style={{ marginTop: 0 }}>共享控制台回退路径</Typography.Title>
+                <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
+                  如果当前库存为空或本页不再是你的首选入口，可通过统一菜单权限回到该角色最合适的工作台，而不是寻找另一套后台。
+                </Typography.Paragraph>
+                {fallbackRoute !== '/projects' ? (
+                  <Button theme="borderless" type="primary" style={{ marginTop: 12 }} onClick={() => navigate(fallbackRoute)}>
+                    返回推荐工作台
+                  </Button>
+                ) : null}
               </Card>
             </Space>
           </Card>

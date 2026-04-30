@@ -186,6 +186,39 @@ describe('App', () => {
     expect(screen.getByText('邮件接码业务的统一运营控制台')).toBeInTheDocument()
   })
 
+  it('redirects admin users to their preferred shared-console workspace after session bootstrap', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+      ],
+    })
+
+    renderApp(['/'])
+
+    expect(await screen.findByText('高风险信号总览')).toBeInTheDocument()
+    expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the first server-menu route when no preferred role landing route exists', async () => {
+    setSession('supplier')
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'supplier',
+      items: [
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
+
+    renderApp(['/'])
+
+    expect(await screen.findByText('API 文档')).toBeInTheDocument()
+  })
+
   it('shows register journey guidance and role entry descriptions on the login shell', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })

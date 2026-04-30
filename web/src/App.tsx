@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { AdminRoute, ProtectedRoute, SupplierRoute } from './components/ProtectedRoute'
 import { ConsoleLayout } from './layouts/ConsoleLayout'
@@ -23,9 +23,11 @@ import { AdminRiskPage } from './pages/AdminRiskPage'
 import { AdminAuditPage } from './pages/AdminAuditPage'
 import { getCurrentUser, getMenu, logoutSession } from './services/auth'
 import { useAuthStore } from './store/authStore'
+import { resolvePostAuthLandingRoute } from './utils/consoleNavigation'
 
 function Shell() {
   const navigate = useNavigate()
+  const redirectedOnceRef = useRef(false)
   const { token, refreshToken, logout, setMenu, setUser } = useAuthStore()
 
   useEffect(() => {
@@ -42,6 +44,13 @@ function Shell() {
         }
         setUser(currentUser.user)
         setMenu(menu.items)
+        if (!redirectedOnceRef.current && menu.role === currentUser.user.role) {
+          const preferredRoute = resolvePostAuthLandingRoute(menu.items, currentUser.user.role)
+          redirectedOnceRef.current = true
+          if (preferredRoute !== '/') {
+            navigate(preferredRoute, { replace: true })
+          }
+        }
       })
       .catch(async () => {
         if (!active) {

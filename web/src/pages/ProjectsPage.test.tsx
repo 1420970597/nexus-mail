@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ProjectsPage } from './ProjectsPage'
 import * as activationService from '../services/activation'
+import { useAuthStore } from '../store/authStore'
 
 vi.mock('../services/activation', () => ({
   getInventory: vi.fn(),
@@ -14,6 +15,18 @@ const mockedCreateActivationOrder = vi.mocked(activationService.createActivation
 
 describe('ProjectsPage', () => {
   beforeEach(() => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
     mockedGetInventory.mockResolvedValue({
       items: [
         {
@@ -70,6 +83,7 @@ describe('ProjectsPage', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
   it('renders shared-console hero and aggregated procurement metrics', async () => {
@@ -105,5 +119,19 @@ describe('ProjectsPage', () => {
 
     await waitFor(() => expect(mockedCreateActivationOrder).toHaveBeenCalledWith('discord', 21))
     expect(mockedGetInventory).toHaveBeenCalledTimes(2)
+  })
+
+  it('shows empty-state next actions inside the same shared console', async () => {
+    mockedGetInventory.mockResolvedValueOnce({ items: [] })
+
+    render(
+      <MemoryRouter>
+        <ProjectsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '重新拉取库存' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 })
