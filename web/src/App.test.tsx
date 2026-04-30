@@ -9,10 +9,15 @@ import * as activationService from './services/activation'
 import { SHARED_CONSOLE_MENU_LOADING_LABEL } from './components/AppSidebar'
 import { userFirstRunStorageKeyForUser } from './pages/DashboardPage'
 import {
+  API_KEYS_ROUTE,
   DEFAULT_LOGIN_ROUTE,
+  DOCS_ROUTE,
+  ORDERS_ROUTE,
+  PROJECTS_ROUTE,
   SETTINGS_ROUTE,
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
+  WEBHOOKS_ROUTE,
 } from './utils/consoleNavigation'
 
 function renderApp(initialEntries: string[]) {
@@ -400,6 +405,57 @@ describe('App', () => {
 
     expect(screen.getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
     expect(screen.queryByText('用户管理')).not.toBeInTheDocument()
+    expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
+  })
+
+  it('keeps shared integration routes reachable after register bootstrap', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    mockedRegister.mockResolvedValueOnce({
+      token: 'register-token',
+      refresh_token: 'register-refresh',
+      user: { id: 8, email: 'new@example.com', role: 'user' },
+    })
+
+    renderApp([DEFAULT_LOGIN_ROUTE])
+
+    await user.click(await screen.findByRole('button', { name: '注册' }))
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
+    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+
+    expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
+    expect(mockedGetMenu).toHaveBeenCalled()
+    await waitFor(() => {
+      const menuPaths = useAuthStore.getState().menu.map((item) => item.path)
+      expect(menuPaths).toEqual(expect.arrayContaining([PROJECTS_ROUTE, ORDERS_ROUTE, API_KEYS_ROUTE, WEBHOOKS_ROUTE, SETTINGS_ROUTE]))
+    })
+  })
+
+  it('hides supplier and admin-only menu labels for a newly registered user shell', async () => {
+    useAuthStore.setState({
+      token: 'user-token',
+      refreshToken: 'user-refresh',
+      user: { id: 8, email: 'new@example.com', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderApp(['/'])
+
+    expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText('基础工作台')).length).toBeGreaterThan(0)
+    expect(screen.queryByText('供应商扩展')).not.toBeInTheDocument()
+    expect(screen.queryByText('管理员扩展')).not.toBeInTheDocument()
+    expect(screen.queryByText('域名管理')).not.toBeInTheDocument()
     expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
   })
 
