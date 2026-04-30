@@ -10,9 +10,8 @@ import {
 } from '@douyinfe/semi-icons'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../store/authStore'
-
-const userFirstRunStorageKey = 'nexus-mail-user-first-run-dismissed'
+import { userFirstRunStorageKeyForUser } from './DashboardPage'
+import { MenuItem, useAuthStore } from '../store/authStore'
 
 const sharedFirstRunRoutes = {
   projects: '/projects',
@@ -76,126 +75,150 @@ function shortcutCardStyle(accent: string) {
   }
 }
 
+function menuHasPath(menu: MenuItem[], path: string) {
+  return menu.some((item) => item.path === path)
+}
+
 export function SettingsPage() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, menu } = useAuthStore()
 
   const reopenUserFirstRun = () => {
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(userFirstRunStorageKey, 'false')
+      window.localStorage.setItem(userFirstRunStorageKeyForUser(user?.id ?? null), 'false')
     }
     navigate('/')
   }
 
   const shortcuts = useMemo<ShortcutCard[]>(() => {
     const common: ShortcutCard[] = [
-      {
-        title: '个人资料与身份核对',
-        description: '返回个人资料页确认当前角色、账号邮箱与推荐操作路径，避免角色误判导致跨区访问。',
-        button: '查看个人资料',
-        path: '/profile',
-        tag: '基础入口',
-        accent: 'rgba(94,106,210,0.2)',
-        icon: <IconUser />,
-      },
-      {
-        title: 'API 接入入口',
-        description: '快速跳转 API Keys 完成 token、白名单与回调前置准备，再从顶栏与侧边栏进入 API 文档。',
-        button: '管理 API Keys',
-        path: '/api-keys',
-        tag: '集成入口',
-        accent: 'rgba(16,185,129,0.18)',
-        icon: <IconArticle />,
-      },
-      {
-        title: 'Webhook 回调工作台',
-        description: '在共享控制台中直接维护 endpoint、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。',
-        button: '打开 Webhook 设置',
-        path: '/webhooks',
-        tag: '共享入口',
-        accent: 'rgba(14,165,233,0.18)',
-        icon: <IconBolt />,
-      },
+      ...(menuHasPath(menu, '/profile')
+        ? [{
+            title: '个人资料与身份核对',
+            description: '返回个人资料页确认当前角色、账号邮箱与推荐操作路径，避免角色误判导致跨区访问。',
+            button: '查看个人资料',
+            path: '/profile',
+            tag: '基础入口',
+            accent: 'rgba(94,106,210,0.2)',
+            icon: <IconUser />,
+          }]
+        : []),
+      ...(menuHasPath(menu, '/api-keys')
+        ? [{
+            title: 'API 接入入口',
+            description: '快速跳转 API Keys 完成 token、白名单与回调前置准备，再从顶栏与侧边栏进入 API 文档。',
+            button: '管理 API Keys',
+            path: '/api-keys',
+            tag: '集成入口',
+            accent: 'rgba(16,185,129,0.18)',
+            icon: <IconArticle />,
+          }]
+        : []),
+      ...(menuHasPath(menu, '/webhooks')
+        ? [{
+            title: 'Webhook 回调工作台',
+            description: '在共享控制台中直接维护 endpoint、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。',
+            button: '打开 Webhook 设置',
+            path: '/webhooks',
+            tag: '共享入口',
+            accent: 'rgba(14,165,233,0.18)',
+            icon: <IconBolt />,
+          }]
+        : []),
     ]
 
     switch (user?.role) {
       case 'admin':
         return [
-          {
-            title: '风险规则联动',
-            description: '进入风控中心查看高风险信号、规则阈值与运行时效果，确认限流、白名单与告警链路一致。',
-            button: '前往风控中心',
-            path: '/admin/risk',
-            tag: '管理员',
-            accent: 'rgba(239,68,68,0.16)',
-            icon: <IconSafe />,
-          },
-          {
-            title: '审计追踪',
-            description: '查看 API Key 生命周期、结算、调账与争议处理审计，保证高危动作可追踪可回放。',
-            button: '查看审计日志',
-            path: '/admin/audit',
-            tag: '管理员',
-            accent: 'rgba(249,115,22,0.18)',
-            icon: <IconBolt />,
-          },
-          {
-            title: 'Webhook 观测',
-            description: '通过管理员共享入口查看回调 endpoint、投递记录与失败重试状态，避免跨后台切换。',
-            button: '打开 Webhook 设置',
-            path: '/webhooks',
-            tag: '管理员',
-            accent: 'rgba(14,165,233,0.18)',
-            icon: <IconServer />,
-          },
+          ...(menuHasPath(menu, '/admin/risk')
+            ? [{
+                title: '风险规则联动',
+                description: '进入风控中心查看高风险信号、规则阈值与运行时效果，确认限流、白名单与告警链路一致。',
+                button: '前往风控中心',
+                path: '/admin/risk',
+                tag: '管理员',
+                accent: 'rgba(239,68,68,0.16)',
+                icon: <IconSafe />,
+              }]
+            : []),
+          ...(menuHasPath(menu, '/admin/audit')
+            ? [{
+                title: '审计追踪',
+                description: '查看 API Key 生命周期、结算、调账与争议处理审计，保证高危动作可追踪可回放。',
+                button: '查看审计日志',
+                path: '/admin/audit',
+                tag: '管理员',
+                accent: 'rgba(249,115,22,0.18)',
+                icon: <IconBolt />,
+              }]
+            : []),
+          ...(menuHasPath(menu, '/webhooks')
+            ? [{
+                title: 'Webhook 观测',
+                description: '通过管理员共享入口查看回调 endpoint、投递记录与失败重试状态，避免跨后台切换。',
+                button: '打开 Webhook 设置',
+                path: '/webhooks',
+                tag: '管理员',
+                accent: 'rgba(14,165,233,0.18)',
+                icon: <IconServer />,
+              }]
+            : []),
           ...common,
         ]
       case 'supplier':
         return [
-          {
-            title: '资源供给维护',
-            description: '进入供应商资源页维护邮箱账号、协议配置与健康状态，确保供给链路稳定。',
-            button: '查看供应商资源',
-            path: '/supplier/resources',
-            tag: '供应商',
-            accent: 'rgba(16,185,129,0.18)',
-            icon: <IconServer />,
-          },
-          {
-            title: '供货与结算闭环',
-            description: '从供货规则到供应商结算页形成闭环，及时修正售价、成功率与回款观察。',
-            button: '前往供应商结算',
-            path: '/supplier/settlements',
-            tag: '供应商',
-            accent: 'rgba(94,106,210,0.18)',
-            icon: <IconSetting />,
-          },
+          ...(menuHasPath(menu, '/supplier/resources')
+            ? [{
+                title: '资源供给维护',
+                description: '进入供应商资源页维护邮箱账号、协议配置与健康状态，确保供给链路稳定。',
+                button: '查看供应商资源',
+                path: '/supplier/resources',
+                tag: '供应商',
+                accent: 'rgba(16,185,129,0.18)',
+                icon: <IconServer />,
+              }]
+            : []),
+          ...(menuHasPath(menu, '/supplier/settlements')
+            ? [{
+                title: '供货与结算闭环',
+                description: '从供货规则到供应商结算页形成闭环，及时修正售价、成功率与回款观察。',
+                button: '前往供应商结算',
+                path: '/supplier/settlements',
+                tag: '供应商',
+                accent: 'rgba(94,106,210,0.18)',
+                icon: <IconSetting />,
+              }]
+            : []),
           ...common,
         ]
       default:
         return [
-          {
-            title: '项目采购入口',
-            description: '从项目市场继续采购资源，并在订单中心与余额中心查看后续执行结果。',
-            button: '前往项目市场',
-            path: '/projects',
-            tag: '用户',
-            accent: 'rgba(14,165,233,0.18)',
-            icon: <IconServer />,
-          },
-          {
-            title: '订单与回调观察',
-            description: '通过订单中心观察邮箱分配、提取结果和完成状态，再结合 API 文档完成系统集成。',
-            button: '查看订单中心',
-            path: '/orders',
-            tag: '用户',
-            accent: 'rgba(94,106,210,0.18)',
-            icon: <IconBolt />,
-          },
+          ...(menuHasPath(menu, '/projects')
+            ? [{
+                title: '项目采购入口',
+                description: '从项目市场继续采购资源，并在订单中心与余额中心查看后续执行结果。',
+                button: '前往项目市场',
+                path: '/projects',
+                tag: '用户',
+                accent: 'rgba(14,165,233,0.18)',
+                icon: <IconServer />,
+              }]
+            : []),
+          ...(menuHasPath(menu, '/orders')
+            ? [{
+                title: '订单与回调观察',
+                description: '通过订单中心观察邮箱分配、提取结果和完成状态，再结合 API 文档完成系统集成。',
+                button: '查看订单中心',
+                path: '/orders',
+                tag: '用户',
+                accent: 'rgba(94,106,210,0.18)',
+                icon: <IconBolt />,
+              }]
+            : []),
           ...common,
         ]
     }
-  }, [user?.role])
+  }, [menu, user?.role])
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>

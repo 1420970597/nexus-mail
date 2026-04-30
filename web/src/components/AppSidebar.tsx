@@ -16,6 +16,8 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { MenuItem, useAuthStore } from '../store/authStore'
 
+export const SHARED_CONSOLE_MENU_LOADING_LABEL = '正在同步服务端菜单权限...'
+
 const iconMap: Record<string, JSX.Element> = {
   dashboard: <IconHome />,
   projects: <IconComponent />,
@@ -35,38 +37,6 @@ const iconMap: Record<string, JSX.Element> = {
   'admin-risk': <IconSafe />,
   'admin-audit': <IconActivity />,
   docs: <IconArticle />,
-}
-
-function fallbackMenu(role?: string): MenuItem[] {
-  const base: MenuItem[] = [
-    { key: 'dashboard', label: '仪表盘', path: '/' },
-    { key: 'projects', label: '项目市场', path: '/projects' },
-    { key: 'orders', label: '订单中心', path: '/orders' },
-    { key: 'balance', label: '余额中心', path: '/balance' },
-    { key: 'profile', label: '个人资料', path: '/profile' },
-    { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
-    { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
-    { key: 'settings', label: '设置中心', path: '/settings' },
-  ]
-  if (role === 'supplier' || role === 'admin') {
-    base.push(
-      { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
-      { key: 'supplier-resources', label: '供应商资源', path: '/supplier/resources' },
-      { key: 'supplier-offerings', label: '供货规则', path: '/supplier/offerings' },
-      { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
-    )
-  }
-  if (role === 'admin') {
-    base.push(
-      { key: 'admin-users', label: '用户管理', path: '/admin/users' },
-      { key: 'admin-suppliers', label: '供应商管理', path: '/admin/suppliers' },
-      { key: 'admin-pricing', label: '价格策略', path: '/admin/pricing' },
-      { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-      { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-    )
-  }
-  base.push({ key: 'docs', label: 'API 文档', path: '/docs' })
-  return base
 }
 
 function roleMeta(role?: string) {
@@ -100,8 +70,8 @@ export function AppSidebar() {
   const location = useLocation()
   const { user, menu } = useAuthStore()
 
-  const source = useMemo(() => (menu.length > 0 ? menu : fallbackMenu(user?.role)), [menu, user?.role])
-  const { userItems, supplierItems, adminItems } = useMemo(() => groupedMenu(source), [source])
+  const menuReady = menu.length > 0
+  const { userItems, supplierItems, adminItems } = useMemo(() => groupedMenu(menu), [menu])
   const meta = roleMeta(user?.role)
 
   return (
@@ -139,31 +109,52 @@ export function AppSidebar() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px 0' }}>
-        <SidebarGroup
-          title="基础工作台"
-          description="所有角色共享的采购、订单与集成入口"
-          selectedPath={location.pathname}
-          items={userItems}
-          navigate={navigate}
-        />
-        {supplierItems.length > 0 ? (
-          <SidebarGroup
-            title="供应商扩展"
-            description="域名池、资源供给、供货规则与结算闭环"
-            selectedPath={location.pathname}
-            items={supplierItems}
-            navigate={navigate}
-          />
-        ) : null}
-        {adminItems.length > 0 ? (
-          <SidebarGroup
-            title="管理员扩展"
-            description="用户运营、供应商经营、风控审计与 Webhook"
-            selectedPath={location.pathname}
-            items={adminItems}
-            navigate={navigate}
-          />
-        ) : null}
+        {menuReady ? (
+          <>
+            <SidebarGroup
+              title="基础工作台"
+              description="所有角色共享的采购、订单与集成入口"
+              selectedPath={location.pathname}
+              items={userItems}
+              navigate={navigate}
+            />
+            {supplierItems.length > 0 ? (
+              <SidebarGroup
+                title="供应商扩展"
+                description="域名池、资源供给、供货规则与结算闭环"
+                selectedPath={location.pathname}
+                items={supplierItems}
+                navigate={navigate}
+              />
+            ) : null}
+            {adminItems.length > 0 ? (
+              <SidebarGroup
+                title="管理员扩展"
+                description="用户运营、供应商经营、风控审计与 Webhook"
+                selectedPath={location.pathname}
+                items={adminItems}
+                navigate={navigate}
+              />
+            ) : null}
+          </>
+        ) : (
+          <div
+            style={{
+              marginBottom: 14,
+              borderRadius: 16,
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              padding: '16px 14px',
+            }}
+          >
+            <Typography.Text style={{ color: '#f7f8f8', fontWeight: 600, fontSize: 13 }}>
+              共享菜单加载中
+            </Typography.Text>
+            <Typography.Paragraph style={{ color: 'rgba(138,143,152,0.9)', margin: '8px 0 0', fontSize: 12, lineHeight: 1.6 }}>
+              {SHARED_CONSOLE_MENU_LOADING_LABEL}
+            </Typography.Paragraph>
+          </div>
+        )}
       </div>
 
       <div style={{ padding: '14px 18px 18px', color: 'rgba(138,143,152,0.96)', fontSize: 12, lineHeight: 1.7 }}>

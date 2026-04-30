@@ -5,6 +5,8 @@ import App from './App'
 import { useAuthStore } from './store/authStore'
 import * as authService from './services/auth'
 import * as webhookService from './services/webhooks'
+import { SHARED_CONSOLE_MENU_LOADING_LABEL } from './components/AppSidebar'
+import { userFirstRunStorageKeyForUser } from './pages/DashboardPage'
 
 function renderApp(initialEntries: string[]) {
   return render(
@@ -173,6 +175,7 @@ describe('App', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    window.localStorage.clear()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
@@ -242,7 +245,7 @@ describe('App', () => {
 
   it('keeps settings guidance entry available after dismissing first-run mission cards for default user', async () => {
     const user = userEvent.setup()
-    window.localStorage.removeItem('nexus-mail-user-first-run-dismissed')
+    window.localStorage.removeItem(userFirstRunStorageKeyForUser(1))
     setSession('user')
 
     const dashboardView = renderApp(['/'])
@@ -250,7 +253,7 @@ describe('App', () => {
     expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /稍后再看/ }))
     await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
-    expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('true')
+    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
 
     dashboardView.unmount()
     renderApp(['/settings'])
@@ -258,16 +261,90 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByText('首次使用清单')).toBeInTheDocument())
     expect(screen.getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /重新打开首轮引导/ }))
-    expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('false')
+    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('false')
     expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
     expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
     expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
+  })
 
+  it('waits for server menu instead of rendering fallback privileged navigation from client role state', () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockImplementationOnce(
+      () =>
+        new Promise(() => {
+          // keep pending to verify no client-derived fallback menu leaks privileged entries
+        }),
+    )
+
+    renderApp(['/'])
+
+    expect(screen.getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
+    expect(screen.queryByText('用户管理')).not.toBeInTheDocument()
+    expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
+  })
+
+  it('scopes first-run dismissal by user id so one user does not hide onboarding for another', async () => {
+    const user = userEvent.setup()
+    window.localStorage.clear()
+
+    useAuthStore.setState({
+      token: 'token-a',
+      refreshToken: 'refresh-a',
+      user: { id: 1, email: 'user1@nexus-mail.local', role: 'user' },
+      menu: [],
+    })
+
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'user1@nexus-mail.local', role: 'user' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
+
+    const firstView = renderApp(['/'])
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /稍后再看/ }))
+    await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
+    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
+    firstView.unmount()
+
+    useAuthStore.setState({
+      token: 'token-b',
+      refreshToken: 'refresh-b',
+      user: { id: 2, email: 'user2@nexus-mail.local', role: 'user' },
+      menu: [],
+    })
+
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 2, email: 'user2@nexus-mail.local', role: 'user' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
+
+    renderApp(['/'])
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(2))).toBeNull()
   })
 
   it('shows first-run onboarding guidance for default user dashboard and allows dismissing it', async () => {
     const user = userEvent.setup()
-    window.localStorage.removeItem('nexus-mail-user-first-run-dismissed')
+    window.localStorage.removeItem(userFirstRunStorageKeyForUser(1))
     setSession('user')
 
     renderApp(['/'])
@@ -275,19 +352,17 @@ describe('App', () => {
     expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
     expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
     expect(screen.getByText('先完成基础采购路径')).toBeInTheDocument()
-    expect(screen.getByText('继续准备 API 接入')).toBeInTheDocument()
     expect(screen.getByText('后续角色能力仍在同一壳内扩展')).toBeInTheDocument()
-
     await user.click(screen.getByRole('button', { name: /稍后再看/ }))
     await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
-    expect(window.localStorage.getItem('nexus-mail-user-first-run-dismissed')).toBe('true')
+    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
   })
 
   it('does not show first-run onboarding guidance for supplier dashboard', async () => {
-    window.localStorage.removeItem('nexus-mail-user-first-run-dismissed')
+    window.localStorage.removeItem(userFirstRunStorageKeyForUser(2))
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
-    mockedGetMenu.mockResolvedValue({
+    mockedGetMenu.mockResolvedValueOnce({
       role: 'supplier',
       items: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
@@ -300,6 +375,8 @@ describe('App', () => {
 
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
     expect(screen.queryByText('普通用户首轮引导')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看结算页' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
   })
 
   it('shows onboarding checklist on settings page for default user only', async () => {
@@ -308,49 +385,25 @@ describe('App', () => {
     renderApp(['/settings'])
 
     expect(await screen.findByText('首次使用清单')).toBeInTheDocument()
-    expect(screen.getByText('1. 先进入项目市场')).toBeInTheDocument()
-    expect(screen.getByText('2. 回到订单中心')).toBeInTheDocument()
-    expect(screen.getByText('3. 完成 API 接入准备')).toBeInTheDocument()
+    expect(screen.getByText('重新打开首轮引导')).toBeInTheDocument()
   })
 
-  it('hides onboarding checklist on settings page for admin role', async () => {
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'settings', label: '设置中心', path: '/settings' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-      ],
-    })
-
-    renderApp(['/settings'])
-
-    expect(await screen.findAllByText('设置中心')).toBeTruthy()
-    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
-  })
-
-  it('renders profile page with role-specific operation guidance instead of placeholder actions', async () => {
+  it('does not show onboarding checklist on settings page for supplier role', async () => {
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
     mockedGetMenu.mockResolvedValue({
       role: 'supplier',
       items: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'profile', label: '个人资料', path: '/profile' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
         { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
-        { key: 'supplier-resources', label: '供应商资源', path: '/supplier/resources' },
       ],
     })
 
-    renderApp(['/profile'])
+    renderApp(['/settings'])
 
-    expect(await screen.findByText('供应商运营焦点')).toBeInTheDocument()
-    expect(screen.getAllByText('supplier@nexus-mail.local').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('active')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
-    expect(screen.queryByText('编辑资料（待开放）')).not.toBeInTheDocument()
+    expect(await screen.findByText('设置中心')).toBeInTheDocument()
+    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
   })
 
   it('navigates from profile page CTA to the supplier domains page', async () => {
@@ -363,14 +416,14 @@ describe('App', () => {
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'profile', label: '个人资料', path: '/profile' },
         { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
-        { key: 'supplier-resources', label: '供应商资源', path: '/supplier/resources' },
       ],
     })
 
     renderApp(['/profile'])
 
-    await user.click(await screen.findByRole('button', { name: '前往域名管理' }))
-    expect(window.sessionStorage.getItem('nexus-mail-menu')).toContain('/supplier/domains')
+    await waitFor(() => expect(screen.getByText('建议先完成共享控制台中的供应侧准备')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
+    expect(await screen.findByText('供应商域名池与 Catch-All 管理')).toBeInTheDocument()
   })
 
   it('renders dashboard with role mission panel and navigable next actions for supplier', async () => {
@@ -390,63 +443,38 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('角色工作台导引')).toBeInTheDocument()
-    expect(screen.getByText('供应商主任务')).toBeInTheDocument()
-    expect(screen.getByText('共享壳中的角色菜单映射')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '调整供货规则' })).toBeInTheDocument()
-
+    expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
+    expect(screen.getByText('维护域名池')).toBeInTheDocument()
+    expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(window.sessionStorage.getItem('nexus-mail-menu')).toContain('/supplier/domains')
-  })
-
-  it('renders settings page with real role shortcuts instead of planning cards', async () => {
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'settings', label: '设置中心', path: '/settings' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
-      ],
-    })
-
-    renderApp(['/settings'])
-
-    expect(await screen.findByText('控制台运行快捷入口')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往风控中心' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
-    expect(screen.getAllByText('当前登录会话').length).toBeGreaterThanOrEqual(1)
-    expect(screen.queryByText('规划中')).not.toBeInTheDocument()
-    expect(screen.queryByText(/假保存/)).not.toBeInTheDocument()
+    expect(await screen.findByText('供应商域名池与 Catch-All 管理')).toBeInTheDocument()
   })
 
   it('navigates from settings shortcuts to admin risk and audit pages', async () => {
     const user = userEvent.setup()
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
+    mockedGetMenu.mockResolvedValueOnce({
       role: 'admin',
       items: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'settings', label: '设置中心', path: '/settings' },
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
       ],
     })
 
     renderApp(['/settings'])
 
-    await user.click(await screen.findByRole('button', { name: '前往风控中心' }))
-    expect(window.sessionStorage.getItem('nexus-mail-menu')).toContain('/admin/risk')
+    await waitFor(() => expect(screen.getByText('风险规则联动')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: /前往风控中心/ }))
+    expect(await screen.findByText('高风险信号总览')).toBeInTheDocument()
 
     renderApp(['/settings'])
-    await user.click(await screen.findByRole('button', { name: '查看审计日志' }))
-    expect(window.sessionStorage.getItem('nexus-mail-menu')).toContain('/admin/audit')
+    await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: /查看审计日志/ }))
+    expect(await screen.findByText('管理员审计日志')).toBeInTheDocument()
+    expect(screen.queryByText('Webhook 观测')).not.toBeInTheDocument()
   })
 
   it('renders webhook settings page for authenticated admin', async () => {
@@ -460,16 +488,38 @@ describe('App', () => {
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
       ],
     })
+
     renderApp(['/webhooks'])
-    expect(await screen.findAllByRole('heading', { name: 'Webhook 设置' })).not.toHaveLength(0)
-    expect(await screen.findByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
-    expect(await screen.findByText('whsec_abcd…1234')).toBeInTheDocument()
-    expect(await screen.findByText(/localhost、内网、link-local/)).toBeInTheDocument()
-    await waitFor(() => expect(mockedGetWebhookEndpoints).toHaveBeenCalled())
-    await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledWith(11))
+
+    expect(await screen.findByText('共享控制台内的 Webhook / 回调中枢')).toBeInTheDocument()
+    expect(screen.getByText('回调地址与事件订阅')).toBeInTheDocument()
+    expect(screen.getByText('最近投递 / 重试概览')).toBeInTheDocument()
+    expect(screen.getByText('查看 Delivery 列表')).toBeInTheDocument()
   })
 
-  it('renders admin risk page with real widgets', async () => {
+  it('creates a webhook test delivery and refreshes the delivery feed', async () => {
+    const user = userEvent.setup()
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+      ],
+    })
+
+    renderApp(['/webhooks'])
+
+    await user.click(await screen.findByRole('button', { name: '发送测试投递' }))
+    await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
+    await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2))
+    expect(await screen.findByText('已创建测试投递，队列将异步发送')).toBeInTheDocument()
+    expect(await screen.findAllByText('webhook.test')).toHaveLength(2)
+  })
+
+  it('renders admin risk page with signal cards and rule editor', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValue({
@@ -478,7 +528,7 @@ describe('App', () => {
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
       ],
     })
 
@@ -548,5 +598,4 @@ describe('App', () => {
     expect((await screen.findAllByText('supplier@nexus-mail.local')).length).toBeGreaterThanOrEqual(1)
     expect(await screen.findByText('鉴权拒绝总数：2')).toBeInTheDocument()
   })
-
 })

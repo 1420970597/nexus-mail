@@ -78,56 +78,20 @@ const routeTitleMap: Record<string, string> = {
   '/docs': 'API 文档',
 }
 
-const quickActions = [
-  {
-    path: '/projects',
-    label: '项目市场',
-    icon: <IconFile />,
-    roles: ['user', 'supplier', 'admin'],
-  },
-  {
-    path: '/balance',
-    label: '余额中心',
-    icon: <IconTickCircle />,
-    roles: ['user', 'supplier', 'admin'],
-  },
-  {
-    path: '/admin/risk',
-    label: '风控中心',
-    icon: <IconSafe />,
-    roles: ['admin'],
-  },
-  {
-    path: '/admin/users',
-    label: '用户运营',
-    icon: <IconUser />,
-    roles: ['admin'],
-  },
-  {
-    path: '/admin/audit',
-    label: '审计日志',
-    icon: <IconActivity />,
-    roles: ['admin'],
-  },
-  {
-    path: '/supplier/domains',
-    label: '域名管理',
-    icon: <IconServer />,
-    roles: ['supplier', 'admin'],
-  },
-  {
-    path: '/orders',
-    label: '订单中心',
-    icon: <IconHistogram />,
-    roles: ['user', 'supplier', 'admin'],
-  },
-  {
-    path: '/docs',
-    label: 'API 文档',
-    icon: <IconArticle />,
-    roles: ['user', 'supplier', 'admin'],
-  },
-]
+const quickActionIcons: Record<string, JSX.Element> = {
+  '/projects': <IconFile />,
+  '/balance': <IconTickCircle />,
+  '/admin/risk': <IconSafe />,
+  '/admin/users': <IconUser />,
+  '/admin/audit': <IconActivity />,
+  '/supplier/domains': <IconServer />,
+  '/orders': <IconHistogram />,
+  '/docs': <IconArticle />,
+  '/api-keys': <IconSafe />,
+  '/webhooks': <IconActivity />,
+}
+
+const quickActionPriority = ['/projects', '/balance', '/admin/risk', '/admin/users', '/admin/audit', '/supplier/domains', '/orders', '/docs', '/api-keys', '/webhooks']
 
 function resolveRouteTitle(pathname: string) {
   return routeTitleMap[pathname] ?? titleFromPath(pathname)
@@ -147,7 +111,7 @@ function roleIntro(role?: string) {
 export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, menu } = useAuthStore()
 
   const breadcrumbRoutes = useMemo(() => {
     const segments = location.pathname.split('/').filter(Boolean)
@@ -161,8 +125,16 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
   }, [location.pathname])
 
   const visibleQuickActions = useMemo(
-    () => quickActions.filter((item) => item.roles.includes(user?.role ?? 'user') && item.path !== location.pathname),
-    [location.pathname, user?.role],
+    () =>
+      quickActionPriority
+        .map((path) => menu.find((item) => item.path === path))
+        .filter((item): item is NonNullable<typeof item> => Boolean(item) && item.path !== location.pathname)
+        .map((item) => ({
+          path: item.path,
+          label: item.label,
+          icon: quickActionIcons[item.path] ?? <IconArticle />,
+        })),
+    [location.pathname, menu],
   )
 
   return (

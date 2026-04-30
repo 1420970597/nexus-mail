@@ -14,7 +14,9 @@ import { useNavigate } from 'react-router-dom'
 import { getAdminOverview, getDashboardOverview, AdminOverviewResponse, DashboardOverviewResponse } from '../services/auth'
 import { useAuthStore } from '../store/authStore'
 
-const userFirstRunStorageKey = 'nexus-mail-user-first-run-dismissed'
+export function userFirstRunStorageKeyForUser(userId?: number | null) {
+  return `nexus-mail-user-first-run-dismissed:${userId ?? 'guest'}`
+}
 
 const sharedFirstRunRoutes = {
   projects: '/projects',
@@ -110,6 +112,7 @@ function metricCardStyle(accent: string) {
 }
 
 interface RoleAction {
+  key: string
   title: string
   description: string
   path: string
@@ -130,90 +133,120 @@ interface RoleSurfaceItem {
   summary: string
 }
 
-function roleActions(role?: string): RoleAction[] {
-  switch (role) {
-    case 'admin':
-      return [
-        {
-          title: '经营与供应商运营',
-          description: '优先查看供应商待结算、完成率和争议处置入口，保持管理动作在同一控制台内闭环。',
-          path: '/admin/suppliers',
-          button: '前往供应商管理',
-          icon: <IconServer />,
-          accent: 'rgba(113, 112, 255, 0.28)',
-        },
-        {
-          title: '风险与审计联动',
-          description: '把 API Key 风险、白名单拦截、限流拒绝与审计事件串联观察，不再切换独立后台。',
-          path: '/admin/risk',
-          button: '进入风控中心',
-          icon: <IconSafe />,
-          accent: 'rgba(239, 68, 68, 0.24)',
-        },
-        {
-          title: '共享接入入口',
-          description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
-          path: '/webhooks',
-          button: '打开 Webhook 工作台',
-          icon: <IconArticle />,
-          accent: 'rgba(14, 165, 233, 0.24)',
-        },
-      ]
-    case 'supplier':
-      return [
-        {
-          title: '域名池运营',
-          description: '先维护域名池与 Catch-All 覆盖，再回到资源与供货规则页收敛供给质量。',
-          path: '/supplier/domains',
-          button: '前往域名管理',
-          icon: <IconServer />,
-          accent: 'rgba(16, 185, 129, 0.24)',
-        },
-        {
-          title: '供货与履约',
-          description: '围绕订单履约、库存消耗与成功率调整供货规则，保持供给侧动作集中。',
-          path: '/supplier/offerings',
-          button: '调整供货规则',
-          icon: <IconActivity />,
-          accent: 'rgba(113, 112, 255, 0.28)',
-        },
-        {
-          title: '结算与观察',
-          description: '随时检查待结算余额与运营结果，减少供应商在多页面之间往返。',
-          path: '/supplier/settlements',
-          button: '查看结算页',
-          icon: <IconHistogram />,
-          accent: 'rgba(249, 115, 22, 0.26)',
-        },
-      ]
-    default:
-      return [
-        {
-          title: '开始采购',
-          description: '从项目市场快速进入真实库存与定价，再直接创建订单进入统一流程。',
-          path: '/projects',
-          button: '前往项目市场',
-          icon: <IconServer />,
-          accent: 'rgba(14, 165, 233, 0.24)',
-        },
-        {
-          title: '追踪订单结果',
-          description: '在订单中心查看邮箱分配、提取结果和完成状态，避免跳到独立后台查看。',
-          path: '/orders',
-          button: '查看订单中心',
-          icon: <IconActivity />,
-          accent: 'rgba(113, 112, 255, 0.28)',
-        },
-        {
-          title: '集成与回调',
-          description: '继续配置 API Keys、白名单与文档，完成对外 API / Webhook 对接。',
-          path: '/api-keys',
-          button: '管理 API Keys',
-          icon: <IconSetting />,
-          accent: 'rgba(16, 185, 129, 0.24)',
-        },
-      ]
+function roleActions(menu: MenuItem[], role?: string): RoleAction[] {
+  const itemsByPath = new Map(menu.map((item) => [item.path, item]))
+
+  if (role === 'admin') {
+    const actions: RoleAction[] = []
+    if (itemsByPath.has('/admin/suppliers')) {
+      actions.push({
+        key: 'admin-suppliers',
+        title: '经营与供应商运营',
+        description: '优先查看供应商待结算、完成率和争议处置入口，保持管理动作在同一控制台内闭环。',
+        path: '/admin/suppliers',
+        button: '前往供应商管理',
+        icon: <IconServer />,
+        accent: 'rgba(113, 112, 255, 0.28)',
+      })
+    }
+    if (itemsByPath.has('/admin/risk')) {
+      actions.push({
+        key: 'admin-risk',
+        title: '风险与审计联动',
+        description: '把 API Key 风险、白名单拦截、限流拒绝与审计事件串联观察，不再切换独立后台。',
+        path: '/admin/risk',
+        button: '进入风控中心',
+        icon: <IconSafe />,
+        accent: 'rgba(239, 68, 68, 0.24)',
+      })
+    }
+    if (itemsByPath.has('/webhooks')) {
+      actions.push({
+        key: 'webhooks',
+        title: '共享接入入口',
+        description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
+        path: '/webhooks',
+        button: '打开 Webhook 工作台',
+        icon: <IconArticle />,
+        accent: 'rgba(14, 165, 233, 0.24)',
+      })
+    }
+    return actions
   }
+
+  if (role === 'supplier') {
+    const actions: RoleAction[] = []
+    if (itemsByPath.has('/supplier/domains')) {
+      actions.push({
+        key: 'supplier-domains',
+        title: '域名池运营',
+        description: '先维护域名池与 Catch-All 覆盖，再回到资源与供货规则页收敛供给质量。',
+        path: '/supplier/domains',
+        button: '前往域名管理',
+        icon: <IconServer />,
+        accent: 'rgba(16, 185, 129, 0.24)',
+      })
+    }
+    if (itemsByPath.has('/supplier/offerings')) {
+      actions.push({
+        key: 'supplier-offerings',
+        title: '供货与履约',
+        description: '围绕订单履约、库存消耗与成功率调整供货规则，保持供给侧动作集中。',
+        path: '/supplier/offerings',
+        button: '调整供货规则',
+        icon: <IconActivity />,
+        accent: 'rgba(113, 112, 255, 0.28)',
+      })
+    }
+    if (itemsByPath.has('/supplier/settlements')) {
+      actions.push({
+        key: 'supplier-settlements',
+        title: '结算与观察',
+        description: '随时检查待结算余额与运营结果，减少供应商在多页面之间往返。',
+        path: '/supplier/settlements',
+        button: '查看结算页',
+        icon: <IconHistogram />,
+        accent: 'rgba(249, 115, 22, 0.26)',
+      })
+    }
+    return actions
+  }
+
+  const actions: RoleAction[] = []
+  if (itemsByPath.has('/projects')) {
+    actions.push({
+      key: 'projects',
+      title: '开始采购',
+      description: '从项目市场快速进入真实库存与定价，再直接创建订单进入统一流程。',
+      path: '/projects',
+      button: '前往项目市场',
+      icon: <IconServer />,
+      accent: 'rgba(14, 165, 233, 0.24)',
+    })
+  }
+  if (itemsByPath.has('/orders')) {
+    actions.push({
+      key: 'orders',
+      title: '追踪订单结果',
+      description: '在订单中心查看邮箱分配、提取结果和完成状态，避免跳到独立后台查看。',
+      path: '/orders',
+      button: '查看订单中心',
+      icon: <IconActivity />,
+      accent: 'rgba(113, 112, 255, 0.28)',
+    })
+  }
+  if (itemsByPath.has('/api-keys')) {
+    actions.push({
+      key: 'api-keys',
+      title: '集成与回调',
+      description: '继续配置 API Keys、白名单与文档，完成对外 API / Webhook 对接。',
+      path: '/api-keys',
+      button: '管理 API Keys',
+      icon: <IconSetting />,
+      accent: 'rgba(16, 185, 129, 0.24)',
+    })
+  }
+  return actions
 }
 
 function roleHeadline(role?: string) {
@@ -250,32 +283,44 @@ function roleMissionSteps(role?: string): RoleMissionStep[] {
   }
 }
 
-function roleSurface(role?: string): RoleSurfaceItem[] {
-  switch (role) {
-    case 'admin':
-      return [
-        { label: '基础工作台', route: '/', summary: '总览、共享入口与实时概览都从这里开始。' },
-        { label: '管理员扩展', route: '/admin/risk', summary: '风控中心、审计日志、供应商管理等管理动作在此展开。' },
-        { label: '共享接入', route: '/webhooks', summary: 'Webhook 与 API 文档仍留在共享控制台内。' },
-      ]
-    case 'supplier':
-      return [
-        { label: '基础工作台', route: '/', summary: '总览页先聚合供给侧最重要的下一步动作。' },
-        { label: '供应商扩展', route: '/supplier/domains', summary: '域名池、资源、供货规则与结算围绕供给闭环展开。' },
-        { label: '共享接入', route: '/settings', summary: '设置中心继续连接 Webhook、API Keys 与共享会话说明。' },
-      ]
-    default:
-      return [
-        { label: '基础工作台', route: '/', summary: '总览页负责把采购、订单与集成入口组织在同一壳里。' },
-        { label: '采购执行', route: '/projects', summary: '项目市场与订单中心承接真实购买链路。' },
-        { label: '集成入口', route: '/api-keys', summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' },
-      ]
+function roleSurface(menu: MenuItem[], role?: string): RoleSurfaceItem[] {
+  const itemsByPath = new Map(menu.map((item) => [item.path, item]))
+
+  if (role === 'admin') {
+    const surfaces: RoleSurfaceItem[] = [{ label: '基础工作台', route: '/', summary: '总览、共享入口与实时概览都从这里开始。' }]
+    if (itemsByPath.has('/admin/risk')) {
+      surfaces.push({ label: '管理员扩展', route: '/admin/risk', summary: '风控中心、审计日志、供应商管理等管理动作在此展开。' })
+    }
+    if (itemsByPath.has('/webhooks')) {
+      surfaces.push({ label: '共享接入', route: '/webhooks', summary: 'Webhook 与 API 文档仍留在共享控制台内。' })
+    }
+    return surfaces
   }
+
+  if (role === 'supplier') {
+    const surfaces: RoleSurfaceItem[] = [{ label: '基础工作台', route: '/', summary: '总览页先聚合供给侧最重要的下一步动作。' }]
+    if (itemsByPath.has('/supplier/domains')) {
+      surfaces.push({ label: '供应商扩展', route: '/supplier/domains', summary: '域名池、资源、供货规则与结算围绕供给闭环展开。' })
+    }
+    if (itemsByPath.has('/settings')) {
+      surfaces.push({ label: '共享接入', route: '/settings', summary: '设置中心继续连接 Webhook、API Keys 与共享会话说明。' })
+    }
+    return surfaces
+  }
+
+  const surfaces: RoleSurfaceItem[] = [{ label: '基础工作台', route: '/', summary: '总览页负责把采购、订单与集成入口组织在同一壳里。' }]
+  if (itemsByPath.has('/projects')) {
+    surfaces.push({ label: '采购执行', route: '/projects', summary: '项目市场与订单中心承接真实购买链路。' })
+  }
+  if (itemsByPath.has('/api-keys')) {
+    surfaces.push({ label: '集成入口', route: '/api-keys', summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' })
+  }
+  return surfaces
 }
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, menu } = useAuthStore()
   const [overview, setOverview] = useState<DashboardOverviewResponse | null>(null)
   const [adminOverview, setAdminOverview] = useState<AdminOverviewResponse | null>(null)
   const [message, setMessage] = useState('正在加载概览数据...')
@@ -289,9 +334,9 @@ export function DashboardPage() {
       setShowUserFirstRun(false)
       return
     }
-    const dismissed = window.localStorage.getItem(userFirstRunStorageKey) === 'true'
+    const dismissed = window.localStorage.getItem(userFirstRunStorageKeyForUser(user?.id ?? null)) === 'true'
     setShowUserFirstRun(!dismissed)
-  }, [user?.role])
+  }, [user?.id, user?.role])
 
   useEffect(() => {
     let active = true
@@ -317,13 +362,13 @@ export function DashboardPage() {
 
   const adminSummary = adminOverview?.summary
   const topSupplier = useMemo(() => adminOverview?.suppliers?.[0], [adminOverview])
-  const actions = useMemo(() => roleActions(user?.role), [user?.role])
+  const actions = useMemo(() => roleActions(menu, user?.role), [menu, user?.role])
   const missionSteps = useMemo(() => roleMissionSteps(user?.role), [user?.role])
-  const roleSurfaceItems = useMemo(() => roleSurface(user?.role), [user?.role])
+  const roleSurfaceItems = useMemo(() => roleSurface(menu, user?.role), [menu, user?.role])
 
   const dismissUserFirstRun = () => {
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(userFirstRunStorageKey, 'true')
+      window.localStorage.setItem(userFirstRunStorageKeyForUser(user?.id ?? null), 'true')
     }
     setShowUserFirstRun(false)
   }
@@ -508,7 +553,7 @@ export function DashboardPage() {
               <div>
                 <Tag color="cyan">共享壳中的角色菜单映射</Tag>
                 <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
-                  同一控制台布局下，不同角色通过菜单分组进入不同任务页；以下跳转全部对应现有真实路由。
+                  当前菜单与页面能力以服务端返回的角色权限与菜单结果为准，以下跳转全部对应现有真实路由。
                 </Typography.Paragraph>
               </div>
               {roleSurfaceItems.map((item) => (
