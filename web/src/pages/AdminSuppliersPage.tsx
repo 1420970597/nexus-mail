@@ -1,7 +1,9 @@
 import { Banner, Button, Card, Col, Row, Space, Table, Tag, Typography } from '@douyinfe/semi-ui'
+import { IconActivity, IconAlertTriangle, IconBolt, IconBriefcase, IconSafe, IconShield } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { AdminOverviewResponse, getAdminOverview } from '../services/auth'
 import { useNavigate } from 'react-router-dom'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 function amountLabel(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -17,6 +19,23 @@ function completionColor(value: number) {
   if (ratio >= 7000) return 'blue'
   if (ratio >= 5000) return 'orange'
   return 'red'
+}
+
+interface MissionSignal {
+  key: string
+  title: string
+  value: string
+  helper: string
+  color: 'cyan' | 'red' | 'orange' | 'green'
+}
+
+interface ActionLane {
+  key: string
+  title: string
+  description: string
+  button: string
+  path: string
+  tag: string
 }
 
 export function AdminSuppliersPage() {
@@ -42,28 +61,182 @@ export function AdminSuppliersPage() {
   const suppliers = data?.suppliers ?? []
 
   const highlights = useMemo(() => {
-    const risky = suppliers.filter((item) => Number(item.completion_rate_bps || 0) < 7000).length
+    const riskySuppliers = suppliers.filter((item) => Number(item.completion_rate_bps || 0) < 7000)
     const highPending = [...suppliers]
       .sort((a, b) => Number(b.pending_settlement || 0) - Number(a.pending_settlement || 0))
       .slice(0, 3)
-    return { risky, highPending }
+    const highestPending = highPending[0]?.pending_settlement ?? 0
+    return { riskySuppliers, highPending, highestPending }
   }, [suppliers])
+
+  const missionSignals = useMemo<MissionSignal[]>(() => [
+    {
+      key: 'pending',
+      title: '高待结算待办',
+      value: amountLabel(summary?.supplier_settlements.pending_amount ?? 0),
+      helper: `Top supplier ${amountLabel(highlights.highestPending)}`,
+      color: 'cyan',
+    },
+    {
+      key: 'risk',
+      title: '低履约风险',
+      value: `${highlights.riskySuppliers.length}`,
+      helper: '完成率低于 70% 的供应商数量',
+      color: 'red',
+    },
+    {
+      key: 'dispute',
+      title: '争议敞口',
+      value: percentLabel(summary?.disputes.dispute_rate_bps ?? 0),
+      helper: `${summary?.disputes.open ?? 0} 个开放争议待处理`,
+      color: 'orange',
+    },
+    {
+      key: 'console',
+      title: '共享控制台联动',
+      value: '结算 / 风控 / 审计',
+      helper: '供应商运营动作保持在同一控制台闭环',
+      color: 'green',
+    },
+  ], [highlights.highestPending, highlights.riskySuppliers.length, summary?.disputes.dispute_rate_bps, summary?.disputes.open, summary?.supplier_settlements.pending_amount])
+
+  const actionLanes = useMemo<ActionLane[]>(() => [
+    {
+      key: 'settlement',
+      title: '结算优先级排程',
+      description: '先处理高待结算与开放争议，把供应商账务确认留在共享控制台同一条运营链路。',
+      button: '前往处理结算 / 争议',
+      path: ADMIN_USERS_ROUTE,
+      tag: 'Settlement',
+    },
+    {
+      key: 'risk',
+      title: '异常履约复盘',
+      description: '低完成率与超时上升时，立即联动风控中心确认阈值、信号等级与是否需要临时止损。',
+      button: '查看风控中心',
+      path: ADMIN_RISK_ROUTE,
+      tag: 'Risk',
+    },
+    {
+      key: 'audit',
+      title: '审计回放闭环',
+      description: '把供应商运营动作与 denied_* 事件放到同一条时间线里，方便追查白名单、限流与角色操作。',
+      button: '查看审计日志',
+      path: ADMIN_AUDIT_ROUTE,
+      tag: 'Audit',
+    },
+  ], [])
+
+  const sharedConsoleLinks = useMemo(() => [
+    { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+    { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+    { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+  ], [])
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
-      <div>
-        <Typography.Title heading={3}>供应商管理</Typography.Title>
-        <Typography.Paragraph>
-          面向管理员的供应商运营总览页：聚合真实 overview 数据，快速识别高待结算、低完成率与争议风险供应商，并跳转到结算/争议处置页面。
-        </Typography.Paragraph>
-      </div>
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 28,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.92) 58%, rgba(30,41,59,0.92) 100%)',
+          border: '1px solid rgba(148,163,184,0.16)',
+          boxShadow: '0 24px 64px rgba(2, 6, 23, 0.36)',
+        }}
+        bodyStyle={{ padding: 28 }}
+      >
+        <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+          <Tag color="cyan" shape="circle">Supplier Mission Control</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>供应商管理</Typography.Title>
+              <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 860 }}>
+                管理员供应商运营台升级为深色共享控制台：围绕待结算、履约质量与争议敞口做任务编排，并直接回流到结算、风控和审计动作。
+              </Typography.Paragraph>
+            </div>
+            <Space spacing={8} wrap>
+              <Tag color="blue">任务闭环</Tag>
+              <Tag color="green">共享控制台</Tag>
+            </Space>
+          </Space>
+          <Banner
+            type="info"
+            fullMode={false}
+            description="真实 /admin/overview 仍是唯一数据底座；页面只重组为 mission-control 视图，帮助管理员优先确认高待结算供应商、低完成率风险与争议敞口。"
+            style={{ width: '100%', background: 'rgba(15, 23, 42, 0.54)', border: '1px solid rgba(148,163,184,0.16)' }}
+          />
+          <Space wrap>
+            <Tag color="grey" prefixIcon={<IconBriefcase />}>高待结算供应商</Tag>
+            <Tag color="red" prefixIcon={<IconAlertTriangle />}>低完成率需人工复核</Tag>
+            <Tag color="green" prefixIcon={<IconShield />}>争议处理继续挂接审计</Tag>
+            <Tag color="blue" prefixIcon={<IconBolt />}>无需切换独立后台</Tag>
+          </Space>
+        </Space>
+      </Card>
 
-      <Banner
-        type="info"
-        fullMode={false}
-        description="本页优先复用真实 /admin/overview 聚合结果，并直接承接供应商风险识别与处置入口；无需切换独立后台。"
-        style={{ width: '100%' }}
-      />
+      <Space wrap style={{ width: '100%' }} spacing={16}>
+        {missionSignals.map((item) => (
+          <Card
+            key={item.key}
+            style={{
+              flex: '1 1 220px',
+              minWidth: 220,
+              borderRadius: 20,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            bodyStyle={{ padding: 18 }}
+          >
+            <Space vertical align="start" spacing={10}>
+              <Tag color={item.color}>{item.title}</Tag>
+              <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>{item.value}</Typography.Title>
+              <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>{item.helper}</Typography.Text>
+            </Space>
+          </Card>
+        ))}
+      </Space>
+
+      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        <Col xs={24} xl={15}>
+          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }}>
+            <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              {actionLanes.map((item) => (
+                <Card
+                  key={item.key}
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                    border: '1px solid rgba(148,163,184,0.14)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Tag color="blue">{item.tag}</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                    <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>{item.description}</Typography.Text>
+                    <Button theme="solid" type="primary" onClick={() => navigate(item.path)}>{item.button}</Button>
+                  </Space>
+                </Card>
+              ))}
+            </Space>
+          </Card>
+        </Col>
+        <Col xs={24} xl={9}>
+          <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
+            <Space vertical align="start" spacing={12}>
+              <Typography.Paragraph style={{ marginBottom: 0 }}>
+                即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。
+              </Typography.Paragraph>
+              {sharedConsoleLinks.map((item) => (
+                <Tag key={item.key} color="grey" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>
+                  {item.label} · {item.path}
+                </Tag>
+              ))}
+            </Space>
+          </Card>
+        </Col>
+      </Row>
 
       <Row gutter={16} style={{ width: '100%' }}>
         <Col span={6}>
@@ -86,7 +259,7 @@ export function AdminSuppliersPage() {
         </Col>
         <Col span={6}>
           <Card title="低完成率供应商" loading={loading}>
-            <Typography.Title heading={2} style={{ margin: 0 }}>{highlights.risky}</Typography.Title>
+            <Typography.Title heading={2} style={{ margin: 0 }}>{highlights.riskySuppliers.length}</Typography.Title>
             <Typography.Text type="tertiary">完成率低于 70% 的供应商数量</Typography.Text>
           </Card>
         </Col>
@@ -100,9 +273,9 @@ export function AdminSuppliersPage() {
           <Tag color="green">完成订单流水：{amountLabel(summary?.orders.gross_revenue ?? 0)}</Tag>
         </Space>
         <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <Button theme="solid" type="primary" onClick={() => navigate('/admin/users')}>前往处理结算 / 争议</Button>
-          <Button onClick={() => navigate('/admin/risk')}>查看风控中心</Button>
-          <Button onClick={() => navigate('/admin/audit')}>查看审计日志</Button>
+          <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>前往处理结算 / 争议</Button>
+          <Button onClick={() => navigate(ADMIN_RISK_ROUTE)}>查看风控中心</Button>
+          <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查看审计日志</Button>
         </div>
       </Card>
 
@@ -127,8 +300,8 @@ export function AdminSuppliersPage() {
                     </div>
                   </div>
                   <Space>
-                    <Button theme="solid" type="primary" onClick={() => navigate('/admin/users')}>去确认结算</Button>
-                    <Button onClick={() => navigate('/admin/audit')}>查审计</Button>
+                    <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>去确认结算</Button>
+                    <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查审计</Button>
                   </Space>
                 </Space>
               </Card>
@@ -158,11 +331,11 @@ export function AdminSuppliersPage() {
             {
               title: '运营动作',
               key: 'actions',
-              render: (_, record) => (
+              render: () => (
                 <Space wrap>
-                  <Button theme="solid" type="primary" onClick={() => navigate('/admin/users')}>处理结算</Button>
-                  <Button onClick={() => navigate('/admin/risk')}>看风控</Button>
-                  <Button onClick={() => navigate('/admin/audit')}>查审计</Button>
+                  <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>处理结算</Button>
+                  <Button onClick={() => navigate(ADMIN_RISK_ROUTE)}>看风控</Button>
+                  <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查审计</Button>
                 </Space>
               ),
             },

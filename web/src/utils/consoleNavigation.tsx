@@ -318,10 +318,22 @@ export function groupedConsolePaths() {
   }
 }
 
-export function visibleQuickActionPaths(menu: Array<{ path: string }>, currentPath: string) {
-  const allowed = new Set(menu.map((item) => item.path))
+export function quickActionRoutesForRole(role?: string) {
+  const effectiveRole: Role = role === 'admin' || role === 'supplier' ? role : 'user'
   return consoleRoutes
-    .filter((item) => typeof item.quickActionPriority === 'number' && item.path !== currentPath && allowed.has(item.path))
-    .sort((a, b) => (a.quickActionPriority ?? 999) - (b.quickActionPriority ?? 999))
+    .filter((item) => item.allowedRoles.includes(effectiveRole) && item.quickActionPriority !== undefined)
+    .sort((a, b) => {
+      const priorityDiff = (a.quickActionPriority ?? 0) - (b.quickActionPriority ?? 0)
+      if (priorityDiff !== 0) {
+        return priorityDiff
+      }
+      return a.path.localeCompare(b.path)
+    })
+}
+
+export function visibleQuickActionPaths(menu: Array<{ path: string }>, currentPath: string, role?: string) {
+  const allowed = new Set(menu.map((item) => item.path))
+  return quickActionRoutesForRole(role)
     .map((item) => item.path)
+    .filter((path) => path !== currentPath && allowed.has(path))
 }

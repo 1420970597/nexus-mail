@@ -32,6 +32,7 @@ describe('ConsoleLayout', () => {
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'admin-users', label: '用户管理', path: '/admin/users' },
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
         { key: 'api-keys', label: 'API Keys', path: '/api-keys' },

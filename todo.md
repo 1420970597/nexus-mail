@@ -46,6 +46,11 @@
 - 已补齐 `web/src/pages/LoginPage.test.tsx`、`web/src/pages/WebhooksPage.test.tsx` focused 回归，覆盖新的共享接入文案、注册 CTA 切换、注册成功落回共享控制台，以及普通用户 Webhook 首轮联调建议卡片展示。
 - 控制器已重新通过 `pnpm --dir web test -- src/pages/LoginPage.test.tsx src/pages/WebhooksPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/me`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、`GET /login` 前端壳可达性，以及 `POST /api/v1/webhooks/endpoints` 的域名不可解析 400 真实错误路径、`GET /api/v1/webhooks/endpoints` 列表查询，验证新的注册后接入叙事未破坏共享控制台与真实 Webhook 契约。
 - 本轮五维评审结论：产品/规格与安全/集成初审曾指出“90 秒 / 15 分钟内完成”及时限式联调承诺会夸大前端无法证明的后端保证，现已改写为“首轮接入建议 / 回调联调建议”并复验通过；代码质量评审通过，仅保留登录页三段 onboarding 区块存在轻微文案重复为非阻塞债务；测试/可靠性评审通过，保留既有 Semi UI `findDOMNode`、Testing Library `act(...)` 与 React Router future warning 噪声为后续清理项；性能/运维评审通过，保留前端大 chunk 告警为后续非阻塞优化项。
+- 本轮已完成新的前端优先纵向切片：`AdminSuppliersPage` 升级为 **Supplier Mission Control** 深色共享控制台页面，在单一登录后壳内把高待结算、低履约风险、争议敞口与共享接入桥接收敛为同一管理员供应商运营工作台；新增管理员主任务流卡片，统一从该页回流到结算/争议、风控与审计动作，并明确 API Keys / Webhook / Docs 仍属于同一共享控制台链路，而不是拆分额外后台。
+- 已补齐 `web/src/pages/AdminSuppliersPage.test.tsx` focused 回归，覆盖：Supplier Mission Control 文案、高待结算/风险/接入桥接展示，以及从该页进入结算 / 风控 / 审计页面的代表性导航断言；同时修正共享路由常量 `API_KEYS_ROUTE` 与 `visibleQuickActionPaths` 导出，保持 `ConsoleLayout` 与 onboarding 路径常量一致。
+- 控制器已通过 `pnpm --dir web test -- src/pages/AdminSuppliersPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose config`、`docker compose up -d --build web api gateway`、`GET /healthz`，以及真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/me`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、管理员 `POST /api/v1/auth/login`、`GET /api/v1/admin/overview`、`GET /api/v1/admin/risk`、`GET /api/v1/admin/audit?limit=5`，验证新的管理员供应商运营切片未破坏共享控制台注册后链路与真实管理端接口契约。
+- 本轮五维评审结论：产品/规格初审曾指出共享接入桥接中的 API Keys 路径常量漂移，现已修复 `API_KEYS_ROUTE='/api-keys'` 并复验通过；代码质量、安全/集成、测试/可靠性、性能/运维评审通过，保留 `ConsoleLayout.test.tsx` 旧断言与 Semi UI `findDOMNode` / React Router future warnings / 前端大 chunk 告警为后续非阻塞债务。
+
 
 ## 0. 项目目标
 
