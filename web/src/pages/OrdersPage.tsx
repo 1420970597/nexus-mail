@@ -11,7 +11,7 @@ import {
   getActivationResult,
 } from '../services/activation'
 import { useAuthStore } from '../store/authStore'
-import { hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, PROJECTS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function statusColor(status: string) {
   switch (status) {
@@ -114,8 +114,8 @@ export function OrdersPage() {
   const waitingCount = items.filter((item) => item.status === 'WAITING_EMAIL').length
   const finishedCount = items.filter((item) => item.status === 'FINISHED').length
   const latestMailbox = items.find((item) => item.email_address)?.email_address ?? '—'
-  const canOpenProjects = hasMenuPath(menu, '/projects')
-  const canOpenApiKeys = hasMenuPath(menu, '/api-keys')
+  const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
 
   return (
@@ -171,12 +171,12 @@ export function OrdersPage() {
                   <Empty description="当前暂无订单，可先前往项目市场下单。" image={null}>
                     <Space>
                       {canOpenProjects ? (
-                        <Button type="primary" theme="solid" onClick={() => navigate('/projects')}>
+                        <Button type="primary" theme="solid" onClick={() => navigate(PROJECTS_ROUTE)}>
                           前往项目市场
                         </Button>
                       ) : null}
                       {canOpenApiKeys ? (
-                        <Button theme="borderless" type="primary" onClick={() => navigate('/api-keys')}>
+                        <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
                           查看 API 接入准备
                         </Button>
                       ) : null}
@@ -260,12 +260,12 @@ export function OrdersPage() {
                   </Typography.Paragraph>
                   <Space style={{ marginTop: 12 }}>
                     {canOpenProjects ? (
-                      <Button type="primary" theme="solid" onClick={() => navigate('/projects')}>
+                      <Button type="primary" theme="solid" onClick={() => navigate(PROJECTS_ROUTE)}>
                         前往项目市场
                       </Button>
                     ) : null}
                     {canOpenApiKeys ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate('/api-keys')}>
+                      <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
                         管理 API Keys
                       </Button>
                     ) : null}

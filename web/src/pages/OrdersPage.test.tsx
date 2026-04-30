@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { OrdersPage } from './OrdersPage'
 import * as activationService from '../services/activation'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, PROJECTS_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/activation', () => ({
   getActivationOrders: vi.fn(),
@@ -116,17 +117,25 @@ describe('OrdersPage', () => {
   })
 
   it('shows shared-console next actions when the order list is empty', async () => {
+    const user = userEvent.setup()
     mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
 
     render(
-      <MemoryRouter>
-        <OrdersPage />
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+          <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        </Routes>
       </MemoryRouter>,
     )
 
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: '前往项目市场' }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('button', { name: '查看 API 接入准备' }).length).toBeGreaterThan(0)
+
+    await user.click(screen.getAllByRole('button', { name: '查看 API 接入准备' })[0])
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
 
   it('opens result modal for an existing order', async () => {

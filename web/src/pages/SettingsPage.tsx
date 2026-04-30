@@ -12,11 +12,12 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userFirstRunStorageKeyForUser } from './DashboardPage'
 import { MenuItem, useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE } from '../utils/consoleNavigation'
 
 const sharedFirstRunRoutes = {
-  projects: '/projects',
-  orders: '/orders',
-  apiKeys: '/api-keys',
+  projects: PROJECTS_ROUTE,
+  orders: ORDERS_ROUTE,
+  apiKeys: API_KEYS_ROUTE,
 } as const
 
 interface ShortcutCard {
@@ -103,12 +104,12 @@ export function SettingsPage() {
             icon: <IconUser />,
           }]
         : []),
-      ...(menuHasPath(menu, '/api-keys')
+      ...(menuHasPath(menu, API_KEYS_ROUTE)
         ? [{
             title: 'API 接入入口',
             description: '快速跳转 API Keys 完成 token、白名单与回调前置准备，再从顶栏与侧边栏进入 API 文档。',
             button: '管理 API Keys',
-            path: '/api-keys',
+            path: API_KEYS_ROUTE,
             tag: '集成入口',
             accent: 'rgba(16,185,129,0.18)',
             icon: <IconArticle />,

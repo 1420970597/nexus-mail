@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProfilePage } from './ProfilePage'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, PROJECTS_ROUTE } from '../utils/consoleNavigation'
 
 describe('ProfilePage', () => {
   afterEach(() => {
@@ -17,15 +18,19 @@ describe('ProfilePage', () => {
       user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'projects', label: '项目市场', path: '/projects' },
-        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
         { key: 'profile', label: '个人资料', path: '/profile' },
       ],
     })
 
     render(
-      <MemoryRouter>
-        <ProfilePage />
+      <MemoryRouter initialEntries={['/profile']}>
+        <Routes>
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+          <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        </Routes>
       </MemoryRouter>,
     )
 
@@ -36,8 +41,21 @@ describe('ProfilePage', () => {
     expect(screen.queryByRole('button', { name: '打开域名管理' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '打开风控中心' })).not.toBeInTheDocument()
 
+    await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+
+    render(
+      <MemoryRouter initialEntries={['/profile']}>
+        <Routes>
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+          <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
     await user.click(screen.getAllByRole('button', { name: '前往项目市场' })[0])
-    await waitFor(() => expect(screen.getByText('用户接入焦点')).toBeInTheDocument())
+    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
   })
 
   it('renders admin-facing shared-console next actions from profile', () => {

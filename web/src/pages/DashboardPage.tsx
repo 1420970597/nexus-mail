@@ -13,16 +13,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminOverview, getDashboardOverview, AdminOverviewResponse, DashboardOverviewResponse } from '../services/auth'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE } from '../utils/consoleNavigation'
 
 export function userFirstRunStorageKeyForUser(userId?: number | null) {
   return `nexus-mail-user-first-run-dismissed:${userId ?? 'guest'}`
 }
 
 const sharedFirstRunRoutes = {
-  projects: '/projects',
-  orders: '/orders',
-  apiKeys: '/api-keys',
-  settings: '/settings',
+  projects: PROJECTS_ROUTE,
+  orders: ORDERS_ROUTE,
+  apiKeys: API_KEYS_ROUTE,
+  settings: SETTINGS_ROUTE,
 } as const
 
 interface FirstRunStep {
@@ -235,12 +236,12 @@ function roleActions(menu: MenuItem[], role?: string): RoleAction[] {
       accent: 'rgba(113, 112, 255, 0.28)',
     })
   }
-  if (itemsByPath.has('/api-keys')) {
+  if (itemsByPath.has(API_KEYS_ROUTE)) {
     actions.push({
       key: 'api-keys',
       title: '集成与回调',
       description: '继续配置 API Keys、白名单与文档，完成对外 API / Webhook 对接。',
-      path: '/api-keys',
+      path: API_KEYS_ROUTE,
       button: '管理 API Keys',
       icon: <IconSetting />,
       accent: 'rgba(16, 185, 129, 0.24)',
@@ -312,8 +313,8 @@ function roleSurface(menu: MenuItem[], role?: string): RoleSurfaceItem[] {
   if (itemsByPath.has('/projects')) {
     surfaces.push({ label: '采购执行', route: '/projects', summary: '项目市场与订单中心承接真实购买链路。' })
   }
-  if (itemsByPath.has('/api-keys')) {
-    surfaces.push({ label: '集成入口', route: '/api-keys', summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' })
+  if (itemsByPath.has(API_KEYS_ROUTE)) {
+    surfaces.push({ label: '集成入口', route: API_KEYS_ROUTE, summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' })
   }
   return surfaces
 }

@@ -257,6 +257,8 @@ export function titleFromPathname(pathname: string) {
   if (pathname === '/') return '控制台总览'
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 0) return '控制台总览'
+  const route = consoleRoutes.find((item) => item.path === pathname)
+  if (route) return route.title
   const raw = segments[segments.length - 1]
   return raw
     .split('-')

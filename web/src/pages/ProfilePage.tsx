@@ -2,7 +2,7 @@ import { Banner, Button, Card, Col, Descriptions, Row, Space, Tag, Typography } 
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, PROJECTS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 interface FocusAction {
   label: string
@@ -41,8 +41,8 @@ export function ProfilePage() {
   const navigate = useNavigate()
   const { user, menu } = useAuthStore()
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
-  const canOpenProjects = hasMenuPath(menu, '/projects')
-  const canOpenApiKeys = hasMenuPath(menu, '/api-keys')
+  const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const canOpenSupplierDomains = hasMenuPath(menu, '/supplier/domains')
   const canOpenAdminRisk = hasMenuPath(menu, '/admin/risk')
 
@@ -73,7 +73,7 @@ export function ProfilePage() {
         }
       }
       default: {
-        const actionPath = canOpenProjects ? '/projects' : fallbackRoute
+        const actionPath = canOpenProjects ? PROJECTS_ROUTE : fallbackRoute
         return {
           title: '用户接入焦点',
           summary: '在同一套控制台里完成项目采购、订单追踪、API Key 接入与回调观察，减少跨角色跳转。',
@@ -171,12 +171,12 @@ export function ProfilePage() {
                   </Typography.Paragraph>
                   <Space wrap>
                     {user?.role === 'user' && canOpenProjects ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate('/projects')}>
+                      <Button theme="borderless" type="primary" onClick={() => navigate(PROJECTS_ROUTE)}>
                         打开项目市场
                       </Button>
                     ) : null}
                     {user?.role === 'user' && canOpenApiKeys ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate('/api-keys')}>
+                      <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
                         打开 API Keys
                       </Button>
                     ) : null}

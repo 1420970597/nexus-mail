@@ -367,6 +367,45 @@ describe('App', () => {
     expect(screen.queryByText('管理员主任务')).not.toBeInTheDocument()
   })
 
+  it('uses the shared API keys route constant for register onboarding entrypoints', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    mockedRegister.mockResolvedValueOnce({
+      token: 'register-token',
+      refresh_token: 'register-refresh',
+      user: { id: 8, email: 'new@example.com', role: 'user' },
+    })
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 8, email: 'new@example.com', role: 'user' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderApp(['/login'])
+
+    expect(API_KEYS_ROUTE).toBe('/api-keys')
+
+    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
+    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: '管理 API Keys' })[0])
+
+    expect(await screen.findByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /API Keys/ })).toHaveClass('semi-navigation-item-selected')
+  })
+
   it('keeps settings guidance entry available after dismissing first-run mission cards for default user', async () => {
     const user = userEvent.setup()
     window.localStorage.removeItem(userFirstRunStorageKeyForUser(1))
