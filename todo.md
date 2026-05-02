@@ -25,6 +25,11 @@
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
 ### 最新执行检查点（2026-05-02）
+- 本轮已完成新的前端优先纵向切片：`AdminRiskPage` 与 `AdminAuditPage` 已同步升级为 **Risk Mission Control** / **Audit Mission Control** 深色共享控制台页面，在单一登录后壳内把真实风险信号、规则编辑、审计回放、高危运营后果与接入复盘收敛到同一条管理员运营路径；继续保持角色差异只体现在菜单、权限与局部 CTA，不新增独立风控后台或独立审计后台。
+- 已新增 `web/src/pages/AdminRiskPage.test.tsx` 与 `web/src/pages/AdminAuditPage.test.tsx`，覆盖：Risk / Audit Mission Control 深色壳渲染、共享控制台桥接、管理员主任务流导航（风控↔审计↔资金工作台↔API Keys）以及规则保存 / 审计筛选等 focused 回归；同时同步更新 `web/src/App.test.tsx` 对新页面标题与导航入口的断言。
+- 控制器已通过 `pnpm --dir web test -- src/pages/AdminRiskPage.test.tsx src/pages/AdminAuditPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、管理员 `POST /api/v1/auth/login`、`GET /api/v1/admin/risk`、`GET /api/v1/admin/audit?limit=5`、`GET /api/v1/auth/api-keys`、`GET /docs`，验证注册后共享控制台链路、管理员风险/审计页面依赖的真实接口契约与文档入口保持可用。
+- 本轮五维评审结论：产品/规格、安全/集成、性能/运维通过；代码质量与测试/可靠性评审存在跨仓库污染结果，已按仓库隔离规则丢弃并改由控制器完成针对当前 diff 的三轮直接复核（Focused Vitest / build / real API 回放）后通过。保留前端 chunk 体积告警、Semi UI `findDOMNode` 与既有 Testing Library `act(...)` 噪声为后续非阻塞债务。
+
 - 本轮已完成新的前端优先纵向切片：`ApiDocsPage` 已升级为 **Docs Mission Control** 深色共享控制台页面，在单一登录后壳内把 OpenAPI / Redoc、API Keys、Webhook 联调与真实业务回放收敛为同一条文档→接入→验证路径；继续保持角色差异只体现在 copy / CTA / 菜单权限，不新增独立文档后台或第二套登录壳。
 - 已新增 `web/src/pages/ApiDocsPage.test.tsx`，覆盖：普通用户 Docs Mission Control 文案、API Keys 导航、嵌入式 Redoc iframe，以及管理员视角下文档页保留 API 契约与共享控制台叙事、但不暴露缺失的 Webhook 快捷入口。
 - 控制器已通过 `pnpm --dir web test -- src/pages/ApiDocsPage.test.tsx src/App.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`、`GET /api/v1/projects/inventory`、`GET /docs`，验证注册后普通用户仍能在共享控制台菜单中看到 `/docs`、`/api-keys`、`/webhooks` 并访问文档壳页面。

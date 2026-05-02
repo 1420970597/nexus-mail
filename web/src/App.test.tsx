@@ -291,7 +291,7 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
+    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '保存规则' })).toBeInTheDocument()
   })
 
@@ -682,12 +682,12 @@ describe('App', () => {
 
     await waitFor(() => expect(screen.getByText('风险规则联动')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /前往风控中心/ }))
-    expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
+    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
 
     renderApp([SETTINGS_ROUTE])
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: /查看审计日志/ }))
-    expect(await screen.findByText('审计回放与追踪')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: /查看审计日志/ })[0])
+    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
   })
 
   it('renders webhook settings page for authenticated admin', async () => {
@@ -708,7 +708,7 @@ describe('App', () => {
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
-    expect(screen.getByText('发送测试投递')).toBeInTheDocument()
+    expect(screen.getAllByText('发送测试投递').length).toBeGreaterThan(0)
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
@@ -747,7 +747,7 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    expect(await screen.findByText('风险指挥台')).toBeInTheDocument()
+    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
     expect(screen.getByText('规则命中概览')).toBeInTheDocument()
     expect(screen.getByText('处置建议')).toBeInTheDocument()
     expect(screen.getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
@@ -775,7 +775,7 @@ describe('App', () => {
 
     renderApp(['/admin/audit'])
 
-    expect(await screen.findByText('审计回放与追踪')).toBeInTheDocument()
+    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
     expect(screen.getByText('高风险动作')).toBeInTheDocument()
     expect(screen.getAllByText('denied_whitelist').length).toBeGreaterThan(0)
     expect(screen.getByText('blocked')).toBeInTheDocument()
