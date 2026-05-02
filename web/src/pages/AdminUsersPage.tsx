@@ -3,7 +3,8 @@ import { IconAlertTriangle, IconBolt, IconPulse, IconSafe, IconServer, IconShiel
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, settleSupplierPending, OrderDispute, WalletOverview } from '../services/finance'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function disputeStatusColor(status: string) {
   switch (status) {
@@ -81,6 +82,7 @@ export function buildDisputeResolutionPayload(values: {
 
 export function AdminUsersPage() {
   const navigate = useNavigate()
+  const { menu, user } = useAuthStore()
   const [items, setItems] = useState<WalletOverview[]>([])
   const [disputes, setDisputes] = useState<OrderDispute[]>([])
   const [loading, setLoading] = useState(true)
@@ -167,6 +169,12 @@ export function AdminUsersPage() {
     return Math.round(walletTotal / items.length)
   }, [items.length, walletTotal])
   const refundExposure = useMemo(() => disputes.reduce((sum, item) => sum + Number(item.refund_amount || 0), 0), [disputes])
+  const canOpenRisk = hasMenuPath(menu, ADMIN_RISK_ROUTE)
+  const canOpenAudit = hasMenuPath(menu, ADMIN_AUDIT_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
 
   const missionSignals = useMemo<AdminMissionSignal[]>(() => [
     {
@@ -226,11 +234,29 @@ export function AdminUsersPage() {
     },
   ], [])
 
-  const sharedConsoleLinks = useMemo(() => [
-    { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE, icon: <IconSafe /> },
-    { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE, icon: <IconBolt /> },
-    { key: 'docs', label: 'API 文档', path: DOCS_ROUTE, icon: <IconShield /> },
-  ], [])
+  const visibleActionLanes = useMemo(
+    () => actionLanes.filter((item) => {
+      if (item.path === ADMIN_RISK_ROUTE) return canOpenRisk
+      if (item.path === ADMIN_AUDIT_ROUTE) return canOpenAudit
+      if (item.path === API_KEYS_ROUTE) return canOpenApiKeys
+      return true
+    }),
+    [actionLanes, canOpenApiKeys, canOpenAudit, canOpenRisk],
+  )
+
+  const visibleSharedConsoleLinks = useMemo(
+    () => [
+      ...(canOpenApiKeys ? [{ key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE, icon: <IconSafe /> }] : []),
+      ...(canOpenWebhooks ? [{ key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE, icon: <IconBolt /> }] : []),
+      ...(canOpenDocs ? [{ key: 'docs', label: 'API 文档', path: DOCS_ROUTE, icon: <IconShield /> }] : []),
+    ],
+    [canOpenApiKeys, canOpenDocs, canOpenWebhooks],
+  )
+
+  const shouldShowFallback = useMemo(
+    () => fallbackRoute !== ADMIN_USERS_ROUTE && !canOpenRisk && !canOpenAudit && !canOpenApiKeys && !canOpenWebhooks && !canOpenDocs,
+    [fallbackRoute, canOpenApiKeys, canOpenAudit, canOpenDocs, canOpenRisk, canOpenWebhooks],
+  )
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -299,7 +325,7 @@ export function AdminUsersPage() {
         <Col xs={24} xl={15}>
           <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }}>
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-              {actionLanes.map((item) => (
+              {visibleActionLanes.map((item) => (
                 <Card
                   key={item.key}
                   style={{
@@ -327,11 +353,32 @@ export function AdminUsersPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。
               </Typography.Paragraph>
-              {sharedConsoleLinks.map((item) => (
+              {visibleSharedConsoleLinks.map((item) => (
                 <Tag key={item.key} color="grey" prefixIcon={item.icon}>
                   {item.label} · {item.path}
                 </Tag>
               ))}
+              {shouldShowFallback ? (
+                <Card
+                  data-testid="admin-users-shared-console-fallback"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                    border: '1px solid rgba(148,163,184,0.14)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Tag color="cyan">Fallback</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到推荐工作台继续管理员主链路</Typography.Title>
+                    <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
+                      当前菜单未暴露风控、审计或共享接入入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
+                    </Typography.Text>
+                    <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>返回推荐工作台</Button>
+                  </Space>
+                </Card>
+              ) : null}
             </Space>
           </Card>
         </Col>

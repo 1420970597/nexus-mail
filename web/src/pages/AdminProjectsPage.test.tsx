@@ -10,6 +10,7 @@ import {
   ADMIN_PRICING_ROUTE,
   ADMIN_RISK_ROUTE,
   API_KEYS_ROUTE,
+  DASHBOARD_ROUTE,
   DOCS_ROUTE,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
@@ -172,5 +173,29 @@ describe('AdminProjectsPage', () => {
       timeout_seconds: 240,
       is_active: false,
     })
+  })
+
+  it('keeps only the fallback CTA when admin pricing is isolated from risk/audit/integration entries', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 3, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
+        { key: 'admin-pricing', label: '价格策略', path: ADMIN_PRICING_ROUTE },
+      ],
+    })
+
+    renderAdminProjectsPage()
+
+    expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('admin-pricing-fallback-button')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 })

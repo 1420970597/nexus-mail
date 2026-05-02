@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
 import * as financeService from '../services/finance'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE, DASHBOARD_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/finance', async () => {
   const actual = await vi.importActual<typeof import('../services/finance')>('../services/finance')
@@ -31,6 +32,7 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
         <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
         <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -38,6 +40,20 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
 
 describe('AdminUsersPage shared-console admin workbench', () => {
   beforeEach(() => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
+        { key: 'admin-users', label: '用户管理', path: ADMIN_USERS_ROUTE },
+        { key: 'admin-risk', label: '风控中心', path: ADMIN_RISK_ROUTE },
+        { key: 'admin-audit', label: '审计日志', path: ADMIN_AUDIT_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
     mockedGetAdminWalletUsers.mockResolvedValue({
       items: [
         {
@@ -71,6 +87,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
   it('renders admin finance mission-control shell with metrics and shared-console guidance', async () => {
@@ -132,5 +149,32 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     await user.type(screen.getByLabelText('争议单 ID'), '8')
     await user.click(screen.getByRole('button', { name: '处理争议单' }))
     await waitFor(() => expect(mockedResolveAdminDispute).toHaveBeenCalled())
+  })
+
+  it('suppresses unavailable shared-console CTAs and falls back to dashboard when only the finance page remains', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 2, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
+        { key: 'admin-users', label: '用户管理', path: ADMIN_USERS_ROUTE },
+      ],
+    })
+
+    renderAdminUsersPage()
+
+    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(screen.queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
+    expect(screen.queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
+    expect(screen.queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    expect(screen.getByTestId('admin-users-shared-console-fallback')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 })

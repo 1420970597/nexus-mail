@@ -25,6 +25,10 @@
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
 ### 最新执行检查点（2026-05-02）
+- 本轮继续按“前端优先”补齐管理员 shared-console CTA 权限抑制基线：已为 `AdminUsersPage` 与 `AdminProjectsPage` 收口风险 / 审计 / API Keys / Webhook / Docs 入口的 `menu` 真值过滤，并在相关入口全部缺失且推荐工作台不再指向当前页时，仅保留“返回推荐工作台”回退动作，继续保持单一登录后深色控制台而不是泄露未授权管理入口。
+- 已补齐 `web/src/pages/AdminUsersPage.shared-console.test.tsx` 与 `web/src/pages/AdminProjectsPage.test.tsx` focused 回归，覆盖：管理员资金工作台在仅剩当前页时抑制共享接入 CTA 并回退到 dashboard、价格策略页在风险/审计/接入入口缺失时仅保留 fallback 按钮、以及对应真实导航断言；同时为价格策略页新增稳定 `data-testid="admin-pricing-fallback-button"`。
+- 控制器已重新通过 `pnpm --dir web exec vitest run src/pages/AdminProjectsPage.test.tsx src/pages/AdminUsersPage.shared-console.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`，并完成真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/dashboard/overview`、管理员 `POST /api/v1/auth/login`、`GET /api/v1/auth/menu`、`GET /api/v1/admin/overview`、`GET /api/v1/admin/risk`、`GET /api/v1/admin/audit?limit=5`、`GET /api/v1/admin/projects`，以及前端 `/admin/pricing`、`/admin/users` 壳 200，确认新的管理员页面权限抑制没有破坏注册后普通用户菜单、管理员真实概览接口与共享控制台前端入口。
+- 本轮五维评审结论：产品/规格、代码质量、安全/集成、测试/可靠性、性能/运维均通过；仅记录非阻塞后续项：`AdminUsersPage` 头部固定提示 Tag 未来可继续按 `menu` 真值收紧文案，既有 Semi UI `findDOMNode` / RTL `act(...)` 与前端 chunk 体积告警继续保留为后续债务。
 - 本轮继续按"前端优先"补齐管理员 shared-console 权限抑制基线：`AdminRiskPage` 与 `AdminAuditPage` 已接入 `useAuthStore` + `menu` 真值，管理员主任务流 CTA 与共享接入桥接仅在服务端实际暴露 `/admin/audit`、`/admin/risk`、`/admin/users`、`/api-keys`、`/docs` 时才渲染；当这些入口全部缺失且推荐工作台不再指向当前页时，仅展示单一 `返回推荐工作台` 回退动作，继续保持单一登录后深色控制台，不泄露未授权管理入口。
 - 已补齐 `web/src/pages/AdminRiskPage.test.tsx` 与 `web/src/pages/AdminAuditPage.test.tsx` focused 回归，覆盖：风控 / 审计页在权限缺失时抑制任务流与 bridge CTA、出现推荐工作台 fallback、以及当当前页已是唯一可见管理员路由时隐藏 fallback；同时新增对应 fallback 标记，避免测试回归依赖脆弱文案匹配。
 - 控制器已重新通过 `pnpm --dir web exec vitest run src/pages/AdminRiskPage.test.tsx src/pages/AdminAuditPage.test.tsx`、`pnpm --dir web build`、`go test ./...`，确认本轮前端权限抑制切片未引入新的前后端回归；当前仍保留既有 Semi UI `findDOMNode` / `Form` 警告与前端 chunk 体积告警为非阻塞债务。

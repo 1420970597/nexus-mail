@@ -6,6 +6,7 @@ import { InventoryItem, ProjectItem, getAdminProjectOfferings, getAdminProjects,
 import { useAuthStore } from '../store/authStore'
 import {
   ADMIN_AUDIT_ROUTE,
+  ADMIN_PRICING_ROUTE,
   ADMIN_RISK_ROUTE,
   API_KEYS_ROUTE,
   DOCS_ROUTE,
@@ -330,8 +331,8 @@ export function AdminProjectsPage() {
         <Space wrap>
           <Tag color="green" prefixIcon={<IconActivity />}>价格与成功率调整后，建议立即回到风控中心确认风险信号是否同步变化</Tag>
           <Tag color="blue" prefixIcon={<IconArticle />}>若需验证接入叙事，可继续进入 API Keys / Webhooks / Docs，保持管理端与共享接入路径统一</Tag>
-          {fallbackRoute !== '/admin/pricing' ? (
-            <Button theme="borderless" type="primary" onClick={() => navigate(fallbackRoute)}>
+          {fallbackRoute !== ADMIN_PRICING_ROUTE ? (
+            <Button data-testid="admin-pricing-fallback-button" theme="borderless" type="primary" onClick={() => navigate(fallbackRoute)}>
               返回推荐工作台
             </Button>
           ) : null}
