@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { OrdersPage } from './OrdersPage'
@@ -104,6 +104,19 @@ describe('OrdersPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
+  it('renders the fulfillment shared-console slice shell', async () => {
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
+    expect(screen.getByText('订单中心')).toBeInTheDocument()
+    expect(screen.getByText('把首轮采购后的邮箱分配、提取结果、履约终态与接入回放统一收敛在同一套深色共享控制台内。')).toBeInTheDocument()
+    expect(screen.getByText('履约路径信号')).toBeInTheDocument()
+  })
+
   it('renders the unified order workbench with real-order messaging', async () => {
     render(
       <MemoryRouter>
@@ -111,7 +124,7 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('统一订单工作台')).toBeInTheDocument()
+    expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
     expect(screen.getByText('待收信')).toBeInTheDocument()
     expect(screen.getByText('READY / FINISHED / TIMEOUT 全部来自真实 API 返回')).toBeInTheDocument()
   })
@@ -206,36 +219,46 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('订单中心')).toBeInTheDocument()
+    expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
     expect(screen.queryByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).not.toBeInTheDocument()
   })
 
-  it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
-    mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
-    useAuthStore.setState({
-      token: 'token',
-      refreshToken: 'refresh-token',
-      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
-      menu: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'orders', label: '订单中心', path: '/orders' },
-      ],
-    })
+  it('renders a mission-control continuation lane from orders into API integration and procurement replay', async () => {
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
+    const lane = screen.getByText('首轮履约与接入衔接').closest('.semi-card')
+    expect(lane).not.toBeNull()
+    const scoped = within(lane as HTMLElement)
+    expect(scoped.getByText('订单结果 → API 接入 → 再次采购')).toBeInTheDocument()
+    expect(scoped.getByText('先确认邮箱与提取结果，再继续程序化接入。')).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /回到项目市场/ })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+  })
+
+  it('navigates from the continuation lane back to the procurement market inside the shared console', async () => {
+    const user = userEvent.setup()
 
     render(
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/" element={<div>控制台总览页面</div>} />
+          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+          <Route path={API_KEYS_ROUTE} element={<div>开发者 API 接入工作台</div>} />
         </Routes>
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /回到项目市场/ }))
+    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
   })
 
-  it('navigates from the empty-state return CTA back to the preferred workspace', async () => {
+  it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
     const user = userEvent.setup()
     mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
     useAuthStore.setState({

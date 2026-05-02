@@ -1,5 +1,5 @@
 import { Banner, Button, Card, Col, Descriptions, Empty, Modal, Row, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { IconActivity, IconClock, IconMail, IconTickCircle } from '@douyinfe/semi-icons'
+import { IconActivity, IconArrowRight, IconClock, IconMail, IconSafe, IconTickCircle } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -131,17 +131,54 @@ export function OrdersPage() {
           bodyStyle={{ padding: 24 }}
         >
           <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-            <Tag color="cyan" shape="circle">统一订单工作台</Tag>
+            <Tag color="cyan" shape="circle">共享控制台履约切片</Tag>
             <div>
               <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>订单中心</Typography.Title>
               <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
-                在共享控制台中统一追踪当前用户的真实激活订单、邮箱分配、提取结果与订单终态，让采购与履约观察不再依赖独立后台。
+                把首轮采购后的邮箱分配、提取结果、履约终态与接入回放统一收敛在同一套深色共享控制台内。
               </Typography.Paragraph>
             </div>
             <Space wrap>
               <Tag color="grey" prefixIcon={<IconMail />}>下单后回到此页追踪邮箱与验证码提取</Tag>
               <Tag color="grey" prefixIcon={<IconActivity />}>READY / FINISHED / TIMEOUT 全部来自真实 API 返回</Tag>
               {canOpenApiKeys ? <Tag color="blue">接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用</Tag> : null}
+              <Tag color="grey" prefixIcon={<IconTickCircle />}>履约路径信号</Tag>
+            </Space>
+          </Space>
+        </Card>
+
+        <Card
+          style={{
+            width: '100%',
+            borderRadius: 22,
+            background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.94) 56%, rgba(8,9,10,0.98) 100%)',
+            border: '1px solid rgba(125,211,252,0.16)',
+          }}
+          bodyStyle={{ padding: 22 }}
+        >
+          <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+            <Tag color="cyan" shape="circle">首轮履约与接入衔接</Tag>
+            <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+              <div>
+                <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+                  订单结果 → API 接入 → 再次采购
+                </Typography.Title>
+                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
+                  先确认邮箱与提取结果，再继续程序化接入。
+                </Typography.Paragraph>
+              </div>
+              <Space wrap>
+                {canOpenProjects ? (
+                  <Button theme="borderless" type="primary" icon={<IconArrowRight />} onClick={() => navigate(PROJECTS_ROUTE)}>
+                    回到项目市场
+                  </Button>
+                ) : null}
+                {canOpenApiKeys ? (
+                  <Button type="primary" theme="solid" icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
+                    打开 API Keys
+                  </Button>
+                ) : null}
+              </Space>
             </Space>
           </Space>
         </Card>

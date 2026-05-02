@@ -1,10 +1,10 @@
 import { Banner, Button, Card, Col, Empty, Row, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { IconBolt, IconBriefStroked, IconHistogram, IconServer } from '@douyinfe/semi-icons'
+import { IconArrowRight, IconBolt, IconBriefStroked, IconHistogram, IconSafe, IconServer } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createActivationOrder, getInventory, InventoryItem } from '../services/activation'
 import { useAuthStore } from '../store/authStore'
-import { hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function formatCurrency(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -74,8 +74,9 @@ export function ProjectsPage() {
   const uniqueProjects = useMemo(() => new Set(grouped.map((item) => item.project_key)).size, [grouped])
   const topSuccess = useMemo(() => grouped.reduce((best, item) => Math.max(best, Number(item.success_rate || 0)), 0), [grouped])
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
-  const canOpenOrders = hasMenuPath(menu, '/orders')
-  const canOpenDocs = hasMenuPath(menu, '/docs')
+  const canOpenOrders = hasMenuPath(menu, ORDERS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
 
   const handleCreate = async (record: InventoryItem) => {
     setCreatingKey(`${record.project_key}-${record.domain_id}`)
@@ -84,7 +85,7 @@ export function ProjectsPage() {
       Toast.success(`已创建订单 ${res.order.order_no}，邮箱：${res.order.email_address}`)
       await load()
       if (canOpenOrders) {
-        navigate('/orders')
+        navigate(ORDERS_ROUTE)
       }
     } catch (error: any) {
       Toast.error(error?.response?.data?.error ?? '创建订单失败')
@@ -105,17 +106,54 @@ export function ProjectsPage() {
         bodyStyle={{ padding: 24 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">用户采购入口</Tag>
+          <Tag color="cyan" shape="circle">共享控制台采购切片</Tag>
           <div>
             <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>项目市场</Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
-              面向共享控制台中的采购角色，先确认真实库存、价格和供给来源，再从同一工作台直接发起下单并回到订单中心继续追踪。
+              让注册后的首轮采购、订单回流与 API 接入准备都保持在同一套深色共享控制台里继续完成。
             </Typography.Paragraph>
           </div>
           <Space wrap>
-            <Tag color="grey" prefixIcon={<IconBriefStroked />}>单一登录后控制台 · 用户工作台</Tag>
+            <Tag color="grey" prefixIcon={<IconBriefStroked />}>单一登录后控制台 · 用户采购工作台</Tag>
             <Tag color="grey" prefixIcon={<IconServer />}>库存与来源来自真实 `/projects/inventory` 返回</Tag>
             {canOpenDocs ? <Tag color="blue">继续 API 接入准备：文档与密钥配置仍留在同一控制台</Tag> : null}
+            <Tag color="grey" prefixIcon={<IconHistogram />}>采购路径信号</Tag>
+          </Space>
+        </Space>
+      </Card>
+
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 22,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.94) 56%, rgba(8,9,10,0.98) 100%)',
+          border: '1px solid rgba(125,211,252,0.16)',
+        }}
+        bodyStyle={{ padding: 22 }}
+      >
+        <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+          <Tag color="cyan" shape="circle">注册后首轮采购路径</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+                采购 → 履约 → 接入
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
+                先确认真实库存与价格，再创建第一笔订单。订单结果与 API 接入准备都继续留在同一控制台。
+              </Typography.Paragraph>
+            </div>
+            <Space wrap>
+              {canOpenOrders ? (
+                <Button theme="borderless" type="primary" icon={<IconArrowRight />} onClick={() => navigate(ORDERS_ROUTE)}>
+                  打开订单中心
+                </Button>
+              ) : null}
+              {canOpenApiKeys ? (
+                <Button type="primary" theme="solid" icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
+                  打开 API Keys
+                </Button>
+              ) : null}
+            </Space>
           </Space>
         </Space>
       </Card>
@@ -151,7 +189,7 @@ export function ProjectsPage() {
                       重新拉取库存
                     </Button>
                     {canOpenDocs ? (
-                      <Button theme="borderless" type="primary" onClick={() => navigate('/docs')}>
+                      <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
                         查看 API 文档
                       </Button>
                     ) : null}
@@ -206,7 +244,7 @@ export function ProjectsPage() {
                   成功创建订单后，直接前往订单中心查看邮箱分配、提取结果和是否 READY / FINISHED，无需跳转到独立后台。
                 </Typography.Paragraph>
                 {canOpenOrders ? (
-                  <Button type="primary" theme="solid" style={{ marginTop: 12 }} onClick={() => navigate('/orders')}>
+                  <Button type="primary" theme="solid" style={{ marginTop: 12 }} onClick={() => navigate(ORDERS_ROUTE)}>
                     打开订单中心
                   </Button>
                 ) : null}
