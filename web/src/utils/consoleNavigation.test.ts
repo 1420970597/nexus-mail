@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allowedLandingPathsForRole, resolvePreferredConsoleRoute } from './consoleNavigation'
+import { allowedLandingPathsForRole, resolvePreferredConsoleRoute, visibleQuickActionPaths } from './consoleNavigation'
 
 describe('console navigation landing rules', () => {
   it('keeps shared dashboard ahead of admin-specific routes for admin users in the current shared-console model', () => {
@@ -46,5 +46,25 @@ describe('console navigation landing rules', () => {
         'user',
       ),
     ).toBe('/')
+  })
+
+  it('filters quick actions by visible menu paths and excludes the current route', () => {
+    expect(
+      visibleQuickActionPaths(
+        [
+          { path: '/' },
+          { path: '/projects' },
+          { path: '/balance' },
+          { path: '/api-keys' },
+          { path: '/docs' },
+        ],
+        '/balance',
+        'user',
+      ),
+    ).toEqual(['/projects', '/docs', '/api-keys'])
+  })
+
+  it('returns no quick actions when the menu exposes none of the quick-action routes', () => {
+    expect(visibleQuickActionPaths([{ path: '/' }, { path: '/profile' }], '/profile', 'user')).toEqual([])
   })
 })

@@ -196,7 +196,10 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
           </Space>
         </Header>
         <Content style={{ padding: 28, background: 'transparent' }}>
-          <div
+          <main
+            role="main"
+            aria-label="控制台主内容"
+            tabIndex={-1}
             style={{
               minHeight: 'calc(100vh - 156px)',
               borderRadius: 28,
@@ -207,7 +210,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
             }}
           >
             {children}
-          </div>
+          </main>
         </Content>
       </Layout>
     </Layout>

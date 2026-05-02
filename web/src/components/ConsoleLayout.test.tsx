@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/authStore'
 
 function renderLayout(initialPath: string) {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
+    <MemoryRouter initialEntries={[initialPath]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route
           path="*"
@@ -24,7 +24,7 @@ function renderLayout(initialPath: string) {
 }
 
 describe('ConsoleLayout', () => {
-  it('renders shared route title and excludes the current page from quick actions', () => {
+  it('renders shared route title, keeps the current page out of quick actions, and exposes a main landmark', () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -43,11 +43,14 @@ describe('ConsoleLayout', () => {
 
     expect(screen.getAllByText('风控中心').length).toBeGreaterThan(0)
     expect(screen.getAllByText('管理员控制台').length).toBeGreaterThan(0)
-    const quickActionButtons = screen.getAllByRole('button')
-    expect(quickActionButtons.length).toBeGreaterThan(0)
+    expect(screen.getByRole('main', { name: '控制台主内容' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /用户管理/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /审计日志/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /API Keys/ })).not.toBeInTheDocument()
   })
 
-  it('navigates through quick actions using the shared route schema order', async () => {
+  it('renders quick actions in shared route schema order and navigates through them', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -57,13 +60,14 @@ describe('ConsoleLayout', () => {
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'projects', label: '项目市场', path: '/projects' },
         { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'balance', label: '余额中心', path: '/balance' },
         { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
         { key: 'docs', label: 'API 文档', path: '/docs' },
       ],
     })
 
     render(
-      <MemoryRouter initialEntries={['/orders']}>
+      <MemoryRouter initialEntries={['/orders']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route
             path="*"
@@ -77,10 +81,12 @@ describe('ConsoleLayout', () => {
       </MemoryRouter>,
     )
 
-    const navigationRoot = screen.getByRole('menu')
-    const projectNavItem = within(navigationRoot).getAllByText('项目市场')[0]
+    const quickActions = screen.getAllByRole('button').filter((button) =>
+      ['项目市场', '余额中心', 'API 文档', 'API Keys'].includes(button.textContent ?? ''),
+    )
+    expect(quickActions.map((button) => button.textContent)).toEqual(['项目市场', '余额中心', 'API 文档'])
 
-    await user.click(projectNavItem)
+    await user.click(screen.getByRole('button', { name: /项目市场/ }))
     expect(await screen.findAllByText('项目市场')).not.toHaveLength(0)
   })
 })

@@ -285,8 +285,12 @@ export function allowedLandingPathsForRole(role?: Role) {
   return getConsoleRoutesForRole(role).map((route) => route.path)
 }
 
-export function visibleQuickActionPaths(role?: Role) {
-  return getQuickActionRoutes(role).map((route) => route.path)
+export function visibleQuickActionPaths(menuItems: Array<{ path: string }> = [], currentPath?: string, role?: Role) {
+  const allowedPaths = new Set(menuItems.map((item) => item.path))
+  return getQuickActionRoutes(role)
+    .map((route) => route.path)
+    .filter((path) => allowedPaths.has(path))
+    .filter((path) => path !== currentPath)
 }
 
 export function groupedConsolePaths() {
