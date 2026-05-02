@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { Modal } from '@douyinfe/semi-ui'
 import { ApiKeysPage } from './ApiKeysPage'
 import * as apiKeyService from '../services/apiKeys'
@@ -37,7 +38,14 @@ function seedRole(role: 'user' | 'supplier' | 'admin' = 'user') {
     token: 'token',
     refreshToken: 'refresh-token',
     user: { id: 1, email: `${role}@nexus-mail.local`, role },
-    menu: [],
+    menu: [
+      { key: 'dashboard', label: '仪表盘', path: '/' },
+      { key: 'projects', label: '项目市场', path: '/projects' },
+      { key: 'orders', label: '订单中心', path: '/orders' },
+      { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+      { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+      { key: 'docs', label: 'API 文档', path: '/docs' },
+    ],
   })
 }
 
@@ -127,7 +135,11 @@ describe('ApiKeysPage', () => {
 
   it('renders role-specific guidance for current user role', async () => {
     seedRole('supplier')
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(screen.getByText('共享控制台 · 供应商扩展')).toBeInTheDocument()
@@ -137,7 +149,11 @@ describe('ApiKeysPage', () => {
   it('loads and creates api key with trimmed scopes and whitelist', async () => {
     const user = userEvent.setup()
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     await user.type(screen.getByLabelText('名称'), '新密钥')
     await user.type(screen.getByLabelText('权限范围'), ' finance:write , , activation:read ')
@@ -156,7 +172,11 @@ describe('ApiKeysPage', () => {
   })
 
   it('disables revoke action for revoked keys and keeps active keys revocable', async () => {
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('已撤销密钥')).toBeInTheDocument()
 
     const revokeButtons = screen.getAllByRole('button', { name: '撤销' })
@@ -167,7 +187,11 @@ describe('ApiKeysPage', () => {
   it('reloads list after revoking an active key', async () => {
     const user = userEvent.setup()
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: '撤销' })[0])
@@ -179,7 +203,11 @@ describe('ApiKeysPage', () => {
   it('updates whitelist with normalized entries and reloads list', async () => {
     const user = userEvent.setup()
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
@@ -197,7 +225,11 @@ describe('ApiKeysPage', () => {
   it('allows clearing whitelist to remove restrictions', async () => {
     const user = userEvent.setup()
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
@@ -214,7 +246,11 @@ describe('ApiKeysPage', () => {
       response: { data: { error: 'IP 白名单仅支持合法 IP 或 CIDR' } },
     })
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
@@ -234,7 +270,11 @@ describe('ApiKeysPage', () => {
       onCancel?.()
     })
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: '撤销' })[0])
@@ -246,7 +286,11 @@ describe('ApiKeysPage', () => {
   it('renders plaintext api key in one-time banner after creation', async () => {
     const user = userEvent.setup()
 
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.type(screen.getByLabelText('名称'), '新密钥')
@@ -257,12 +301,57 @@ describe('ApiKeysPage', () => {
   })
 
   it('renders audit entries and summary cards', async () => {
-    render(<ApiKeysPage />)
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(screen.getByText('活跃 Key')).toBeInTheDocument()
     expect(screen.getByText('白名单保护')).toBeInTheDocument()
     expect(screen.getByText('create')).toBeInTheDocument()
     expect(screen.getByText('当前密钥')).toBeInTheDocument()
+  })
+
+  it('navigates from the empty-state docs CTA into the docs workspace', async () => {
+    const user = userEvent.setup()
+    mockedGetAPIKeys.mockResolvedValueOnce({ items: [] })
+
+    render(
+      <MemoryRouter initialEntries={['/api-keys']}>
+        <Routes>
+          <Route path="/api-keys" element={<ApiKeysPage />} />
+          <Route path="/docs" element={<div>API 文档页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '查看 API 文档' }))
+    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+  })
+
+  it('hides follow-up integration CTAs when the server menu does not expose docs or webhooks', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+      ],
+    })
+    mockedGetAPIKeys.mockResolvedValueOnce({ items: [] })
+
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '前往 Webhook 设置' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 })

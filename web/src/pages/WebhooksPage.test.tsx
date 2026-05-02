@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { WebhooksPage } from './WebhooksPage'
 import * as webhookService from '../services/webhooks'
 import { useAuthStore } from '../store/authStore'
@@ -21,8 +22,13 @@ function seedRole(role: 'user' | 'supplier' | 'admin' = 'user') {
     token: 'token',
     refreshToken: 'refresh-token',
     user: { id: 1, email: `${role}@nexus-mail.local`, role },
-    menu: [],
-  })
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+})
 }
 
 describe('WebhooksPage', () => {
@@ -97,7 +103,11 @@ describe('WebhooksPage', () => {
   })
 
   it('loads endpoints and auto-loads first endpoint deliveries', async () => {
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
     expect(mockedGetWebhookEndpoints).toHaveBeenCalledTimes(1)
@@ -107,7 +117,11 @@ describe('WebhooksPage', () => {
 
   it('renders role-specific guidance for supplier role', async () => {
     seedRole('supplier')
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('供给事件回调工作台')).toBeInTheDocument()
     expect(screen.getByText('供应商视角')).toBeInTheDocument()
@@ -116,7 +130,11 @@ describe('WebhooksPage', () => {
 
   it('renders role-specific guidance for admin role', async () => {
     seedRole('admin')
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
     expect(screen.getByText('管理员视角')).toBeInTheDocument()
@@ -125,7 +143,11 @@ describe('WebhooksPage', () => {
 
   it('queues test delivery and reloads deliveries', async () => {
     const user = userEvent.setup()
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     await screen.findByText('https://hooks.example.com/nexus-mail')
     await user.click(screen.getByRole('button', { name: '发送测试投递' }))
@@ -136,7 +158,11 @@ describe('WebhooksPage', () => {
 
   it('creates endpoint with trimmed payload and shows signing secret once', async () => {
     const user = userEvent.setup()
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     await screen.findByText('https://hooks.example.com/nexus-mail')
     await user.type(screen.getByLabelText('目标地址'), '  https://hooks.example.com/new-endpoint  ')
@@ -159,7 +185,11 @@ describe('WebhooksPage', () => {
 
   it('shows empty state when no endpoints exist', async () => {
     mockedGetWebhookEndpoints.mockResolvedValueOnce({ items: [] })
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
   })
@@ -242,7 +272,11 @@ describe('WebhooksPage', () => {
         ],
       })
 
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
     expect(screen.getByText('端点总数')).toBeInTheDocument()
@@ -261,12 +295,70 @@ describe('WebhooksPage', () => {
   })
 
   it('shows a shared first-hour integration timeline for plain users', async () => {
-    render(<WebhooksPage />)
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
 
     expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
     expect(screen.getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。')).toBeInTheDocument()
     expect(screen.getByText('1. 创建首个 endpoint')).toBeInTheDocument()
     expect(screen.getByText('2. 验证 test delivery')).toBeInTheDocument()
     expect(screen.getByText('3. 回到 API 文档/消费端')).toBeInTheDocument()
+  })
+
+  it('navigates from the first-run guidance into the api keys workspace', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter initialEntries={['/webhooks']}>
+        <Routes>
+          <Route path="/webhooks" element={<WebhooksPage />} />
+          <Route path="/api-keys" element={<div>开发者 API 接入工作台</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+  })
+
+  it('navigates from the empty-state docs CTA into the docs workspace', async () => {
+    const user = userEvent.setup()
+    mockedGetWebhookEndpoints.mockResolvedValueOnce({ items: [] })
+
+    render(
+      <MemoryRouter initialEntries={['/webhooks']}>
+        <Routes>
+          <Route path="/webhooks" element={<WebhooksPage />} />
+          <Route path="/docs" element={<div>API 文档页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '查看 API 文档' })[0])
+    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+  })
+
+  it('hides shared-console continuation CTAs when api keys and docs are not exposed by the server menu', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [{ key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' }],
+    })
+
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 })

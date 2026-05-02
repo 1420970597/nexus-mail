@@ -2,6 +2,7 @@ import { Banner, Button, Card, Empty, Form, Space, Table, Tag, Toast, Typography
 import { IconActivity, IconArticle, IconBolt, IconSafe, IconServer } from '@douyinfe/semi-icons'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   createWebhookEndpoint,
   createWebhookTestDelivery,
@@ -11,6 +12,7 @@ import {
   WebhookEndpointRecord,
 } from '../services/webhooks'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 const SIGNING_SECRET_VISIBILITY_MS = 5 * 60 * 1000
 
@@ -136,7 +138,8 @@ function MetricCard({ title, value, description, icon }: { title: string; value:
 }
 
 export function WebhooksPage() {
-  const { user } = useAuthStore()
+  const navigate = useNavigate()
+  const { user, menu } = useAuthStore()
   const [items, setItems] = useState<WebhookEndpointRecord[]>([])
   const [deliveries, setDeliveries] = useState<Record<number, WebhookDeliveryRecord[]>>({})
   const [loading, setLoading] = useState(true)
@@ -241,6 +244,9 @@ export function WebhooksPage() {
   }
 
   const copy = useMemo(() => roleCopy(user?.role), [user?.role])
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
   const deliveryStats = useMemo(() => {
     let total = 0
     let sent = 0
@@ -423,6 +429,18 @@ export function WebhooksPage() {
                 </Card>
               ))}
             </Space>
+            <Space>
+              {canOpenApiKeys ? (
+                <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
+                  先配置 API Keys
+                </Button>
+              ) : null}
+              {canOpenDocs ? (
+                <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                  查看 API 文档
+                </Button>
+              ) : null}
+            </Space>
           </Space>
         </Card>
       ) : null}
@@ -450,6 +468,16 @@ export function WebhooksPage() {
               >
                 复制并隐藏
               </Button>
+              {canOpenDocs ? (
+                <Button theme="solid" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                  查看 API 文档
+                </Button>
+              ) : null}
+              {canOpenApiKeys ? (
+                <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
+                  前往 API Keys
+                </Button>
+              ) : null}
               <Button
                 theme="borderless"
                 onClick={() => {
@@ -552,7 +580,25 @@ export function WebhooksPage() {
             }}
           />
         ) : (
-          <Empty description="当前还没有 Webhook endpoint，先创建第一个回调地址。" />
+          <Empty description="当前还没有 Webhook endpoint，先创建第一个回调地址。">
+            <Space>
+              {canOpenApiKeys ? (
+                <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
+                  先配置 API Keys
+                </Button>
+              ) : null}
+              {canOpenDocs ? (
+                <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                  查看 API 文档
+                </Button>
+              ) : null}
+              {fallbackRoute !== WEBHOOKS_ROUTE ? (
+                <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
+                  返回推荐工作台
+                </Button>
+              ) : null}
+            </Space>
+          </Empty>
         )}
       </Card>
     </Space>

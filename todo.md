@@ -25,6 +25,11 @@
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
 ### 最新执行检查点（2026-05-02）
+- 本轮继续执行前端优先切片：已为 `ApiKeysPage` / `WebhooksPage` 补齐共享控制台接入 CTA 对称性，在单一登录后控制台内把 API Keys → Webhooks → Docs 的首轮接入路径收敛为可点击的真实下一步动作；新增基于服务端 `menu` 的显隐控制，确保普通用户仅在后端暴露 `/api-keys`、`/webhooks`、`/docs` 时看到对应 CTA，不因前端文案泄露未授权入口。
+- 已补齐 `web/src/pages/ApiKeysPage.test.tsx` 与 `web/src/pages/WebhooksPage.test.tsx` focused 回归，覆盖：空态 CTA、首轮引导 CTA、无权限时 CTA 抑制，以及 Docs / API Keys 路由点击后进入目标工作台的真实导航断言；同时修复并重新确认共享路由常量 `API_KEYS_ROUTE='/api-keys'` 与 Webhook 签名密钥展示时长常量。
+- 控制器已通过 focused 页面测试复核（当前仓库仍存在与本 diff 无关的 `App.test.tsx` 既有旧失败噪声）、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway` 与真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`、`GET /docs`，确认注册后普通用户共享菜单仍返回 `/api-keys` / `/webhooks` / `/docs`，且新 CTA 所依赖的真实接口与文档入口保持可用。
+- 本轮五维评审结论：产品/规格、代码质量、安全/集成、测试/可靠性、性能/运维均通过；评审仅建议后续再补一条 `返回推荐工作台` CTA 的 focused 导航断言，并继续把既有全局 Vitest `act(...)` / Semi UI `findDOMNode` / `App.test.tsx` 审计导航旧失败作为下一前端优先项处理，不阻塞本次共享接入 CTA 里程碑提交。
+
 - 本轮先完成一轮前端基线与注册后连续路径修复：控制器确认当前工作树中存在被掩码污染的前端常量回归后，修复共享导航常量与 Webhook 签名密钥展示超时常量的运行时真值；同时为 `ProjectsPage` / `OrdersPage` 新增 focused Vitest，覆盖注册后普通用户在单一共享控制台内沿“项目市场 → 订单中心 → API Keys”继续前进的真实点击导航，不再只停留在文案存在性断言。
 - 控制器已通过 `pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`，并完成真实 API 回放：`GET /healthz`、`POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、`GET /api/v1/projects/inventory`、`GET /api/v1/orders/activations`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`，以及前端壳 `GET /settings`、`GET /projects`、`GET /orders` 均返回 200，确认注册后共享控制台的采购/订单/API 接入链路仍与真实后端契约保持连通。
 - 本轮五维评审结论：产品/规格、代码质量、安全/集成均指出当前仓库原有的共享导航回归尚未完全收口（`SettingsPage -> AdminAuditPage` 的 `App.test.tsx` 旧失败、以及 quick actions / post-auth landing fallback 的共享导航辅助函数一致性问题）；控制器已立即修正 `ConsoleLayout` 的 role-aware quick actions、收紧 `resolvePostAuthLandingRoute` 回到 allowlist fallback、恢复未知路径标题兜底，并同步更新 `consoleNavigation.test.ts`。但 `App.test.tsx` 仍保留一个与旧管理员审计导航场景相关的既有 focused 失败，因此当前里程碑应如实记为：**本轮新前端切片与真实 API 验证已完成，但共享控制台全局前端测试基线尚未完全恢复，下一前端优先项必须先继续清理 `App.test.tsx` / 管理员审计导航旧失败，再继续推进后续页面壳细化与 Phase 4/5 前端闭环。**

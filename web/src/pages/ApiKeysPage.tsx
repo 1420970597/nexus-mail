@@ -1,8 +1,10 @@
 import { Banner, Button, Card, Empty, Form, Modal, Space, Table, Tag, Toast, Typography } from '@douyinfe/semi-ui'
 import { IconArticle, IconEdit, IconSafe, IconServer, IconShield, IconTickCircle } from '@douyinfe/semi-icons'
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { APIKeyAuditEntry, APIKeyRecord, createAPIKey, getAPIKeyAudit, getAPIKeys, revokeAPIKey, updateAPIKeyWhitelist } from '../services/apiKeys'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 const PLAINTEXT_VISIBILITY_MS = 5 * 60 * 1000
 
@@ -79,7 +81,8 @@ function latestUsedAt(items: APIKeyRecord[]) {
 }
 
 export function ApiKeysPage() {
-  const { user } = useAuthStore()
+  const navigate = useNavigate()
+  const { user, menu } = useAuthStore()
   const [items, setItems] = useState<APIKeyRecord[]>([])
   const [audit, setAudit] = useState<APIKeyAuditEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -132,6 +135,9 @@ export function ApiKeysPage() {
   const copy = useMemo(() => roleCopy(user?.role), [user?.role])
   const activeKeys = useMemo(() => items.filter((item) => item.status === 'active'), [items])
   const revokedKeys = useMemo(() => items.filter((item) => item.status === 'revoked'), [items])
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
   const whitelistProtectedCount = useMemo(
     () => activeKeys.filter((item) => Array.isArray(item.whitelist) && item.whitelist.length > 0).length,
     [activeKeys],
@@ -289,6 +295,16 @@ export function ApiKeysPage() {
               >
                 复制并隐藏
               </Button>
+              {canOpenWebhooks ? (
+                <Button theme="solid" type="primary" onClick={() => navigate(WEBHOOKS_ROUTE)}>
+                  继续配置 Webhook
+                </Button>
+              ) : null}
+              {canOpenDocs ? (
+                <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                  查看 API 文档
+                </Button>
+              ) : null}
               <Button
                 theme="borderless"
                 onClick={() => {
@@ -316,7 +332,25 @@ export function ApiKeysPage() {
 
       <Card title="当前密钥" style={{ width: '100%' }} loading={loading}>
         {items.length === 0 ? (
-          <Empty description="暂无 API Key，先创建第一个凭证完成接入。" />
+          <Empty description="暂无 API Key，先创建第一个凭证完成接入。">
+            <Space>
+              {canOpenWebhooks ? (
+                <Button type="primary" theme="solid" onClick={() => navigate(WEBHOOKS_ROUTE)}>
+                  前往 Webhook 设置
+                </Button>
+              ) : null}
+              {canOpenDocs ? (
+                <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                  查看 API 文档
+                </Button>
+              ) : null}
+              {fallbackRoute !== API_KEYS_ROUTE ? (
+                <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
+                  返回推荐工作台
+                </Button>
+              ) : null}
+            </Space>
+          </Empty>
         ) : (
           <Table
             pagination={false}
