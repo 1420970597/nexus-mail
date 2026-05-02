@@ -3,8 +3,9 @@ import { IconActivity, IconAlertTriangle, IconBolt, IconClock, IconHistogram, Ic
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../store/authStore'
 import { AdminRiskResponse, RiskRule, getAdminRisk, getAdminRiskRules, updateAdminRiskRules } from '../services/auth'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE } from '../utils/consoleNavigation'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function severityColor(severity: string) {
   switch (severity) {
@@ -67,6 +68,7 @@ function ruleStatus(rule: RiskRule) {
 
 export function AdminRiskPage() {
   const navigate = useNavigate()
+  const { menu, user } = useAuthStore()
   const [data, setData] = useState<AdminRiskResponse | null>(null)
   const [rules, setRules] = useState<RiskRule[]>([])
   const [saving, setSaving] = useState(false)
@@ -166,6 +168,30 @@ export function AdminRiskPage() {
     ],
     [],
   )
+  const canOpenAudit = hasMenuPath(menu, ADMIN_AUDIT_ROUTE)
+  const canOpenUsers = hasMenuPath(menu, ADMIN_USERS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
+  const shouldShowFallbackCta = fallbackRoute !== ADMIN_RISK_ROUTE
+  const visibleActionLanes = useMemo(
+    () => actionLanes.filter((item) => {
+      if (item.path === ADMIN_AUDIT_ROUTE) return canOpenAudit
+      if (item.path === ADMIN_USERS_ROUTE) return canOpenUsers
+      if (item.path === API_KEYS_ROUTE) return canOpenApiKeys
+      return true
+    }),
+    [actionLanes, canOpenApiKeys, canOpenAudit, canOpenUsers],
+  )
+  const visibleSharedConsoleLinks = useMemo(
+    () => sharedConsoleLinks.filter((item) => {
+      if (item.path === API_KEYS_ROUTE) return canOpenApiKeys
+      if (item.path === ADMIN_AUDIT_ROUTE) return canOpenAudit
+      if (item.path === DOCS_ROUTE) return canOpenDocs
+      return true
+    }),
+    [canOpenApiKeys, canOpenAudit, canOpenDocs, sharedConsoleLinks],
+  )
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -240,7 +266,7 @@ export function AdminRiskPage() {
         <Col xs={24} xl={15}>
           <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }}>
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-              {actionLanes.map((item) => (
+              {visibleActionLanes.map((item) => (
                 <Card
                   key={item.key}
                   style={{
@@ -272,11 +298,36 @@ export function AdminRiskPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。
               </Typography.Paragraph>
-              {sharedConsoleLinks.map((item) => (
+              {visibleSharedConsoleLinks.map((item) => (
                 <Tag key={item.key} color="grey" prefixIcon={item.icon}>
                   {item.label} · {item.path}
                 </Tag>
               ))}
+              {!canOpenAudit && !canOpenApiKeys && !canOpenDocs && shouldShowFallbackCta ? (
+                <Card
+                  data-testid="admin-risk-shared-console-fallback"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                    border: '1px solid rgba(148,163,184,0.14)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Tag color="cyan">Fallback</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                      回到推荐工作台继续管理员主链路
+                    </Typography.Title>
+                    <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
+                      当前菜单未暴露审计、接入或文档入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
+                    </Typography.Text>
+                    <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
+                      返回推荐工作台
+                    </Button>
+                  </Space>
+                </Card>
+              ) : null}
             </Space>
           </Card>
         </Col>

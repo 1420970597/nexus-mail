@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminRiskPage } from './AdminRiskPage'
+import { useAuthStore } from '../store/authStore'
 import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE } from '../utils/consoleNavigation'
 
 const mockedGetAdminRisk = vi.fn()
@@ -24,6 +25,7 @@ function renderAdminRiskPage(initialEntry = ADMIN_RISK_ROUTE) {
         <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
         <Route path={ADMIN_USERS_ROUTE} element={<div>资金工作台页面</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        <Route path="/" element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -34,6 +36,20 @@ describe('AdminRiskPage', () => {
     mockedGetAdminRisk.mockReset()
     mockedGetAdminRiskRules.mockReset()
     mockedUpdateAdminRiskRules.mockReset()
+
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 9, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-risk', label: '风控中心', path: ADMIN_RISK_ROUTE },
+        { key: 'admin-audit', label: '审计日志', path: ADMIN_AUDIT_ROUTE },
+        { key: 'admin-users', label: '用户管理', path: ADMIN_USERS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ],
+    })
 
     mockedGetAdminRisk.mockResolvedValue({
       generated_at: '2026-05-02T00:00:00Z',
@@ -101,6 +117,49 @@ describe('AdminRiskPage', () => {
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+  })
+
+  it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 10, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-risk', label: '风控中心', path: ADMIN_RISK_ROUTE },
+      ],
+    })
+
+    renderAdminRiskPage()
+
+    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(screen.queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
+    expect(screen.queryByText('审计日志 · /admin/audit')).not.toBeInTheDocument()
+    expect(screen.queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    expect(screen.getByTestId('admin-risk-shared-console-fallback')).toBeInTheDocument()
+    expect(screen.getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
+  it('hides the fallback slice when the risk page is the only visible admin route', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 11, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [{ key: 'admin-risk', label: '风控中心', path: ADMIN_RISK_ROUTE }],
+    })
+
+    renderAdminRiskPage()
+
+    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(screen.queryByTestId('admin-risk-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('updates rules and re-fetches risk summary after saving', async () => {

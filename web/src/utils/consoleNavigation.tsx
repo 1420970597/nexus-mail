@@ -220,9 +220,9 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   },
   {
     key: 'admin-pricing',
-    label: '项目定价',
+    label: '价格策略',
     path: ADMIN_PRICING_ROUTE,
-    title: '项目定价',
+    title: '价格策略',
     group: 'admin',
     icon: <IconPriceTag />,
     landingPriority: 10,
@@ -234,9 +234,9 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     path: ADMIN_RISK_ROUTE,
     title: '风控中心',
     group: 'admin',
-    icon: <IconSafe />,
-    landingPriority: 40,
-    quickActionPriority: 30,
+    icon: <IconActivity />,
+    landingPriority: 0,
+    quickActionPriority: 10,
     allowedRoles: ['admin'],
   },
   {
@@ -245,37 +245,29 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     path: ADMIN_AUDIT_ROUTE,
     title: '审计日志',
     group: 'admin',
-    icon: <IconArticle />,
-    landingPriority: 50,
+    icon: <IconSafe />,
+    landingPriority: 40,
     quickActionPriority: 50,
     allowedRoles: ['admin'],
   },
 ]
 
 export function getConsoleRoutesForRole(role?: Role) {
-  return consoleRoutes.filter((route) => route.allowedRoles.includes((role ?? 'user') as Role))
+  return consoleRoutes.filter((route) => route.allowedRoles.includes(role ?? 'user'))
 }
 
-export function allowedLandingPathsForRole(role?: Role) {
-  return [...getConsoleRoutesForRole(role)]
-    .sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))
-    .map((route) => route.path)
+export function getConsoleMenuForRole(role?: Role): MenuItem[] {
+  return getConsoleRoutesForRole(role).map((route) => ({
+    key: route.key,
+    label: route.label,
+    path: route.path,
+  }))
 }
 
 export function resolvePostAuthLandingRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
-  const allowed = getConsoleRoutesForRole(role)
-  const allowedMap = new Map(allowed.map((route) => [route.path, route]))
-
-  const fromMenu = menuItems
-    .map((item) => allowedMap.get(item.path))
-    .filter((route): route is ConsoleRouteDefinition => Boolean(route))
-    .sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))
-
-  if (fromMenu.length > 0) {
-    return fromMenu[0].path
-  }
-
-  const fallback = [...allowed].sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))[0]
+  const allowedPaths = new Set(menuItems.map((item) => item.path))
+  const candidates = getConsoleRoutesForRole(role).filter((route) => allowedPaths.has(route.path))
+  const fallback = [...candidates].sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))[0]
   return fallback?.path ?? DEFAULT_SHARED_ROUTE
 }
 
@@ -286,14 +278,15 @@ export function resolvePreferredConsoleRoute(menuItems: Array<{ path: string }> 
 export function getQuickActionRoutes(role?: Role) {
   return getConsoleRoutesForRole(role)
     .filter((route) => typeof route.quickActionPriority === 'number')
-    .sort((left, right) => (left.quickActionPriority ?? Number.MAX_SAFE_INTEGER) - (right.quickActionPriority ?? Number.MAX_SAFE_INTEGER))
+    .sort((left, right) => (left.quickActionPriority ?? 999) - (right.quickActionPriority ?? 999))
 }
 
-export function visibleQuickActionPaths(menuItems: Array<{ path: string }> = [], currentPath?: string, role?: Role) {
-  const visibleMenuPaths = new Set(menuItems.map((item) => item.path))
-  return getQuickActionRoutes(role)
-    .map((route) => route.path)
-    .filter((path) => path !== currentPath && visibleMenuPaths.has(path))
+export function allowedLandingPathsForRole(role?: Role) {
+  return getConsoleRoutesForRole(role).map((route) => route.path)
+}
+
+export function visibleQuickActionPaths(role?: Role) {
+  return getQuickActionRoutes(role).map((route) => route.path)
 }
 
 export function groupedConsolePaths() {
@@ -314,9 +307,5 @@ export function resolveRouteDefinition(path: string) {
 
 export function resolveRouteTitle(path: string) {
   const route = resolveRouteDefinition(path)
-  if (route) {
-    return route.title
-  }
-  const segments = path.split('/').filter(Boolean)
-  return segments[segments.length - 1] ?? '控制台'
+  return route?.title ?? 'Nexus Console'
 }
