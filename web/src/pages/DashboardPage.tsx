@@ -596,7 +596,7 @@ export function DashboardPage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         {user?.role === 'user' && nextSteps.length > 0 ? (
           <Col xs={24}>
-            <Card style={metricCardStyle('rgba(16,185,129,0.24)')} bodyStyle={{ padding: 22 }}>
+            <Card data-testid="dashboard-next-steps-lane" style={metricCardStyle('rgba(16,185,129,0.24)')} bodyStyle={{ padding: 22 }}>
               <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                 <div>
                   <Tag color="green">推荐下一步</Tag>

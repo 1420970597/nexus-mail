@@ -25,6 +25,10 @@
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
 ### 最新执行检查点（2026-05-02）
+- 本轮继续按"前端优先"清理 `DashboardPage` focused 回归中最后一处 `.closest('.semi-card')` 脆弱依赖：已为首页 `推荐下一步` lane 增加稳定 `data-testid="dashboard-next-steps-lane"` 语义锚点，并将 `web/src/pages/DashboardPage.test.tsx` 的余额 / 项目市场 / 订单中心 / API Keys 导航断言与 menu 真值显隐断言全部切换为 `within(...)` + 语义锚点查询，继续保持 new-api 风格单一登录后深色共享控制台与真实导航合同不变，而不是把 focused 测试继续绑定在 Semi UI 卡片 DOM 结构上。
+- 控制器已重新通过 `pnpm --dir web exec vitest run src/pages/DashboardPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`，并完成真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/dashboard/overview`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`，以及前端 `/`、`/projects`、`/orders`、`/api-keys`、`/docs` 壳 200，确认新的 Dashboard lane 语义锚点没有破坏注册后普通用户共享菜单、真实接入接口与单壳前端入口。
+- 本轮五维评审结论：产品/规格、代码质量、安全/集成、测试/可靠性、性能/运维均通过；评审一致认为新增 `dashboard-next-steps-lane` 命名语义清晰、运行时成本可忽略，且 focused 测试仍验证真实用户可见文案与导航结果，只是去除了对 `.semi-card` 包装层的脆弱依赖。继续保留既有 Semi UI `findDOMNode`、RTL `act(...)` 与前端 chunk 体积告警为后续非阻塞债务；下一前端优先项转为继续清理 `SettingsPage` / 其余 shared-console focused 用例中的 `.closest('.semi-card')` 等结构耦合，再回到 Phase 4/5 其余后端能力。
+
 - 本轮继续按“前端优先”补齐管理员 `AdminSuppliersPage` shared-console fallback 语义基线：管理员供应商运营页现已把“下游结算 / 风控 / 审计与共享接入入口全部缺失”场景从裸按钮收敛为带说明文案的 scoped fallback 卡片，继续保持 new-api 风格单一登录后深色控制台、menu 真值 gating 与“返回推荐工作台”合同不变，而不是在孤立状态下泄露未授权后台入口或只剩无上下文按钮。
 - 已补齐 `web/src/pages/AdminSuppliersPage.test.tsx` focused 回归，新增覆盖：当管理员菜单仅保留 `/` 与 `/admin/suppliers` 时，`admin-suppliers-shared-console-fallback` 卡片会显示“回到推荐工作台继续管理员主链路”说明与真实 fallback 按钮；同时保留既有 bridge 链接按 menu 真值抑制、fallback 点击回到共享控制台首页的导航断言。
 - 控制器已重新通过 `pnpm --dir web exec vitest run src/pages/AdminSuppliersPage.test.tsx`、`pnpm --dir web build`、`go test ./...`，并完成真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/dashboard/overview`、管理员 `POST /api/v1/auth/login`、`GET /api/v1/auth/menu`、`GET /api/v1/admin/overview`，确认新的管理员供应商页 fallback 卡片没有破坏注册后普通用户共享菜单、管理员真实概览接口与单壳前端入口。
