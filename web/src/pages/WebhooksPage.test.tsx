@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 import { WebhooksPage } from './WebhooksPage'
 import * as webhookService from '../services/webhooks'
 import { useAuthStore } from '../store/authStore'
@@ -29,6 +30,18 @@ function seedRole(role: 'user' | 'supplier' | 'admin' = 'user') {
         { key: 'docs', label: 'API 文档', path: '/docs' },
       ],
 })
+}
+
+function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <Routes>
+        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
+        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
 }
 
 describe('WebhooksPage', () => {
@@ -192,6 +205,23 @@ describe('WebhooksPage', () => {
     )
 
     expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
+  })
+
+  it('renders shared-console navigation actions for the first integration loop', async () => {
+    const user = userEvent.setup()
+
+    renderWebhooksPage()
+
+    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+
+    seedRole('user')
+    renderWebhooksPage()
+    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '查看 API 文档' })[0])
+    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
   it('renders shared-console metrics and delivery operations for admin role', async () => {
