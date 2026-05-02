@@ -225,6 +225,7 @@ export function BalancePage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={16}>
           <Card
+            data-testid="balance-mission-cards"
             title={<span style={{ color: '#f7f8f8' }}>资金任务流</span>}
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
@@ -234,6 +235,7 @@ export function BalancePage() {
                 {visibleMissionCards.map((item) => (
                   <Col xs={24} md={8} key={item.key}>
                     <Card
+                      data-testid={item.key === 'orders' ? 'balance-orders-mission-card' : undefined}
                       style={{
                         height: '100%',
                         borderRadius: 20,

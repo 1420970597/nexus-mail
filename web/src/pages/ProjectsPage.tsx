@@ -123,6 +123,7 @@ export function ProjectsPage() {
       </Card>
 
       <Card
+        data-testid="projects-first-run-lane"
         style={{
           width: '100%',
           borderRadius: 22,

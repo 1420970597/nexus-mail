@@ -231,9 +231,8 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
-    const lane = screen.getByText('首轮履约与接入衔接').closest('.semi-card')
-    expect(lane).not.toBeNull()
-    const scoped = within(lane as HTMLElement)
+    const lane = screen.getByTestId('orders-continuation-lane')
+    const scoped = within(lane)
     expect(scoped.getByText('订单结果 → API 接入 → 再次采购')).toBeInTheDocument()
     expect(scoped.getByText('先确认邮箱与提取结果，再继续程序化接入。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /回到项目市场/ })).toBeInTheDocument()

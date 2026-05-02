@@ -284,7 +284,7 @@ export function SupplierOfferingsPage() {
         </Space>
       </Card>
 
-      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} data-testid="supplier-offerings-shared-console-bridge">
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
             <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>

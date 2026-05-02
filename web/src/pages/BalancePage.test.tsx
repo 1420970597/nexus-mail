@@ -140,9 +140,8 @@ describe('BalancePage', () => {
     view = renderBalancePage()
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
 
-    const missionCardsSection = screen.getByText('资金任务流').closest('.semi-card')
-    expect(missionCardsSection).not.toBeNull()
-    const ordersMissionCard = within(missionCardsSection as HTMLElement).getByText('再追踪冻结与退款链路').closest('.semi-card')
+    const missionCardsSection = screen.getByTestId('balance-mission-cards')
+    const ordersMissionCard = within(missionCardsSection).getByTestId('balance-orders-mission-card')
     expect(ordersMissionCard).not.toBeNull()
     await user.click(within(ordersMissionCard as HTMLElement).getByRole('button', { name: /查看订单中心/ }))
     expect(await screen.findByText('订单中心页面')).toBeInTheDocument()

@@ -148,6 +148,7 @@ export function OrdersPage() {
         </Card>
 
         <Card
+          data-testid="orders-continuation-lane"
           style={{
             width: '100%',
             borderRadius: 22,

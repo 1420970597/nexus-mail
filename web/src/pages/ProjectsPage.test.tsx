@@ -221,9 +221,8 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('注册后首轮采购路径')).toBeInTheDocument()
-    const lane = screen.getByText('注册后首轮采购路径').closest('.semi-card')
-    expect(lane).not.toBeNull()
-    const scoped = within(lane as HTMLElement)
+    const lane = screen.getByTestId('projects-first-run-lane')
+    const scoped = within(lane)
     expect(scoped.getByText('采购 → 履约 → 接入')).toBeInTheDocument()
     expect(scoped.getByText('先确认真实库存与价格，再创建第一笔订单。订单结果与 API 接入准备都继续留在同一控制台。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()

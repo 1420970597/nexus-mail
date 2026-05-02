@@ -177,7 +177,7 @@ describe('SupplierOfferingsPage', () => {
 
     const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
     expect(fallback).toBeInTheDocument()
-    await user.click(within(fallback.parentElement as HTMLElement).getByRole('button', { name: /返回推荐工作台/ }))
+    await user.click(fallback)
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
