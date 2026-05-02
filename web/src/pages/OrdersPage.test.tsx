@@ -154,7 +154,6 @@ describe('OrdersPage', () => {
     expect(screen.getAllByText('123456').length).toBeGreaterThan(0)
   })
 
-
   it('renders the first-run order journey card so users know what to do after purchasing', async () => {
     render(
       <MemoryRouter>
@@ -209,5 +208,57 @@ describe('OrdersPage', () => {
 
     expect(await screen.findByText('订单中心')).toBeInTheDocument()
     expect(screen.queryByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).not.toBeInTheDocument()
+  })
+
+  it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
+    mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+      ],
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/" element={<div>控制台总览页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+  })
+
+  it('navigates from the empty-state return CTA back to the preferred workspace', async () => {
+    const user = userEvent.setup()
+    mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+      ],
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/" element={<div>控制台总览页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    expect(await screen.findByText('控制台总览页面')).toBeInTheDocument()
   })
 })

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProjectsPage } from './ProjectsPage'
@@ -117,7 +117,8 @@ describe('ProjectsPage', () => {
 
     await user.click(orderButtons[0])
 
-    await waitFor(() => expect(mockedCreateActivationOrder).toHaveBeenCalledWith('discord', 21))
+    await screen.findByText('项目市场')
+    expect(mockedCreateActivationOrder).toHaveBeenCalledWith('discord', 21)
     expect(mockedGetInventory).toHaveBeenCalledTimes(2)
   })
 
@@ -148,7 +149,6 @@ describe('ProjectsPage', () => {
     expect(screen.getByText('共享控制台回退路径')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
   })
-
 
   it('navigates from market procurement guidance into the order center inside the shared console', async () => {
     const user = userEvent.setup()
@@ -198,5 +198,57 @@ describe('ProjectsPage', () => {
 
     expect(await screen.findByText('项目市场')).toBeInTheDocument()
     expect(screen.queryByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).not.toBeInTheDocument()
+  })
+
+  it('shows a return-to-recommended-workspace CTA in the empty state when the user lands here from another preferred workspace', async () => {
+    mockedGetInventory.mockResolvedValueOnce({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+      ],
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/projects']}>
+        <Routes>
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/" element={<div>控制台总览页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: '返回推荐工作台' }).length).toBeGreaterThan(0)
+  })
+
+  it('navigates from the empty-state return CTA back to the preferred workspace inside the shared console', async () => {
+    const user = userEvent.setup()
+    mockedGetInventory.mockResolvedValueOnce({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+      ],
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/projects']}>
+        <Routes>
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/" element={<div>控制台总览页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '返回推荐工作台' })[0])
+    expect(await screen.findByText('控制台总览页面')).toBeInTheDocument()
   })
 })
