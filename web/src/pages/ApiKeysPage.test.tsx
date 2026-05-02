@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { Modal } from '@douyinfe/semi-ui'
@@ -63,6 +63,13 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
       </Routes>
     </MemoryRouter>,
   )
+}
+
+function getApiKeyRow(name: string) {
+  const rowLabel = screen.getByText(name)
+  const row = rowLabel.closest('tr')
+  expect(row).not.toBeNull()
+  return row as HTMLElement
 }
 
 describe('ApiKeysPage', () => {
@@ -195,9 +202,10 @@ describe('ApiKeysPage', () => {
     )
     expect(await screen.findByText('已撤销密钥')).toBeInTheDocument()
 
-    const revokeButtons = screen.getAllByRole('button', { name: '撤销' })
-    expect(revokeButtons[0]).toBeEnabled()
-    expect(revokeButtons[1]).toBeDisabled()
+    const activeRow = within(getApiKeyRow('默认密钥'))
+    const revokedRow = within(getApiKeyRow('已撤销密钥'))
+    expect(activeRow.getByRole('button', { name: '撤销' })).toBeEnabled()
+    expect(revokedRow.getByRole('button', { name: '撤销' })).toBeDisabled()
   })
 
   it('reloads list after revoking an active key', async () => {
@@ -210,7 +218,7 @@ describe('ApiKeysPage', () => {
     )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
-    await user.click(screen.getAllByRole('button', { name: '撤销' })[0])
+    await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: '撤销' }))
 
     await waitFor(() => expect(mockedRevokeAPIKey).toHaveBeenCalledWith(1))
     expect(mockedGetAPIKeys).toHaveBeenCalledTimes(2)
@@ -226,7 +234,7 @@ describe('ApiKeysPage', () => {
     )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
-    await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
+    await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
     const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     expect((whitelistInput as HTMLInputElement).value).toContain('127.0.0.1')
     await user.clear(whitelistInput)
@@ -248,7 +256,7 @@ describe('ApiKeysPage', () => {
     )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
-    await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
+    await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
     const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     await user.clear(whitelistInput)
     await user.click(screen.getByRole('button', { name: '保存白名单' }))
@@ -269,7 +277,7 @@ describe('ApiKeysPage', () => {
     )
 
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
+    await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
     await user.clear(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24'))
     await user.type(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24'), 'invalid-entry')
     await user.click(screen.getByRole('button', { name: '保存白名单' }))
@@ -331,7 +339,7 @@ describe('ApiKeysPage', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '撤销' })[0])
+    await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: '撤销' }))
 
     expect(mockedModalConfirm).toHaveBeenCalledTimes(1)
   })
