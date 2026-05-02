@@ -234,6 +234,37 @@ describe('WebhooksPage', () => {
     expect(screen.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
+  it('suppresses shared integration CTAs when the server menu hides them and falls back to the recommended workspace', async () => {
+    const user = userEvent.setup()
+    mockedGetWebhookEndpoints.mockResolvedValueOnce({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+      ],
+    })
+
+    render(
+      <MemoryRouter initialEntries={[WEBHOOKS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Routes>
+          <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
+          <Route path="/" element={<div>共享控制台首页</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
   it('renders shared-console metrics and delivery operations for admin role', async () => {
     seedRole('admin')
     mockedGetWebhookEndpoints.mockResolvedValueOnce({
