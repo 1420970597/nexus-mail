@@ -149,8 +149,50 @@ describe('ApiDocsPage', () => {
     expect(screen.queryByText('收敛最小权限 API Key')).not.toBeInTheDocument()
     expect(screen.queryByText('完成 Webhook 回调联调')).not.toBeInTheDocument()
     expect(screen.queryByText('返回资金工作台核对预算与售后')).not.toBeInTheDocument()
+    expect(screen.getByText('文档与接入工作台继续保持单壳闭环')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    const loopLane = screen.getByTestId('docs-shared-console-loop')
+    await user.click(within(loopLane).getByRole('button', { name: '返回推荐工作台' }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
+  it('keeps docs-to-integration loop actions inside the shared console after reading docs', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 36, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    let view = renderApiDocsPage()
+    expect(await screen.findByText('文档与接入工作台继续保持单壳闭环')).toBeInTheDocument()
+    expect(screen.getByText('先回到 API Keys 收口最小权限')).toBeInTheDocument()
+    expect(screen.getByText('随后校验 Webhook delivery')).toBeInTheDocument()
+    expect(screen.getByText('最后回到业务主链路复放')).toBeInTheDocument()
+
+    let loopLane = screen.getByTestId('docs-shared-console-loop')
+    await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderApiDocsPage()
+    expect(await screen.findByText('文档与接入工作台继续保持单壳闭环')).toBeInTheDocument()
+    loopLane = screen.getByTestId('docs-shared-console-loop')
+    await user.click(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' }))
+    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderApiDocsPage()
+    expect(await screen.findByText('文档与接入工作台继续保持单壳闭环')).toBeInTheDocument()
+    loopLane = screen.getByTestId('docs-shared-console-loop')
+    await user.click(within(loopLane).getByRole('button', { name: '返回推荐工作台' }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 })

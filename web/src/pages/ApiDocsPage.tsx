@@ -31,6 +31,8 @@ interface SharedConsoleBridgeCard {
   accent: string
 }
 
+const DOCS_LOOP_FALLBACK_PATH = '__fallback__'
+
 const sharedConsoleBridgeCards: SharedConsoleBridgeCard[] = [
   {
     key: 'projects',
@@ -67,6 +69,36 @@ const sharedConsoleBridgeCards: SharedConsoleBridgeCard[] = [
     path: BALANCE_ROUTE,
     tag: 'Finance',
     accent: 'rgba(249, 115, 22, 0.24)',
+  },
+]
+
+const sharedConsoleLoopCards: SharedConsoleBridgeCard[] = [
+  {
+    key: 'api-keys',
+    title: '先回到 API Keys 收口最小权限',
+    description: '发放最小 scopes Key、确认白名单与限流语义后，再继续阅读文档与真实业务回放，避免接入链路断层。',
+    button: '打开 API Keys 工作台',
+    path: API_KEYS_ROUTE,
+    tag: 'Credentials',
+    accent: 'rgba(94, 106, 210, 0.28)',
+  },
+  {
+    key: 'webhooks',
+    title: '随后校验 Webhook delivery',
+    description: '使用 test delivery 和最近投递记录确认回调 payload、签名与失败重试链路，再回到文档核对消费端实现。',
+    button: '打开 Webhook 设置',
+    path: WEBHOOKS_ROUTE,
+    tag: 'Callbacks',
+    accent: 'rgba(16, 185, 129, 0.24)',
+  },
+  {
+    key: 'fallback',
+    title: '最后回到业务主链路复放',
+    description: '把文档中的接口字段重新映射回项目市场、余额中心与订单履约路径，确认文档与真实工作台仍然一致。',
+    button: '返回推荐工作台',
+    path: DOCS_LOOP_FALLBACK_PATH,
+    tag: 'Runtime',
+    accent: 'rgba(14, 165, 233, 0.24)',
   },
 ]
 
@@ -202,6 +234,22 @@ export function ApiDocsPage() {
       }),
     [canOpenApiKeys, canOpenBalance, canOpenProjects, canOpenWebhooks],
   )
+  const loopCards = useMemo(
+    () =>
+      sharedConsoleLoopCards.filter((card) => {
+        switch (card.path) {
+          case API_KEYS_ROUTE:
+            return canOpenApiKeys
+          case WEBHOOKS_ROUTE:
+            return canOpenWebhooks
+          case DOCS_LOOP_FALLBACK_PATH:
+            return fallbackRoute !== DOCS_ROUTE
+          default:
+            return false
+        }
+      }),
+    [canOpenApiKeys, canOpenWebhooks, fallbackRoute],
+  )
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -228,6 +276,63 @@ export function ApiDocsPage() {
             <Tag color="grey" prefixIcon={<IconActivity />}>真实 API 回放仍在同一控制台继续完成</Tag>
           </Space>
           <Typography.Text style={{ color: 'rgba(208,214,224,0.74)', fontSize: 13, lineHeight: 1.7 }}>{copy.helper}</Typography.Text>
+        </Space>
+      </Card>
+
+      <Card
+        data-testid="docs-shared-console-loop"
+        style={{
+          width: '100%',
+          borderRadius: 24,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.94) 56%, rgba(8,9,10,0.98) 100%)',
+          border: '1px solid rgba(94,106,210,0.18)',
+        }}
+        bodyStyle={{ padding: 22 }}
+      >
+        <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+          <Tag color="indigo" shape="circle">Docs → API Keys → Webhooks</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+                文档与接入工作台继续保持单壳闭环
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
+                当用户从 API 文档继续推进接入时，仍应回到 API Keys、Webhook 与推荐工作台完成真实联调，而不是把文档页视为孤立终点。
+              </Typography.Paragraph>
+            </div>
+          </Space>
+          <Row gutter={[16, 16]} style={{ width: '100%' }}>
+            {loopCards.map((card) => (
+              <Col xs={24} md={8} key={card.key}>
+                <Card
+                  style={{
+                    height: '100%',
+                    borderRadius: 20,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: `1px solid ${card.accent}`,
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                    <Tag color="grey">{card.tag}</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>{card.title}</Typography.Title>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.76)', minHeight: 88 }}>
+                      {card.description}
+                    </Typography.Paragraph>
+                    <Button
+                      theme="borderless"
+                      type="primary"
+                      icon={<IconArrowRight />}
+                      onClick={() => navigate(card.path === DOCS_LOOP_FALLBACK_PATH ? fallbackRoute : card.path)}
+                      aria-label={card.button}
+                    >
+                      {card.button}
+                    </Button>
+                  </Space>
+                </Card>
+              </Col>
+            ))}
+          </Row>
         </Space>
       </Card>
 
