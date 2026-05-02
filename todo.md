@@ -25,6 +25,10 @@
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
 ### 最新执行检查点（2026-05-02）
+- 本轮已先完成一个前端测试基线修复里程碑：共享控制台 `App.test.tsx` 已对齐当前 new-api 风格页面契约，把注册后进入 API Keys 的断言从过时标题 `API Keys` 收敛为实际页面标题 `开发者 API 接入工作台`，并把 Webhook 管理页的存在性检查从宽泛文本匹配收紧为 `发送测试投递` 按钮的可访问角色断言，避免 focused Vitest 在页面文案升级后继续误报。
+- 控制器已重新通过 `pnpm --dir web test -- src/App.test.tsx src/pages/AdminAuditPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway` 与 `GET /healthz`；并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/dashboard/overview`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`，以及浏览器壳对应的 `GET http://127.0.0.1/docs` / `GET http://127.0.0.1/openapi/index.html` 200，确认注册后普通用户共享菜单、API Keys / Webhooks 工作台入口与文档壳链路仍成立。
+- 本轮五维评审结论：产品/规格、代码质量、安全/集成、测试/可靠性、性能/运维均通过；本次 diff 仅修正前端 focused 测试断言，不引入新的运行时逻辑。保留前端 chunk 体积告警、Semi UI `findDOMNode` 与既有 Testing Library `act(...)` 噪声为后续非阻塞债务。
+
 - 本轮已完成新的前端优先纵向切片：`AdminRiskPage` 与 `AdminAuditPage` 已同步升级为 **Risk Mission Control** / **Audit Mission Control** 深色共享控制台页面，在单一登录后壳内把真实风险信号、规则编辑、审计回放、高危运营后果与接入复盘收敛到同一条管理员运营路径；继续保持角色差异只体现在菜单、权限与局部 CTA，不新增独立风控后台或独立审计后台。
 - 已新增 `web/src/pages/AdminRiskPage.test.tsx` 与 `web/src/pages/AdminAuditPage.test.tsx`，覆盖：Risk / Audit Mission Control 深色壳渲染、共享控制台桥接、管理员主任务流导航（风控↔审计↔资金工作台↔API Keys）以及规则保存 / 审计筛选等 focused 回归；同时同步更新 `web/src/App.test.tsx` 对新页面标题与导航入口的断言。
 - 控制器已通过 `pnpm --dir web test -- src/pages/AdminRiskPage.test.tsx src/pages/AdminAuditPage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/dashboard/overview`、管理员 `POST /api/v1/auth/login`、`GET /api/v1/admin/risk`、`GET /api/v1/admin/audit?limit=5`、`GET /api/v1/auth/api-keys`、`GET /docs`，验证注册后共享控制台链路、管理员风险/审计页面依赖的真实接口契约与文档入口保持可用。

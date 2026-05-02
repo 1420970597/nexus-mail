@@ -402,7 +402,7 @@ describe('App', () => {
 
     await user.click(screen.getAllByRole('button', { name: '管理 API Keys' })[0])
 
-    expect(await screen.findByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: /API Keys/ })).toHaveClass('semi-navigation-item-selected')
   })
 
@@ -708,7 +708,7 @@ describe('App', () => {
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
-    expect(screen.getAllByText('发送测试投递').length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: '发送测试投递' }).length).toBeGreaterThan(0)
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
