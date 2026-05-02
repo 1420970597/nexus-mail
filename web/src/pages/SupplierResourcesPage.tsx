@@ -2,7 +2,9 @@ import { Banner, Button, Card, Col, Form, Row, Space, Table, Tag, Toast, Typogra
 import {
   IconActivity,
   IconArrowRight,
+  IconBolt,
   IconMail,
+  IconPriceTag,
   IconSafe,
   IconServer,
   IconTickCircle,
@@ -19,10 +21,13 @@ import {
   getSupplierResourcesOverview,
 } from '../services/activation'
 import {
+  API_KEYS_ROUTE,
+  DOCS_ROUTE,
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
+  WEBHOOKS_ROUTE,
   hasMenuPath,
   resolvePreferredConsoleRoute,
 } from '../utils/consoleNavigation'
@@ -183,7 +188,7 @@ const consolePillars = [
     label: '角色差异但不拆后台',
     summary: '供应商仍共用统一 Layout，只通过菜单、页面说明与运营动作体现供给侧差异。',
   },
-]
+] as const
 
 export function SupplierResourcesPage() {
   const navigate = useNavigate()
@@ -201,14 +206,19 @@ export function SupplierResourcesPage() {
   const canOpenDomains = hasMenuPath(menu, SUPPLIER_DOMAINS_ROUTE)
   const canOpenOfferings = hasMenuPath(menu, SUPPLIER_OFFERINGS_ROUTE)
   const canOpenSettlements = hasMenuPath(menu, SUPPLIER_SETTLEMENTS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const visibleMissionCards = missionCards.filter((item) => hasMenuPath(menu, item.path))
   const fallbackRoute = resolvePreferredConsoleRoute(menu, role)
-  const shouldShowFallback =
+  const shouldShowMissionFallback =
     !canOpenDomains &&
     !canOpenOfferings &&
     !canOpenSettlements &&
     fallbackRoute !== SUPPLIER_DOMAINS_ROUTE &&
     fallbackRoute !== SUPPLIER_RESOURCES_ROUTE
+  const shouldShowSharedConsoleFallback =
+    !canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE
 
   const load = async () => {
     setLoading(true)
@@ -260,7 +270,6 @@ export function SupplierResourcesPage() {
         auth_mode: values.auth_mode,
         protocol_mode: values.protocol_mode,
         identifier: values.identifier,
-        status: values.status,
         host: values.host,
         port: values.port ? Number(values.port) : undefined,
         refresh_token: values.refresh_token,
@@ -268,6 +277,7 @@ export function SupplierResourcesPage() {
         secret_ref: values.secret_ref,
         bridge_endpoint: values.bridge_endpoint,
         bridge_label: values.bridge_label,
+        status: values.status,
       })
       Toast.success('第三方邮箱账号已新增')
       accountForm.reset()
@@ -287,15 +297,15 @@ export function SupplierResourcesPage() {
       const values = await mailboxForm.validate()
       setMailboxSubmitting(true)
       await createSupplierMailbox({
+        project_key: values.project_key,
         domain_id: values.domain_id ? Number(values.domain_id) : undefined,
         account_id: values.account_id ? Number(values.account_id) : undefined,
         local_part: values.local_part,
         address: values.address,
         source_type: values.source_type,
-        project_key: values.project_key,
         status: values.status,
       })
-      Toast.success('邮箱池记录已新增')
+      Toast.success('邮箱池已新增')
       mailboxForm.reset()
       await load()
     } catch (error: any) {
@@ -374,10 +384,10 @@ export function SupplierResourcesPage() {
                   />
                 </Col>
               ))}
-              {shouldShowFallback ? (
+              {shouldShowMissionFallback ? (
                 <Col xs={24} md={8}>
                   <Card
-                    data-testid="supplier-resources-shared-console-fallback"
+                    data-testid="supplier-resources-mission-fallback"
                     style={{
                       height: '100%',
                       borderRadius: 20,
@@ -411,8 +421,16 @@ export function SupplierResourcesPage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card title={<span style={{ color: '#f7f8f8' }}>控制台能力矩阵</span>} style={sectionCardStyle()} bodyStyle={{ padding: 20 }}>
-            <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+          <Card style={sectionCardStyle()} bodyStyle={{ padding: 20 }}>
+            <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+              <div data-testid="supplier-resources-shared-console-bridge" style={{ width: '100%' }}>
+                <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
+                  共享控制台联动
+                </Typography.Title>
+                <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', marginTop: 8, marginBottom: 0 }}>
+                  资源侧页面继续和 API Keys、Webhook 与 Docs 处于同一套共享控制台中，避免把供应商接入路径拆成独立后台。
+                </Typography.Paragraph>
+              </div>
               {consolePillars.map((item) => (
                 <Card
                   key={item.key}
@@ -432,6 +450,34 @@ export function SupplierResourcesPage() {
                   </Typography.Paragraph>
                 </Card>
               ))}
+              <Space wrap>
+                {canOpenApiKeys ? (
+                  <Button icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
+                    API Keys · {API_KEYS_ROUTE}
+                  </Button>
+                ) : null}
+                {canOpenWebhooks ? (
+                  <Button icon={<IconBolt />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
+                    Webhook 设置 · {WEBHOOKS_ROUTE}
+                  </Button>
+                ) : null}
+                {canOpenDocs ? (
+                  <Button icon={<IconPriceTag />} onClick={() => navigate(DOCS_ROUTE)}>
+                    API 文档 · {DOCS_ROUTE}
+                  </Button>
+                ) : null}
+                {shouldShowSharedConsoleFallback ? (
+                  <Button
+                    data-testid="supplier-resources-shared-console-fallback"
+                    theme="solid"
+                    type="primary"
+                    icon={<IconArrowRight />}
+                    onClick={() => navigate(fallbackRoute)}
+                  >
+                    返回推荐工作台
+                  </Button>
+                ) : null}
+              </Space>
               <Space wrap>
                 <Tag color="blue">Catch-All：{catchAllDomains}</Tag>
                 <Tag color="green">健康账号：{healthyAccounts}</Tag>
@@ -519,40 +565,9 @@ export function SupplierResourcesPage() {
               dataSource={data.domains}
               columns={[
                 { title: '域名', dataIndex: 'name', key: 'name' },
-                { title: '区域', dataIndex: 'region', key: 'region', render: (value) => value || 'global' },
-                {
-                  title: 'Catch-All',
-                  dataIndex: 'catch_all',
-                  key: 'catch_all',
-                  render: (value) => <Tag color={value ? 'green' : 'grey'}>{value ? '已开启' : '未开启'}</Tag>,
-                },
-                {
-                  title: '状态',
-                  dataIndex: 'status',
-                  key: 'status',
-                  render: (value) => <Tag color={String(value) === 'active' ? 'green' : 'grey'}>{String(value)}</Tag>,
-                },
-              ]}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} xl={8}>
-          <Card title="邮箱池 / 别名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
-            <Table
-              pagination={false}
-              rowKey="id"
-              dataSource={data.mailboxes}
-              columns={[
-                { title: '邮箱地址', dataIndex: 'address', key: 'address' },
-                { title: '来源类型', dataIndex: 'source_type', key: 'source_type' },
-                { title: '项目', dataIndex: 'project_key', key: 'project_key' },
-                { title: 'Provider', dataIndex: 'provider', key: 'provider', render: (value) => value || '自建域名' },
-                {
-                  title: '状态',
-                  dataIndex: 'status',
-                  key: 'status',
-                  render: (value) => <Tag color={String(value) === 'available' ? 'green' : 'purple'}>{String(value)}</Tag>,
-                },
+                { title: '区域', dataIndex: 'region', key: 'region' },
+                { title: '状态', dataIndex: 'status', key: 'status', render: (value) => <Tag color={value === 'active' ? 'green' : 'grey'}>{String(value)}</Tag> },
+                { title: 'Catch-All', dataIndex: 'catch_all', key: 'catch_all', render: (value) => (value ? '已开启' : '关闭') },
               ]}
             />
           </Card>
@@ -565,79 +580,31 @@ export function SupplierResourcesPage() {
               dataSource={data.accounts}
               columns={[
                 { title: 'Provider', dataIndex: 'provider', key: 'provider' },
+                { title: '账号', dataIndex: 'identifier', key: 'identifier' },
+                { title: '来源', dataIndex: 'source_type', key: 'source_type' },
                 { title: '认证', dataIndex: 'auth_mode', key: 'auth_mode' },
                 { title: '协议', dataIndex: 'protocol_mode', key: 'protocol_mode' },
-                {
-                  title: '健康状态',
-                  dataIndex: 'health_status',
-                  key: 'health_status',
-                  render: (value) => <Tag color={value === 'healthy' ? 'green' : 'red'}>{String(value || 'unknown')}</Tag>,
-                },
-                { title: 'Bridge', dataIndex: 'bridge_endpoint', key: 'bridge_endpoint', render: (value) => value || '-' },
+                { title: '健康度', dataIndex: 'health_status', key: 'health_status', render: (value) => value || 'unknown' },
+              ]}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} xl={8}>
+          <Card title="邮箱池 / 别名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+            <Table
+              pagination={false}
+              rowKey="id"
+              dataSource={data.mailboxes}
+              columns={[
+                { title: '地址', dataIndex: 'address', key: 'address' },
+                { title: '项目', dataIndex: 'project_key', key: 'project_key' },
+                { title: '来源', dataIndex: 'source_type', key: 'source_type' },
+                { title: '状态', dataIndex: 'status', key: 'status' },
               ]}
             />
           </Card>
         </Col>
       </Row>
-
-      <Card title="资源运营提示" style={sectionCardStyle()} bodyStyle={{ padding: 20 }}>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} md={8}>
-            <Card
-              style={{
-                height: '100%',
-                borderRadius: 18,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-              bodyStyle={{ padding: 16 }}
-            >
-              <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 8 }}>
-                先补资源，再谈供货
-              </Typography.Title>
-              <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', marginBottom: 0 }}>
-                如果账号健康状态异常或邮箱池为空，优先回到这里补齐资源，而不是直接去改价格或等待订单失败后再回查。
-              </Typography.Paragraph>
-            </Card>
-          </Col>
-          <Col xs={24} md={8}>
-            <Card
-              style={{
-                height: '100%',
-                borderRadius: 18,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-              bodyStyle={{ padding: 16 }}
-            >
-              <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 8 }}>
-                与供货规则联动
-              </Typography.Title>
-              <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', marginBottom: 0 }}>
-                当项目需要新来源类型或协议模式时，先在资源页补账号/邮箱，再回到供货规则页确认售价、优先级与成功率。
-              </Typography.Paragraph>
-            </Card>
-          </Col>
-          <Col xs={24} md={8}>
-            <Card
-              style={{
-                height: '100%',
-                borderRadius: 18,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-              bodyStyle={{ padding: 16 }}
-            >
-              <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 8 }}>
-                保持供应商单壳闭环
-              </Typography.Title>
-              <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', marginBottom: 0 }}>
-                资源、供货、结算与争议都应在同一登录后控制台内连续完成，不为供应商单独拆一套后台。
-              </Typography.Paragraph>
-            </Card>
-          </Col>
-        </Row>
-      </Card>
     </Space>
   )
 }

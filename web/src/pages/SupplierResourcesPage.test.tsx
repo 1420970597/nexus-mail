@@ -5,6 +5,9 @@ import '@testing-library/jest-dom'
 import { SupplierResourcesPage } from './SupplierResourcesPage'
 import * as activationService from '../services/activation'
 import {
+  API_KEYS_ROUTE,
+  WEBHOOKS_ROUTE,
+  DOCS_ROUTE,
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
@@ -62,6 +65,9 @@ function renderPage() {
         <Route path={SUPPLIER_DOMAINS_ROUTE} element={<div>供应商域名页面</div>} />
         <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<div>供应商供货页面</div>} />
         <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页面</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div>Docs 页面</div>} />
         <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
@@ -81,6 +87,9 @@ describe('SupplierResourcesPage', () => {
         { key: 'supplier-domains', label: '域名管理', path: SUPPLIER_DOMAINS_ROUTE },
         { key: 'supplier-offerings', label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
         { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
       ],
     })
     seedOverview()
@@ -110,18 +119,19 @@ describe('SupplierResourcesPage', () => {
     })
   })
 
-  it('renders the supplier resource mission control shell and shared-console guidance', async () => {
+  it('renders the supplier resource mission control shell and shared-console bridge guidance', async () => {
     renderPage()
 
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     expect(screen.getByText('在同一套深色共享控制台里统一维护域名池、邮箱池与第三方邮箱账号池，让供给准备、健康检查与后续供货规则保持单壳闭环。')).toBeInTheDocument()
     expect(screen.getByText('供应商任务流')).toBeInTheDocument()
-    expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(screen.getByText('共享控制台联动')).toBeInTheDocument()
     expect(screen.getByText('先维护域名池与 Catch-All')).toBeInTheDocument()
     expect(screen.getByText('继续收敛供货规则')).toBeInTheDocument()
     expect(screen.getByText('最后观察结算与争议')).toBeInTheDocument()
-    expect(screen.getByText('单一供应商工作台')).toBeInTheDocument()
-    expect(screen.getByText('角色差异但不拆后台')).toBeInTheDocument()
+    expect(screen.getAllByText(`API Keys · ${API_KEYS_ROUTE}`).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(`API 文档 · ${DOCS_ROUTE}`).length).toBeGreaterThan(0)
     expect(screen.getAllByText('域名池').length).toBeGreaterThan(0)
     expect(screen.getByText('健康账号')).toBeInTheDocument()
     expect(screen.getByText('可用邮箱池')).toBeInTheDocument()
@@ -171,7 +181,30 @@ describe('SupplierResourcesPage', () => {
     expect(await screen.findByText('供应商结算页面')).toBeInTheDocument()
   })
 
-  it('suppresses unavailable supplier CTAs and falls back to the preferred workspace when downstream routes are absent', async () => {
+  it('navigates from the shared-console bridge to API keys, webhooks, and docs pages', async () => {
+    const user = userEvent.setup()
+
+    renderPage()
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
+    await user.click(within(bridge).getByRole('button', { name: /API Keys · \/api-keys/ }))
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+
+    cleanup()
+    renderPage()
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement).getByRole('button', { name: /Webhook 设置 · \/webhooks/ }))
+    expect(await screen.findByText('Webhook 页面')).toBeInTheDocument()
+
+    cleanup()
+    renderPage()
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement).getByRole('button', { name: /API 文档 · \/docs/ }))
+    expect(await screen.findByText('Docs 页面')).toBeInTheDocument()
+  })
+
+  it('suppresses unavailable supplier and shared-console CTAs then falls back to the preferred workspace', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -190,13 +223,41 @@ describe('SupplierResourcesPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '前往域名管理' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看供货规则' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('supplier-resources-mission-fallback')).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
+    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-shared-console-fallback')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /返回推荐工作台/ }))
+    await user.click(within(screen.getByTestId('supplier-resources-shared-console-fallback').parentElement as HTMLElement).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
-  it('hides the fallback slice when supplier resources is the only visible supplier route', async () => {
+  it('hides shared-console fallback when at least one bridge route remains visible', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 10, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      ],
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
+    expect(within(bridge).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
+    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
+  })
+
+  it('hides both fallback slices when supplier resources is the only visible supplier route', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -207,6 +268,7 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
