@@ -25,6 +25,10 @@
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
 ### 最新执行检查点（2026-04-30）
+- 本轮已完成新的前端优先纵向切片：`SupplierSettlementsPage` 已升级为 **Supplier Finance Mission Control** 深色共享控制台页面，在单一登录后壳内把待结算余额、冻结资金、成本模型、项目报表与争议处理收敛为同一条供应商财务闭环；同时新增供应商资金任务流与共享控制台联动卡片，将资源页 / 供货规则 / API Keys / Webhook / Docs 保持在同一套 new-api 风格单壳路径中，而不拆第二个供应商后台。
+- 已新增 `web/src/pages/SupplierSettlementsPage.test.tsx`，覆盖：Supplier Finance Mission Control 深色壳渲染、真实财务数据加载、供应商资金任务流导航、成本模型保存与争议提交流程。
+- 控制器已通过 `pnpm --dir web test -- src/pages/SupplierSettlementsPage.test.tsx src/pages/SupplierResourcesPage.test.tsx src/pages/SupplierOfferingsPage.test.tsx src/utils/consoleNavigation.test.ts src/components/ConsoleLayout.test.tsx src/pages/LoginPage.test.tsx`、`pnpm --dir web build`、`go test ./...`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/dashboard/overview` 与普通注册用户访问 `GET/POST /api/v1/supplier/settlements`、`/api/v1/supplier/cost-profiles`、`/api/v1/supplier/reports`、`/api/v1/supplier/disputes` 的预期 403 验证，确认新的供应商财务工作台未破坏共享控制台链路且供应商角色边界仍由真实 API 保持。
+- 本轮五维评审结论：产品/规格初审指出“本周期流水”措辞会夸大已加载列表的统计语义，现已改为“当前列表流水”；共享接入叙事也已收敛为“共享控制台入口”，避免把财务角色误写成直接负责接入配置。代码质量、安全/集成、测试/可靠性、性能/运维复验通过；保留既有 Semi UI `findDOMNode` / Testing Library `act(...)` 噪声与前端 chunk 体积告警为后续非阻塞债务。
 - 本轮已完成新的前端优先切片：`BalancePage` 升级为 **Finance Mission Control** 深色共享控制台工作台，新增资金任务流、控制台能力矩阵与角色差异说明，保持单一登录后壳并把预算确认 → 订单追踪 → API Keys / Webhook / Docs 串成一条共享路径；同时将“最近争议”表述收敛为“本次会话新提交的争议”，避免把本地前端 state 误写成服务端事实，并把管理员后续处理文案改为共享控制台运营链路而非错误指向具体页面。
 - 已补齐 `web/src/pages/BalancePage.test.tsx`，覆盖普通用户 Finance Mission Control 文案、供应商/管理员角色差异提示，以及充值 / 争议表单提交流程；当前 focused 测试仍以稳定断言为主，后续再继续补强共享路由点击导航断言。
 - 控制器已通过 `pnpm --dir web test -- src/pages/BalancePage.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`、前端 `/` / `/docs` 可用性检查，以及真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/dashboard/overview`、`GET /api/v1/wallet/overview`、`GET /api/v1/wallet/transactions`、`POST /api/v1/wallet/topups`、`POST /api/v1/wallet/disputes/999999`（预期 400 错误路径）验证当前余额工作台未破坏共享控制台与真实资金接口契约。
