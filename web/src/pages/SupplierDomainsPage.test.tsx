@@ -1,10 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SupplierDomainsPage } from './SupplierDomainsPage'
+import { useAuthStore } from '../store/authStore'
 import {
   API_KEYS_ROUTE,
+  DASHBOARD_ROUTE,
   DOCS_ROUTE,
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
@@ -34,11 +36,21 @@ vi.mock('@douyinfe/semi-ui', async () => {
   }
 })
 
+function seedSupplierMenu(paths: string[]) {
+  useAuthStore.setState({
+    token: 'token',
+    refreshToken: 'refresh-token',
+    user: { id: 9, email: 'supplier@nexus-mail.local', role: 'supplier' },
+    menu: paths.map((path) => ({ key: path, label: path, path })),
+  })
+}
+
 function renderSupplierDomainsPage() {
   return render(
     <MemoryRouter initialEntries={[SUPPLIER_DOMAINS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={SUPPLIER_DOMAINS_ROUTE} element={<SupplierDomainsPage />} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
         <Route path={SUPPLIER_RESOURCES_ROUTE} element={<div>供应商资源页</div>} />
         <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<div>供应商供货页</div>} />
         <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页</div>} />
@@ -56,6 +68,16 @@ describe('SupplierDomainsPage', () => {
     mockedCreateSupplierDomain.mockReset()
     mockedSuccess.mockReset()
     mockedError.mockReset()
+    seedSupplierMenu([
+      DASHBOARD_ROUTE,
+      SUPPLIER_DOMAINS_ROUTE,
+      SUPPLIER_RESOURCES_ROUTE,
+      SUPPLIER_OFFERINGS_ROUTE,
+      SUPPLIER_SETTLEMENTS_ROUTE,
+      API_KEYS_ROUTE,
+      WEBHOOKS_ROUTE,
+      DOCS_ROUTE,
+    ])
   })
 
   it('renders supplier domain mission-control shell and shared-console guidance', async () => {
@@ -79,6 +101,7 @@ describe('SupplierDomainsPage', () => {
     expect(screen.getByText('域名 readiness 优先')).toBeInTheDocument()
     expect(screen.getByText('角色扩展但不伪造升级')).toBeInTheDocument()
     expect(screen.getByText('先确认域名池与 Catch-All 覆盖')).toBeInTheDocument()
+    expect(screen.getByText('当前域名运营阶段')).toBeInTheDocument()
     expect(screen.getByText('继续补齐邮箱池与账号映射')).toBeInTheDocument()
     expect(screen.getByText('再进入供货规则编排')).toBeInTheDocument()
     expect(screen.getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
@@ -137,6 +160,61 @@ describe('SupplierDomainsPage', () => {
     expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
   })
 
+  it('suppresses unavailable supplier and shared-console CTAs, then falls back to dashboard', async () => {
+    mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
+    seedSupplierMenu([DASHBOARD_ROUTE, SUPPLIER_DOMAINS_ROUTE])
+    const user = userEvent.setup()
+
+    renderSupplierDomainsPage()
+
+    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
+    expect(within(missionFlow).getByText('先确认域名池与 Catch-All 覆盖')).toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /留在域名管理/ })).not.toBeInTheDocument()
+
+    const missionFallback = screen.getByTestId('supplier-domains-mission-fallback')
+    await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+
+    renderSupplierDomainsPage()
+    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
+    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}`)).not.toBeInTheDocument()
+
+    const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
+    await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
+    expect(screen.getAllByText('共享控制台首页').length).toBeGreaterThan(0)
+  })
+
+  it('shows explicit error state instead of empty-state fallback when overview loading fails', async () => {
+    mockedGetSupplierResourcesOverview.mockRejectedValue({ response: { data: { error: 'overview failed' } } })
+
+    renderSupplierDomainsPage()
+
+    await waitFor(() => expect(mockedError).toHaveBeenCalledWith('overview failed'))
+    expect(await screen.findByText('overview failed，请先恢复真实 /supplier/resources/overview 后再继续域名运营。')).toBeInTheDocument()
+    expect(screen.getByText('域名池加载失败时暂停显示区域统计，请先恢复上游概览接口。')).toBeInTheDocument()
+    expect(screen.queryByText('暂无域名池记录，可先在右侧创建第一条域名。')).not.toBeInTheDocument()
+    expect(screen.queryByText('暂无可统计区域。')).not.toBeInTheDocument()
+  })
+
+  it('hides fallback when current page is the only visible supplier workspace', async () => {
+    mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
+    seedSupplierMenu([SUPPLIER_DOMAINS_ROUTE])
+
+    renderSupplierDomainsPage()
+
+    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-domains-mission-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-domains-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /返回推荐工作台/ })).not.toBeInTheDocument()
+  })
+
   it('submits create domain form and reloads data', async () => {
     mockedGetSupplierResourcesOverview
       .mockResolvedValueOnce({ domains: [], accounts: [], mailboxes: [] })
@@ -170,13 +248,4 @@ describe('SupplierDomainsPage', () => {
     await waitFor(() => expect(mockedGetSupplierResourcesOverview).toHaveBeenCalledTimes(2))
   })
 
-  it('shows error state when overview loading fails', async () => {
-    mockedGetSupplierResourcesOverview.mockRejectedValue({ response: { data: { error: 'overview failed' } } })
-
-    renderSupplierDomainsPage()
-
-    await waitFor(() => expect(mockedError).toHaveBeenCalledWith('overview failed'))
-    expect(await screen.findByText('暂无域名池记录，可先在右侧创建第一条域名。')).toBeInTheDocument()
-    expect(screen.getByText('暂无可统计区域。')).toBeInTheDocument()
-  })
 })

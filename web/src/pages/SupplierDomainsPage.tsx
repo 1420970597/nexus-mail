@@ -10,14 +10,18 @@ import {
 import { JSX, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SupplierDomain, createSupplierDomain, getSupplierResourcesOverview } from '../services/activation'
+import { useAuthStore } from '../store/authStore'
 import {
   API_KEYS_ROUTE,
+  DASHBOARD_ROUTE,
   DOCS_ROUTE,
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
+  hasMenuPath,
+  resolvePreferredConsoleRoute,
 } from '../utils/consoleNavigation'
 
 function statusColor(status: string) {
@@ -95,6 +99,7 @@ const missionSteps = [
     button: '留在域名管理',
     path: SUPPLIER_DOMAINS_ROUTE,
     accent: 'rgba(14,165,233,0.18)',
+    current: true,
   },
   {
     key: 'resources',
@@ -136,19 +141,40 @@ const consolePillars = [
 
 export function SupplierDomainsPage() {
   const navigate = useNavigate()
+  const { menu, user } = useAuthStore()
   const [domains, setDomains] = useState<SupplierDomain[]>([])
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const [form] = Form.useForm()
+
+  const canOpenResources = hasMenuPath(menu, SUPPLIER_RESOURCES_ROUTE)
+  const canOpenOfferings = hasMenuPath(menu, SUPPLIER_OFFERINGS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const canOpenSettlements = hasMenuPath(menu, SUPPLIER_SETTLEMENTS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
+  const shouldShowMissionFallback = useMemo(
+    () => fallbackRoute !== SUPPLIER_DOMAINS_ROUTE && !canOpenResources && !canOpenOfferings,
+    [canOpenOfferings, canOpenResources, fallbackRoute],
+  )
+  const shouldShowBridgeFallback = useMemo(
+    () => fallbackRoute !== SUPPLIER_DOMAINS_ROUTE && !canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && !canOpenSettlements,
+    [canOpenApiKeys, canOpenDocs, canOpenSettlements, canOpenWebhooks, fallbackRoute],
+  )
 
   const load = async () => {
     setLoading(true)
     try {
+      setLoadError('')
       const res = await getSupplierResourcesOverview()
       setDomains(res.domains ?? [])
     } catch (error: any) {
-      Toast.error(error?.response?.data?.error ?? '加载域名池失败')
+      const message = error?.response?.data?.error ?? '加载域名池失败'
+      Toast.error(message)
       setDomains([])
+      setLoadError(message)
     } finally {
       setLoading(false)
     }
@@ -191,6 +217,20 @@ export function SupplierDomainsPage() {
       setSubmitting(false)
     }
   }
+
+  const visibleMissionSteps = missionSteps.filter((step) => {
+    if (step.path === SUPPLIER_DOMAINS_ROUTE) return true
+    if (step.path === SUPPLIER_RESOURCES_ROUTE) return canOpenResources
+    if (step.path === SUPPLIER_OFFERINGS_ROUTE) return canOpenOfferings
+    return true
+  })
+
+  const visibleBridgeLinks = [
+    ...(canOpenApiKeys ? [{ label: `API Keys · ${API_KEYS_ROUTE}`, summary: '继续核对密钥分发与白名单联动。', path: API_KEYS_ROUTE, icon: <IconSafe /> }] : []),
+    ...(canOpenWebhooks ? [{ label: `Webhook 设置 · ${WEBHOOKS_ROUTE}`, summary: '在同一共享控制台中继续回调联调与投递验证。', path: WEBHOOKS_ROUTE, icon: <IconBolt /> }] : []),
+    ...(canOpenDocs ? [{ label: `API 文档 · ${DOCS_ROUTE}`, summary: '返回文档页确认真实对外接入规则与示例。', path: DOCS_ROUTE, icon: <IconServer /> }] : []),
+    ...(canOpenSettlements ? [{ label: `供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}`, summary: '域名供给稳定后，再回到结算页观察财务与争议反馈。', path: SUPPLIER_SETTLEMENTS_ROUTE, icon: <IconActivity /> }] : []),
+  ]
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -240,8 +280,8 @@ export function SupplierDomainsPage() {
               继续沿 new-api 风格单壳控制台推进域名 readiness → 资源映射 → 供货编排，不切换冗余后台。
             </Typography.Paragraph>
           </div>
-          <Space wrap spacing={16} style={{ width: '100%' }}>
-            {missionSteps.map((step) => (
+          <Space wrap spacing={16} style={{ width: '100%' }} data-testid="supplier-domains-mission-flow">
+            {visibleMissionSteps.map((step) => (
               <Card
                 key={step.key}
                 style={{
@@ -259,12 +299,23 @@ export function SupplierDomainsPage() {
                     {step.title}
                   </Typography.Title>
                   <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>{step.description}</Typography.Text>
-                  <Button theme="borderless" type="primary" icon={<IconArrowRight />} onClick={() => navigate(step.path)}>
-                    {step.button}
-                  </Button>
+                  {step.current ? (
+                    <Tag color="blue">当前域名运营阶段</Tag>
+                  ) : (
+                    <Button theme="borderless" type="primary" icon={<IconArrowRight />} onClick={() => navigate(step.path)}>
+                      {step.button}
+                    </Button>
+                  )}
                 </Space>
               </Card>
             ))}
+            {shouldShowMissionFallback ? (
+              <div data-testid="supplier-domains-mission-fallback">
+                <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
+                  返回推荐工作台
+                </Button>
+              </div>
+            ) : null}
           </Space>
         </Space>
       </Card>
@@ -314,12 +365,20 @@ export function SupplierDomainsPage() {
                   当前已加载域名池记录会直接影响后续邮箱映射与供货规则编排，先在这里完成基本运营判断。
                 </Typography.Paragraph>
               </div>
-              {domains.length === 0 ? (
+              {loadError ? (
+                <Banner
+                  type="danger"
+                  fullMode={false}
+                  description={`${loadError}，请先恢复真实 /supplier/resources/overview 后再继续域名运营。`}
+                  style={{ width: '100%', background: 'rgba(127, 29, 29, 0.24)', border: '1px solid rgba(248,113,113,0.28)', borderRadius: 18 }}
+                />
+              ) : domains.length === 0 ? (
                 <Empty description="暂无域名池记录，可先在右侧创建第一条域名。" />
               ) : (
                 <Table
                   pagination={false}
                   rowKey="id"
+                  loading={loading}
                   dataSource={domains}
                   columns={[
                     { title: '域名', dataIndex: 'name', key: 'name' },
@@ -376,13 +435,8 @@ export function SupplierDomainsPage() {
                     域名池准备完成后，继续在同一登录态中验证接入密钥、Webhook 与文档，不拆第二套供应商后台。
                   </Typography.Paragraph>
                 </div>
-                <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                  {[
-                    { label: `API Keys · ${API_KEYS_ROUTE}`, summary: '继续核对密钥分发与白名单联动。', path: API_KEYS_ROUTE, icon: <IconSafe /> },
-                    { label: `Webhook 设置 · ${WEBHOOKS_ROUTE}`, summary: '在同一共享控制台中继续回调联调与投递验证。', path: WEBHOOKS_ROUTE, icon: <IconBolt /> },
-                    { label: `API 文档 · ${DOCS_ROUTE}`, summary: '返回文档页确认真实对外接入规则与示例。', path: DOCS_ROUTE, icon: <IconServer /> },
-                    { label: `供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}`, summary: '域名供给稳定后，再回到结算页观察财务与争议反馈。', path: SUPPLIER_SETTLEMENTS_ROUTE, icon: <IconActivity /> },
-                  ].map((item) => (
+                <Space vertical align="start" spacing={12} style={{ width: '100%' }} data-testid="supplier-domains-shared-console-bridge">
+                  {visibleBridgeLinks.map((item) => (
                     <Card
                       key={item.path}
                       style={{
@@ -407,6 +461,13 @@ export function SupplierDomainsPage() {
                       </Space>
                     </Card>
                   ))}
+                  {shouldShowBridgeFallback ? (
+                    <div data-testid="supplier-domains-shared-console-fallback">
+                      <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute || DASHBOARD_ROUTE)}>
+                        返回推荐工作台
+                      </Button>
+                    </div>
+                  ) : null}
                 </Space>
               </Space>
             </Card>
@@ -421,7 +482,9 @@ export function SupplierDomainsPage() {
                     仅基于当前已加载域名池统计区域，帮助判断是否需要先回到资源或规则页补足区域覆盖。
                   </Typography.Paragraph>
                 </div>
-                {topRegions.length === 0 ? (
+                {loadError ? (
+                  <Typography.Text type="danger">域名池加载失败时暂停显示区域统计，请先恢复上游概览接口。</Typography.Text>
+                ) : topRegions.length === 0 ? (
                   <Typography.Text type="tertiary">暂无可统计区域。</Typography.Text>
                 ) : (
                   <Space wrap>
