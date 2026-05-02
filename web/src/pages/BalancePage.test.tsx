@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { BalancePage } from './BalancePage'
@@ -96,6 +96,49 @@ describe('BalancePage', () => {
     expect(screen.getByText('资金观察与售后同层')).toBeInTheDocument()
     expect(screen.getByText('普通用户先完成预算确认，再串联订单、争议与接入路径')).toBeInTheDocument()
     expect(screen.getByText('本次会话新提交的争议')).toBeInTheDocument()
+  })
+
+  it('navigates through the finance mission cards and shared-console bridge CTAs', async () => {
+    const user = userEvent.setup()
+
+    let view = renderBalancePage()
+
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+
+    await user.click(screen.getByText('前往项目市场'))
+    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderBalancePage()
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+
+    const missionCardsSection = screen.getByText('资金任务流').closest('.semi-card')
+    expect(missionCardsSection).not.toBeNull()
+    const ordersMissionCard = within(missionCardsSection as HTMLElement).getByText('再追踪冻结与退款链路').closest('.semi-card')
+    expect(ordersMissionCard).not.toBeNull()
+    await user.click(within(ordersMissionCard as HTMLElement).getByRole('button', { name: /查看订单中心/ }))
+    expect(await screen.findByText('订单中心页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderBalancePage()
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+
+    await user.click(screen.getByText('打开 API Keys'))
+    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderBalancePage()
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+
+    await user.click(screen.getByText('打开 Webhook 设置'))
+    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderBalancePage()
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+
+    await user.click(screen.getByText('打开 API 文档'))
+    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
   it('supports topup and dispute submission flows', async () => {
