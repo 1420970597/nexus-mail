@@ -51,16 +51,15 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('首次使用清单')).toBeInTheDocument()
     expect(screen.getByText('新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。')).toBeInTheDocument()
 
-    const checklistCard = screen.getByText('首次使用清单').closest('.semi-card')
-    expect(checklistCard).not.toBeNull()
-    const checklistScope = within(checklistCard as HTMLElement)
+    const checklistCard = screen.getByTestId('settings-user-first-run-checklist')
+    const checklistScope = within(checklistCard)
 
     await user.click(checklistScope.getByRole('button', { name: '打开项目市场' }))
     expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
 
     renderSettingsPage()
-    const checklistCardAgain = await screen.findByText('首次使用清单')
-    const checklistScopeAgain = within(checklistCardAgain.closest('.semi-card') as HTMLElement)
+    const checklistCardAgain = await screen.findByTestId('settings-user-first-run-checklist')
+    const checklistScopeAgain = within(checklistCardAgain)
     expect(checklistScopeAgain.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
     expect(checklistScopeAgain.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
 
@@ -97,7 +96,7 @@ describe('SettingsPage', () => {
 
     expect(await screen.findByText('Console Mission Control')).toBeInTheDocument()
     expect(screen.getByText('接入与账户设置不再停留在浅色占位页，而是收敛为与仪表盘一致的深色共享控制台工作台。')).toBeInTheDocument()
-    expect(screen.getByText('集成任务流')).toBeInTheDocument()
+    expect(screen.getByTestId('settings-mission-cards')).toBeInTheDocument()
     expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(screen.getByText('深色共享工作台')).toBeInTheDocument()
     expect(screen.getAllByText('注册后连续路径').length).toBeGreaterThan(0)

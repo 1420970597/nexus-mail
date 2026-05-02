@@ -355,6 +355,7 @@ export function SettingsPage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
           <Card
+            data-testid="settings-mission-cards"
             title={<span style={{ color: '#f8fafc' }}>集成任务流</span>}
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
@@ -399,7 +400,12 @@ export function SettingsPage() {
       </Row>
 
       {user?.role === 'user' ? (
-        <Card title="首次使用清单" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+        <Card
+          data-testid="settings-user-first-run-checklist"
+          title="首次使用清单"
+          style={{ width: '100%', borderRadius: 24 }}
+          bodyStyle={{ padding: 20 }}
+        >
           <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
             <Banner
               type="info"
