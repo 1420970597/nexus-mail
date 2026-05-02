@@ -1,16 +1,18 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SupplierSettlementsPage } from './SupplierSettlementsPage'
 import {
   API_KEYS_ROUTE,
+  DASHBOARD_ROUTE,
   DOCS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 const mockedGetSupplierSettlementOverview = vi.fn()
 const mockedGetSupplierCostProfiles = vi.fn()
@@ -131,6 +133,7 @@ function renderSupplierSettlementsPage() {
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>Docs 页面</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -146,6 +149,20 @@ describe('SupplierSettlementsPage', () => {
     mockedCreateSupplierDispute.mockReset()
     mockedSuccess.mockReset()
     mockedError.mockReset()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 88, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+        { key: 'supplier-offerings', label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
+        { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'Docs', path: DOCS_ROUTE },
+      ],
+    })
     seedFinancePayload()
   })
 
@@ -187,18 +204,68 @@ describe('SupplierSettlementsPage', () => {
 
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
+    const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
+    await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierSettlementsPage()
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /继续维护供货规则/ }))
+    await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
     expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierSettlementsPage()
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
+    await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+  })
+
+  it('suppresses unavailable supplier and shared-console ctas then falls back to the preferred workspace when downstream routes are absent', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 89, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
+      ],
+    })
+
+    renderSupplierSettlementsPage()
+
+    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
+    expect(within(missionFlow).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('supplier-settlements-mission-fallback')).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.getByTestId('supplier-settlements-shared-console-fallback')).toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: /返回推荐工作台/ })[0])
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
+  it('hides the fallback slices when supplier settlements is the only visible route', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 90, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [{ key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE }],
+    })
+
+    renderSupplierSettlementsPage()
+
+    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-settlements-mission-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-settlements-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('submits supplier cost profile and dispute actions then reloads data', async () => {

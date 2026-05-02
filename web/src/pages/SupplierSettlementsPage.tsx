@@ -15,7 +15,17 @@ import {
   SupplierSettlementEntry,
   WalletOverview,
 } from '../services/finance'
-import { API_KEYS_ROUTE, DOCS_ROUTE, SUPPLIER_OFFERINGS_ROUTE, SUPPLIER_RESOURCES_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import {
+  API_KEYS_ROUTE,
+  DOCS_ROUTE,
+  hasMenuPath,
+  resolvePreferredConsoleRoute,
+  SUPPLIER_OFFERINGS_ROUTE,
+  SUPPLIER_RESOURCES_ROUTE,
+  SUPPLIER_SETTLEMENTS_ROUTE,
+  WEBHOOKS_ROUTE,
+} from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 function disputeTagColor(status: string) {
   switch (status) {
@@ -67,6 +77,8 @@ function MetricCard({ title, value, description, color }: { title: string; value
 
 export function SupplierSettlementsPage() {
   const navigate = useNavigate()
+  const menu = useAuthStore((state) => state.menu)
+  const role = useAuthStore((state) => state.user?.role)
   const [wallet, setWallet] = useState<WalletOverview | null>(null)
   const [entries, setEntries] = useState<SupplierSettlementEntry[]>([])
   const [profiles, setProfiles] = useState<SupplierCostProfile[]>([])
@@ -77,6 +89,13 @@ export function SupplierSettlementsPage() {
   const [reportDraft, setReportDraft] = useState({ from: '', to: '', limit: 100 })
   const [costForm] = Form.useForm()
   const [disputeForm] = Form.useForm()
+
+  const canOpenResources = hasMenuPath(menu, SUPPLIER_RESOURCES_ROUTE)
+  const canOpenOfferings = hasMenuPath(menu, SUPPLIER_OFFERINGS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = resolvePreferredConsoleRoute(menu, role)
 
   const load = async () => {
     setLoading(true)
@@ -155,6 +174,32 @@ export function SupplierSettlementsPage() {
     { key: 'webhooks', label: 'Webhook 设置 · /webhooks', summary: '结算与争议反馈后的外部回调链路仍在共享控制台统一维护。', action: () => navigate(WEBHOOKS_ROUTE), icon: <IconBolt /> },
     { key: 'docs', label: 'API 文档 · /docs', summary: '供给与财务动作完成后，继续回到文档验证真实对外接入规则。', action: () => navigate(DOCS_ROUTE), icon: <IconPriceTag /> },
   ]
+
+  const visibleMissionSteps = missionSteps.filter((step) => hasMenuPath(menu, step.path))
+  const visibleConsolePillars = consolePillars.filter((pillar) => {
+    switch (pillar.key) {
+      case 'api':
+        return canOpenApiKeys
+      case 'webhooks':
+        return canOpenWebhooks
+      case 'docs':
+        return canOpenDocs
+      default:
+        return false
+    }
+  })
+  const shouldShowMissionFallback =
+    !canOpenResources &&
+    !canOpenOfferings &&
+    !canOpenApiKeys &&
+    fallbackRoute !== SUPPLIER_RESOURCES_ROUTE &&
+    fallbackRoute !== SUPPLIER_OFFERINGS_ROUTE &&
+    fallbackRoute !== SUPPLIER_SETTLEMENTS_ROUTE
+  const shouldShowConsoleFallback =
+    !canOpenApiKeys &&
+    !canOpenWebhooks &&
+    !canOpenDocs &&
+    fallbackRoute !== SUPPLIER_SETTLEMENTS_ROUTE
 
   const handleSaveProfile = async () => {
     try {
@@ -237,8 +282,8 @@ export function SupplierSettlementsPage() {
               继续沿共享控制台的单壳路径推进资金检查 → 成本维护 → 争议复盘，不在财务切片里切换冗余后台。
             </Typography.Paragraph>
           </div>
-          <Space wrap spacing={16} style={{ width: '100%' }}>
-            {missionSteps.map((step) => (
+          <Space wrap spacing={16} style={{ width: '100%' }} data-testid="supplier-settlements-mission-flow">
+            {visibleMissionSteps.map((step) => (
               <Card
                 key={step.key}
                 style={{
@@ -260,6 +305,31 @@ export function SupplierSettlementsPage() {
                 </Space>
               </Card>
             ))}
+            {shouldShowMissionFallback ? (
+              <Card
+                key="mission-fallback"
+                style={{
+                  flex: '1 1 250px',
+                  minWidth: 250,
+                  borderRadius: 20,
+                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                  border: '1px solid rgba(148,163,184,0.28)',
+                }}
+                bodyStyle={{ padding: 20 }}
+                data-testid="supplier-settlements-mission-fallback"
+              >
+                <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                  <Tag color="grey">Fallback</Tag>
+                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>返回推荐工作台</Typography.Title>
+                  <Typography.Text style={{ color: 'rgba(226,232,240,0.78)' }}>
+                    当服务端暂未暴露资源、供货或接入入口时，先回到推荐工作台继续保持单一登录后的供应商控制台路径。
+                  </Typography.Text>
+                  <Button theme="solid" type="primary" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+                    返回推荐工作台
+                  </Button>
+                </Space>
+              </Card>
+            ) : null}
           </Space>
         </Space>
       </Card>
@@ -274,8 +344,8 @@ export function SupplierSettlementsPage() {
               供应商财务动作完成后，继续与共享接入能力、回调配置和文档入口处于同一控制台中，避免把财务体验拆成孤岛页面。
             </Typography.Paragraph>
           </div>
-          <Space wrap spacing={16} style={{ width: '100%' }}>
-            {consolePillars.map((pillar) => (
+          <Space wrap spacing={16} style={{ width: '100%' }} data-testid="supplier-settlements-shared-console-bridge">
+            {visibleConsolePillars.map((pillar) => (
               <Card
                 key={pillar.key}
                 style={{
@@ -293,13 +363,39 @@ export function SupplierSettlementsPage() {
                 </Space>
               </Card>
             ))}
+            {shouldShowConsoleFallback ? (
+              <Card
+                key="console-fallback"
+                style={{
+                  flex: '1 1 240px',
+                  minWidth: 240,
+                  borderRadius: 18,
+                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                  border: '1px solid rgba(148,163,184,0.28)',
+                }}
+                bodyStyle={{ padding: 18 }}
+                data-testid="supplier-settlements-shared-console-fallback"
+              >
+                <Space vertical align="start" spacing={10}>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回推荐工作台</Typography.Text>
+                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
+                    共享接入入口暂未由服务端暴露时，先回到推荐工作台继续真实业务主链路，不在当前页泄露未授权集成入口。
+                  </Typography.Text>
+                </Space>
+              </Card>
+            ) : null}
           </Space>
           <Space wrap spacing={12}>
-            {consolePillars.map((pillar) => (
+            {visibleConsolePillars.map((pillar) => (
               <Button key={pillar.key} icon={pillar.icon} onClick={pillar.action}>
                 {pillar.label}
               </Button>
             ))}
+            {shouldShowConsoleFallback ? (
+              <Button icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+                返回推荐工作台
+              </Button>
+            ) : null}
           </Space>
         </Space>
       </Card>
