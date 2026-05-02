@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore'
 import {
   API_KEYS_ROUTE,
   BALANCE_ROUTE,
+  DASHBOARD_ROUTE,
   DOCS_ROUTE,
   ORDERS_ROUTE,
   PROJECTS_ROUTE,
@@ -28,7 +29,7 @@ const mockedGetAdminOverview = vi.mocked(authService.getAdminOverview)
 
 function seedUserMenu(paths: string[]) {
   const labels: Record<string, string> = {
-    '/': '仪表盘',
+    [DASHBOARD_ROUTE]: '仪表盘',
     [BALANCE_ROUTE]: '余额中心',
     [PROJECTS_ROUTE]: '项目市场',
     [ORDERS_ROUTE]: '订单中心',
@@ -46,11 +47,11 @@ function seedUserMenu(paths: string[]) {
   })
 }
 
-function renderDashboard(initialEntry = '/') {
+function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path="/" element={<DashboardPage />} />
+        <Route path={DASHBOARD_ROUTE} element={<DashboardPage />} />
         <Route path={BALANCE_ROUTE} element={<div>余额中心页面</div>} />
         <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
         <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
@@ -67,7 +68,7 @@ describe('DashboardPage shared-console journey hub', () => {
   beforeEach(() => {
     window.localStorage.clear()
     seedUserMenu([
-      '/',
+      DASHBOARD_ROUTE,
       BALANCE_ROUTE,
       PROJECTS_ROUTE,
       ORDERS_ROUTE,
@@ -138,7 +139,7 @@ describe('DashboardPage shared-console journey hub', () => {
   })
 
   it('hides unavailable journey cards when the server menu does not expose those shared routes', async () => {
-    seedUserMenu(['/', PROJECTS_ROUTE, SETTINGS_ROUTE])
+    seedUserMenu([DASHBOARD_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE])
 
     renderDashboard()
 
@@ -152,5 +153,21 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scoped.queryByText('最后完成 API 接入')).not.toBeInTheDocument()
     expect(scoped.queryByRole('button', { name: '查看余额中心' })).not.toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
+  })
+
+  it('links the dashboard integration lane to api keys, webhooks, and docs with shared route constants', async () => {
+    const user = userEvent.setup()
+
+    const view = renderDashboard()
+    const lane = await screen.findByText('推荐下一步')
+    const scoped = within(lane.closest('.semi-card') as HTMLElement)
+
+    expect(scoped.getByText('最后完成 API 接入')).toBeInTheDocument()
+    expect(scoped.getByText('继续进入 API Keys、Webhook 与文档，完成程序化调用、回调联调与真实接口验证准备。')).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+
+    await user.click(scoped.getByRole('button', { name: '管理 API Keys' }))
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    view.unmount()
   })
 })

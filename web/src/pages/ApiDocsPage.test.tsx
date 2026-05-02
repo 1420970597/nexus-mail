@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -75,5 +75,34 @@ describe('ApiDocsPage', () => {
     expect(screen.getAllByText('最小权限 API Key').length).toBeGreaterThan(0)
     expect(screen.getByText('查看项目市场基线')).toBeInTheDocument()
     expect(screen.queryByText('打开 Webhook 设置')).not.toBeInTheDocument()
+  })
+
+  it('keeps the docs page aligned with the shared integration loop and navigates to webhook settings', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 33, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    renderApiDocsPage()
+
+    expect(await screen.findByText('Docs Mission Control')).toBeInTheDocument()
+    const journeyButtons = screen.getAllByRole('button', { name: /打开 Webhook 设置/ })
+    expect(journeyButtons.length).toBeGreaterThan(0)
+    const journeyCard = journeyButtons[0].closest('.semi-card')
+    expect(journeyCard).not.toBeNull()
+    const scoped = within(journeyCard as HTMLElement)
+    expect(scoped.getByText('真实回调验证')).toBeInTheDocument()
+    expect(scoped.getByText('阅读 payload 契约后回到 Webhook 页面做 test delivery，继续观察异步 delivery 状态。')).toBeInTheDocument()
+
+    await user.click(scoped.getByRole('button', { name: /打开 Webhook 设置/ }))
+    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
   })
 })

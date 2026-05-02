@@ -302,10 +302,12 @@ function roleActions(menu: MenuItem[], role?: string): RoleAction[] {
     })
   }
   if (itemsByPath.has(API_KEYS_ROUTE)) {
+    const docsLabel = itemsByPath.has(DOCS_ROUTE) ? '文档' : '接口说明'
+    const webhookLabel = itemsByPath.has(WEBHOOKS_ROUTE) ? 'Webhook' : '回调'
     actions.push({
       key: 'api-keys',
       title: '集成与回调',
-      description: '继续配置 API Keys、白名单与文档，完成对外 API / Webhook 对接。',
+      description: `继续配置 API Keys、${webhookLabel} 与 ${docsLabel}，完成对外 API / Webhook 对接。`,
       path: API_KEYS_ROUTE,
       button: '管理 API Keys',
       icon: <IconSetting />,

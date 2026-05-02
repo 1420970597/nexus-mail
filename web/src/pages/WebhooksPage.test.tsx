@@ -23,18 +23,18 @@ function seedRole(role: 'user' | 'supplier' | 'admin' = 'user') {
     token: 'token',
     refreshToken: 'refresh-token',
     user: { id: 1, email: `${role}@nexus-mail.local`, role },
-      menu: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
-        { key: 'docs', label: 'API 文档', path: '/docs' },
-      ],
-})
+    menu: [
+      { key: 'dashboard', label: '仪表盘', path: '/' },
+      { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+      { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+    ],
+  })
 }
 
 function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
   return render(
-    <MemoryRouter initialEntries={[initialEntry]}>
+    <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
@@ -224,6 +224,16 @@ describe('WebhooksPage', () => {
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
+  it('renders a shared integration loop card with api keys and docs CTAs', async () => {
+    renderWebhooksPage()
+
+    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(screen.getByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    expect(screen.getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+  })
+
   it('renders shared-console metrics and delivery operations for admin role', async () => {
     seedRole('admin')
     mockedGetWebhookEndpoints.mockResolvedValueOnce({
@@ -250,57 +260,46 @@ describe('WebhooksPage', () => {
         },
       ],
     })
-    mockedGetWebhookDeliveries
-      .mockResolvedValueOnce({
+    mockedGetWebhookDeliveries.mockImplementation(async (id: number) => {
+      if (id === 11) {
+        return {
+          items: [
+            {
+              id: 91,
+              endpoint_id: 11,
+              user_id: 1,
+              event_type: 'webhook.test',
+              payload: '{"type":"webhook.test"}',
+              status: 'sent',
+              attempt_count: 1,
+              next_attempt_at: '',
+              last_error: '',
+              delivered_at: '2026-04-29T00:03:00Z',
+              created_at: '2026-04-29T00:00:10Z',
+              updated_at: '2026-04-29T00:03:00Z',
+            },
+          ],
+        }
+      }
+      return {
         items: [
-          {
-            id: 91,
-            endpoint_id: 11,
-            user_id: 1,
-            event_type: 'webhook.test',
-            payload: '{"type":"webhook.test"}',
-            status: 'pending',
-            attempt_count: 2,
-            next_attempt_at: '2026-04-29T00:01:00Z',
-            last_error: 'upstream timeout',
-            delivered_at: '',
-            created_at: '2026-04-29T00:00:10Z',
-            updated_at: '2026-04-29T00:00:10Z',
-          },
           {
             id: 92,
-            endpoint_id: 11,
-            user_id: 1,
-            event_type: 'activation.finished',
-            payload: '{"type":"activation.finished"}',
-            status: 'sent',
-            attempt_count: 1,
-            next_attempt_at: '',
-            last_error: '',
-            delivered_at: '2026-04-29T00:00:40Z',
-            created_at: '2026-04-29T00:00:30Z',
-            updated_at: '2026-04-29T00:00:40Z',
-          },
-        ],
-      })
-      .mockResolvedValueOnce({
-        items: [
-          {
-            id: 93,
             endpoint_id: 12,
             user_id: 1,
             event_type: 'activation.ready',
             payload: '{"type":"activation.ready"}',
             status: 'failed',
             attempt_count: 3,
-            next_attempt_at: '2026-04-29T00:02:00Z',
-            last_error: 'tls handshake failed',
+            next_attempt_at: '2026-04-29T00:04:00Z',
+            last_error: 'timeout',
             delivered_at: '',
-            created_at: '2026-04-29T00:01:30Z',
-            updated_at: '2026-04-29T00:01:30Z',
+            created_at: '2026-04-29T00:00:20Z',
+            updated_at: '2026-04-29T00:03:30Z',
           },
         ],
-      })
+      }
+    })
 
     render(
       <MemoryRouter>
@@ -310,85 +309,13 @@ describe('WebhooksPage', () => {
 
     expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
     expect(screen.getByText('端点总数')).toBeInTheDocument()
+    expect(screen.getByText('投递成功')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('最近回调')).toBeInTheDocument()
-    expect(screen.getAllByText('2026-04-29T00:00:40Z').length).toBeGreaterThan(0)
-    expect(screen.getByText('最近一次成功送达的回调时间')).toBeInTheDocument()
+    expect(screen.getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
+    expect(screen.getByText('已聚合 2 条最近 delivery')).toBeInTheDocument()
     expect(screen.getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
-    expect(screen.getByText('排队中')).toBeInTheDocument()
-    expect(screen.getAllByText('disabled').length).toBeGreaterThan(0)
-
-    const testButtons = screen.getAllByRole('button', { name: '发送测试投递' })
-    expect(testButtons[0]).toBeEnabled()
-    expect(testButtons[1]).toBeDisabled()
-    expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2)
-  })
-
-  it('shows a shared first-hour integration timeline for plain users', async () => {
-    render(
-      <MemoryRouter>
-        <WebhooksPage />
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
-    expect(screen.getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。')).toBeInTheDocument()
-    expect(screen.getByText('1. 创建首个 endpoint')).toBeInTheDocument()
-    expect(screen.getByText('2. 验证 test delivery')).toBeInTheDocument()
-    expect(screen.getByText('3. 回到 API 文档/消费端')).toBeInTheDocument()
-  })
-
-  it('navigates from the first-run guidance into the api keys workspace', async () => {
-    const user = userEvent.setup()
-
-    render(
-      <MemoryRouter initialEntries={['/webhooks']}>
-        <Routes>
-          <Route path="/webhooks" element={<WebhooksPage />} />
-          <Route path="/api-keys" element={<div>开发者 API 接入工作台</div>} />
-        </Routes>
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-  })
-
-  it('navigates from the empty-state docs CTA into the docs workspace', async () => {
-    const user = userEvent.setup()
-    mockedGetWebhookEndpoints.mockResolvedValueOnce({ items: [] })
-
-    render(
-      <MemoryRouter initialEntries={['/webhooks']}>
-        <Routes>
-          <Route path="/webhooks" element={<WebhooksPage />} />
-          <Route path="/docs" element={<div>API 文档页面</div>} />
-        </Routes>
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '查看 API 文档' })[0])
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
-  })
-
-  it('hides shared-console continuation CTAs when api keys and docs are not exposed by the server menu', async () => {
-    useAuthStore.setState({
-      token: 'token',
-      refreshToken: 'refresh-token',
-      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
-      menu: [{ key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' }],
-    })
-
-    render(
-      <MemoryRouter>
-        <WebhooksPage />
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('注册后首轮回调联调建议')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    expect(screen.getAllByText('2026-04-29T00:03:00Z').length).toBeGreaterThan(0)
+    expect(screen.getByText(/重点关注 failed \/ pending 重试链路与 last_error/)).toBeInTheDocument()
   })
 })

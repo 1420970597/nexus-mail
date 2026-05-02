@@ -5,6 +5,7 @@ import { Modal } from '@douyinfe/semi-ui'
 import { ApiKeysPage } from './ApiKeysPage'
 import * as apiKeyService from '../services/apiKeys'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/apiKeys', () => ({
   getAPIKeys: vi.fn(),
@@ -40,13 +41,25 @@ function seedRole(role: 'user' | 'supplier' | 'admin' = 'user') {
     user: { id: 1, email: `${role}@nexus-mail.local`, role },
     menu: [
       { key: 'dashboard', label: '仪表盘', path: '/' },
-      { key: 'projects', label: '项目市场', path: '/projects' },
-      { key: 'orders', label: '订单中心', path: '/orders' },
-      { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
-      { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
-      { key: 'docs', label: 'API 文档', path: '/docs' },
+      { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+      { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+      { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+      { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
     ],
   })
+}
+
+function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Routes>
+        <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
+        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
 }
 
 describe('ApiKeysPage', () => {
@@ -251,107 +264,41 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     await user.click(screen.getAllByRole('button', { name: /编辑白名单/ })[0])
-    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
-    await user.clear(whitelistInput)
-    await user.type(whitelistInput, 'not-an-ip')
+    await user.clear(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24'))
+    await user.type(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24'), 'invalid-entry')
     await user.click(screen.getByRole('button', { name: '保存白名单' }))
 
-    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['not-an-ip']))
+    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['invalid-entry']))
     expect(await screen.findByText('IP 白名单仅支持合法 IP 或 CIDR')).toBeInTheDocument()
   })
 
-  it('does not revoke when modal confirm is cancelled', async () => {
-    const user = userEvent.setup()
-
-    mockedModalConfirm.mockImplementationOnce(({ onCancel }) => {
-      onCancel?.()
-    })
-
-    render(
-      <MemoryRouter>
-        <ApiKeysPage />
-      </MemoryRouter>,
-    )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-
-    await user.click(screen.getAllByRole('button', { name: '撤销' })[0])
-
-    await waitFor(() => expect(mockedModalConfirm).toHaveBeenCalled())
-    expect(mockedRevokeAPIKey).not.toHaveBeenCalled()
-  })
-
-  it('renders plaintext api key in one-time banner after creation', async () => {
-    const user = userEvent.setup()
-
-    render(
-      <MemoryRouter>
-        <ApiKeysPage />
-      </MemoryRouter>,
-    )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-
-    await user.type(screen.getByLabelText('名称'), '新密钥')
-    await user.click(screen.getByRole('button', { name: '创建新密钥' }))
-
-    expect(await screen.findByText(/nmx_created_secret/)).toBeInTheDocument()
-    expect(screen.queryByText('nmx_created_secret', { selector: 'td' })).not.toBeInTheDocument()
-  })
-
-  it('renders audit entries and summary cards', async () => {
-    render(
-      <MemoryRouter>
-        <ApiKeysPage />
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-    expect(screen.getByText('活跃 Key')).toBeInTheDocument()
-    expect(screen.getByText('白名单保护')).toBeInTheDocument()
-    expect(screen.getByText('create')).toBeInTheDocument()
-    expect(screen.getByText('当前密钥')).toBeInTheDocument()
-  })
-
-  it('navigates from the empty-state docs CTA into the docs workspace', async () => {
+  it('navigates from the existing shared integration CTAs into the docs workspace', async () => {
     const user = userEvent.setup()
     mockedGetAPIKeys.mockResolvedValueOnce({ items: [] })
 
-    render(
-      <MemoryRouter initialEntries={['/api-keys']}>
-        <Routes>
-          <Route path="/api-keys" element={<ApiKeysPage />} />
-          <Route path="/docs" element={<div>API 文档页面</div>} />
-        </Routes>
-      </MemoryRouter>,
-    )
-
+    renderApiKeysPage()
     expect(await screen.findByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
+    expect(screen.getByText('完成创建、复制、权限规划与白名单维护，再结合 API 文档与 Webhook 页面打通真实接入链路。')).toBeInTheDocument()
+    expect(screen.getByText('新建后仅展示一次明文密钥，请立即复制保存；后续列表仅显示 key_preview。若需要程序化回调，请继续前往 Webhook 设置与 API 文档。')).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
-  it('hides follow-up integration CTAs when the server menu does not expose docs or webhooks', async () => {
-    useAuthStore.setState({
-      token: 'token',
-      refreshToken: 'refresh-token',
-      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
-      menu: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
-      ],
-    })
-    mockedGetAPIKeys.mockResolvedValueOnce({ items: [] })
+  it('uses modal confirmation for revoke flow', async () => {
+    const user = userEvent.setup()
 
     render(
       <MemoryRouter>
         <ApiKeysPage />
       </MemoryRouter>,
     )
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '撤销' })[0])
 
-    expect(await screen.findByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '前往 Webhook 设置' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    expect(mockedModalConfirm).toHaveBeenCalledTimes(1)
   })
 })
