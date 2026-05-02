@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { APIKeyAuditEntry, APIKeyRecord, createAPIKey, getAPIKeyAudit, getAPIKeys, revokeAPIKey, updateAPIKeyWhitelist } from '../services/apiKeys'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 const PLAINTEXT_VISIBILITY_MS = 5 * 60 * 1000
 
@@ -137,6 +137,7 @@ export function ApiKeysPage() {
   const revokedKeys = useMemo(() => items.filter((item) => item.status === 'revoked'), [items])
   const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
   const whitelistProtectedCount = useMemo(
     () => activeKeys.filter((item) => Array.isArray(item.whitelist) && item.whitelist.length > 0).length,
@@ -271,6 +272,52 @@ export function ApiKeysPage() {
         fullMode={false}
         description="新建后仅展示一次明文密钥，请立即复制保存；后续列表仅显示 key_preview。若需要程序化回调，请继续前往 Webhook 设置与 API 文档。"
       />
+
+      <Card
+        style={{
+          width: '100%',
+          borderRadius: 22,
+          background: 'linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(15,23,42,0.94) 56%, rgba(8,9,10,0.98) 100%)',
+          border: '1px solid rgba(125,211,252,0.16)',
+        }}
+        bodyStyle={{ padding: 22 }}
+      >
+        <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+          <Tag color="cyan" shape="circle">共享接入回退路径</Tag>
+          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+                API Keys → Webhook → 文档
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
+                保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到推荐工作台继续真实业务主链路。
+              </Typography.Paragraph>
+            </div>
+            <Space wrap>
+              {canOpenProjects ? (
+                <Button theme="borderless" type="primary" icon={<IconServer />} onClick={() => navigate(PROJECTS_ROUTE)}>
+                  返回项目市场
+                </Button>
+              ) : null}
+              {canOpenWebhooks ? (
+                <Button type="primary" theme="solid" icon={<IconArticle />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
+                  继续配置 Webhook
+                </Button>
+              ) : null}
+              {canOpenDocs ? (
+                <Button theme="light" type="primary" icon={<IconSafe />} onClick={() => navigate(DOCS_ROUTE)}>
+                  查看 API 文档
+                </Button>
+              ) : null}
+              {!canOpenProjects && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== API_KEYS_ROUTE ? (
+                <Button theme="solid" type="primary" icon={<IconServer />} onClick={() => navigate(fallbackRoute)}>
+                  返回推荐工作台
+                </Button>
+              ) : null}
+            </Space>
+          </Space>
+        </Space>
+      </Card>
 
       {createdKey ? (
         <Banner

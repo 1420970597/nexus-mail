@@ -54,9 +54,12 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
+        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+        <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
         <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route path="/" element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -286,6 +289,37 @@ describe('ApiKeysPage', () => {
 
     await user.click(screen.getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+  })
+
+  it('keeps the integration fallback lane inside the shared console and renders the docs bridge copy when docs is available', async () => {
+    renderApiKeysPage()
+
+    expect(await screen.findByText('共享接入回退路径')).toBeInTheDocument()
+    expect(screen.getByText('API Keys → Webhook → 文档')).toBeInTheDocument()
+    expect(screen.getByText('保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到推荐工作台继续真实业务主链路。')).toBeInTheDocument()
+  })
+
+  it('suppresses integration CTAs and returns to the preferred workspace when webhook/docs routes are unavailable', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 2, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      ],
+    })
+
+    renderApiKeysPage()
+
+    expect(await screen.findByText('共享接入回退路径')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '返回项目市场' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
+    expect(screen.queryAllByRole('button', { name: '查看 API 文档' })).toHaveLength(0)
+
+    await user.click(screen.getByRole('button', { name: /返回推荐工作台/ }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
   it('uses modal confirmation for revoke flow', async () => {
