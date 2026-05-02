@@ -267,9 +267,27 @@ export function AdminSuppliersPage() {
                 </Tag>
               ))}
               {shouldShowFallback ? (
-                <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
-                  返回推荐工作台
-                </Button>
+                <Card
+                  data-testid="admin-suppliers-shared-console-fallback"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                    border: '1px solid rgba(148,163,184,0.14)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Tag color="cyan">Fallback</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到推荐工作台继续管理员主链路</Typography.Title>
+                    <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
+                      当前菜单未暴露结算、风控、审计或共享接入入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
+                    </Typography.Text>
+                    <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
+                      返回推荐工作台
+                    </Button>
+                  </Space>
+                </Card>
               ) : null}
             </Space>
           </Card>

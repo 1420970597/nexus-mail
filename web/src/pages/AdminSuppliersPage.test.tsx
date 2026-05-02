@@ -196,6 +196,19 @@ describe('AdminSuppliersPage', () => {
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
+  it('shows the scoped fallback card when every downstream admin action is hidden', async () => {
+    seedAdminMenu([DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE])
+
+    renderAdminSuppliersPage()
+
+    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const fallbackCard = screen.getByTestId('admin-suppliers-shared-console-fallback')
+    expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
+    expect(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
+  })
+
   it('keeps bridge links only for the pages exposed by the admin menu', async () => {
     seedAdminMenu([DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE])
 
