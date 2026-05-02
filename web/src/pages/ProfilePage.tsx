@@ -3,7 +3,16 @@ import { IconArticle, IconBolt, IconSafe, IconServer } from '@douyinfe/semi-icon
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import {
+  API_KEYS_ROUTE,
+  DOCS_ROUTE,
+  PROFILE_ROUTE,
+  PROJECTS_ROUTE,
+  SETTINGS_ROUTE,
+  WEBHOOKS_ROUTE,
+  hasMenuPath,
+  resolvePreferredConsoleRoute,
+} from '../utils/consoleNavigation'
 
 interface FocusAction {
   label: string
@@ -23,6 +32,13 @@ interface CapabilityCard {
   buttonText: string
   path: string
   visible: boolean
+}
+
+interface SharedConsoleReturnCard {
+  title: string
+  description: string
+  buttonText: string
+  path: string
 }
 
 function roleColor(role?: string) {
@@ -55,6 +71,7 @@ export function ProfilePage() {
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const canOpenSettings = hasMenuPath(menu, SETTINGS_ROUTE)
   const canOpenSupplierDomains = hasMenuPath(menu, '/supplier/domains')
   const canOpenAdminRisk = hasMenuPath(menu, '/admin/risk')
 
@@ -138,6 +155,39 @@ export function ProfilePage() {
   )
 
   const visibleCapabilityCards = capabilityCards.filter((item) => item.visible)
+  const sharedConsoleReturnCard = useMemo<SharedConsoleReturnCard | null>(() => {
+    if (user?.role === 'user') {
+      if (!canOpenProjects && fallbackRoute !== PROFILE_ROUTE) {
+        return {
+          title: '回到推荐工作台继续主链路',
+          description: '当服务端暂未暴露项目市场时，普通用户仍可从账号中枢回到推荐工作台继续查看预算、订单或接入入口。',
+          buttonText: '返回推荐工作台',
+          path: fallbackRoute,
+        }
+      }
+      return null
+    }
+
+    if (canOpenSettings) {
+      return {
+        title: '通过设置中心回到共享控制台',
+        description: '角色扩展仍留在同一套深色控制台中；如果当前页只负责身份核对，可先回到设置中心再继续风控、供给或接入链路。',
+        buttonText: '返回共享工作台',
+        path: SETTINGS_ROUTE,
+      }
+    }
+
+    if (fallbackRoute !== PROFILE_ROUTE) {
+      return {
+        title: '回到推荐工作台继续角色扩展链路',
+        description: '当设置中心入口暂未暴露时，仍可返回当前角色的推荐工作台，继续同一控制台中的风控、供给或接入任务。',
+        buttonText: '返回共享工作台',
+        path: fallbackRoute,
+      }
+    }
+
+    return null
+  }, [canOpenProjects, canOpenSettings, fallbackRoute, user?.role])
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -292,10 +342,27 @@ export function ProfilePage() {
                 <Tag color="blue" prefixIcon={<IconBolt />}>Webhook / API</Tag>
                 <Tag color="green" prefixIcon={<IconArticle />}>单一文档入口</Tag>
               </Space>
-              {fallbackRoute !== PROFILE_ROUTE ? (
-                <Button theme="borderless" type="primary" onClick={() => navigate(fallbackRoute)}>
-                  返回共享工作台
-                </Button>
+              {sharedConsoleReturnCard ? (
+                <Card
+                  data-testid="profile-shared-console-return"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(94,106,210,0.24)',
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f8fafc' }}>{sharedConsoleReturnCard.title}</Typography.Text>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)' }}>
+                      {sharedConsoleReturnCard.description}
+                    </Typography.Paragraph>
+                    <Button theme="solid" type="primary" onClick={() => navigate(sharedConsoleReturnCard.path)}>
+                      {sharedConsoleReturnCard.buttonText}
+                    </Button>
+                  </Space>
+                </Card>
               ) : null}
             </Space>
           </Card>
