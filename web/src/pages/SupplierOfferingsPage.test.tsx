@@ -1,16 +1,18 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SupplierOfferingsPage } from './SupplierOfferingsPage'
 import {
   API_KEYS_ROUTE,
+  DASHBOARD_ROUTE,
   DOCS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 const mockedGetSupplierResourcesOverview = vi.fn()
 const mockedGetSupplierOfferings = vi.fn()
@@ -40,6 +42,7 @@ function renderSupplierOfferingsPage() {
     <MemoryRouter initialEntries={[SUPPLIER_OFFERINGS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<SupplierOfferingsPage />} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
         <Route path={SUPPLIER_RESOURCES_ROUTE} element={<div>供应商资源页</div>} />
         <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
@@ -57,6 +60,20 @@ describe('SupplierOfferingsPage', () => {
     mockedSaveSupplierOffering.mockReset()
     mockedSuccess.mockReset()
     mockedError.mockReset()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+        { label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
+        { label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
+        { label: 'API Keys', path: API_KEYS_ROUTE },
+        { label: 'Webhook', path: WEBHOOKS_ROUTE },
+        { label: 'Docs', path: DOCS_ROUTE },
+      ],
+    })
   })
 
   it('renders supplier mission-control shell with metrics and shared-console guidance', async () => {
@@ -134,6 +151,33 @@ describe('SupplierOfferingsPage', () => {
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+  })
+
+  it('suppresses hidden shared-console bridge actions and falls back to the preferred workspace when integration routes are absent from the menu', async () => {
+    mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
+    mockedGetSupplierOfferings.mockResolvedValue({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+        { label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
+      ],
+    })
+    const user = userEvent.setup()
+
+    renderSupplierOfferingsPage()
+    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+
+    const bridge = screen.getByText('共享控制台联动').closest('[class*=semi-card]') ?? screen.getByText('共享控制台联动').parentElement!
+    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /返回推荐工作台/ }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
   it('submits create offering form and reloads data', async () => {

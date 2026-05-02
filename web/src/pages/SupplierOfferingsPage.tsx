@@ -14,10 +14,13 @@ import { getSupplierOfferings, getSupplierResourcesOverview, InventoryItem, save
 import {
   API_KEYS_ROUTE,
   DOCS_ROUTE,
+  hasMenuPath,
+  resolvePreferredConsoleRoute,
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 function money(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -140,11 +143,18 @@ function topSourceTypes(offerings: InventoryItem[]) {
 
 export function SupplierOfferingsPage() {
   const navigate = useNavigate()
+  const menu = useAuthStore((state) => state.menu)
+  const role = useAuthStore((state) => state.user?.role)
   const [domains, setDomains] = useState<SupplierDomain[]>([])
   const [offerings, setOfferings] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [form] = Form.useForm()
+
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = resolvePreferredConsoleRoute(menu, role)
 
   const load = async () => {
     setLoading(true)
@@ -305,15 +315,32 @@ export function SupplierOfferingsPage() {
             ))}
           </Space>
           <Space wrap spacing={12}>
-            <Button icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
-              API Keys · {API_KEYS_ROUTE}
-            </Button>
-            <Button icon={<IconBolt />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
-              Webhook 设置 · {WEBHOOKS_ROUTE}
-            </Button>
-            <Button icon={<IconPriceTag />} onClick={() => navigate(DOCS_ROUTE)}>
-              API 文档 · {DOCS_ROUTE}
-            </Button>
+            {canOpenApiKeys ? (
+              <Button icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
+                API Keys · {API_KEYS_ROUTE}
+              </Button>
+            ) : null}
+            {canOpenWebhooks ? (
+              <Button icon={<IconBolt />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
+                Webhook 设置 · {WEBHOOKS_ROUTE}
+              </Button>
+            ) : null}
+            {canOpenDocs ? (
+              <Button icon={<IconPriceTag />} onClick={() => navigate(DOCS_ROUTE)}>
+                API 文档 · {DOCS_ROUTE}
+              </Button>
+            ) : null}
+            {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (
+              <Button
+                data-testid="supplier-offerings-shared-console-fallback"
+                theme="solid"
+                type="primary"
+                icon={<IconArrowRight />}
+                onClick={() => navigate(fallbackRoute)}
+              >
+                返回推荐工作台
+              </Button>
+            ) : null}
           </Space>
         </Space>
       </Card>
