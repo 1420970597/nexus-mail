@@ -171,12 +171,13 @@ describe('SupplierOfferingsPage', () => {
     renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
 
-    const bridge = screen.getByText('共享控制台联动').closest('[class*=semi-card]') ?? screen.getByText('共享控制台联动').parentElement!
-    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /返回推荐工作台/ }))
+    const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
+    expect(fallback).toBeInTheDocument()
+    await user.click(within(fallback.parentElement as HTMLElement).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
