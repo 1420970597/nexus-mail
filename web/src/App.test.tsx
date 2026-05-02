@@ -637,7 +637,7 @@ describe('App', () => {
 
     await waitFor(() => expect(screen.getByText('供应商运营焦点')).toBeInTheDocument())
     await user.click(screen.getAllByRole('button', { name: '前往域名管理' })[0])
-    expect(await screen.findByText('当前供应商域名池记录')).toBeInTheDocument()
+    expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
   it('renders dashboard with role mission panel and navigable next actions for supplier', async () => {
@@ -661,7 +661,7 @@ describe('App', () => {
     expect(screen.getAllByText('域名池运营').length).toBeGreaterThan(0)
     expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
     await user.click(screen.getAllByRole('button', { name: '前往域名管理' })[0])
-    expect(await screen.findByText('当前供应商域名池记录')).toBeInTheDocument()
+    expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
   it('navigates from settings shortcuts to admin risk and audit pages', async () => {
