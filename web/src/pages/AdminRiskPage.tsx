@@ -415,19 +415,43 @@ export function AdminRiskPage() {
               title: '启用',
               dataIndex: 'enabled',
               key: 'enabled',
-              render: (_value, _record, index) => <Switch checked={rules[index].enabled} onChange={(checked) => updateRule(index, { enabled: checked })} />,
+              render: (_value, _record, index) => (
+                <Switch
+                  aria-label={`启用规则-${rules[index].key}`}
+                  checked={rules[index].enabled}
+                  onChange={(checked) => updateRule(index, { enabled: checked })}
+                />
+              ),
             },
             {
               title: '阈值',
               dataIndex: 'threshold',
               key: 'threshold',
-              render: (_value, _record, index) => <Form.InputNumber noLabel min={1} max={10000} value={rules[index].threshold} onNumberChange={(value) => updateRule(index, { threshold: Number(value) || 1 })} />,
+              render: (_value, _record, index) => (
+                <Form.InputNumber
+                  field={`threshold-${rules[index].key}`}
+                  noLabel
+                  min={1}
+                  max={10000}
+                  value={rules[index].threshold}
+                  onNumberChange={(value) => updateRule(index, { threshold: Number(value) || 1 })}
+                />
+              ),
             },
             {
               title: '窗口(分钟)',
               dataIndex: 'window_minutes',
               key: 'window_minutes',
-              render: (_value, _record, index) => <Form.InputNumber noLabel min={1} max={1440} value={rules[index].window_minutes} onNumberChange={(value) => updateRule(index, { window_minutes: Number(value) || 1 })} />,
+              render: (_value, _record, index) => (
+                <Form.InputNumber
+                  field={`window-${rules[index].key}`}
+                  noLabel
+                  min={1}
+                  max={1440}
+                  value={rules[index].window_minutes}
+                  onNumberChange={(value) => updateRule(index, { window_minutes: Number(value) || 1 })}
+                />
+              ),
             },
             {
               title: '等级',
