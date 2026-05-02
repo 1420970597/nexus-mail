@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
@@ -7,8 +7,11 @@ import * as activationService from '../services/activation'
 import {
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
+  SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
+  DASHBOARD_ROUTE,
 } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 vi.mock('../services/activation', async () => {
   const actual = await vi.importActual<typeof import('../services/activation')>('../services/activation')
@@ -53,8 +56,14 @@ function seedOverview() {
 
 function renderPage() {
   return render(
-    <MemoryRouter>
-      <SupplierResourcesPage />
+    <MemoryRouter initialEntries={[SUPPLIER_RESOURCES_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Routes>
+        <Route path={SUPPLIER_RESOURCES_ROUTE} element={<SupplierResourcesPage />} />
+        <Route path={SUPPLIER_DOMAINS_ROUTE} element={<div>供应商域名页面</div>} />
+        <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<div>供应商供货页面</div>} />
+        <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页面</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
+      </Routes>
     </MemoryRouter>,
   )
 }
@@ -62,6 +71,18 @@ function renderPage() {
 describe('SupplierResourcesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+        { key: 'supplier-domains', label: '域名管理', path: SUPPLIER_DOMAINS_ROUTE },
+        { key: 'supplier-offerings', label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
+        { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
+      ],
+    })
     seedOverview()
     mockedCreateSupplierDomain.mockResolvedValue({
       domain: { id: 3, name: 'new-mail.nexus.test', region: 'us', status: 'active', catch_all: true },
@@ -130,40 +151,64 @@ describe('SupplierResourcesPage', () => {
   it('navigates from mission-control actions to supplier domains, offerings, and settlements pages', async () => {
     const user = userEvent.setup()
 
-    const renderMissionControl = () => render(
-      <MemoryRouter initialEntries={['/supplier/resources']}>
-        <Routes>
-          <Route path="/supplier/resources" element={<SupplierResourcesPage />} />
-          <Route path={SUPPLIER_DOMAINS_ROUTE} element={<div>供应商域名页面</div>} />
-          <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<div>供应商供货页面</div>} />
-          <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页面</div>} />
-        </Routes>
-      </MemoryRouter>,
-    )
-
-    const { unmount } = renderMissionControl()
-
+    renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
 
-    const missionButtons = screen.getAllByRole('button')
-
-    await user.click(missionButtons.find((button) => button.textContent?.includes('前往域名管理'))!)
+    const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    await user.click(within(missionFlow).getByRole('button', { name: /前往域名管理/ }))
     expect(await screen.findByText('供应商域名页面')).toBeInTheDocument()
 
-    unmount()
-    renderMissionControl()
-
+    cleanup()
+    renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button').find((button) => button.textContent?.includes('查看供货规则'))!)
+    await user.click(within(screen.getByTestId('supplier-resources-mission-flow')).getByRole('button', { name: /查看供货规则/ }))
     expect(await screen.findByText('供应商供货页面')).toBeInTheDocument()
 
-    renderMissionControl().unmount()
-    const third = renderMissionControl()
+    cleanup()
+    renderPage()
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('supplier-resources-mission-flow')).getByRole('button', { name: /打开供应商结算/ }))
+    expect(await screen.findByText('供应商结算页面')).toBeInTheDocument()
+  })
+
+  it('suppresses unavailable supplier CTAs and falls back to the preferred workspace when downstream routes are absent', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 8, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+      ],
+    })
+
+    renderPage()
 
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button').find((button) => button.textContent?.includes('打开供应商结算'))!)
-    expect(await screen.findByText('供应商结算页面')).toBeInTheDocument()
-    third.unmount()
+    const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    expect(within(missionFlow).queryByRole('button', { name: '前往域名管理' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '查看供货规则' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('supplier-resources-shared-console-fallback')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /返回推荐工作台/ }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
+  it('hides the fallback slice when supplier resources is the only visible supplier route', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 9, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [{ key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE }],
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('submits supplier domain, account, and mailbox actions then reloads overview data', async () => {

@@ -21,8 +21,12 @@ import {
 import {
   SUPPLIER_DOMAINS_ROUTE,
   SUPPLIER_OFFERINGS_ROUTE,
+  SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
+  hasMenuPath,
+  resolvePreferredConsoleRoute,
 } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 interface ResourceState {
   domains: SupplierDomain[]
@@ -116,6 +120,53 @@ const missionCards = [
   },
 ] as const
 
+function MissionFlowCard({
+  tag,
+  title,
+  description,
+  button,
+  accent,
+  onClick,
+}: {
+  tag: string
+  title: string
+  description: string
+  button: string
+  accent: string
+  onClick: () => void
+}) {
+  return (
+    <Card
+      style={{
+        height: '100%',
+        borderRadius: 20,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+        border: `1px solid ${accent}`,
+      }}
+      bodyStyle={{ padding: 18 }}
+    >
+      <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+        <Tag color="grey">{tag}</Tag>
+        <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
+          {title}
+        </Typography.Title>
+        <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
+          {description}
+        </Typography.Paragraph>
+        <Button
+          type="primary"
+          theme="borderless"
+          icon={<IconArrowRight />}
+          style={{ color: '#a5b4fc', paddingLeft: 0 }}
+          onClick={onClick}
+        >
+          {button}
+        </Button>
+      </Space>
+    </Card>
+  )
+}
+
 const consolePillars = [
   {
     key: 'single-shell',
@@ -136,6 +187,8 @@ const consolePillars = [
 
 export function SupplierResourcesPage() {
   const navigate = useNavigate()
+  const menu = useAuthStore((state) => state.menu)
+  const role = useAuthStore((state) => state.user?.role)
   const [data, setData] = useState<ResourceState>({ domains: [], mailboxes: [], accounts: [] })
   const [loading, setLoading] = useState(false)
   const [domainSubmitting, setDomainSubmitting] = useState(false)
@@ -144,6 +197,18 @@ export function SupplierResourcesPage() {
   const [domainForm] = Form.useForm()
   const [accountForm] = Form.useForm()
   const [mailboxForm] = Form.useForm()
+
+  const canOpenDomains = hasMenuPath(menu, SUPPLIER_DOMAINS_ROUTE)
+  const canOpenOfferings = hasMenuPath(menu, SUPPLIER_OFFERINGS_ROUTE)
+  const canOpenSettlements = hasMenuPath(menu, SUPPLIER_SETTLEMENTS_ROUTE)
+  const visibleMissionCards = missionCards.filter((item) => hasMenuPath(menu, item.path))
+  const fallbackRoute = resolvePreferredConsoleRoute(menu, role)
+  const shouldShowFallback =
+    !canOpenDomains &&
+    !canOpenOfferings &&
+    !canOpenSettlements &&
+    fallbackRoute !== SUPPLIER_DOMAINS_ROUTE &&
+    fallbackRoute !== SUPPLIER_RESOURCES_ROUTE
 
   const load = async () => {
     setLoading(true)
@@ -296,39 +361,52 @@ export function SupplierResourcesPage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={16}>
           <Card title={<span style={{ color: '#f7f8f8' }}>供应商任务流</span>} style={sectionCardStyle()} bodyStyle={{ padding: 20 }}>
-            <Row gutter={[16, 16]}>
-              {missionCards.map((item) => (
+            <Row gutter={[16, 16]} data-testid="supplier-resources-mission-flow">
+              {visibleMissionCards.map((item) => (
                 <Col xs={24} md={8} key={item.key}>
+                  <MissionFlowCard
+                    tag={item.tag}
+                    title={item.title}
+                    description={item.description}
+                    button={item.button}
+                    accent={item.accent}
+                    onClick={() => navigate(item.path)}
+                  />
+                </Col>
+              ))}
+              {shouldShowFallback ? (
+                <Col xs={24} md={8}>
                   <Card
+                    data-testid="supplier-resources-shared-console-fallback"
                     style={{
                       height: '100%',
                       borderRadius: 20,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: `1px solid ${item.accent}`,
+                      background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                      border: '1px solid rgba(148,163,184,0.14)',
                     }}
                     bodyStyle={{ padding: 18 }}
                   >
                     <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                      <Tag color="grey">{item.tag}</Tag>
+                      <Tag color="cyan">Fallback</Tag>
                       <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
-                        {item.title}
+                        返回推荐工作台继续供应商主链路
                       </Typography.Title>
                       <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
-                        {item.description}
+                        当前菜单未暴露域名、供货或结算入口时，继续回到服务端授予的共享工作台完成下一步运营闭环。
                       </Typography.Paragraph>
                       <Button
                         type="primary"
                         theme="borderless"
                         icon={<IconArrowRight />}
-                        style={{ color: '#a5b4fc', paddingLeft: 0 }}
-                        onClick={() => navigate(item.path)}
+                        style={{ color: '#67e8f9', paddingLeft: 0 }}
+                        onClick={() => navigate(fallbackRoute)}
                       >
-                        {item.button}
+                        返回推荐工作台
                       </Button>
                     </Space>
                   </Card>
                 </Col>
-              ))}
+              ) : null}
             </Row>
           </Card>
         </Col>
