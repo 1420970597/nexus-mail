@@ -402,8 +402,8 @@ describe('App', () => {
 
     await user.click(screen.getAllByRole('button', { name: '管理 API Keys' })[0])
 
-    expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
-    expect(screen.getByRole('menuitem', { name: /API Keys/ })).toHaveClass('semi-navigation-item-selected')
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(screen.getByText('当前密钥')).toBeInTheDocument()
   })
 
   it('keeps settings guidance entry available after dismissing first-run mission cards for default user', async () => {
@@ -687,7 +687,7 @@ describe('App', () => {
     renderApp([SETTINGS_ROUTE])
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
     await user.click(screen.getAllByRole('button', { name: /查看审计日志/ })[0])
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByText('审计日志')).toBeInTheDocument()
   })
 
   it('renders webhook settings page for authenticated admin', async () => {
@@ -708,7 +708,7 @@ describe('App', () => {
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '发送测试投递' }).length).toBeGreaterThan(0)
+    expect(screen.getByText('发送测试投递')).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {

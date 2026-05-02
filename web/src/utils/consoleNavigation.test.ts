@@ -36,7 +36,7 @@ describe('console navigation landing rules', () => {
     ).toBe('/')
   })
 
-  it('falls back to the first server menu item when no preferred path is present', () => {
+  it('falls back to the shared dashboard when no allowed menu path is present', () => {
     expect(
       resolvePreferredConsoleRoute(
         [
@@ -45,6 +45,6 @@ describe('console navigation landing rules', () => {
         ],
         'user',
       ),
-    ).toBe('/custom')
+    ).toBe('/')
   })
 })

@@ -154,6 +154,7 @@ describe('OrdersPage', () => {
     expect(screen.getAllByText('123456').length).toBeGreaterThan(0)
   })
 
+
   it('renders the first-run order journey card so users know what to do after purchasing', async () => {
     render(
       <MemoryRouter>
@@ -167,6 +168,25 @@ describe('OrdersPage', () => {
     expect(screen.getByText('异常时看结果面板')).toBeInTheDocument()
     expect(screen.getByText('订单为空时的下一步')).toBeInTheDocument()
     expect(screen.getByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).toBeInTheDocument()
+  })
+
+  it('navigates from the empty-state api continuation CTA into the api keys workspace', async () => {
+    const user = userEvent.setup()
+    mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
+
+    render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path={API_KEYS_ROUTE} element={<div>开发者 API 接入工作台</div>} />
+          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: '查看 API 接入准备' })[0])
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
   })
 
   it('hides the API continuation CTA when the server menu does not expose API key management', async () => {

@@ -260,33 +260,38 @@ export function WebhooksPage() {
 
     return { total, sent, failed }
   }, [deliveries])
+
   const activeEndpoints = useMemo(() => items.filter((item) => item.status === 'active'), [items])
+  const attentionCount = useMemo(() => {
+    let pending = 0
+    for (const endpointDeliveries of Object.values(deliveries)) {
+      for (const item of endpointDeliveries) {
+        if (item.status === 'failed' || item.status === 'pending') {
+          pending += 1
+        }
+      }
+    }
+    return pending
+  }, [deliveries])
   const latestDelivery = useMemo(() => latestDeliveryTimestamp(deliveries), [deliveries])
-  const attentionCount = useMemo(
-    () => Object.values(deliveries).reduce((count, endpointDeliveries) => count + endpointDeliveries.filter((item) => item.status === 'failed' || item.status === 'pending').length, 0),
-    [deliveries],
-  )
 
   const endpointColumns = useMemo(
     () => [
-      { title: 'Endpoint ID', dataIndex: 'id', key: 'id' },
-      { title: '目标 URL', dataIndex: 'url', key: 'url' },
+      { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+      { title: '目标地址', dataIndex: 'url', key: 'url' },
       {
-        title: '事件',
+        title: '事件订阅',
         dataIndex: 'events',
         key: 'events',
-        render: (value: string[]) =>
-          Array.isArray(value) && value.length > 0 ? (
-            <Space wrap>
-              {value.map((event) => (
-                <Tag key={event} color="cyan">
-                  {event}
-                </Tag>
-              ))}
-            </Space>
-          ) : (
-            '—'
-          ),
+        render: (events: string[]) => (
+          <Space wrap>
+            {events.map((event) => (
+              <Tag key={event} color="cyan">
+                {event}
+              </Tag>
+            ))}
+          </Space>
+        ),
       },
       {
         title: '状态',
@@ -294,27 +299,24 @@ export function WebhooksPage() {
         key: 'status',
         render: (value: string) => <Tag color={endpointStatusColor(String(value))}>{String(value)}</Tag>,
       },
-      { title: '密钥预览', dataIndex: 'secret_preview', key: 'secret_preview' },
-      { title: '创建时间', dataIndex: 'created_at', key: 'created_at' },
       {
-        title: '回调健康度',
-        key: 'health',
-        render: (_: unknown, record: WebhookEndpointRecord) => {
-          const endpointDeliveries = deliveries[record.id] ?? []
-          const hasFailed = endpointDeliveries.some((item) => item.status === 'failed')
-          const hasPending = endpointDeliveries.some((item) => item.status === 'pending')
-          const healthLabel = record.status !== 'active' ? 'disabled' : hasFailed ? '异常' : hasPending ? '排队中' : '稳定'
-          const healthColor = record.status !== 'active' ? 'grey' : hasFailed ? 'red' : hasPending ? 'blue' : 'green'
-          return <Tag color={healthColor}>{healthLabel}</Tag>
-        },
+        title: '签名预览',
+        dataIndex: 'secret_preview',
+        key: 'secret_preview',
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
       },
       {
         title: '操作',
-        key: 'action',
+        key: 'actions',
         render: (_: unknown, record: WebhookEndpointRecord) => (
           <Space>
             <Button
-              theme="light"
+              theme="solid"
+              type="primary"
               loading={testingID === record.id}
               disabled={record.status !== 'active'}
               onClick={() => void handleTest(record.id)}
@@ -533,7 +535,11 @@ export function WebhooksPage() {
                       title: '状态',
                       dataIndex: 'status',
                       key: 'status',
-                      render: (value: string) => <Tag color={deliveryStatusColor(String(value))}>{String(value)}</Tag>,
+                      render: (value: string) => {
+                        const normalized = String(value)
+                        const label = normalized === 'pending' ? '排队中' : normalized
+                        return <Tag color={deliveryStatusColor(normalized)}>{label}</Tag>
+                      },
                     },
                     { title: '尝试次数', dataIndex: 'attempt_count', key: 'attempt_count' },
                     { title: '下次重试', dataIndex: 'next_attempt_at', key: 'next_attempt_at', render: formatTime },

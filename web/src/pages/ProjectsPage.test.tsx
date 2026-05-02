@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProjectsPage } from './ProjectsPage'
 import * as activationService from '../services/activation'
 import { useAuthStore } from '../store/authStore'
@@ -147,6 +147,24 @@ describe('ProjectsPage', () => {
     expect(screen.getByText('下单后下一步')).toBeInTheDocument()
     expect(screen.getByText('共享控制台回退路径')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
+  })
+
+
+  it('navigates from market procurement guidance into the order center inside the shared console', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter initialEntries={['/projects']}>
+        <Routes>
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/orders" element={<div>订单中心页面</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('采购动作提示')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '打开订单中心' }))
+    expect(await screen.findByText('订单中心页面')).toBeInTheDocument()
   })
 
   it('shows an integration CTA in the hero so newly registered users can continue API onboarding from the market view', async () => {

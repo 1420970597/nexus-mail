@@ -1,6 +1,6 @@
 import { IconActivity, IconArticle, IconBolt, IconComponent, IconHome, IconHistogram, IconPriceTag, IconSafe, IconServer, IconSetting, IconUser } from '@douyinfe/semi-icons'
 import type { JSX } from 'react'
-import type { Role } from '../store/authStore'
+import type { MenuItem, Role } from '../store/authStore'
 
 export type ConsoleNavGroup = 'shared' | 'supplier' | 'admin'
 
@@ -220,12 +220,12 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   },
   {
     key: 'admin-pricing',
-    label: '价格策略',
+    label: '项目定价',
     path: ADMIN_PRICING_ROUTE,
-    title: '价格策略',
+    title: '项目定价',
     group: 'admin',
     icon: <IconPriceTag />,
-    landingPriority: 40,
+    landingPriority: 10,
     allowedRoles: ['admin'],
   },
   {
@@ -235,7 +235,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     title: '风控中心',
     group: 'admin',
     icon: <IconSafe />,
-    landingPriority: 0,
+    landingPriority: 40,
     quickActionPriority: 30,
     allowedRoles: ['admin'],
   },
@@ -245,64 +245,55 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     path: ADMIN_AUDIT_ROUTE,
     title: '审计日志',
     group: 'admin',
-    icon: <IconActivity />,
-    landingPriority: 10,
+    icon: <IconArticle />,
+    landingPriority: 50,
     quickActionPriority: 50,
     allowedRoles: ['admin'],
   },
 ]
 
-export function resolveRouteDefinition(pathname: string) {
-  return consoleRoutes.find((item) => item.path === pathname)
-}
-
-export function resolveRouteTitle(pathname: string) {
-  if (pathname === DASHBOARD_ROUTE) return '控制台总览'
-  const segments = pathname.split('/').filter(Boolean)
-  if (segments.length === 0) return '控制台总览'
-  const route = resolveRouteDefinition(pathname)
-  if (route) return route.title
-  return segments[segments.length - 1]
-}
-
-export const titleFromPathname = resolveRouteTitle
-
-export function routesForRole(role?: Role) {
-  if (!role) return consoleRoutes.filter((item) => item.group === 'shared')
-  return consoleRoutes.filter((item) => item.allowedRoles.includes(role))
+export function getConsoleRoutesForRole(role?: Role) {
+  return consoleRoutes.filter((route) => route.allowedRoles.includes((role ?? 'user') as Role))
 }
 
 export function allowedLandingPathsForRole(role?: Role) {
-  return routesForRole(role)
-    .slice()
-    .sort((a, b) => routePriorityForRole(a, role) - routePriorityForRole(b, role))
+  return [...getConsoleRoutesForRole(role)]
+    .sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))
     .map((route) => route.path)
 }
 
-export function resolvePreferredConsoleRoute(menu: Array<{ path: string }> = [], role?: Role) {
-  const allowed = routesForRole(role)
-  const menuPaths = new Set(menu.map((item) => item.path))
-  const matchingRoutes = allowed.filter((route) => menuPaths.size === 0 || menuPaths.has(route.path))
-  if (matchingRoutes.length > 0) {
-    const sorted = [...matchingRoutes].sort((a, b) => routePriorityForRole(a, role) - routePriorityForRole(b, role))
-    return sorted[0]?.path ?? DEFAULT_SHARED_ROUTE
+export function resolvePostAuthLandingRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
+  const allowed = getConsoleRoutesForRole(role)
+  const allowedMap = new Map(allowed.map((route) => [route.path, route]))
+
+  const fromMenu = menuItems
+    .map((item) => allowedMap.get(item.path))
+    .filter((route): route is ConsoleRouteDefinition => Boolean(route))
+    .sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))
+
+  if (fromMenu.length > 0) {
+    return fromMenu[0].path
   }
-  return menu[0]?.path ?? DEFAULT_SHARED_ROUTE
+
+  const fallback = [...allowed].sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))[0]
+  return fallback?.path ?? DEFAULT_SHARED_ROUTE
 }
 
-export function resolvePostAuthLandingRoute(menu: Array<{ path: string }> = [], role?: Role) {
-  return resolvePreferredConsoleRoute(menu, role)
+export function resolvePreferredConsoleRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
+  return resolvePostAuthLandingRoute(menuItems, role)
 }
 
-export function visibleQuickActionPaths(role?: Role) {
-  return routesForRole(role)
+export function getQuickActionRoutes(role?: Role) {
+  return getConsoleRoutesForRole(role)
     .filter((route) => typeof route.quickActionPriority === 'number')
-    .sort((a, b) => (a.quickActionPriority ?? 0) - (b.quickActionPriority ?? 0))
-    .map((route) => route.path)
+    .sort((left, right) => (left.quickActionPriority ?? Number.MAX_SAFE_INTEGER) - (right.quickActionPriority ?? Number.MAX_SAFE_INTEGER))
 }
 
-export function hasMenuPath(menu: Array<{ path: string }> = [], path: string) {
-  return menu.some((item) => item.path === path)
+export function visibleQuickActionPaths(menuItems: Array<{ path: string }> = [], currentPath?: string, role?: Role) {
+  const visibleMenuPaths = new Set(menuItems.map((item) => item.path))
+  return getQuickActionRoutes(role)
+    .map((route) => route.path)
+    .filter((path) => path !== currentPath && visibleMenuPaths.has(path))
 }
 
 export function groupedConsolePaths() {
@@ -311,4 +302,21 @@ export function groupedConsolePaths() {
     supplier: consoleRoutes.filter((route) => route.group === 'supplier').map((route) => route.path),
     admin: consoleRoutes.filter((route) => route.group === 'admin').map((route) => route.path),
   }
+}
+
+export function hasMenuPath(menuItems: MenuItem[] = [], path: string) {
+  return menuItems.some((item) => item.path === path)
+}
+
+export function resolveRouteDefinition(path: string) {
+  return consoleRoutes.find((route) => route.path === path)
+}
+
+export function resolveRouteTitle(path: string) {
+  const route = resolveRouteDefinition(path)
+  if (route) {
+    return route.title
+  }
+  const segments = path.split('/').filter(Boolean)
+  return segments[segments.length - 1] ?? '控制台'
 }

@@ -66,7 +66,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
 
   const visibleQuickActions = useMemo(
     () =>
-      visibleQuickActionPaths(menu, location.pathname)
+      visibleQuickActionPaths(menu, location.pathname, user?.role)
         .map((path) => {
           const menuItem = menu.find((item) => item.path === path)
           const route = resolveRouteDefinition(path)
@@ -80,7 +80,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
           }
         })
         .filter((item): item is { path: string; label: string; icon: JSX.Element } => Boolean(item)),
-    [location.pathname, menu],
+    [location.pathname, menu, user?.role],
   )
 
   return (
