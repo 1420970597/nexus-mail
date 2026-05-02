@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createUserOrderDispute, getWalletOverview, getWalletTransactions, topupWallet, OrderDispute, WalletOverview, WalletTransaction } from '../services/finance'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, BALANCE_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
 
 function amountLabel(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -97,7 +97,7 @@ const consolePillars: ConsolePillar[] = [
 
 export function BalancePage() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, menu } = useAuthStore()
   const [wallet, setWallet] = useState<WalletOverview | null>(null)
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -161,6 +161,26 @@ export function BalancePage() {
     }
   }, [user?.role])
 
+  const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
+  const canOpenOrders = hasMenuPath(menu, ORDERS_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
+
+  const visibleMissionCards = useMemo(
+    () => missionCards.filter((item) => hasMenuPath(menu, item.path)),
+    [menu],
+  )
+
+  const canShowFallback =
+    !canOpenProjects &&
+    !canOpenOrders &&
+    !canOpenApiKeys &&
+    !canOpenWebhooks &&
+    !canOpenDocs &&
+    fallbackRoute !== BALANCE_ROUTE
+
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
@@ -209,32 +229,51 @@ export function BalancePage() {
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
           >
-            <Row gutter={[16, 16]}>
-              {missionCards.map((item) => (
-                <Col xs={24} md={8} key={item.key}>
-                  <Card
-                    style={{
-                      height: '100%',
-                      borderRadius: 20,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: `1px solid ${item.accent}`,
-                    }}
-                    bodyStyle={{ padding: 18 }}
-                  >
-                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                      <Tag color="cyan">{item.tag}</Tag>
-                      <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>{item.title}</Typography.Title>
-                      <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.78)' }}>
-                        {item.description}
-                      </Typography.Paragraph>
-                      <Button theme="borderless" type="tertiary" icon={<IconArrowRight />} onClick={() => navigate(item.path)}>
-                        {item.button}
-                      </Button>
-                    </Space>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+            {visibleMissionCards.length > 0 ? (
+              <Row gutter={[16, 16]}>
+                {visibleMissionCards.map((item) => (
+                  <Col xs={24} md={8} key={item.key}>
+                    <Card
+                      style={{
+                        height: '100%',
+                        borderRadius: 20,
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                        border: `1px solid ${item.accent}`,
+                      }}
+                      bodyStyle={{ padding: 18 }}
+                    >
+                      <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                        <Tag color="cyan">{item.tag}</Tag>
+                        <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>{item.title}</Typography.Title>
+                        <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.78)' }}>
+                          {item.description}
+                        </Typography.Paragraph>
+                        <Button theme="borderless" type="tertiary" icon={<IconArrowRight />} onClick={() => navigate(item.path)}>
+                          {item.button}
+                        </Button>
+                      </Space>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            ) : canShowFallback ? (
+              <Card
+                data-testid="balance-shared-console-fallback"
+                style={{ width: '100%', borderRadius: 20, background: 'rgba(15, 23, 42, 0.72)', border: '1px solid rgba(148,163,184,0.16)' }}
+                bodyStyle={{ padding: 20 }}
+              >
+                <Space vertical align="start" spacing={12}>
+                  <Tag color="blue">Shared Console fallback</Tag>
+                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>当前资金页已是唯一可见业务工作台</Typography.Title>
+                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.76)', maxWidth: 720 }}>
+                    当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到推荐工作台继续查看当前角色仍可访问的主链路。
+                  </Typography.Paragraph>
+                  <Button theme="solid" type="primary" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+                    返回推荐工作台
+                  </Button>
+                </Space>
+              </Card>
+            ) : null}
           </Card>
         </Col>
         <Col xs={24} xl={8}>
@@ -251,9 +290,15 @@ export function BalancePage() {
                 </Card>
               ))}
               <Space wrap>
-                <Button theme="light" icon={<IconActivity />} onClick={() => navigate(ORDERS_ROUTE)}>查看订单中心</Button>
-                <Button theme="light" icon={<IconSetting />} onClick={() => navigate(WEBHOOKS_ROUTE)}>打开 Webhook 设置</Button>
-                <Button theme="light" icon={<IconSafe />} onClick={() => navigate(DOCS_ROUTE)}>打开 API 文档</Button>
+                {canOpenOrders ? (
+                  <Button theme="light" icon={<IconActivity />} onClick={() => navigate(ORDERS_ROUTE)}>查看订单中心</Button>
+                ) : null}
+                {canOpenWebhooks ? (
+                  <Button theme="light" icon={<IconSetting />} onClick={() => navigate(WEBHOOKS_ROUTE)}>打开 Webhook 设置</Button>
+                ) : null}
+                {canOpenDocs ? (
+                  <Button theme="light" icon={<IconSafe />} onClick={() => navigate(DOCS_ROUTE)}>打开 API 文档</Button>
+                ) : null}
               </Space>
             </Space>
           </Card>

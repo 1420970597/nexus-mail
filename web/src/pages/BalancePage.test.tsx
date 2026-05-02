@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { BalancePage } from './BalancePage'
 import * as financeService from '../services/finance'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, BALANCE_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/finance', () => ({
   getWalletOverview: vi.fn(),
@@ -27,6 +27,26 @@ function seedRole(role: 'user' | 'supplier' | 'admin' = 'user') {
   })
 }
 
+function seedMenu(paths: string[]) {
+  const labelByPath: Record<string, string> = {
+    '/': '仪表盘',
+    [BALANCE_ROUTE]: '余额中心',
+    [PROJECTS_ROUTE]: '项目市场',
+    [ORDERS_ROUTE]: '订单中心',
+    [API_KEYS_ROUTE]: 'API Keys',
+    [WEBHOOKS_ROUTE]: 'Webhook 设置',
+    [DOCS_ROUTE]: 'API 文档',
+  }
+  useAuthStore.setState((state) => ({
+    ...state,
+    menu: paths.map((path) => ({
+      key: path,
+      label: labelByPath[path] ?? path,
+      path,
+    })),
+  }))
+}
+
 function renderBalancePage(initialEntry = '/balance') {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -37,14 +57,22 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route path="/" element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
+function FallbackRouteProbe() {
+  const { menu, user } = useAuthStore()
+  const currentPaths = menu.map((item) => item.path).join(',')
+  return <div>{`fallback-probe:${user?.role ?? 'none'}:${currentPaths}`}</div>
+}
+
 describe('BalancePage', () => {
   beforeEach(() => {
     seedRole('user')
+    seedMenu(['/', BALANCE_ROUTE, PROJECTS_ROUTE, ORDERS_ROUTE, API_KEYS_ROUTE, WEBHOOKS_ROUTE, DOCS_ROUTE])
     mockedGetWalletOverview.mockResolvedValue({
       wallet: {
         user_id: 7,
@@ -141,6 +169,37 @@ describe('BalancePage', () => {
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
+  it('suppresses unavailable finance CTA targets and returns to the preferred workspace', async () => {
+    seedMenu(['/', BALANCE_ROUTE])
+
+    render(
+      <MemoryRouter initialEntries={[BALANCE_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Routes>
+          <Route path={BALANCE_ROUTE} element={<BalancePage />} />
+          <Route path="/" element={<div>共享控制台首页</div>} />
+          <Route path="*" element={<FallbackRouteProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '打开 API 文档' })).not.toBeInTheDocument()
+    expect(screen.getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
+  })
+
+  it('hides the fallback when balance page is already the only visible workspace', async () => {
+    seedMenu([BALANCE_ROUTE])
+
+    renderBalancePage()
+
+    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
+  })
+
   it('supports topup and dispute submission flows', async () => {
     const user = userEvent.setup()
 
@@ -162,6 +221,7 @@ describe('BalancePage', () => {
 
   it('shows supplier-facing single-shell guidance when supplier role is active', async () => {
     seedRole('supplier')
+    seedMenu(['/', BALANCE_ROUTE, PROJECTS_ROUTE, ORDERS_ROUTE, API_KEYS_ROUTE, WEBHOOKS_ROUTE, DOCS_ROUTE])
 
     renderBalancePage()
 
@@ -171,6 +231,7 @@ describe('BalancePage', () => {
 
   it('shows admin-facing shared-console operations guidance when admin role is active', async () => {
     seedRole('admin')
+    seedMenu(['/', BALANCE_ROUTE, PROJECTS_ROUTE, ORDERS_ROUTE, API_KEYS_ROUTE, WEBHOOKS_ROUTE, DOCS_ROUTE])
 
     renderBalancePage()
 
