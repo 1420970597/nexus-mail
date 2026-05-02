@@ -24,6 +24,12 @@
 - 已在项目目录放置竞品调研参考：`docs/reference-local/luckyous-reference.md`
 - 该目录已加入本地 Git 排除规则，**仅作为本机开发参考，不推送远程仓库**
 
+### 最新执行检查点（2026-05-02）
+- 本轮已完成新的前端优先纵向切片：`ApiDocsPage` 已升级为 **Docs Mission Control** 深色共享控制台页面，在单一登录后壳内把 OpenAPI / Redoc、API Keys、Webhook 联调与真实业务回放收敛为同一条文档→接入→验证路径；继续保持角色差异只体现在 copy / CTA / 菜单权限，不新增独立文档后台或第二套登录壳。
+- 已新增 `web/src/pages/ApiDocsPage.test.tsx`，覆盖：普通用户 Docs Mission Control 文案、API Keys 导航、嵌入式 Redoc iframe，以及管理员视角下文档页保留 API 契约与共享控制台叙事、但不暴露缺失的 Webhook 快捷入口。
+- 控制器已通过 `pnpm --dir web test -- src/pages/ApiDocsPage.test.tsx src/App.test.tsx`、`pnpm --dir web build`、`go test ./...`、`docker compose up -d --build web api gateway`、`GET /healthz`，并通过真实 API 回放 `POST /api/v1/auth/register`、`GET /api/v1/auth/menu`、`GET /api/v1/auth/me`、`GET /api/v1/auth/api-keys`、`GET /api/v1/webhooks/endpoints`、`GET /api/v1/projects/inventory`、`GET /docs`，验证注册后普通用户仍能在共享控制台菜单中看到 `/docs`、`/api-keys`、`/webhooks` 并访问文档壳页面。
+- 本轮五维评审结论：产品/规格评审曾指出 `Timeline.Item type=solid` 为 Semi UI 非法值，现已改为合法 `ongoing` 并复验通过；代码质量、安全/集成、测试/可靠性、性能/运维评审通过。保留前端 chunk 体积告警、Semi UI `findDOMNode` 与既有 React Testing Library `act(...)` 噪声为后续非阻塞债务。
+
 ### 最新执行检查点（2026-04-30）
 - 本轮已完成新的前端优先纵向切片：`SupplierDomainsPage` 升级为 **Supplier Domain Mission Control** 深色共享控制台页面，在单一登录后壳内把域名状态、Catch-All 覆盖、区域 readiness、资源映射下一步与共享接入入口收敛到同一条供应商域名运营路径；同时新增供应商主任务流、控制台能力矩阵与共享控制台联动卡片，继续保持 API Keys / Webhook / Docs / 供应商结算都在同一套 new-api 风格单壳中联动，而不拆第二个供应商后台。
 - 已补齐 `web/src/pages/SupplierDomainsPage.test.tsx` 与 `web/src/App.test.tsx` focused 回归，覆盖：Supplier Domain Mission Control 深色壳渲染、真实域名池摘要与 region 归一化统计、供应商主任务流导航、共享控制台联动 CTA 到 API Keys / 供应商结算，以及从现有应用入口跳转到新域名工作台的断言。
