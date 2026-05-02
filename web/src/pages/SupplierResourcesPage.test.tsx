@@ -187,20 +187,19 @@ describe('SupplierResourcesPage', () => {
     renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
 
-    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
-    await user.click(within(bridge).getByRole('button', { name: /API Keys · \/api-keys/ }))
+    await user.click(screen.getByTestId('supplier-resources-bridge-api-keys'))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
     cleanup()
     renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement).getByRole('button', { name: /Webhook 设置 · \/webhooks/ }))
+    await user.click(screen.getByTestId('supplier-resources-bridge-webhooks'))
     expect(await screen.findByText('Webhook 页面')).toBeInTheDocument()
 
     cleanup()
     renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement).getByRole('button', { name: /API 文档 · \/docs/ }))
+    await user.click(screen.getByTestId('supplier-resources-bridge-docs'))
     expect(await screen.findByText('Docs 页面')).toBeInTheDocument()
   })
 
@@ -225,13 +224,12 @@ describe('SupplierResourcesPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-mission-fallback')).toBeInTheDocument()
 
-    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
-    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-bridge-api-keys')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-shared-console-fallback')).toBeInTheDocument()
 
-    await user.click(within(screen.getByTestId('supplier-resources-shared-console-fallback').parentElement as HTMLElement).getByRole('button', { name: /返回推荐工作台/ }))
+    await user.click(screen.getByTestId('supplier-resources-shared-console-fallback'))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
@@ -250,10 +248,9 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
-    expect(within(bridge).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
-    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(screen.getByTestId('supplier-resources-bridge-api-keys')).toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
   })
 

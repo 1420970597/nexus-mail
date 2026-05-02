@@ -452,17 +452,29 @@ export function SupplierResourcesPage() {
               ))}
               <Space wrap>
                 {canOpenApiKeys ? (
-                  <Button icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
+                  <Button
+                    data-testid="supplier-resources-bridge-api-keys"
+                    icon={<IconSafe />}
+                    onClick={() => navigate(API_KEYS_ROUTE)}
+                  >
                     API Keys · {API_KEYS_ROUTE}
                   </Button>
                 ) : null}
                 {canOpenWebhooks ? (
-                  <Button icon={<IconBolt />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
+                  <Button
+                    data-testid="supplier-resources-bridge-webhooks"
+                    icon={<IconBolt />}
+                    onClick={() => navigate(WEBHOOKS_ROUTE)}
+                  >
                     Webhook 设置 · {WEBHOOKS_ROUTE}
                   </Button>
                 ) : null}
                 {canOpenDocs ? (
-                  <Button icon={<IconPriceTag />} onClick={() => navigate(DOCS_ROUTE)}>
+                  <Button
+                    data-testid="supplier-resources-bridge-docs"
+                    icon={<IconPriceTag />}
+                    onClick={() => navigate(DOCS_ROUTE)}
+                  >
                     API 文档 · {DOCS_ROUTE}
                   </Button>
                 ) : null}
