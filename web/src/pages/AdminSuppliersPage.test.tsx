@@ -1,10 +1,20 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminSuppliersPage } from './AdminSuppliersPage'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_SUPPLIERS_ROUTE, ADMIN_USERS_ROUTE } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
+import {
+  ADMIN_AUDIT_ROUTE,
+  ADMIN_RISK_ROUTE,
+  ADMIN_SUPPLIERS_ROUTE,
+  ADMIN_USERS_ROUTE,
+  API_KEYS_ROUTE,
+  DASHBOARD_ROUTE,
+  DOCS_ROUTE,
+  WEBHOOKS_ROUTE,
+} from '../utils/consoleNavigation'
 
 const mockedGetAdminOverview = vi.fn()
 
@@ -20,13 +30,36 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route path={ADMIN_USERS_ROUTE} element={<div>结算与争议页面</div>} />
         <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
         <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
+function seedAdminMenu(paths: string[]) {
+  useAuthStore.setState({
+    token: 'token',
+    refreshToken: 'refresh-token',
+    user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' },
+    menu: paths.map((path) => ({ key: path, label: path, path })),
+  })
+}
+
 describe('AdminSuppliersPage', () => {
   beforeEach(() => {
+    seedAdminMenu([
+      DASHBOARD_ROUTE,
+      ADMIN_SUPPLIERS_ROUTE,
+      ADMIN_USERS_ROUTE,
+      ADMIN_RISK_ROUTE,
+      ADMIN_AUDIT_ROUTE,
+      API_KEYS_ROUTE,
+      WEBHOOKS_ROUTE,
+      DOCS_ROUTE,
+    ])
     mockedGetAdminOverview.mockReset()
     mockedGetAdminOverview.mockResolvedValue({
       generated_at: '2026-04-29T00:00:00Z',
@@ -92,6 +125,11 @@ describe('AdminSuppliersPage', () => {
     })
   })
 
+  afterEach(() => {
+    vi.clearAllMocks()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+  })
+
   it('renders the supplier mission-control shell with risk highlights from overview data', async () => {
     renderAdminSuppliersPage()
 
@@ -135,5 +173,40 @@ describe('AdminSuppliersPage', () => {
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
     await user.click(screen.getAllByRole('button', { name: '查看审计日志' })[0])
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
+  })
+
+  it('suppresses unavailable action and bridge CTAs based on menu truth and falls back to dashboard', async () => {
+    const user = userEvent.setup()
+    seedAdminMenu([DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE])
+
+    renderAdminSuppliersPage()
+
+    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '前往处理结算 / 争议' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+
+    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
+    expect(within(bridge).queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
+    expect(within(bridge).queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+
+    const fallbackButton = within(bridge).getByRole('button', { name: '返回推荐工作台' })
+    await user.click(fallbackButton)
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
+  it('keeps bridge links only for the pages exposed by the admin menu', async () => {
+    seedAdminMenu([DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE])
+
+    renderAdminSuppliersPage()
+
+    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
+    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
+    expect(within(bridge).queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 })

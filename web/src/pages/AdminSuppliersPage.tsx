@@ -3,7 +3,18 @@ import { IconActivity, IconAlertTriangle, IconBolt, IconBriefcase, IconSafe, Ico
 import { useEffect, useMemo, useState } from 'react'
 import { AdminOverviewResponse, getAdminOverview } from '../services/auth'
 import { useNavigate } from 'react-router-dom'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
+import {
+  ADMIN_AUDIT_ROUTE,
+  ADMIN_RISK_ROUTE,
+  ADMIN_SUPPLIERS_ROUTE,
+  ADMIN_USERS_ROUTE,
+  API_KEYS_ROUTE,
+  DOCS_ROUTE,
+  hasMenuPath,
+  resolvePreferredConsoleRoute,
+  WEBHOOKS_ROUTE,
+} from '../utils/consoleNavigation'
 
 function amountLabel(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -40,8 +51,21 @@ interface ActionLane {
 
 export function AdminSuppliersPage() {
   const navigate = useNavigate()
+  const { user, menu } = useAuthStore()
   const [data, setData] = useState<AdminOverviewResponse | null>(null)
   const [loading, setLoading] = useState(false)
+
+  const canOpenAdminUsers = hasMenuPath(menu, ADMIN_USERS_ROUTE)
+  const canOpenRisk = hasMenuPath(menu, ADMIN_RISK_ROUTE)
+  const canOpenAudit = hasMenuPath(menu, ADMIN_AUDIT_ROUTE)
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
+  const shouldShowFallback = useMemo(
+    () => fallbackRoute !== ADMIN_SUPPLIERS_ROUTE && !canOpenAdminUsers && !canOpenRisk && !canOpenAudit && !canOpenApiKeys && !canOpenWebhooks && !canOpenDocs,
+    [fallbackRoute, canOpenAdminUsers, canOpenRisk, canOpenAudit, canOpenApiKeys, canOpenWebhooks, canOpenDocs],
+  )
 
   const load = async () => {
     setLoading(true)
@@ -101,37 +125,46 @@ export function AdminSuppliersPage() {
   ], [highlights.highestPending, highlights.riskySuppliers.length, summary?.disputes.dispute_rate_bps, summary?.disputes.open, summary?.supplier_settlements.pending_amount])
 
   const actionLanes = useMemo<ActionLane[]>(() => [
-    {
-      key: 'settlement',
-      title: '结算优先级排程',
-      description: '先处理高待结算与开放争议，把供应商账务确认留在共享控制台同一条运营链路。',
-      button: '前往处理结算 / 争议',
-      path: ADMIN_USERS_ROUTE,
-      tag: 'Settlement',
-    },
-    {
-      key: 'risk',
-      title: '异常履约复盘',
-      description: '低完成率与超时上升时，立即联动风控中心确认阈值、信号等级与是否需要临时止损。',
-      button: '查看风控中心',
-      path: ADMIN_RISK_ROUTE,
-      tag: 'Risk',
-    },
-    {
-      key: 'audit',
-      title: '审计回放闭环',
-      description: '把供应商运营动作与 denied_* 事件放到同一条时间线里，方便追查白名单、限流与角色操作。',
-      button: '查看审计日志',
-      path: ADMIN_AUDIT_ROUTE,
-      tag: 'Audit',
-    },
-  ], [])
+    ...(canOpenAdminUsers
+      ? [{
+          key: 'settlement',
+          title: '结算优先级排程',
+          description: '先处理高待结算与开放争议，把供应商账务确认留在共享控制台同一条运营链路。',
+          button: '前往处理结算 / 争议',
+          path: ADMIN_USERS_ROUTE,
+          tag: 'Settlement',
+        }]
+      : []),
+    ...(canOpenRisk
+      ? [{
+          key: 'risk',
+          title: '异常履约复盘',
+          description: '低完成率与超时上升时，立即联动风控中心确认阈值、信号等级与是否需要临时止损。',
+          button: '查看风控中心',
+          path: ADMIN_RISK_ROUTE,
+          tag: 'Risk',
+        }]
+      : []),
+    ...(canOpenAudit
+      ? [{
+          key: 'audit',
+          title: '审计回放闭环',
+          description: '把供应商运营动作与 denied_* 事件放到同一条时间线里，方便追查白名单、限流与角色操作。',
+          button: '查看审计日志',
+          path: ADMIN_AUDIT_ROUTE,
+          tag: 'Audit',
+        }]
+      : []),
+  ], [canOpenAdminUsers, canOpenAudit, canOpenRisk])
 
-  const sharedConsoleLinks = useMemo(() => [
-    { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
-    { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
-    { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
-  ], [])
+  const sharedConsoleLinks = useMemo(
+    () => [
+      ...(canOpenApiKeys ? [{ key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE }] : []),
+      ...(canOpenWebhooks ? [{ key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE }] : []),
+      ...(canOpenDocs ? [{ key: 'docs', label: 'API 文档', path: DOCS_ROUTE }] : []),
+    ],
+    [canOpenApiKeys, canOpenDocs, canOpenWebhooks],
+  )
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -224,7 +257,7 @@ export function AdminSuppliersPage() {
         </Col>
         <Col xs={24} xl={9}>
           <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
-            <Space vertical align="start" spacing={12}>
+            <Space vertical align="start" spacing={12} data-testid="admin-suppliers-shared-console-bridge">
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。
               </Typography.Paragraph>
@@ -233,6 +266,11 @@ export function AdminSuppliersPage() {
                   {item.label} · {item.path}
                 </Tag>
               ))}
+              {shouldShowFallback ? (
+                <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
+                  返回推荐工作台
+                </Button>
+              ) : null}
             </Space>
           </Card>
         </Col>
@@ -273,9 +311,9 @@ export function AdminSuppliersPage() {
           <Tag color="green">完成订单流水：{amountLabel(summary?.orders.gross_revenue ?? 0)}</Tag>
         </Space>
         <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>前往处理结算 / 争议</Button>
-          <Button onClick={() => navigate(ADMIN_RISK_ROUTE)}>查看风控中心</Button>
-          <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查看审计日志</Button>
+          {canOpenAdminUsers ? <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>前往处理结算 / 争议</Button> : null}
+          {canOpenRisk ? <Button onClick={() => navigate(ADMIN_RISK_ROUTE)}>查看风控中心</Button> : null}
+          {canOpenAudit ? <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查看审计日志</Button> : null}
         </div>
       </Card>
 
@@ -300,8 +338,8 @@ export function AdminSuppliersPage() {
                     </div>
                   </div>
                   <Space>
-                    <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>去确认结算</Button>
-                    <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查审计</Button>
+                    {canOpenAdminUsers ? <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>去确认结算</Button> : null}
+                    {canOpenAudit ? <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查审计</Button> : null}
                   </Space>
                 </Space>
               </Card>
@@ -333,9 +371,9 @@ export function AdminSuppliersPage() {
               key: 'actions',
               render: () => (
                 <Space wrap>
-                  <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>处理结算</Button>
-                  <Button onClick={() => navigate(ADMIN_RISK_ROUTE)}>看风控</Button>
-                  <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查审计</Button>
+                  {canOpenAdminUsers ? <Button theme="solid" type="primary" onClick={() => navigate(ADMIN_USERS_ROUTE)}>处理结算</Button> : null}
+                  {canOpenRisk ? <Button onClick={() => navigate(ADMIN_RISK_ROUTE)}>看风控</Button> : null}
+                  {canOpenAudit ? <Button onClick={() => navigate(ADMIN_AUDIT_ROUTE)}>查审计</Button> : null}
                 </Space>
               ),
             },
