@@ -395,7 +395,7 @@ export function AdminUsersPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={12}>
-          <Card title="管理员调账" style={{ width: '100%', borderRadius: 24 }}>
+          <Card title="管理员调账" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-users-adjustment-card">
             <Form form={form} layout="horizontal" labelPosition="left">
               <Form.InputNumber field="user_id" label="用户 ID" rules={[{ required: true, message: '请输入用户 ID' }]} style={{ width: '100%' }} />
               <Form.InputNumber field="amount" label="金额（分）" rules={[{ required: true, message: '请输入调账金额' }]} style={{ width: '100%' }} />
@@ -406,7 +406,7 @@ export function AdminUsersPage() {
           </Card>
         </Col>
         <Col xs={24} xl={12}>
-          <Card title="供应商待结算确认" style={{ width: '100%', borderRadius: 24 }}>
+          <Card title="供应商待结算确认" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-users-settlement-card">
             <Typography.Paragraph>将供应商 pending 流水一次性标记为 settled，并把待结算余额迁移到已结算余额；操作会写入 settle_supplier_pending 审计。</Typography.Paragraph>
             <Form form={settlementForm} layout="horizontal" labelPosition="left">
               <Form.InputNumber field="supplier_id" label="供应商用户 ID" rules={[{ required: true, message: '请输入供应商用户 ID' }]} style={{ width: '100%' }} />
@@ -418,7 +418,7 @@ export function AdminUsersPage() {
         </Col>
       </Row>
 
-      <Card title="争议单处理" style={{ width: '100%', borderRadius: 24 }}>
+      <Card title="争议单处理" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-users-dispute-resolution-card">
         <Typography.Paragraph>退款金额大于 0 时必须选择“原路退款”，驳回争议时退款金额必须为 0；处理后会写入 resolve_dispute 审计。</Typography.Paragraph>
         <Form form={disputeForm} layout="horizontal" labelPosition="left" initValues={{ status: 'resolved', resolution_type: 'manual_adjustment', refund_amount: 0 }}>
           <Form.InputNumber field="dispute_id" label="争议单 ID" rules={[{ required: true, message: '请输入争议单 ID' }]} style={{ width: '100%' }} />
@@ -436,7 +436,7 @@ export function AdminUsersPage() {
         </Form>
       </Card>
 
-      <Card title="争议单列表" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+      <Card title="争议单列表" style={{ width: '100%', borderRadius: 24 }} loading={loading} data-testid="admin-users-dispute-list-card">
         <Form layout="horizontal" labelPosition="left" initValues={disputeDraft}>
           <Form.Input
             field="status"

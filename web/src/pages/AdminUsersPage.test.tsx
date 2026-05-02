@@ -101,7 +101,7 @@ describe('AdminUsersPage dispute handling', () => {
     )
 
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
-    const disputeCard = screen.getByText('争议单处理').closest('.semi-card') as HTMLElement
+    const disputeCard = screen.getByTestId('admin-users-dispute-resolution-card')
 
     fireEvent.change(within(disputeCard).getByLabelText('争议单 ID'), { target: { value: '8' } })
     fireEvent.change(within(disputeCard).getByLabelText('退款金额（分）'), { target: { value: '200' } })
@@ -162,7 +162,7 @@ describe('AdminUsersPage dispute handling', () => {
     )
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
 
-    const adjustmentCard = screen.getByText('管理员调账').closest('.semi-card') as HTMLElement
+    const adjustmentCard = screen.getByTestId('admin-users-adjustment-card')
     fireEvent.change(within(adjustmentCard).getByLabelText('用户 ID'), { target: { value: '2' } })
     fireEvent.change(within(adjustmentCard).getByLabelText('金额（分）'), { target: { value: '500' } })
     fireEvent.change(within(adjustmentCard).getByLabelText('原因'), { target: { value: '运营补偿' } })
@@ -170,7 +170,7 @@ describe('AdminUsersPage dispute handling', () => {
     fireEvent.click(within(adjustmentCard).getByRole('button', { name: '执行调账' }))
     await waitFor(() => expect(mockedAdminAdjustWallet).toHaveBeenCalledWith(2, 500, '运营补偿', '确认调账'))
 
-    const settlementCard = screen.getByText('供应商待结算确认').closest('.semi-card') as HTMLElement
+    const settlementCard = screen.getByTestId('admin-users-settlement-card')
     fireEvent.change(within(settlementCard).getByLabelText('供应商用户 ID'), { target: { value: '7' } })
     fireEvent.change(within(settlementCard).getByLabelText('结算说明'), { target: { value: '月度结算' } })
     fireEvent.change(within(settlementCard).getByLabelText('二次确认'), { target: { value: '确认结算' } })
@@ -185,7 +185,7 @@ describe('AdminUsersPage dispute handling', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
-    const listCard = screen.getByText('争议单列表').closest('.semi-card') as HTMLElement
+    const listCard = screen.getByTestId('admin-users-dispute-list-card')
 
     fireEvent.change(within(listCard).getByLabelText('状态筛选'), { target: { value: 'resolved' } })
     fireEvent.change(within(listCard).getByLabelText('最多条数'), { target: { value: '25' } })
