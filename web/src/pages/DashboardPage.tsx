@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminOverview, getDashboardOverview, AdminOverviewResponse, DashboardOverviewResponse } from '../services/auth'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, BALANCE_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 export function userFirstRunStorageKeyForUser(userId?: number | null) {
   return `nexus-mail-user-first-run-dismissed:${userId ?? 'guest'}`
@@ -41,6 +41,15 @@ interface FirstRunMissionCard {
   tag: string
   path: string
   button: string
+}
+
+interface RecommendedNextStep {
+  key: string
+  title: string
+  description: string
+  path: string
+  button: string
+  tag: string
 }
 
 const firstRunMissionCards: FirstRunMissionCard[] = [
@@ -93,6 +102,62 @@ const firstRunSteps: FirstRunStep[] = [
     action: '管理 API Keys',
   },
 ]
+
+function recommendedNextSteps(menu: MenuItem[]): RecommendedNextStep[] {
+  const itemsByPath = new Map(menu.map((item) => [item.path, item]))
+  const steps: RecommendedNextStep[] = []
+
+  if (itemsByPath.has(BALANCE_ROUTE)) {
+    steps.push({
+      key: 'balance',
+      title: '先确认预算与钱包状态',
+      description: '先去余额中心确认可用余额、冻结金额与最近流水，再决定是否立即采购或补款。',
+      path: BALANCE_ROUTE,
+      button: '查看余额中心',
+      tag: 'Budget',
+    })
+  }
+
+  if (itemsByPath.has(PROJECTS_ROUTE)) {
+    steps.push({
+      key: 'projects',
+      title: '再进入项目市场采购',
+      description: '对照真实库存、成功率与价格，决定第一笔订单应该从哪个项目与域名池开始。',
+      path: PROJECTS_ROUTE,
+      button: '前往项目市场',
+      tag: 'Procurement',
+    })
+  }
+
+  if (itemsByPath.has(ORDERS_ROUTE)) {
+    steps.push({
+      key: 'orders',
+      title: '随后追踪订单履约',
+      description: '在订单中心跟踪邮箱分配、提取结果与 READY / FINISHED 终态，保持履约反馈留在同一壳内。',
+      path: ORDERS_ROUTE,
+      button: '查看订单中心',
+      tag: 'Fulfillment',
+    })
+  }
+
+  if (itemsByPath.has(API_KEYS_ROUTE)) {
+    const integrationDest = itemsByPath.has(WEBHOOKS_ROUTE)
+      ? 'API Keys、Webhook 与文档'
+      : itemsByPath.has(DOCS_ROUTE)
+        ? 'API Keys 与文档'
+        : 'API Keys'
+    steps.push({
+      key: 'api-keys',
+      title: '最后完成 API 接入',
+      description: `继续进入 ${integrationDest}，完成程序化调用、回调联调与真实接口验证准备。`,
+      path: API_KEYS_ROUTE,
+      button: '管理 API Keys',
+      tag: 'Integration',
+    })
+  }
+
+  return steps
+}
 
 function amountLabel(value: number) {
   return `¥${(Number(value || 0) / 100).toFixed(2)}`
@@ -364,6 +429,7 @@ export function DashboardPage() {
   const adminSummary = adminOverview?.summary
   const topSupplier = useMemo(() => adminOverview?.suppliers?.[0], [adminOverview])
   const actions = useMemo(() => roleActions(menu, user?.role), [menu, user?.role])
+  const nextSteps = useMemo(() => recommendedNextSteps(menu), [menu])
   const missionSteps = useMemo(() => roleMissionSteps(user?.role), [user?.role])
   const roleSurfaceItems = useMemo(() => roleSurface(menu, user?.role), [menu, user?.role])
 
@@ -526,6 +592,51 @@ export function DashboardPage() {
       </Card>
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
+        {user?.role === 'user' && nextSteps.length > 0 ? (
+          <Col xs={24}>
+            <Card style={metricCardStyle('rgba(16,185,129,0.24)')} bodyStyle={{ padding: 22 }}>
+              <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                <div>
+                  <Tag color="green">推荐下一步</Tag>
+                  <Typography.Title heading={4} style={{ margin: '12px 0 6px', color: '#f7f8f8' }}>
+                    预算 → 采购 → 履约 → 接入
+                  </Typography.Title>
+                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                    采购 → 订单 → 接入 的首轮路径，会与余额中心保持同一套推荐顺序。
+                  </Typography.Paragraph>
+                </div>
+                <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                  {nextSteps.map((step) => (
+                    <Col xs={24} md={12} xl={6} key={step.key}>
+                      <Card
+                        style={{
+                          height: '100%',
+                          borderRadius: 18,
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.06)',
+                        }}
+                        bodyStyle={{ padding: 18 }}
+                      >
+                        <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                          <Tag color="grey">{step.tag}</Tag>
+                          <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
+                            {step.title}
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
+                            {step.description}
+                          </Typography.Paragraph>
+                          <Button type="primary" theme="borderless" onClick={() => navigate(step.path)} style={{ color: '#86efac' }}>
+                            {step.button}
+                          </Button>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </Space>
+            </Card>
+          </Col>
+        ) : null}
         <Col xs={24} xl={14}>
           <Card style={metricCardStyle('rgba(94,106,210,0.24)')} bodyStyle={{ padding: 22 }}>
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
