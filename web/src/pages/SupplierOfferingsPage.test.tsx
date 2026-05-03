@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -142,11 +142,13 @@ describe('SupplierOfferingsPage', () => {
     await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开供应商结算/ }))
     expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
@@ -178,6 +180,35 @@ describe('SupplierOfferingsPage', () => {
     const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
     expect(fallback).toBeInTheDocument()
     await user.click(fallback)
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
+  it('shows a mission fallback card and returns to dashboard when no supplier follow-up routes remain', async () => {
+    mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
+    mockedGetSupplierOfferings.mockResolvedValue({ items: [] })
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
+      ],
+    })
+    const user = userEvent.setup()
+
+    renderSupplierOfferingsPage()
+    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+
+    expect(screen.queryByRole('button', { name: /查看供应商资源/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /打开供应商结算/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+
+    const fallbackCard = screen.getByTestId('supplier-offerings-mission-fallback')
+    expect(within(fallbackCard).getByRole('heading', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
+
+    await user.click(within(fallbackCard).getByTestId('supplier-offerings-mission-fallback-button'))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 

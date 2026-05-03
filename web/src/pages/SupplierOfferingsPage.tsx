@@ -16,6 +16,7 @@ import {
   DOCS_ROUTE,
   hasMenuPath,
   resolvePreferredConsoleRoute,
+  SUPPLIER_OFFERINGS_ROUTE,
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
@@ -155,6 +156,13 @@ export function SupplierOfferingsPage() {
   const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const fallbackRoute = resolvePreferredConsoleRoute(menu, role)
+  const shouldShowMissionFallback =
+    !hasMenuPath(menu, SUPPLIER_RESOURCES_ROUTE) &&
+    !hasMenuPath(menu, SUPPLIER_SETTLEMENTS_ROUTE) &&
+    !canOpenApiKeys &&
+    !canOpenWebhooks &&
+    !canOpenDocs &&
+    fallbackRoute !== SUPPLIER_OFFERINGS_ROUTE
 
   const load = async () => {
     setLoading(true)
@@ -209,6 +217,13 @@ export function SupplierOfferingsPage() {
     }
   }
 
+  const visibleMissionSteps = missionSteps.filter((step) => {
+    if (step.path === SUPPLIER_RESOURCES_ROUTE) return hasMenuPath(menu, SUPPLIER_RESOURCES_ROUTE)
+    if (step.path === SUPPLIER_SETTLEMENTS_ROUTE) return hasMenuPath(menu, SUPPLIER_SETTLEMENTS_ROUTE)
+    if (step.path === API_KEYS_ROUTE) return canOpenApiKeys
+    return true
+  })
+
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
@@ -258,7 +273,7 @@ export function SupplierOfferingsPage() {
             </Typography.Paragraph>
           </div>
           <Space wrap spacing={16} style={{ width: '100%' }}>
-            {missionSteps.map((step) => (
+            {visibleMissionSteps.map((step) => (
               <Card
                 key={step.key}
                 style={{
@@ -280,6 +295,38 @@ export function SupplierOfferingsPage() {
                 </Space>
               </Card>
             ))}
+            {shouldShowMissionFallback ? (
+              <Card
+                data-testid="supplier-offerings-mission-fallback"
+                style={{
+                  flex: '1 1 250px',
+                  minWidth: 250,
+                  borderRadius: 20,
+                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                  border: '1px solid rgba(148,163,184,0.28)',
+                }}
+                bodyStyle={{ padding: 20 }}
+              >
+                <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                  <Tag color="grey">Fallback</Tag>
+                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                    返回推荐工作台
+                  </Typography.Title>
+                  <Typography.Text style={{ color: 'rgba(226,232,240,0.78)' }}>
+                    当服务端暂未暴露资源、结算与接入入口时，先回到推荐工作台继续共享控制台中的供应商主链路。
+                  </Typography.Text>
+                  <Button
+                    data-testid="supplier-offerings-mission-fallback-button"
+                    theme="solid"
+                    type="primary"
+                    icon={<IconArrowRight />}
+                    onClick={() => navigate(fallbackRoute)}
+                  >
+                    返回推荐工作台
+                  </Button>
+                </Space>
+              </Card>
+            ) : null}
           </Space>
         </Space>
       </Card>
