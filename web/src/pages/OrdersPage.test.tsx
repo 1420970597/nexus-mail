@@ -196,7 +196,8 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    await user.click(screen.getByText('查看 API 接入准备'))
+    const emptyActions = screen.getByTestId('orders-empty-state-actions')
+    await user.click(within(emptyActions).getByRole('button', { name: '查看 API 接入准备' }))
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
   })
 
