@@ -250,6 +250,13 @@ describe('SupplierSettlementsPage', () => {
     expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
     expect(screen.getByTestId('supplier-settlements-shared-console-fallback')).toBeInTheDocument()
 
+    await user.click(screen.getByTestId('supplier-settlements-shared-console-fallback-button'))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+
+    cleanup()
+    renderSupplierSettlementsPage()
+    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+
     const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回推荐工作台/ })
     await user.click(fallbackButton)
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()

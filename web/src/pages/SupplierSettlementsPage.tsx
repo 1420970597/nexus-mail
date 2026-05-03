@@ -392,7 +392,7 @@ export function SupplierSettlementsPage() {
               </Button>
             ))}
             {shouldShowConsoleFallback ? (
-              <Button icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+              <Button data-testid="supplier-settlements-shared-console-fallback-button" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
                 返回推荐工作台
               </Button>
             ) : null}
