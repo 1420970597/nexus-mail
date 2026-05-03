@@ -243,7 +243,7 @@ describe('ApiKeysPage', () => {
     await waitFor(() => expect(screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24')).toBeInTheDocument())
   })
 
-  it('allows clearing whitelist to remove restrictions', async () => {
+  it('allows clearing whitelist to remove restrictions and reloads list', async () => {
     const user = userEvent.setup()
 
     render(
@@ -284,93 +284,114 @@ describe('ApiKeysPage', () => {
     expect(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')).toBeInTheDocument()
   })
 
-  it('navigates to webhook and docs from the shared integration loop', async () => {
-    const user = userEvent.setup()
-
+  it('renders audit trail and shared navigation bridge actions', async () => {
     renderApiKeysPage()
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /继续配置 Webhook/i }))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
 
-    renderApiKeysPage()
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /查看 API 文档/i }))
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+    expect(await screen.findByText('创建 API Key')).toBeInTheDocument()
+    const auditCard = screen.getByTestId('api-keys-audit-log-card')
+    const auditScope = within(auditCard)
+    expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
+    expect(auditScope.getByText('create')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
   })
 
-  it('falls back to the preferred workspace when shared integration routes are unavailable', async () => {
+  it('navigates to shared integration routes from the bridge card and creation banner', async () => {
     const user = userEvent.setup()
 
-    seedRole('user')
+    let view = renderApiKeysPage()
+
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /继续配置 Webhook/ }))
+    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderApiKeysPage()
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /查看 API 文档/ }))
+    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderApiKeysPage()
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /返回项目市场/ }))
+    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+
+    mockedCreateAPIKey.mockResolvedValueOnce({
+      plaintext_key: 'nmx_created_secret_2',
+      api_key: {
+        id: 4,
+        name: '联调密钥',
+        key_preview: 'nmx_link...2468',
+        scopes: ['activation:write'],
+        whitelist: [],
+        status: 'active',
+        created_at: '2026-01-03T00:00:00Z',
+        updated_at: '2026-01-03T00:00:00Z',
+      },
+    })
+    mockedGetAPIKeys.mockResolvedValueOnce({
+      items: [
+        {
+          id: 1,
+          name: '默认密钥',
+          key_preview: 'nmx_abcd...1234',
+          scopes: ['activation:read'],
+          whitelist: ['127.0.0.1'],
+          status: 'active',
+          last_used_at: '2026-01-02T00:00:00Z',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      ],
+    })
+    mockedGetAPIKeyAudit.mockResolvedValueOnce({
+      items: [
+        {
+          id: 10,
+          action: 'create',
+          actor_type: 'user',
+          note: '创建联调密钥',
+          created_at: '2026-01-03T00:00:00Z',
+        },
+      ],
+    })
+
+    view.unmount()
+    renderApiKeysPage()
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('名称'), '联调密钥')
+    await user.type(screen.getByLabelText('权限范围'), 'activation:write')
+    await user.click(screen.getByRole('button', { name: '创建新密钥' }))
+    expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /继续配置 Webhook/ }))
+    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+  })
+
+  it('shows shared-console fallback when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {
     useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 3, email: 'user@nexus-mail.local', role: 'user' },
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
       ],
     })
+
     renderApiKeysPage()
-    expect(await screen.findByText('共享接入回退路径')).toBeInTheDocument()
+
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     const fallback = screen.getByTestId('api-keys-shared-console-fallback')
-    expect(fallback).toBeInTheDocument()
-    await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/i }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(within(fallback).getByRole('button', { name: /返回推荐工作台/ })).toBeInTheDocument()
+    expect(within(fallback).getByText(/当 Webhook、文档与项目入口暂未由服务端暴露时/)).toBeInTheDocument()
   })
 
-  it('does not show shared-console fallback when current page is already the preferred workspace', async () => {
-    seedRole('user')
-    useAuthStore.setState({
-      menu: [{ key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE }],
-    })
-
-    renderApiKeysPage()
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-    expect(screen.queryByTestId('api-keys-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /返回推荐工作台/i })).not.toBeInTheDocument()
-  })
-
-  it('shows current integration posture metrics and audit timeline', async () => {
-    render(
-      <MemoryRouter>
-        <ApiKeysPage />
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('活跃 Key')).toBeInTheDocument()
-    expect(screen.getByText('当前可用于集成的凭证')).toBeInTheDocument()
-    expect(screen.getByText('白名单保护')).toBeInTheDocument()
-
-    const latestUsageMetric = screen.getByTestId('api-keys-latest-usage-metric')
-    expect(within(latestUsageMetric).getByText('最近使用')).toBeInTheDocument()
-    expect(within(latestUsageMetric).getByText('2026-01-02T00:00:00Z')).toBeInTheDocument()
-    expect(within(latestUsageMetric).getByText('最近审计动作：create')).toBeInTheDocument()
-
-    const auditCard = screen.getByTestId('api-keys-audit-log-card')
-    const auditScope = within(auditCard)
-    expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
-    expect(auditScope.getByText('create')).toBeInTheDocument()
-  })
-
-  it('surfaces audit empty state and hidden plaintext key after expiry-safe load', async () => {
-    mockedGetAPIKeyAudit.mockResolvedValueOnce({ items: [] })
-    render(
-      <MemoryRouter>
-        <ApiKeysPage />
-      </MemoryRouter>,
-    )
-
-    expect(await screen.findByText('最近审计动作：暂无审计记录')).toBeInTheDocument()
-    expect(screen.getByText('审计日志')).toBeInTheDocument()
-    expect(screen.queryByText('nmx_created_secret')).not.toBeInTheDocument()
-  })
-
-  it('opens revoke confirm dialog with precise warning copy', async () => {
+  it('opens confirmation modal with precise revoke warning copy', async () => {
     const user = userEvent.setup()
 
-    render(
-      <MemoryRouter>
-        <ApiKeysPage />
-      </MemoryRouter>,
-    )
+    renderApiKeysPage()
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: '撤销' }))
@@ -383,5 +404,6 @@ describe('ApiKeysPage', () => {
         cancelText: '取消',
       }),
     )
+    expect(mockedRevokeAPIKey).toHaveBeenCalledWith(1)
   })
 })
