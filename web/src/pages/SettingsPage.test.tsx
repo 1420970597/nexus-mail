@@ -8,6 +8,12 @@ import { useAuthStore } from '../store/authStore'
 import { userFirstRunStorageKeyForUser } from './DashboardPage'
 import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
+function getButtonByLabel(scope: ReturnType<typeof within>, label: string) {
+  const button = scope.getByRole('button', { name: new RegExp(label) })
+  expect(button).toBeInTheDocument()
+  return button
+}
+
 function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -63,10 +69,7 @@ describe('SettingsPage', () => {
     expect(checklistScopeAgain.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
     expect(checklistScopeAgain.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
 
-    const checklistButtons = checklistScopeAgain.getAllByRole('button')
-    const reopenButton = checklistButtons.find((button) => button.textContent?.includes('重新打开首轮引导'))
-    expect(reopenButton).toBeDefined()
-    await user.click(reopenButton as HTMLButtonElement)
+    await user.click(getButtonByLabel(checklistScopeAgain, '重新打开首轮引导'))
 
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(11))).toBe('false')
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
@@ -102,7 +105,8 @@ describe('SettingsPage', () => {
     expect(screen.getAllByText('注册后连续路径').length).toBeGreaterThan(0)
     expect(screen.getByText('Docs / Webhooks / API Keys 已统一到单一壳内导航。')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /打开 API 文档/ })).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: /打开 Webhook 设置/ }).length).toBeGreaterThan(0)
+    const missionCards = screen.getByTestId('settings-mission-cards')
+    expect(within(missionCards).getByRole('button', { name: /打开 Webhook 设置/ })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /打开 API 文档/ }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
