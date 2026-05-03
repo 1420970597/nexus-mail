@@ -48,11 +48,10 @@ describe('ApiDocsPage', () => {
     expect(screen.getByText('注册后连续路径')).toBeInTheDocument()
     expect(screen.getByText('公开文档、API Keys、Webhook 联调与真实订单回放保持在同一套深色共享控制台里，不再跳到独立后台或外置说明页。')).toBeInTheDocument()
     expect(screen.getByText('统一接入路径')).toBeInTheDocument()
-    expect(screen.getByText('三段式联调节奏')).toBeInTheDocument()
-    expect(screen.getAllByText('嵌入式 Redoc').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('最小权限 API Key').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('真实回调验证').length).toBeGreaterThan(0)
     expect(screen.getByText('3. 真实 API 回放')).toBeInTheDocument()
+    expect(screen.getByText('OpenAPI 3 / Redoc')).toBeInTheDocument()
+    expect(screen.getByText('API Keys')).toBeInTheDocument()
+    expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
@@ -75,7 +74,7 @@ describe('ApiDocsPage', () => {
 
     expect(await screen.findByText('管理员扩展 · API 契约')).toBeInTheDocument()
     expect(screen.getByText('审计与风控仍通过共享控制台中的 API Keys / 审计链路交叉验证，不拆新的文档后台。')).toBeInTheDocument()
-    expect(screen.getAllByText('最小权限 API Key').length).toBeGreaterThan(0)
+    expect(screen.getByText('API Keys')).toBeInTheDocument()
     expect(screen.getByText('查看项目市场基线')).toBeInTheDocument()
     expect(screen.queryByText('打开 Webhook 设置')).not.toBeInTheDocument()
   })

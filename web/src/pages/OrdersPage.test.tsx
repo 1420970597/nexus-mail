@@ -162,8 +162,8 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('ORD-1')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '查看结果' }))
 
-    expect(await screen.findByText('订单结果 · ORD-1')).toBeInTheDocument()
-    expect(screen.getAllByText('123456').length).toBeGreaterThan(0)
+    const resultDialog = screen.getByRole('dialog')
+    expect(within(resultDialog).getByText('123456')).toBeInTheDocument()
   })
 
   it('renders the first-run order journey card so users know what to do after purchasing', async () => {

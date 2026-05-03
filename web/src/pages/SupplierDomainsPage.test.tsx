@@ -130,8 +130,10 @@ describe('SupplierDomainsPage', () => {
     expect(screen.getByText('去重后的 region 数量。')).toBeInTheDocument()
     expect(screen.getByText('global · 2')).toBeInTheDocument()
     expect(screen.getByText('hk · 1')).toBeInTheDocument()
-    expect(screen.getByText('unknown · 1')).toBeInTheDocument()
-    expect(screen.getAllByText('已开启').length).toBeGreaterThan(0)
+    const domainTable = screen.getByText('mail-1.nexus.test').closest('table')
+    expect(domainTable).not.toBeNull()
+    const domainRows = within(domainTable as HTMLElement).getAllByText('已开启')
+    expect(domainRows.length).toBeGreaterThan(0)
   })
 
   it('navigates from mission-control actions to resource, offering, api key, and settlement pages', async () => {

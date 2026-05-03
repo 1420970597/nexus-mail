@@ -659,7 +659,7 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
-    expect(screen.getAllByText('域名池运营').length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
     expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
@@ -703,7 +703,7 @@ describe('App', () => {
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '发送测试投递' }).length).toBeGreaterThan(0)
+    expect(await screen.findByRole('button', { name: '发送测试投递' })).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
@@ -772,8 +772,10 @@ describe('App', () => {
 
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
     expect(screen.getByText('高风险动作')).toBeInTheDocument()
-    expect(screen.getAllByText('denied_whitelist').length).toBeGreaterThan(0)
-    expect(screen.getByText('blocked')).toBeInTheDocument()
+    const auditTable = screen.getByText('blocked').closest('table')
+    expect(auditTable).not.toBeNull()
+    expect(within(auditTable as HTMLElement).getByText('denied_whitelist')).toBeInTheDocument()
+    expect(within(auditTable as HTMLElement).getByText('blocked')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
   })
 
