@@ -129,7 +129,8 @@ describe('SupplierResourcesPage', () => {
     expect(screen.getByText('先维护域名池与 Catch-All')).toBeInTheDocument()
     expect(screen.getByText('继续收敛供货规则')).toBeInTheDocument()
     expect(screen.getByText('最后观察结算与争议')).toBeInTheDocument()
-    const bridgeCard = screen.getByTestId('supplier-resources-shared-console-bridge').parentElement as HTMLElement
+    const sharedConsoleBridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    const bridgeCard = sharedConsoleBridge.parentElement as HTMLElement
     expect(within(bridgeCard).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
     expect(within(bridgeCard).getByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
     expect(within(bridgeCard).getByText(`API 文档 · ${DOCS_ROUTE}`)).toBeInTheDocument()
