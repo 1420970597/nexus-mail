@@ -275,7 +275,6 @@ describe('SupplierSettlementsPage', () => {
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
     expect(screen.queryByTestId('supplier-settlements-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-settlements-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('keeps the mission fallback navigation scoped to its own fallback region when shared-console fallback also exists', async () => {

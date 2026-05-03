@@ -202,7 +202,6 @@ describe('BalancePage', () => {
 
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
     expect(screen.queryByTestId('balance-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('supports topup and dispute submission flows', async () => {

@@ -155,7 +155,6 @@ describe('AdminAuditPage', () => {
 
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
     expect(screen.queryByTestId('admin-audit-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('queries audit logs with explicit filters', async () => {

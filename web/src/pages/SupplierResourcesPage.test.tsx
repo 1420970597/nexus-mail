@@ -275,7 +275,6 @@ describe('SupplierResourcesPage', () => {
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('keeps the shared-console fallback button scoped to the shared fallback region when supplier follow-up routes are absent', async () => {

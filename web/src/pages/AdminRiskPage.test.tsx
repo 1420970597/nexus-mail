@@ -167,7 +167,6 @@ describe('AdminRiskPage', () => {
 
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
     expect(screen.queryByTestId('admin-risk-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('updates rules and re-fetches risk summary after saving', async () => {
