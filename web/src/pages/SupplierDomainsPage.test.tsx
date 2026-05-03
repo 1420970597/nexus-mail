@@ -135,8 +135,22 @@ describe('SupplierDomainsPage', () => {
     expect(within(domainTable).getByText('mail-2.nexus.test')).toBeInTheDocument()
     expect(within(domainTable).getByText('mail-3.nexus.test')).toBeInTheDocument()
     expect(within(domainTable).getByText('mail-4.nexus.test')).toBeInTheDocument()
-    expect(within(domainTable).getAllByText('已开启')).toHaveLength(2)
-    expect(within(domainTable).getAllByText('未开启')).toHaveLength(2)
+    const catchAllEnabledRows = [
+      within(domainTable).getByText('mail-1.nexus.test').closest('[role="row"]'),
+      within(domainTable).getByText('mail-3.nexus.test').closest('[role="row"]'),
+    ]
+    const catchAllDisabledRows = [
+      within(domainTable).getByText('mail-2.nexus.test').closest('[role="row"]'),
+      within(domainTable).getByText('mail-4.nexus.test').closest('[role="row"]'),
+    ]
+    catchAllEnabledRows.forEach((row) => {
+      expect(row).not.toBeNull()
+      expect(within(row as HTMLElement).getByText('已开启')).toBeInTheDocument()
+    })
+    catchAllDisabledRows.forEach((row) => {
+      expect(row).not.toBeNull()
+      expect(within(row as HTMLElement).getByText('未开启')).toBeInTheDocument()
+    })
   })
 
   it('navigates from mission-control actions to resource, offering, api key, and settlement pages', async () => {
