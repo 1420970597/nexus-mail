@@ -262,76 +262,105 @@ describe('ApiKeysPage', () => {
     await user.click(screen.getByRole('button', { name: '保存白名单' }))
 
     await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, []))
+    expect(mockedGetAPIKeys).toHaveBeenCalledTimes(2)
   })
 
   it('shows backend error when whitelist update fails', async () => {
     const user = userEvent.setup()
-    mockedUpdateAPIKeyWhitelist.mockRejectedValueOnce({
-      response: { data: { error: 'IP 白名单仅支持合法 IP 或 CIDR' } },
-    })
+    mockedUpdateAPIKeyWhitelist.mockRejectedValueOnce({ response: { data: { error: '白名单格式不合法' } } })
 
     render(
       <MemoryRouter>
         <ApiKeysPage />
       </MemoryRouter>,
     )
-
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    await user.clear(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24'))
-    await user.type(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24'), 'invalid-entry')
+    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    await user.clear(whitelistInput)
+    await user.type(whitelistInput, 'invalid host')
     await user.click(screen.getByRole('button', { name: '保存白名单' }))
 
-    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['invalid-entry']))
-    expect(await screen.findByText('IP 白名单仅支持合法 IP 或 CIDR')).toBeInTheDocument()
+    await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['invalid host']))
+    expect(await screen.findByText('白名单格式不合法')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')).toBeInTheDocument()
   })
 
-  it('navigates from the existing shared integration CTAs into the docs workspace', async () => {
+  it('navigates to webhook and docs from the shared integration loop', async () => {
     const user = userEvent.setup()
-    mockedGetAPIKeys.mockResolvedValueOnce({ items: [] })
 
     renderApiKeysPage()
-    expect(await screen.findByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
-    expect(screen.getByText('完成创建、复制、权限规划与白名单维护，再结合 API 文档与 Webhook 页面打通真实接入链路。')).toBeInTheDocument()
-    expect(screen.getByText('新建后仅展示一次明文密钥，请立即复制保存；后续列表仅显示 key_preview。若需要程序化回调，请继续前往 Webhook 设置与 API 文档。')).toBeInTheDocument()
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /继续配置 Webhook/i }))
+    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '查看 API 文档' }))
+    renderApiKeysPage()
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /查看 API 文档/i }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
-  it('keeps the integration fallback lane inside the shared console and renders the docs bridge copy when docs is available', async () => {
-    renderApiKeysPage()
-
-    expect(await screen.findByText('共享接入回退路径')).toBeInTheDocument()
-    expect(screen.getByText('API Keys → Webhook → 文档')).toBeInTheDocument()
-    expect(screen.getByText('保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到推荐工作台继续真实业务主链路。')).toBeInTheDocument()
-  })
-
-  it('suppresses integration CTAs and returns to the preferred workspace when webhook/docs routes are unavailable', async () => {
+  it('falls back to the preferred workspace when shared integration routes are unavailable', async () => {
     const user = userEvent.setup()
+
+    seedRole('user')
     useAuthStore.setState({
-      token: 'token',
-      refreshToken: 'refresh-token',
-      user: { id: 2, email: 'user@nexus-mail.local', role: 'user' },
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
       ],
     })
-
     renderApiKeysPage()
-
     expect(await screen.findByText('共享接入回退路径')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '返回项目市场' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
-    expect(screen.queryAllByRole('button', { name: '查看 API 文档' })).toHaveLength(0)
-
-    const fallbackCard = screen.getByTestId('api-keys-shared-console-fallback')
-    await user.click(within(fallbackCard).getByRole('button', { name: /返回推荐工作台/ }))
+    const fallback = screen.getByTestId('api-keys-shared-console-fallback')
+    expect(fallback).toBeInTheDocument()
+    await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/i }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
-  it('uses modal confirmation for revoke flow', async () => {
+  it('does not show shared-console fallback when current page is already the preferred workspace', async () => {
+    seedRole('user')
+    useAuthStore.setState({
+      menu: [{ key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE }],
+    })
+
+    renderApiKeysPage()
+    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(screen.queryByTestId('api-keys-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /返回推荐工作台/i })).not.toBeInTheDocument()
+  })
+
+  it('shows current integration posture metrics and audit timeline', async () => {
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('活跃 Key')).toBeInTheDocument()
+    expect(screen.getByText('当前可用于集成的凭证')).toBeInTheDocument()
+    expect(screen.getAllByText('最近使用').length).toBeGreaterThan(0)
+    expect(screen.getByText('最近审计动作：create')).toBeInTheDocument()
+    expect(screen.getByText('白名单保护')).toBeInTheDocument()
+    expect(screen.getAllByText('2026-01-02T00:00:00Z').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0)
+  })
+
+  it('surfaces audit empty state and hidden plaintext key after expiry-safe load', async () => {
+    mockedGetAPIKeyAudit.mockResolvedValueOnce({ items: [] })
+    render(
+      <MemoryRouter>
+        <ApiKeysPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('最近审计动作：暂无审计记录')).toBeInTheDocument()
+    expect(screen.getByText('审计日志')).toBeInTheDocument()
+    expect(screen.queryByText('nmx_created_secret')).not.toBeInTheDocument()
+  })
+
+  it('opens revoke confirm dialog with precise warning copy', async () => {
     const user = userEvent.setup()
 
     render(
@@ -340,8 +369,16 @@ describe('ApiKeysPage', () => {
       </MemoryRouter>,
     )
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: '撤销' }))
 
-    expect(mockedModalConfirm).toHaveBeenCalledTimes(1)
+    expect(mockedModalConfirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: '确认撤销 API Key「默认密钥」？',
+        content: '撤销后该 Key 将无法继续访问受保护接口，请确认调用方已完成切换。',
+        okText: '确认撤销',
+        cancelText: '取消',
+      }),
+    )
   })
 })

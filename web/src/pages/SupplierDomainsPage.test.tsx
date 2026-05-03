@@ -261,15 +261,37 @@ describe('SupplierDomainsPage', () => {
     await user.type(screen.getByPlaceholderText('global / hk / us'), 'hk')
     await user.click(screen.getByRole('button', { name: '保存域名' }))
 
-    await waitFor(() => {
+    await waitFor(() =>
       expect(mockedCreateSupplierDomain).toHaveBeenCalledWith({
         name: 'otp.nexus.test',
         region: 'hk',
         catch_all: true,
         status: 'active',
-      })
-    })
+      }),
+    )
     expect(mockedSuccess).toHaveBeenCalledWith('域名池已新增')
     expect(await screen.findByText('otp.nexus.test')).toBeInTheDocument()
+  })
+
+  it('normalizes blank region to global on submit', async () => {
+    mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
+    mockedCreateSupplierDomain.mockResolvedValue({
+      domain: { id: 5, name: 'fallback-region.nexus.test', region: 'global', status: 'active', catch_all: true },
+    })
+    const user = userEvent.setup()
+
+    renderSupplierDomainsPage()
+
+    await user.type(await screen.findByPlaceholderText('mail.nexus.example'), 'fallback-region.nexus.test')
+    await user.click(screen.getByRole('button', { name: '保存域名' }))
+
+    await waitFor(() =>
+      expect(mockedCreateSupplierDomain).toHaveBeenCalledWith({
+        name: 'fallback-region.nexus.test',
+        region: 'global',
+        catch_all: true,
+        status: 'active',
+      }),
+    )
   })
 })
