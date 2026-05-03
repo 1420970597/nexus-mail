@@ -1,7 +1,7 @@
+import '@testing-library/jest-dom'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import '@testing-library/jest-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminSuppliersPage } from './AdminSuppliersPage'
 import { useAuthStore } from '../store/authStore'
@@ -177,9 +177,10 @@ describe('AdminSuppliersPage', () => {
     renderAdminSuppliersPage()
 
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '前往处理结算 / 争议' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
+    expect(within(missionFlow).queryByRole('button', { name: '前往处理结算 / 争议' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
     expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()

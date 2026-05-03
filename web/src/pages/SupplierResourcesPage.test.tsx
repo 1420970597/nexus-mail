@@ -172,13 +172,15 @@ describe('SupplierResourcesPage', () => {
     cleanup()
     renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-resources-mission-flow')).getByRole('button', { name: /查看供货规则/ }))
+    const refreshedMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    await user.click(within(refreshedMissionFlow).getByRole('button', { name: /查看供货规则/ }))
     expect(await screen.findByText('供应商供货页面')).toBeInTheDocument()
 
     cleanup()
     renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-resources-mission-flow')).getByRole('button', { name: /打开供应商结算/ }))
+    const finalMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    await user.click(within(finalMissionFlow).getByRole('button', { name: /打开供应商结算/ }))
     expect(await screen.findByText('供应商结算页面')).toBeInTheDocument()
   })
 
@@ -225,12 +227,14 @@ describe('SupplierResourcesPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-mission-fallback')).toBeInTheDocument()
 
-    expect(screen.queryByTestId('supplier-resources-bridge-api-keys')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
-    expect(screen.getByTestId('supplier-resources-shared-console-fallback')).toBeInTheDocument()
+    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    expect(within(bridge).queryByTestId('supplier-resources-bridge-api-keys')).not.toBeInTheDocument()
+    expect(within(bridge).queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
+    expect(within(bridge).queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
+    const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
+    expect(sharedConsoleFallback).toBeInTheDocument()
 
-    await user.click(screen.getByTestId('supplier-resources-shared-console-fallback'))
+    await user.click(sharedConsoleFallback)
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
@@ -250,8 +254,9 @@ describe('SupplierResourcesPage', () => {
 
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-bridge-api-keys')).toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
+    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    expect(within(bridge).queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
+    expect(within(bridge).queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
   })
 

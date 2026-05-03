@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -101,21 +101,26 @@ describe('AdminRiskPage', () => {
 
   it('navigates from mission-control actions to audit, finance, and api key pages', async () => {
     const user = userEvent.setup()
-    renderAdminRiskPage()
+    let view = renderAdminRiskPage()
 
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '查看审计日志' }))
+    const missionFlow = screen.getByTestId('admin-risk-mission-flow')
+    await user.click(within(missionFlow).getByRole('button', { name: '查看审计日志' }))
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
 
-    renderAdminRiskPage()
+    view.unmount()
+    view = renderAdminRiskPage()
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '打开资金工作台' }))
+    const refreshedMissionFlow = screen.getByTestId('admin-risk-mission-flow')
+    await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
     expect(await screen.findByText('资金工作台页面')).toBeInTheDocument()
 
+    view.unmount()
     renderAdminRiskPage()
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
+    const finalMissionFlow = screen.getByTestId('admin-risk-mission-flow')
+    await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
 
@@ -134,12 +139,14 @@ describe('AdminRiskPage', () => {
     renderAdminRiskPage()
 
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    expect(screen.queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
-    expect(screen.queryByText('审计日志 · /admin/audit')).not.toBeInTheDocument()
-    expect(screen.queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    const missionFlow = screen.getByTestId('admin-risk-mission-flow')
+    expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    const bridge = screen.getByTestId('admin-risk-shared-console-bridge')
+    expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
+    expect(within(bridge).queryByText('审计日志 · /admin/audit')).not.toBeInTheDocument()
+    expect(within(bridge).queryByText('API 文档 · /docs')).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-risk-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
     expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()

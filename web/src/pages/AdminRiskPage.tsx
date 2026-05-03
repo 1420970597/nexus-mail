@@ -264,7 +264,7 @@ export function AdminRiskPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
-          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }}>
+          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-risk-mission-flow">
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
               {visibleActionLanes.map((item) => (
                 <Card
@@ -294,7 +294,7 @@ export function AdminRiskPage() {
         </Col>
         <Col xs={24} xl={9}>
           <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
-            <Space vertical align="start" spacing={12}>
+            <Space vertical align="start" spacing={12} data-testid="admin-risk-shared-console-bridge">
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。
               </Typography.Paragraph>

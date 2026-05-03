@@ -253,7 +253,7 @@ export function AdminAuditPage() {
       </Space>
 
       <Space align="start" wrap style={{ width: '100%' }} spacing={16}>
-        <Card title="管理员主任务流" style={{ flex: '1 1 560px', borderRadius: 24 }}>
+        <Card title="管理员主任务流" style={{ flex: '1 1 560px', borderRadius: 24 }} data-testid="admin-audit-mission-flow">
           <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
             {visibleActionLanes.map((item) => (
               <Card
@@ -277,7 +277,7 @@ export function AdminAuditPage() {
           </Space>
         </Card>
         <Card title="共享接入桥接" style={{ flex: '1 1 320px', borderRadius: 24 }}>
-          <Space vertical align="start" spacing={12}>
+          <Space vertical align="start" spacing={12} data-testid="admin-audit-shared-console-bridge">
             <Typography.Paragraph style={{ marginBottom: 0 }}>
               审计页不是独立后台：查询完高危事件后，仍然通过风控、API Keys 与 API 文档入口在同一套控制台中继续验证真实鉴权契约与修复结果。
             </Typography.Paragraph>

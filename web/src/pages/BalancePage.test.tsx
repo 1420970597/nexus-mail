@@ -184,12 +184,15 @@ describe('BalancePage', () => {
     )
 
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 API 文档' })).not.toBeInTheDocument()
-    expect(screen.getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
+    const missionCards = screen.getByTestId('balance-mission-cards')
+    expect(within(missionCards).queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
+    expect(within(missionCards).queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
+    expect(within(missionCards).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    const capabilityActions = screen.getByTestId('balance-capability-actions')
+    expect(within(capabilityActions).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+    expect(within(capabilityActions).queryByRole('button', { name: '打开 API 文档' })).not.toBeInTheDocument()
+    const fallback = screen.getByTestId('balance-shared-console-fallback')
+    expect(within(fallback).getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
   })
 
   it('hides the fallback when balance page is already the only visible workspace', async () => {
@@ -198,6 +201,7 @@ describe('BalancePage', () => {
     renderBalancePage()
 
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(screen.queryByTestId('balance-shared-console-fallback')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
