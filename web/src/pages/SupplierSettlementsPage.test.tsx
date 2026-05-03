@@ -278,6 +278,32 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
+  it('keeps the mission fallback navigation scoped to its own fallback region when shared-console fallback also exists', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 89, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
+      ],
+    })
+
+    renderSupplierSettlementsPage()
+
+    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    const missionFallback = screen.getByTestId('supplier-settlements-mission-fallback')
+    const sharedConsoleFallback = screen.getByTestId('supplier-settlements-shared-console-fallback')
+
+    expect(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ })).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getByText('返回推荐工作台')).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).queryByRole('button', { name: /返回推荐工作台/ })).not.toBeInTheDocument()
+
+    await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
   it('submits supplier cost profile and dispute actions then reloads data', async () => {
     mockedSaveSupplierCostProfile.mockResolvedValue({ profile: { id: 2 } })
     mockedCreateSupplierDispute.mockResolvedValue({ dispute: { id: 78 } })
