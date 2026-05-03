@@ -478,16 +478,35 @@ export function SupplierResourcesPage() {
                     API 文档 · {DOCS_ROUTE}
                   </Button>
                 ) : null}
-                {shouldShowSharedConsoleFallback ? (
-                  <Button
-                    data-testid="supplier-resources-shared-console-fallback"
-                    theme="solid"
-                    type="primary"
-                    icon={<IconArrowRight />}
-                    onClick={() => navigate(fallbackRoute)}
-                  >
-                    返回推荐工作台
-                  </Button>
+              {shouldShowSharedConsoleFallback ? (
+                <Card
+                  data-testid="supplier-resources-shared-console-fallback"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                    border: '1px solid rgba(148,163,184,0.28)',
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f7f8f8' }}>
+                      返回推荐工作台
+                    </Typography.Text>
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
+                      当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。
+                    </Typography.Paragraph>
+                    <Button
+                      data-testid="supplier-resources-shared-console-fallback-button"
+                      theme="solid"
+                      type="primary"
+                      icon={<IconArrowRight />}
+                      onClick={() => navigate(fallbackRoute)}
+                    >
+                      返回推荐工作台
+                    </Button>
+                  </Space>
+                </Card>
                 ) : null}
               </Space>
               <Space wrap>

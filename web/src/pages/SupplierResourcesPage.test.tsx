@@ -233,8 +233,10 @@ describe('SupplierResourcesPage', () => {
     expect(within(bridge).queryByTestId('supplier-resources-bridge-docs')).not.toBeInTheDocument()
     const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
     expect(sharedConsoleFallback).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getAllByText('返回推荐工作台')).toHaveLength(2)
+    expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
 
-    await user.click(sharedConsoleFallback)
+    await user.click(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button'))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
@@ -297,9 +299,11 @@ describe('SupplierResourcesPage', () => {
     expect(within(missionFallback).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
 
     const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
-    expect(sharedConsoleFallback).toHaveTextContent('返回推荐工作台')
+    expect(within(sharedConsoleFallback).getAllByText('返回推荐工作台')).toHaveLength(2)
+    expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button')).toBeInTheDocument()
 
-    await user.click(sharedConsoleFallback)
+    await user.click(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button'))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
