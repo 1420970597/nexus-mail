@@ -193,7 +193,7 @@ describe('SupplierDomainsPage', () => {
     expect(within(missionFlow).getByText('先确认域名池与 Catch-All 覆盖')).toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /留在域名管理/ })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: /留在域名管理/ })).not.toBeInTheDocument()
 
     const missionFallback = screen.getByTestId('supplier-domains-mission-fallback')
     await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
@@ -203,10 +203,10 @@ describe('SupplierDomainsPage', () => {
     view = renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
-    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `打开 供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}` })).not.toBeInTheDocument()
 
     const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))

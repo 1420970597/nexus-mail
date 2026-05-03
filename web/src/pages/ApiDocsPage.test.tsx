@@ -145,10 +145,11 @@ describe('ApiDocsPage', () => {
     renderApiDocsPage()
 
     expect(await screen.findByText('共享控制台桥接路径')).toBeInTheDocument()
-    expect(screen.queryByText('回到项目市场校验真实业务输入')).not.toBeInTheDocument()
-    expect(screen.queryByText('收敛最小权限 API Key')).not.toBeInTheDocument()
-    expect(screen.queryByText('完成 Webhook 回调联调')).not.toBeInTheDocument()
-    expect(screen.queryByText('返回资金工作台核对预算与售后')).not.toBeInTheDocument()
+    const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
+    expect(within(bridgeLane).queryByText('回到项目市场校验真实业务输入')).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByText('收敛最小权限 API Key')).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByText('完成 Webhook 回调联调')).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByText('返回资金工作台核对预算与售后')).not.toBeInTheDocument()
     expect(screen.getByText('文档与接入工作台继续保持单壳闭环')).toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')

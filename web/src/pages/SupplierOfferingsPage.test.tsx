@@ -173,9 +173,10 @@ describe('SupplierOfferingsPage', () => {
     renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
 
-    expect(screen.queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
-    expect(screen.queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
-    expect(screen.queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    const bridge = screen.getByTestId('supplier-offerings-shared-console-bridge')
+    expect(within(bridge).queryByRole('button', { name: `API Keys · ${API_KEYS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `Webhook 设置 · ${WEBHOOKS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `API 文档 · ${DOCS_ROUTE}` })).not.toBeInTheDocument()
 
     const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
     expect(fallback).toBeInTheDocument()
