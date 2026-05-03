@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -82,8 +82,10 @@ describe('AdminAuditPage', () => {
     expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
     expect(screen.getByText('风控中心 · /admin/risk')).toBeInTheDocument()
     expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
-    expect(screen.getAllByText('denied_whitelist').length).toBeGreaterThan(0)
-    expect(screen.getByText('blocked by whitelist')).toBeInTheDocument()
+    const auditTable = screen.getByText('blocked by whitelist').closest('table')
+    expect(auditTable).not.toBeNull()
+    expect(within(auditTable as HTMLElement).getByText('denied_whitelist')).toBeInTheDocument()
+    expect(within(auditTable as HTMLElement).getByText('blocked by whitelist')).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to risk, finance, and api keys', async () => {
@@ -95,11 +97,13 @@ describe('AdminAuditPage', () => {
     await user.click(screen.getByRole('button', { name: '查看风控中心' }))
     expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
 
+    cleanup()
     renderAdminAuditPage()
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '打开资金工作台' }))
     expect(await screen.findByText('资金工作台页面')).toBeInTheDocument()
 
+    cleanup()
     renderAdminAuditPage()
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '打开 API Keys' }))

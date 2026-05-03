@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
@@ -217,6 +217,7 @@ describe('WebhooksPage', () => {
     await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
+    cleanup()
     seedRole('user')
     renderWebhooksPage()
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
@@ -229,10 +230,13 @@ describe('WebhooksPage', () => {
     renderWebhooksPage()
 
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
-    expect(screen.getByText('注册后首轮回调联调建议')).toBeInTheDocument()
-    expect(screen.getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    const integrationLoop = screen.getByTestId('webhooks-first-integration-loop')
+    expect(within(integrationLoop).getByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    expect(
+      within(integrationLoop).getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。'),
+    ).toBeInTheDocument()
+    expect(within(integrationLoop).getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
+    expect(within(integrationLoop).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
   it('suppresses shared integration CTAs when the server menu hides them and falls back to the recommended workspace', async () => {
@@ -260,9 +264,10 @@ describe('WebhooksPage', () => {
     expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    const fallbackButton = screen.getByRole('button', { name: '返回推荐工作台' })
+    expect(fallbackButton).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(fallbackButton)
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 

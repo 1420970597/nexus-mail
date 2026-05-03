@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -144,16 +144,19 @@ describe('SupplierDomainsPage', () => {
     await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /继续维护供货规则/ }))
     expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: `打开 供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}` }))
@@ -178,6 +181,7 @@ describe('SupplierDomainsPage', () => {
     await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
 
+    cleanup()
     renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
@@ -188,7 +192,7 @@ describe('SupplierDomainsPage', () => {
 
     const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
-    expect(screen.getAllByText('共享控制台首页').length).toBeGreaterThan(0)
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
   it('shows explicit error state instead of empty-state fallback when overview loading fails', async () => {
