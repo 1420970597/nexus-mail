@@ -818,23 +818,19 @@ describe('App', () => {
     expect(await screen.findByText('争议发生率')).toBeInTheDocument()
     expect(await screen.findByText('已完成订单流水')).toBeInTheDocument()
 
-    const topSupplierCard = screen.getByText('当前重点关注供应商').closest('.semi-card')
-    expect(topSupplierCard).not.toBeNull()
-    expect(within(topSupplierCard as HTMLElement).getByText('supplier-alpha@nexus-mail.local')).toBeInTheDocument()
-    expect(within(topSupplierCard as HTMLElement).getByText('完成率：58.00%')).toBeInTheDocument()
+    const topSupplierCard = screen.getByTestId('dashboard-top-supplier-card')
+    expect(within(topSupplierCard).getByText('supplier-alpha@nexus-mail.local')).toBeInTheDocument()
+    expect(within(topSupplierCard).getByText('完成率：58.00%')).toBeInTheDocument()
 
-    const supplierRankTable = screen.getByText('供应商待结算排行').closest('.semi-card')
-    expect(supplierRankTable).not.toBeNull()
-    expect(within(supplierRankTable as HTMLElement).getByText('supplier-beta@nexus-mail.local')).toBeInTheDocument()
-    expect(within(supplierRankTable as HTMLElement).getByText('92.00%')).toBeInTheDocument()
+    const supplierRankTable = screen.getByTestId('dashboard-supplier-settlement-rank-card')
+    expect(within(supplierRankTable).getByText('supplier-beta@nexus-mail.local')).toBeInTheDocument()
+    expect(within(supplierRankTable).getByText('92.00%')).toBeInTheDocument()
 
-    const disputeCard = screen.getByText('争议发生率').closest('.semi-card')
-    expect(disputeCard).not.toBeNull()
-    expect(within(disputeCard as HTMLElement).getByText('20.00%')).toBeInTheDocument()
+    const disputeCard = screen.getByTestId('dashboard-dispute-rate-card')
+    expect(within(disputeCard).getByText('20.00%')).toBeInTheDocument()
 
-    const revenueCard = screen.getByText('已完成订单流水').closest('.semi-card')
-    expect(revenueCard).not.toBeNull()
-    expect(within(revenueCard as HTMLElement).getByText('¥12.00')).toBeInTheDocument()
+    const revenueCard = screen.getByTestId('dashboard-finished-revenue-card')
+    expect(within(revenueCard).getByText('¥12.00')).toBeInTheDocument()
 
     expect(screen.getByText('当前重点关注供应商')).toBeInTheDocument()
     expect(screen.getByText('鉴权拒绝总数：1')).toBeInTheDocument()

@@ -723,11 +723,11 @@ export function DashboardPage() {
             <Col span={6}><Card title="订单完成率" style={metricCardStyle('rgba(59,130,246,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.completion_rate_bps)}</Typography.Title></Card></Col>
             <Col span={6}><Card title="订单超时率" style={metricCardStyle('rgba(249,115,22,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.timeout_rate_bps)}</Typography.Title></Card></Col>
             <Col span={6}><Card title="订单取消率" style={metricCardStyle('rgba(239,68,68,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.cancel_rate_bps)}</Typography.Title></Card></Col>
-            <Col span={6}><Card title="争议发生率" style={metricCardStyle('rgba(168,85,247,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.disputes.dispute_rate_bps)}</Typography.Title></Card></Col>
+            <Col span={6}><Card title="争议发生率" data-testid="dashboard-dispute-rate-card" style={metricCardStyle('rgba(168,85,247,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.disputes.dispute_rate_bps)}</Typography.Title></Card></Col>
           </Row>
 
           <Row gutter={16} style={{ width: '100%' }}>
-            <Col span={8}><Card title="已完成订单流水" style={metricCardStyle('rgba(16,185,129,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{amountLabel(adminSummary.orders.gross_revenue)}</Typography.Title></Card></Col>
+            <Col span={8}><Card title="已完成订单流水" data-testid="dashboard-finished-revenue-card" style={metricCardStyle('rgba(16,185,129,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{amountLabel(adminSummary.orders.gross_revenue)}</Typography.Title></Card></Col>
             <Col span={8}><Card title="平均完成客单价" style={metricCardStyle('rgba(14,165,233,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{amountLabel(adminSummary.orders.average_finished_order_value)}</Typography.Title></Card></Col>
             <Col span={8}><Card title="鉴权拒绝率" style={metricCardStyle('rgba(239,68,68,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.audit.denied_rate_bps)}</Typography.Title></Card></Col>
           </Row>
@@ -749,7 +749,7 @@ export function DashboardPage() {
           </Card>
 
           {topSupplier ? (
-            <Card title="当前重点关注供应商" style={{ width: '100%' }}>
+            <Card title="当前重点关注供应商" style={{ width: '100%' }} data-testid="dashboard-top-supplier-card">
               <Space wrap>
                 <Tag color="red">{topSupplier.email}</Tag>
                 <Tag color="orange">待结算：{amountLabel(topSupplier.pending_settlement)}</Tag>
@@ -758,12 +758,12 @@ export function DashboardPage() {
               </Space>
             </Card>
           ) : (
-            <Card title="当前重点关注供应商" style={{ width: '100%' }}>
+            <Card title="当前重点关注供应商" style={{ width: '100%' }} data-testid="dashboard-top-supplier-card">
               <Empty description="暂无供应商聚合数据" />
             </Card>
           )}
 
-          <Card title="供应商待结算排行" style={{ width: '100%' }}>
+          <Card title="供应商待结算排行" style={{ width: '100%' }} data-testid="dashboard-supplier-settlement-rank-card">
             <Table
               pagination={false}
               rowKey="user_id"
