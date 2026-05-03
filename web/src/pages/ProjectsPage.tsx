@@ -185,7 +185,7 @@ export function ProjectsPage() {
                   description="当前暂无可售库存，请稍后再试或联系管理员补充供给。"
                   image={null}
                 >
-                  <Space>
+                  <Space data-testid="projects-empty-state-actions">
                     <Button theme="solid" type="primary" onClick={() => void load()}>
                       重新拉取库存
                     </Button>

@@ -220,10 +220,8 @@ describe('WebhooksPage', () => {
     seedRole('user')
     renderWebhooksPage()
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
-    const integrationCard = await screen.findByText('注册后首轮回调联调建议')
-    const integrationRegion = integrationCard.closest('[class*="semi-card"]')
-    expect(integrationRegion).not.toBeNull()
-    await user.click(within(integrationRegion as HTMLElement).getByRole('button', { name: '查看 API 文档' }))
+    const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
+    await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 

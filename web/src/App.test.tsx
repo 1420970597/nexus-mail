@@ -398,11 +398,10 @@ describe('App', () => {
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
     await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
 
-    const onboardingCard = await screen.findByText('继续准备 API 接入')
-    const onboardingRegion = onboardingCard.closest('[class*="semi-card"]')
-    expect(onboardingRegion).not.toBeNull()
-
-    const apiKeyButtons = within(onboardingRegion as HTMLElement).getAllByRole('button', { name: /管理 API Keys/ })
+    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
+    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
+    const apiKeyButtons = within(onboardingRegion).getAllByRole('button', { name: /管理 API Keys/ })
     expect(apiKeyButtons.length).toBeGreaterThan(0)
     await user.click(apiKeyButtons[0])
 
@@ -420,7 +419,7 @@ describe('App', () => {
     expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /稍后再看/ }))
     await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
-    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
+    await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
 
     dashboardView.unmount()
     renderApp([SETTINGS_ROUTE])

@@ -145,8 +145,9 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '重新拉取库存' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    const emptyActions = await screen.findByTestId('projects-empty-state-actions')
+    expect(within(emptyActions).getByRole('button', { name: '重新拉取库存' })).toBeInTheDocument()
+    expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
   it('renders procurement mission guidance that keeps first-run purchasing inside the shared console', async () => {
@@ -268,7 +269,8 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
-    const fallbackButtons = screen.getAllByRole('button', { name: '返回推荐工作台' })
+    const emptyActions = await screen.findByTestId('projects-empty-state-actions')
+    const fallbackButtons = within(emptyActions).getAllByRole('button', { name: '返回推荐工作台' })
     expect(fallbackButtons.length).toBeGreaterThan(0)
     await user.click(fallbackButtons[0])
     expect(await screen.findByText('控制台总览页面')).toBeInTheDocument()

@@ -396,6 +396,7 @@ export function WebhooksPage() {
 
       {user?.role === 'user' ? (
         <Card
+          data-testid="webhooks-first-integration-loop"
           style={{
             width: '100%',
             borderRadius: 24,
