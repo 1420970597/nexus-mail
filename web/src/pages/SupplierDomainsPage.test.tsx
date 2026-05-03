@@ -131,8 +131,12 @@ describe('SupplierDomainsPage', () => {
     expect(screen.getByText('global · 2')).toBeInTheDocument()
     expect(screen.getByText('hk · 1')).toBeInTheDocument()
     const domainTable = screen.getByTestId('supplier-domains-table-card')
-    const domainRows = within(domainTable).getAllByText('已开启')
-    expect(domainRows.length).toBeGreaterThan(0)
+    expect(within(domainTable).getByText('mail-1.nexus.test')).toBeInTheDocument()
+    expect(within(domainTable).getByText('mail-2.nexus.test')).toBeInTheDocument()
+    expect(within(domainTable).getByText('mail-3.nexus.test')).toBeInTheDocument()
+    expect(within(domainTable).getByText('mail-4.nexus.test')).toBeInTheDocument()
+    expect(within(domainTable).getAllByText('已开启')).toHaveLength(2)
+    expect(within(domainTable).getAllByText('未开启')).toHaveLength(2)
   })
 
   it('navigates from mission-control actions to resource, offering, api key, and settlement pages', async () => {
