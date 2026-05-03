@@ -340,11 +340,17 @@ describe('ApiKeysPage', () => {
 
     expect(await screen.findByText('活跃 Key')).toBeInTheDocument()
     expect(screen.getByText('当前可用于集成的凭证')).toBeInTheDocument()
-    expect(screen.getAllByText('最近使用').length).toBeGreaterThan(0)
-    expect(screen.getByText('最近审计动作：create')).toBeInTheDocument()
     expect(screen.getByText('白名单保护')).toBeInTheDocument()
-    expect(screen.getAllByText('2026-01-02T00:00:00Z').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('1').length).toBeGreaterThan(0)
+
+    const latestUsageMetric = screen.getByTestId('api-keys-latest-usage-metric')
+    expect(within(latestUsageMetric).getByText('最近使用')).toBeInTheDocument()
+    expect(within(latestUsageMetric).getByText('2026-01-02T00:00:00Z')).toBeInTheDocument()
+    expect(within(latestUsageMetric).getByText('最近审计动作：create')).toBeInTheDocument()
+
+    const auditCard = screen.getByTestId('api-keys-audit-log-card')
+    const auditScope = within(auditCard)
+    expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
+    expect(auditScope.getByText('create')).toBeInTheDocument()
   })
 
   it('surfaces audit empty state and hidden plaintext key after expiry-safe load', async () => {

@@ -264,7 +264,14 @@ export function ApiKeysPage() {
         <MetricCard title="活跃 Key" value={String(activeKeys.length)} description={roleStatLabel(user?.role)} icon={<IconTickCircle />} />
         <MetricCard title="已撤销" value={String(revokedKeys.length)} description="可追溯但不可继续调用" icon={<IconShield />} />
         <MetricCard title="白名单保护" value={String(whitelistProtectedCount)} description="已绑定出口 IP / CIDR 的活跃 Key" icon={<IconServer />} />
-        <MetricCard title="最近使用" value={latestUsed} description={`最近审计动作：${latestAuditLabel(audit)}`} icon={<IconArticle />} wide />
+        <MetricCard
+          title="最近使用"
+          value={latestUsed}
+          description={`最近审计动作：${latestAuditLabel(audit)}`}
+          icon={<IconArticle />}
+          wide
+          testId="api-keys-latest-usage-metric"
+        />
       </Space>
 
       <Banner
@@ -516,7 +523,7 @@ export function ApiKeysPage() {
         </Space>
       </Card>
 
-      <Card title="审计日志" style={{ width: '100%' }} loading={loading}>
+      <Card title="审计日志" data-testid="api-keys-audit-log-card" style={{ width: '100%' }} loading={loading}>
         <Table
           pagination={false}
           dataSource={audit}
@@ -539,15 +546,18 @@ function MetricCard({
   description,
   icon,
   wide,
+  testId,
 }: {
   title: string
   value: string
   description: string
   icon: JSX.Element
   wide?: boolean
+  testId?: string
 }) {
   return (
     <Card
+      data-testid={testId}
       style={{
         flex: wide ? '1 1 320px' : '1 1 220px',
         minWidth: wide ? 320 : 220,
