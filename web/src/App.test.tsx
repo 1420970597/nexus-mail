@@ -773,10 +773,9 @@ describe('App', () => {
 
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
     expect(screen.getByText('高风险动作')).toBeInTheDocument()
-    const auditTable = screen.getByText('blocked').closest('table')
-    expect(auditTable).not.toBeNull()
-    expect(within(auditTable as HTMLElement).getByText('denied_whitelist')).toBeInTheDocument()
-    expect(within(auditTable as HTMLElement).getByText('blocked')).toBeInTheDocument()
+    const auditTable = screen.getByTestId('admin-audit-events-table-card')
+    expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
+    expect(within(auditTable).getByText('blocked')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
   })
 

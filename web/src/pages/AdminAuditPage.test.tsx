@@ -82,10 +82,9 @@ describe('AdminAuditPage', () => {
     expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
     expect(screen.getByText('风控中心 · /admin/risk')).toBeInTheDocument()
     expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
-    const auditTable = screen.getByText('blocked by whitelist').closest('table')
-    expect(auditTable).not.toBeNull()
-    expect(within(auditTable as HTMLElement).getByText('denied_whitelist')).toBeInTheDocument()
-    expect(within(auditTable as HTMLElement).getByText('blocked by whitelist')).toBeInTheDocument()
+    const auditTable = screen.getByTestId('admin-audit-events-table-card')
+    expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
+    expect(within(auditTable).getByText('blocked by whitelist')).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to risk, finance, and api keys', async () => {

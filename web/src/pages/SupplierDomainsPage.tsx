@@ -355,7 +355,7 @@ export function SupplierDomainsPage() {
 
       <Row gutter={16} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
-          <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+          <Card data-testid="supplier-domains-table-card" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
             <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
               <div>
                 <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>

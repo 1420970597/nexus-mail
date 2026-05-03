@@ -130,9 +130,8 @@ describe('SupplierDomainsPage', () => {
     expect(screen.getByText('去重后的 region 数量。')).toBeInTheDocument()
     expect(screen.getByText('global · 2')).toBeInTheDocument()
     expect(screen.getByText('hk · 1')).toBeInTheDocument()
-    const domainTable = screen.getByText('mail-1.nexus.test').closest('table')
-    expect(domainTable).not.toBeNull()
-    const domainRows = within(domainTable as HTMLElement).getAllByText('已开启')
+    const domainTable = screen.getByTestId('supplier-domains-table-card')
+    const domainRows = within(domainTable).getAllByText('已开启')
     expect(domainRows.length).toBeGreaterThan(0)
   })
 

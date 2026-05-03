@@ -326,7 +326,7 @@ export function AdminAuditPage() {
         </Form>
       </Card>
 
-      <Card title="审计事件" style={{ width: '100%' }} loading={loading}>
+      <Card title="审计事件" data-testid="admin-audit-events-table-card" style={{ width: '100%' }} loading={loading}>
         <Table
           pagination={false}
           rowKey="id"
