@@ -601,7 +601,7 @@ export function WebhooksPage() {
           />
         ) : (
           <Empty description="当前还没有 Webhook endpoint，先创建第一个回调地址。">
-            <Space>
+            <Space data-testid="webhooks-empty-state-actions">
               {canOpenApiKeys ? (
                 <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
                   先配置 API Keys

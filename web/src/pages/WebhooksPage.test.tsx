@@ -239,7 +239,7 @@ describe('WebhooksPage', () => {
     expect(within(integrationLoop).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
-  it('suppresses shared integration CTAs when the server menu hides them and falls back to the recommended workspace', async () => {
+  it('suppresses unavailable shared integration CTAs when the server menu hides them and falls back to the recommended workspace', async () => {
     const user = userEvent.setup()
     mockedGetWebhookEndpoints.mockResolvedValueOnce({ items: [] })
     useAuthStore.setState({
@@ -264,7 +264,8 @@ describe('WebhooksPage', () => {
     expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
-    const fallbackButton = screen.getByRole('button', { name: '返回推荐工作台' })
+    const emptyActions = screen.getByTestId('webhooks-empty-state-actions')
+    const fallbackButton = within(emptyActions).getByRole('button', { name: '返回推荐工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
