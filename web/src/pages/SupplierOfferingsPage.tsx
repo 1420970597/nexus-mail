@@ -378,15 +378,33 @@ export function SupplierOfferingsPage() {
               </Button>
             ) : null}
             {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (
-              <Button
+              <Card
                 data-testid="supplier-offerings-shared-console-fallback"
-                theme="solid"
-                type="primary"
-                icon={<IconArrowRight />}
-                onClick={() => navigate(fallbackRoute)}
+                style={{
+                  flex: '1 1 240px',
+                  minWidth: 240,
+                  borderRadius: 18,
+                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                  border: '1px solid rgba(148,163,184,0.28)',
+                }}
+                bodyStyle={{ padding: 18 }}
               >
-                返回推荐工作台
-              </Button>
+                <Space vertical align="start" spacing={10}>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回推荐工作台</Typography.Text>
+                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
+                    当前接入入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的供应商主链路。
+                  </Typography.Text>
+                  <Button
+                    data-testid="supplier-offerings-shared-console-fallback-button"
+                    theme="solid"
+                    type="primary"
+                    icon={<IconArrowRight />}
+                    onClick={() => navigate(fallbackRoute)}
+                  >
+                    返回推荐工作台
+                  </Button>
+                </Space>
+              </Card>
             ) : null}
           </Space>
         </Space>
