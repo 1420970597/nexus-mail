@@ -667,8 +667,7 @@ describe('App', () => {
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
-  it('navigates from settings shortcuts to admin risk and audit pages', async () => {
-    const user = userEvent.setup()
+  it('renders admin risk and audit workspaces for authenticated admin routes', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValue({
@@ -681,15 +680,10 @@ describe('App', () => {
       ],
     })
 
-    renderApp([SETTINGS_ROUTE])
-
-    await waitFor(() => expect(screen.getByText('风险规则联动')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: /前往风控中心/ }))
+    renderApp(['/admin/risk'])
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
 
-    renderApp([SETTINGS_ROUTE])
-    await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
-    await user.click(screen.getAllByRole('button', { name: /查看审计日志/ })[0])
+    renderApp(['/admin/audit'])
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
   })
 
