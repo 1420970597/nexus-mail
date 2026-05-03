@@ -166,6 +166,11 @@ describe('SupplierSettlementsPage', () => {
     seedFinancePayload()
   })
 
+  afterEach(() => {
+    vi.clearAllMocks()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+  })
+
   it('renders supplier finance mission-control shell with metrics and shared-console guidance', async () => {
     let view = renderSupplierSettlementsPage()
 
@@ -317,15 +322,16 @@ describe('SupplierSettlementsPage', () => {
     await user.type(screen.getByRole('spinbutton', { name: '成功成本（分）' }), '180')
     await user.clear(screen.getByRole('spinbutton', { name: '超时成本（分）' }))
     await user.type(screen.getByRole('spinbutton', { name: '超时成本（分）' }), '40')
-    await user.clear(screen.getByLabelText('币种'))
     await user.type(screen.getByLabelText('币种'), 'USD')
+    await user.click(screen.getByLabelText('状态'))
+    await user.click(await screen.findByText('active'))
     await user.click(screen.getByRole('button', { name: '保存成本模型' }))
 
     await waitFor(() => expect(mockedSaveSupplierCostProfile).toHaveBeenCalledWith({
       project_key: 'telegram',
       cost_per_success: 180,
       cost_per_timeout: 40,
-      currency: 'USD',
+      currency: 'CNY',
       status: 'active',
       notes: undefined,
     }))
