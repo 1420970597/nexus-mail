@@ -1,4 +1,4 @@
-import { render, screen, within, cleanup } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
@@ -162,22 +162,22 @@ describe('SupplierResourcesPage', () => {
   it('navigates from mission-control actions to supplier domains, offerings, and settlements pages', async () => {
     const user = userEvent.setup()
 
-    renderPage()
+    let view = renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /前往域名管理/ }))
     expect(await screen.findByText('供应商域名页面')).toBeInTheDocument()
 
-    cleanup()
-    renderPage()
+    view.unmount()
+    view = renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: /查看供货规则/ }))
     expect(await screen.findByText('供应商供货页面')).toBeInTheDocument()
 
-    cleanup()
-    renderPage()
+    view.unmount()
+    view = renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     const finalMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: /打开供应商结算/ }))
@@ -187,20 +187,20 @@ describe('SupplierResourcesPage', () => {
   it('navigates from the shared-console bridge to API keys, webhooks, and docs pages', async () => {
     const user = userEvent.setup()
 
-    renderPage()
+    let view = renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
 
     await user.click(screen.getByTestId('supplier-resources-bridge-api-keys'))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
-    cleanup()
-    renderPage()
+    view.unmount()
+    view = renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-resources-bridge-webhooks'))
     expect(await screen.findByText('Webhook 页面')).toBeInTheDocument()
 
-    cleanup()
-    renderPage()
+    view.unmount()
+    view = renderPage()
     expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-resources-bridge-docs'))
     expect(await screen.findByText('Docs 页面')).toBeInTheDocument()

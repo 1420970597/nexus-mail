@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -154,28 +154,28 @@ describe('SupplierDomainsPage', () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
     const user = userEvent.setup()
 
-    renderSupplierDomainsPage()
+    let view = renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierDomainsPage()
+    view.unmount()
+    view = renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
     expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierDomainsPage()
+    view.unmount()
+    view = renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
     await user.click(within(bridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierDomainsPage()
+    view.unmount()
+    view = renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: `打开 供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}` }))
     expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
@@ -186,7 +186,7 @@ describe('SupplierDomainsPage', () => {
     seedSupplierMenu([DASHBOARD_ROUTE, SUPPLIER_DOMAINS_ROUTE])
     const user = userEvent.setup()
 
-    renderSupplierDomainsPage()
+    let view = renderSupplierDomainsPage()
 
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
@@ -199,8 +199,8 @@ describe('SupplierDomainsPage', () => {
     await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierDomainsPage()
+    view.unmount()
+    view = renderSupplierDomainsPage()
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
     expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()

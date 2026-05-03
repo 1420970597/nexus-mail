@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProfilePage } from './ProfilePage'
@@ -46,7 +46,7 @@ describe('ProfilePage', () => {
       ],
     })
 
-    renderProfilePage()
+    let view = renderProfilePage()
 
     expect(screen.getByText('Profile Mission Control')).toBeInTheDocument()
     expect(screen.getByText('账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。')).toBeInTheDocument()
@@ -65,14 +65,14 @@ describe('ProfilePage', () => {
     await user.click(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
-    cleanup()
-    renderProfilePage()
+    view.unmount()
+    view = renderProfilePage()
     const webhookRegion = screen.getByTestId('profile-capability-bridge')
     await user.click(within(webhookRegion).getByRole('button', { name: '打开 Webhook 设置' }))
     expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
 
-    cleanup()
-    renderProfilePage()
+    view.unmount()
+    view = renderProfilePage()
     const docsRegion = screen.getByTestId('profile-capability-bridge')
     await user.click(within(docsRegion).getByRole('button', { name: '打开 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()

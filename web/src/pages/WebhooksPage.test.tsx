@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
@@ -210,16 +210,16 @@ describe('WebhooksPage', () => {
   it('renders shared-console navigation actions for the first integration loop', async () => {
     const user = userEvent.setup()
 
-    renderWebhooksPage()
+    let view = renderWebhooksPage()
 
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
-    cleanup()
+    view.unmount()
     seedRole('user')
-    renderWebhooksPage()
+    view = renderWebhooksPage()
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))

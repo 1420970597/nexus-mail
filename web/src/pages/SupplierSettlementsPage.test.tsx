@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within, cleanup } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -167,7 +167,7 @@ describe('SupplierSettlementsPage', () => {
   })
 
   it('renders supplier finance mission-control shell with metrics and shared-console guidance', async () => {
-    renderSupplierSettlementsPage()
+    let view = renderSupplierSettlementsPage()
 
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
     expect(screen.getByText('供应商资金与争议指挥台')).toBeInTheDocument()
@@ -202,7 +202,7 @@ describe('SupplierSettlementsPage', () => {
 
   it('navigates from mission-control actions to supplier resource, offering, and api key pages', async () => {
     const user = userEvent.setup()
-    renderSupplierSettlementsPage()
+    let view = renderSupplierSettlementsPage()
 
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
 
@@ -210,14 +210,14 @@ describe('SupplierSettlementsPage', () => {
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierSettlementsPage()
+    view.unmount()
+    view = renderSupplierSettlementsPage()
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
     expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierSettlementsPage()
+    view.unmount()
+    view = renderSupplierSettlementsPage()
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
@@ -235,7 +235,7 @@ describe('SupplierSettlementsPage', () => {
       ],
     })
 
-    renderSupplierSettlementsPage()
+    let view = renderSupplierSettlementsPage()
 
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
@@ -253,8 +253,8 @@ describe('SupplierSettlementsPage', () => {
     await user.click(screen.getByTestId('supplier-settlements-shared-console-fallback-button'))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierSettlementsPage()
+    view.unmount()
+    view = renderSupplierSettlementsPage()
     expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
 
     const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回推荐工作台/ })

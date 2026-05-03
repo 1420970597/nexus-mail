@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -136,20 +136,20 @@ describe('SupplierOfferingsPage', () => {
     mockedGetSupplierOfferings.mockResolvedValue({ items: [] })
     const user = userEvent.setup()
 
-    renderSupplierOfferingsPage()
+    let view = renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierOfferingsPage()
+    view.unmount()
+    view = renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开供应商结算/ }))
     expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
 
-    cleanup()
-    renderSupplierOfferingsPage()
+    view.unmount()
+    view = renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
