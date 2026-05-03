@@ -55,7 +55,8 @@ describe('ApiDocsPage', () => {
     expect(screen.getByText('3. 真实 API 回放')).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
-    await user.click(screen.getAllByText('打开 API Keys 工作台')[0] as HTMLElement)
+    const loopLane = screen.getByTestId('docs-shared-console-loop')
+    await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
 
