@@ -376,8 +376,8 @@ describe('App', () => {
     await submitRegistration(user)
 
     const onboardingRegion = await expectDefaultUserFirstRunLane()
-    expect(screen.queryByText('供应商主任务')).not.toBeInTheDocument()
-    expect(screen.queryByText('管理员主任务')).not.toBeInTheDocument()
+    expect(within(onboardingRegion).queryByText('供应商主任务')).not.toBeInTheDocument()
+    expect(within(onboardingRegion).queryByText('管理员主任务')).not.toBeInTheDocument()
     expect(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
   })
 
@@ -500,9 +500,9 @@ describe('App', () => {
     renderApp(['/'])
 
     expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
-    expect((await screen.findAllByText('基础工作台')).length).toBeGreaterThan(0)
     expect(screen.queryByText('供应商扩展')).not.toBeInTheDocument()
     expect(screen.queryByText('管理员扩展')).not.toBeInTheDocument()
+    expect(screen.queryAllByText('基础工作台').length).toBeGreaterThan(0)
     expect(screen.queryByText('域名管理')).not.toBeInTheDocument()
     expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
   })
@@ -597,9 +597,10 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
-    expect(screen.queryByText('普通用户首轮引导')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看结算页' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+    const dashboardMain = screen.getByRole('main', { name: '控制台主内容' })
+    expect(within(dashboardMain).queryByText('普通用户首轮引导')).not.toBeInTheDocument()
+    expect(within(dashboardMain).queryByRole('button', { name: '查看结算页' })).not.toBeInTheDocument()
+    expect(within(dashboardMain).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
   })
 
   it('shows onboarding checklist on settings page for default user only', async () => {
@@ -627,6 +628,7 @@ describe('App', () => {
 
     expect(await screen.findByText('控制台模式')).toBeInTheDocument()
     expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
   })
 
   it('navigates from profile page CTA to the supplier domains page', async () => {
