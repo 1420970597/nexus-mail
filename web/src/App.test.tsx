@@ -325,6 +325,29 @@ describe('App', () => {
     expect(screen.getByText('仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。')).toBeInTheDocument()
   })
 
+  async function openRegisterMode(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(await screen.findByRole('button', { name: /立即注册，进入共享控制台/ }))
+  }
+
+  async function submitRegistration(user: ReturnType<typeof userEvent.setup>, email = 'new@example.com') {
+    await user.type(screen.getByPlaceholderText('name@example.com'), email)
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
+    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith(email, 'Password123!'))
+  }
+
+  async function expectDefaultUserFirstRunLane() {
+    const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
+    expect(within(onboardingRegion).getByText('预算 → 采购 → 履约 → 接入')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByText('采购 → 订单 → 接入 的首轮路径，会与余额中心保持同一套推荐顺序。')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByText('再进入项目市场采购')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByText('随后追踪订单履约')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByText('最后完成 API 接入')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    return onboardingRegion
+  }
+
   it('shows role-aware first-run mission cards after registration and navigates into the shared console', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
@@ -349,22 +372,13 @@ describe('App', () => {
 
     renderApp(['/login'])
 
-    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
-    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+    await openRegisterMode(user)
+    await submitRegistration(user)
 
-    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
-    expect(screen.getByText('先完成基础采购路径')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /稍后再看/ })).toBeInTheDocument()
-    expect(screen.getByText('继续准备 API 接入')).toBeInTheDocument()
-    expect(screen.getByText('如果后续被服务端授予供应商或管理员角色，菜单会按权限扩展，不需要切换独立后台。')).toBeInTheDocument()
-    const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
-    expect(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    const onboardingRegion = await expectDefaultUserFirstRunLane()
     expect(screen.queryByText('供应商主任务')).not.toBeInTheDocument()
     expect(screen.queryByText('管理员主任务')).not.toBeInTheDocument()
+    expect(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
   })
 
   it('uses the shared API keys route constant for register onboarding entrypoints', async () => {
@@ -392,15 +406,9 @@ describe('App', () => {
 
     expect(API_KEYS_ROUTE).toBe('/api-keys')
 
-    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
-    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
-
-    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
-    const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
+    await openRegisterMode(user)
+    await submitRegistration(user)
+    const onboardingRegion = await expectDefaultUserFirstRunLane()
     await user.click(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ }))
 
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
