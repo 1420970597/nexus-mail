@@ -292,6 +292,7 @@ export function ProfilePage() {
         <Col xs={24} xl={15}>
           <Card
             title={<span style={{ color: '#f8fafc' }}>控制台桥接能力</span>}
+            data-testid="profile-capability-bridge"
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
           >

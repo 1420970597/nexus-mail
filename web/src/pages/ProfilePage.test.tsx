@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProfilePage } from './ProfilePage'
@@ -55,20 +55,26 @@ describe('ProfilePage', () => {
     expect(screen.getByText('深色共享账号中枢')).toBeInTheDocument()
     expect(screen.getByText('采购与订单串联')).toBeInTheDocument()
     expect(screen.getByText('集成准备')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往 API Keys' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '打开 API 文档' })).toBeInTheDocument()
     expect(screen.getByText('当前账号默认以用户身份进入共享控制台；如后续被服务端授予供应商或管理员角色，菜单会继续在同一壳内扩展。')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '前往 API Keys' }))
+    const capabilityRegion = screen.getByTestId('profile-capability-bridge')
+    expect(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' })).toBeInTheDocument()
+    expect(within(capabilityRegion).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(within(capabilityRegion).getByRole('button', { name: '打开 API 文档' })).toBeInTheDocument()
+
+    await user.click(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
+    cleanup()
     renderProfilePage()
-    await user.click(screen.getByRole('button', { name: '打开 Webhook 设置' }))
+    const webhookRegion = screen.getByTestId('profile-capability-bridge')
+    await user.click(within(webhookRegion).getByRole('button', { name: '打开 Webhook 设置' }))
     expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
 
+    cleanup()
     renderProfilePage()
-    await user.click(screen.getByRole('button', { name: '打开 API 文档' }))
+    const docsRegion = screen.getByTestId('profile-capability-bridge')
+    await user.click(within(docsRegion).getByRole('button', { name: '打开 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
