@@ -172,9 +172,10 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(screen.queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
     expect(screen.queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
     expect(screen.queryByText('API 文档 · /docs')).not.toBeInTheDocument()
-    expect(screen.getByTestId('admin-users-shared-console-fallback')).toBeInTheDocument()
+    const fallbackCard = screen.getByTestId('admin-users-shared-console-fallback')
+    expect(fallbackCard).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 })

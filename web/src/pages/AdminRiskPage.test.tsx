@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -140,10 +140,11 @@ describe('AdminRiskPage', () => {
     expect(screen.queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
     expect(screen.queryByText('审计日志 · /admin/audit')).not.toBeInTheDocument()
     expect(screen.queryByText('API 文档 · /docs')).not.toBeInTheDocument()
-    expect(screen.getByTestId('admin-risk-shared-console-fallback')).toBeInTheDocument()
-    expect(screen.getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
+    const fallbackCard = screen.getByTestId('admin-risk-shared-console-fallback')
+    expect(fallbackCard).toBeInTheDocument()
+    expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
