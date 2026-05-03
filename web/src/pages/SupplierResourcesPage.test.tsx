@@ -276,6 +276,33 @@ describe('SupplierResourcesPage', () => {
     expect(screen.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
+  it('keeps the shared-console fallback button scoped to the shared fallback region when supplier follow-up routes are absent', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 11, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      menu: [
+        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+      ],
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+
+    const missionFallback = screen.getByTestId('supplier-resources-mission-fallback')
+    expect(within(missionFallback).getByText('返回推荐工作台继续供应商主链路')).toBeInTheDocument()
+    expect(within(missionFallback).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
+
+    const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
+    expect(sharedConsoleFallback).toHaveTextContent('返回推荐工作台')
+
+    await user.click(sharedConsoleFallback)
+    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+  })
+
   it('submits supplier domain, account, and mailbox actions then reloads overview data', async () => {
     const user = userEvent.setup()
     renderPage()
