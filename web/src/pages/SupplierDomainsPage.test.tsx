@@ -62,6 +62,14 @@ function renderSupplierDomainsPage() {
   )
 }
 
+function getDomainTableRow(domainName: string) {
+  const domainTable = screen.getByTestId('supplier-domains-table-card')
+  const cell = within(domainTable).getByText(domainName)
+  const row = cell.closest('tr') ?? cell.closest('[role="row"]')
+  expect(row).not.toBeNull()
+  return row as HTMLElement
+}
+
 describe('SupplierDomainsPage', () => {
   beforeEach(() => {
     mockedGetSupplierResourcesOverview.mockReset()
@@ -135,21 +143,13 @@ describe('SupplierDomainsPage', () => {
     expect(within(domainTable).getByText('mail-2.nexus.test')).toBeInTheDocument()
     expect(within(domainTable).getByText('mail-3.nexus.test')).toBeInTheDocument()
     expect(within(domainTable).getByText('mail-4.nexus.test')).toBeInTheDocument()
-    const catchAllEnabledRows = [
-      within(domainTable).getByText('mail-1.nexus.test').closest('[role="row"]'),
-      within(domainTable).getByText('mail-3.nexus.test').closest('[role="row"]'),
-    ]
-    const catchAllDisabledRows = [
-      within(domainTable).getByText('mail-2.nexus.test').closest('[role="row"]'),
-      within(domainTable).getByText('mail-4.nexus.test').closest('[role="row"]'),
-    ]
+    const catchAllEnabledRows = [getDomainTableRow('mail-1.nexus.test'), getDomainTableRow('mail-3.nexus.test')]
+    const catchAllDisabledRows = [getDomainTableRow('mail-2.nexus.test'), getDomainTableRow('mail-4.nexus.test')]
     catchAllEnabledRows.forEach((row) => {
-      expect(row).not.toBeNull()
-      expect(within(row as HTMLElement).getByText('已开启')).toBeInTheDocument()
+      expect(within(row).getByText('已开启')).toBeInTheDocument()
     })
     catchAllDisabledRows.forEach((row) => {
-      expect(row).not.toBeNull()
-      expect(within(row as HTMLElement).getByText('未开启')).toBeInTheDocument()
+      expect(within(row).getByText('未开启')).toBeInTheDocument()
     })
   })
 
@@ -267,8 +267,7 @@ describe('SupplierDomainsPage', () => {
         status: 'active',
       })
     })
-    await waitFor(() => expect(mockedSuccess).toHaveBeenCalled())
-    await waitFor(() => expect(mockedGetSupplierResourcesOverview).toHaveBeenCalledTimes(2))
+    expect(mockedSuccess).toHaveBeenCalledWith('域名池已新增')
+    expect(await screen.findByText('otp.nexus.test')).toBeInTheDocument()
   })
-
 })
