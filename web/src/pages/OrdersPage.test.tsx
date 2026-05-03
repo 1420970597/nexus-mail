@@ -197,7 +197,9 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '查看 API 接入准备' })[0])
+    const continuationButtons = screen.getAllByRole('button', { name: '查看 API 接入准备' })
+    expect(continuationButtons.length).toBeGreaterThan(0)
+    await user.click(continuationButtons[0])
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
   })
 

@@ -231,7 +231,7 @@ export function AdminSuppliersPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
-          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }}>
+          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-suppliers-mission-flow">
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
               {actionLanes.map((item) => (
                 <Card

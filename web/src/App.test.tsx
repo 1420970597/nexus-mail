@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
@@ -398,9 +398,13 @@ describe('App', () => {
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
     await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
 
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    const onboardingCard = await screen.findByText('继续准备 API 接入')
+    const onboardingRegion = onboardingCard.closest('[class*="semi-card"]')
+    expect(onboardingRegion).not.toBeNull()
 
-    await user.click(screen.getAllByRole('button', { name: '管理 API Keys' })[0])
+    const apiKeyButtons = within(onboardingRegion as HTMLElement).getAllByRole('button', { name: /管理 API Keys/ })
+    expect(apiKeyButtons.length).toBeGreaterThan(0)
+    await user.click(apiKeyButtons[0])
 
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(screen.getByText('当前密钥')).toBeInTheDocument()
@@ -708,7 +712,7 @@ describe('App', () => {
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
     expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
-    expect(screen.getByText('发送测试投递')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: '发送测试投递' }).length).toBeGreaterThan(0)
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {

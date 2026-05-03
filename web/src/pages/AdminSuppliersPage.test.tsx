@@ -164,12 +164,8 @@ describe('AdminSuppliersPage', () => {
     renderAdminSuppliersPage()
 
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
-    const missionFlowHeading = screen.getByRole('heading', { name: '管理员主任务流' })
-    const missionFlowCard = missionFlowHeading.closest('.semi-card')
-    expect(missionFlowCard).not.toBeNull()
-
-    const missionFlow = within(missionFlowCard as HTMLElement)
-    await user.click(missionFlow.getByRole('button', { name: actionName }))
+    const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
+    await user.click(within(missionFlow).getByRole('button', { name: actionName }))
     expect(await screen.findByText(destinationText)).toBeInTheDocument()
   })
 

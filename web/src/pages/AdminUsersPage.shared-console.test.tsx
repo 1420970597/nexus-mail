@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
@@ -143,7 +143,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     await user.type(screen.getByLabelText('供应商用户 ID'), '22')
     await user.type(screen.getByPlaceholderText('例如：月度结算'), 'monthly payout')
     await user.type(screen.getByPlaceholderText('请输入：确认结算'), '确认结算')
-    await user.click(screen.getAllByRole('button', { name: '确认结算' })[0])
+    await user.click(within(screen.getByTestId('admin-users-settlement-card')).getByRole('button', { name: '确认结算' }))
     await waitFor(() => expect(mockedSettleSupplierPending).toHaveBeenCalledWith(22, 'monthly payout', '确认结算'))
 
     await user.type(screen.getByLabelText('争议单 ID'), '8')

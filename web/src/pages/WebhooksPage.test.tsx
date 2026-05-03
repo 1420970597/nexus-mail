@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
@@ -220,7 +220,10 @@ describe('WebhooksPage', () => {
     seedRole('user')
     renderWebhooksPage()
     expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '查看 API 文档' })[0])
+    const integrationCard = await screen.findByText('注册后首轮回调联调建议')
+    const integrationRegion = integrationCard.closest('[class*="semi-card"]')
+    expect(integrationRegion).not.toBeNull()
+    await user.click(within(integrationRegion as HTMLElement).getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 

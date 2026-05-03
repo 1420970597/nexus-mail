@@ -268,7 +268,9 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '返回推荐工作台' })[0])
+    const fallbackButtons = screen.getAllByRole('button', { name: '返回推荐工作台' })
+    expect(fallbackButtons.length).toBeGreaterThan(0)
+    await user.click(fallbackButtons[0])
     expect(await screen.findByText('控制台总览页面')).toBeInTheDocument()
   })
 })
