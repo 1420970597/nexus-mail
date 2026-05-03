@@ -155,24 +155,22 @@ describe('AdminSuppliersPage', () => {
     expect(screen.getByText('92.00%')).toBeInTheDocument()
   })
 
-  it('navigates from mission-control actions to settlement, risk, and audit pages', async () => {
+  it.each([
+    ['前往处理结算 / 争议', '结算与争议页面'],
+    ['查看风控中心', '风控中心页面'],
+    ['查看审计日志', '审计日志页面'],
+  ])('navigates from mission-control action %s to the expected page', async (actionName, destinationText) => {
     const user = userEvent.setup()
     renderAdminSuppliersPage()
 
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    const missionFlowHeading = screen.getByRole('heading', { name: '管理员主任务流' })
+    const missionFlowCard = missionFlowHeading.closest('.semi-card')
+    expect(missionFlowCard).not.toBeNull()
 
-    await user.click(screen.getAllByRole('button', { name: '前往处理结算 / 争议' })[0])
-    expect(await screen.findByText('结算与争议页面')).toBeInTheDocument()
-
-    renderAdminSuppliersPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '查看风控中心' })[0])
-    expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
-
-    renderAdminSuppliersPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '查看审计日志' })[0])
-    expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
+    const missionFlow = within(missionFlowCard as HTMLElement)
+    await user.click(missionFlow.getByRole('button', { name: actionName }))
+    expect(await screen.findByText(destinationText)).toBeInTheDocument()
   })
 
   it('suppresses unavailable action and bridge CTAs based on menu truth and falls back to dashboard', async () => {
