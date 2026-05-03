@@ -66,8 +66,8 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
 }
 
 function getApiKeyRow(name: string) {
-  const rowLabel = screen.getByText(name)
-  const row = rowLabel.closest('[role="row"]')
+  const cell = screen.getByText(name)
+  const row = cell.closest('tr') ?? cell.closest('[role="row"]')
   expect(row).not.toBeNull()
   return row as HTMLElement
 }
@@ -326,7 +326,8 @@ describe('ApiKeysPage', () => {
     expect(screen.queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
     expect(screen.queryAllByRole('button', { name: '查看 API 文档' })).toHaveLength(0)
 
-    await user.click(screen.getByRole('button', { name: /返回推荐工作台/ }))
+    const fallbackCard = screen.getByTestId('api-keys-shared-console-fallback')
+    await user.click(within(fallbackCard).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 
