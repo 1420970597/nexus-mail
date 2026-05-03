@@ -112,7 +112,7 @@ describe('AppSidebar', () => {
     await waitFor(() => expect(screen.getByText('Nexus-Mail')).toBeInTheDocument())
 
     const menu = screen.getByRole('menu')
-    await user.click(within(menu).getAllByText('Webhook 设置')[0])
+    await user.click(within(menu).getByRole('menuitem', { name: /Webhook 设置/ }))
     expect(await screen.findByText('Webhook 页面')).toBeInTheDocument()
   })
 

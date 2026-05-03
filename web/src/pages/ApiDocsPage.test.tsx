@@ -105,7 +105,7 @@ describe('ApiDocsPage', () => {
     expect(scoped.getByText('完成 Webhook 回调联调')).toBeInTheDocument()
     expect(scoped.getByText('返回资金工作台核对预算与售后')).toBeInTheDocument()
 
-    await user.click(within(bridgeLane as HTMLElement).getByRole('button', { name: '查看项目市场基线' }))
+    await user.click(scoped.getByRole('button', { name: '查看项目市场基线' }))
     expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
 
     view.unmount()
