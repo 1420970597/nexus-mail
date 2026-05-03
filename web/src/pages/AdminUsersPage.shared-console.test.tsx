@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
@@ -108,22 +108,22 @@ describe('AdminUsersPage shared-console admin workbench', () => {
 
   it('navigates from mission-control actions to risk, audit, and api key pages via the admin mission-flow region', async () => {
     const user = userEvent.setup()
-    renderAdminUsersPage()
+    let view = renderAdminUsersPage()
 
     expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
     expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
 
-    cleanup()
-    renderAdminUsersPage()
+    view.unmount()
+    view = renderAdminUsersPage()
     expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
     const auditMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(auditMissionFlow).getByRole('button', { name: '查看审计日志' }))
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
 
-    cleanup()
-    renderAdminUsersPage()
+    view.unmount()
+    view = renderAdminUsersPage()
     expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
     const integrationMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(integrationMissionFlow).getByRole('button', { name: '打开 API Keys' }))
