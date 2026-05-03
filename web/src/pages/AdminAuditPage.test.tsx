@@ -75,7 +75,7 @@ describe('AdminAuditPage', () => {
     expect(screen.getByText(/将真实 `\/api\/v1\/admin\/audit` 回放、风险联动、高危运营后果与接入契约复盘放在同一套深色共享控制台中/)).toBeInTheDocument()
     expect(screen.getByText('高风险动作')).toBeInTheDocument()
     expect(screen.getByText('审计总数')).toBeInTheDocument()
-    expect(screen.getAllByText('主体类型').length).toBeGreaterThan(0)
+    expect(screen.getByText('查询条件')).toBeInTheDocument()
     expect(screen.getByText('最近动作')).toBeInTheDocument()
     expect(screen.getByText('管理员主任务流')).toBeInTheDocument()
     expect(screen.getByText('共享接入桥接')).toBeInTheDocument()

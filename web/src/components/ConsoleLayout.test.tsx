@@ -41,8 +41,9 @@ describe('ConsoleLayout', () => {
 
     renderLayout('/admin/risk')
 
-    expect(screen.getAllByText('风控中心').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('管理员控制台').length).toBeGreaterThan(0)
+    const breadcrumbNav = screen.getByRole('navigation')
+    expect(within(breadcrumbNav).getByText('风控中心')).toBeInTheDocument()
+    expect(screen.getByText('运营指挥台')).toBeInTheDocument()
     expect(screen.getByRole('main', { name: '控制台主内容' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /用户管理/ })).toBeInTheDocument()

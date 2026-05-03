@@ -94,7 +94,7 @@ describe('AdminRiskPage', () => {
     expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
     expect(screen.getByText('审计日志 · /admin/audit')).toBeInTheDocument()
     expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
-    expect(screen.getAllByText('高风险').length).toBeGreaterThan(0)
+    expect(screen.getByText('高风险')).toBeInTheDocument()
     expect(screen.getByText('规则命中概览')).toBeInTheDocument()
     expect(screen.getByText('处置建议')).toBeInTheDocument()
   })

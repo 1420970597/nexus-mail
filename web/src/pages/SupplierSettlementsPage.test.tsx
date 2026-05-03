@@ -180,9 +180,10 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.getByText('先核对待结算与冻结资金')).toBeInTheDocument()
     expect(screen.getByText('继续维护项目成本模型')).toBeInTheDocument()
     expect(screen.getByText('最后复盘争议与共享控制台入口')).toBeInTheDocument()
-    expect(screen.getAllByText(`API Keys · ${API_KEYS_ROUTE}`).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(`API 文档 · ${DOCS_ROUTE}`).length).toBeGreaterThan(0)
+    const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    expect(within(bridge).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
+    expect(within(bridge).getByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
+    expect(within(bridge).getByText(`API 文档 · ${DOCS_ROUTE}`)).toBeInTheDocument()
   })
 
   it('shows real supplier settlement records, reports, and disputes from loaded payloads', async () => {
