@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
@@ -115,11 +115,13 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     await user.click(screen.getByRole('button', { name: '查看风控中心' }))
     expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
 
+    cleanup()
     renderAdminUsersPage()
     expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '查看审计日志' }))
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
 
+    cleanup()
     renderAdminUsersPage()
     expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
