@@ -67,7 +67,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
 
 function getApiKeyRow(name: string) {
   const rowLabel = screen.getByText(name)
-  const row = rowLabel.closest('tr')
+  const row = rowLabel.closest('[role="row"]')
   expect(row).not.toBeNull()
   return row as HTMLElement
 }
