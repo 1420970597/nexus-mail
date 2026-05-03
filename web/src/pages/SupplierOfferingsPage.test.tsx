@@ -179,8 +179,8 @@ describe('SupplierOfferingsPage', () => {
 
     const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
     expect(fallback).toBeInTheDocument()
-    expect(within(fallback).getAllByText('返回推荐工作台')).toHaveLength(2)
     expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
+    expect(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button')).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-offerings-shared-console-fallback-button'))
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
