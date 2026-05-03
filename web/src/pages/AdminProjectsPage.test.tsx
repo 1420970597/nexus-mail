@@ -193,9 +193,12 @@ describe('AdminProjectsPage', () => {
     expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    expect(screen.getByTestId('admin-pricing-fallback-button')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '返回推荐工作台' }))
+    const fallbackButton = screen.getByTestId('admin-pricing-fallback-button')
+    expect(fallbackButton).toBeInTheDocument()
+    expect(screen.getByText('价格与成功率调整后，建议立即回到风控中心确认风险信号是否同步变化')).toBeInTheDocument()
+
+    await user.click(fallbackButton)
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
   })
 })
