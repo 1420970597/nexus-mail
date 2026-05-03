@@ -250,7 +250,13 @@ export function BalancePage() {
                         <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.78)' }}>
                           {item.description}
                         </Typography.Paragraph>
-                        <Button theme="borderless" type="tertiary" icon={<IconArrowRight />} onClick={() => navigate(item.path)}>
+                        <Button
+                          theme="borderless"
+                          type="tertiary"
+                          data-testid={item.key === 'integrations' ? 'balance-open-api-keys' : undefined}
+                          icon={<IconArrowRight />}
+                          onClick={() => navigate(item.path)}
+                        >
                           {item.button}
                         </Button>
                       </Space>
@@ -279,7 +285,7 @@ export function BalancePage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+          <Card title="控制台能力矩阵" data-testid="balance-capability-matrix" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
             <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
               {consolePillars.map((item) => (
                 <Card
@@ -291,15 +297,15 @@ export function BalancePage() {
                   <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>{item.summary}</Typography.Paragraph>
                 </Card>
               ))}
-              <Space wrap>
+              <Space wrap data-testid="balance-capability-actions">
                 {canOpenOrders ? (
                   <Button theme="light" icon={<IconActivity />} onClick={() => navigate(ORDERS_ROUTE)}>查看订单中心</Button>
                 ) : null}
                 {canOpenWebhooks ? (
-                  <Button theme="light" icon={<IconSetting />} onClick={() => navigate(WEBHOOKS_ROUTE)}>打开 Webhook 设置</Button>
+                  <Button theme="light" icon={<IconSetting />} data-testid="balance-open-webhooks" onClick={() => navigate(WEBHOOKS_ROUTE)}>打开 Webhook 设置</Button>
                 ) : null}
                 {canOpenDocs ? (
-                  <Button theme="light" icon={<IconSafe />} onClick={() => navigate(DOCS_ROUTE)}>打开 API 文档</Button>
+                  <Button theme="light" icon={<IconSafe />} data-testid="balance-open-docs" onClick={() => navigate(DOCS_ROUTE)}>打开 API 文档</Button>
                 ) : null}
               </Space>
             </Space>

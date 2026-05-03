@@ -133,38 +133,40 @@ describe('BalancePage', () => {
 
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByText('前往项目市场'))
+    const missionCards = await screen.findByTestId('balance-mission-cards')
+    await user.click(within(missionCards).getByRole('button', { name: /前往项目市场/ }))
     expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
 
-    const missionCardsSection = screen.getByTestId('balance-mission-cards')
-    const ordersMissionCard = within(missionCardsSection).getByTestId('balance-orders-mission-card')
-    expect(ordersMissionCard).not.toBeNull()
-    await user.click(within(ordersMissionCard as HTMLElement).getByRole('button', { name: /查看订单中心/ }))
+    const refreshedMissionCards = await screen.findByTestId('balance-mission-cards')
+    const ordersMissionCard = within(refreshedMissionCards).getByTestId('balance-orders-mission-card')
+    await user.click(within(ordersMissionCard).getByRole('button', { name: /查看订单中心/ }))
     expect(await screen.findByText('订单中心页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByText('打开 API Keys'))
+    await user.click(await screen.findByTestId('balance-open-api-keys'))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByText('打开 Webhook 设置'))
+    const secondCapabilityActions = await screen.findByTestId('balance-capability-actions')
+    await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
     expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
     expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByText('打开 API 文档'))
+    const thirdCapabilityActions = await screen.findByTestId('balance-capability-actions')
+    await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
