@@ -678,9 +678,10 @@ describe('App', () => {
       ],
     })
 
-    renderApp(['/admin/risk'])
+    const riskView = renderApp(['/admin/risk'])
     expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
 
+    riskView.unmount()
     renderApp(['/admin/audit'])
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
   })
@@ -795,15 +796,47 @@ describe('App', () => {
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
       ],
     })
+    mockedGetAdminOverview.mockResolvedValueOnce({
+      generated_at: '2026-04-28T00:00:00Z',
+      summary: {
+        users: { total: 3 },
+        orders: { total: 10, waiting_email: 1, ready: 2, finished: 6, canceled: 1, timeout: 1, completion_rate_bps: 8000, timeout_rate_bps: 1000, cancel_rate_bps: 1000, gross_revenue: 1200, average_finished_order_value: 200 },
+        disputes: { total: 2, open: 1, resolved: 1, rejected: 0, dispute_rate_bps: 2000 },
+        projects: { total: 3, active: 2, inactive: 1 },
+        suppliers: { total: 2 },
+        audit: { total: 4, create: 1, revoke: 1, success: 1, denied_invalid: 0, denied_scope: 0, denied_whitelist: 1, denied_rate_limit: 0, denied_total: 1, denied_rate_bps: 2500 },
+        supplier_settlements: { pending_amount: 15600 },
+      },
+      suppliers: [
+        { user_id: 9, email: 'supplier-alpha@nexus-mail.local', role: 'supplier', pending_settlement: 9600, order_total: 12, finished_orders: 7, timeout_orders: 3, canceled_orders: 2, gross_revenue: 12800, completion_rate_bps: 5800 },
+        { user_id: 10, email: 'supplier-beta@nexus-mail.local', role: 'supplier', pending_settlement: 6000, order_total: 8, finished_orders: 7, timeout_orders: 1, canceled_orders: 0, gross_revenue: 8800, completion_rate_bps: 9200 },
+      ],
+      recent_audit: [],
+    } as any)
     renderApp(['/'])
     expect(await screen.findByText('订单完成率')).toBeInTheDocument()
-    await waitFor(() => expect(screen.getAllByText('20.00%').length).toBeGreaterThanOrEqual(3))
     expect(await screen.findByText('争议发生率')).toBeInTheDocument()
-    expect(await screen.findByText('40.00%')).toBeInTheDocument()
     expect(await screen.findByText('已完成订单流水')).toBeInTheDocument()
-    await waitFor(() => expect(screen.getAllByText('¥12.00').length).toBeGreaterThanOrEqual(2))
-    await waitFor(() => expect(screen.getAllByText('50.00%').length).toBeGreaterThanOrEqual(1))
-    await waitFor(() => expect(screen.getAllByText('当前重点关注供应商').length).toBeGreaterThanOrEqual(1))
-    expect(screen.getByText('鉴权拒绝总数：2')).toBeInTheDocument()
+
+    const topSupplierCard = screen.getByText('当前重点关注供应商').closest('.semi-card')
+    expect(topSupplierCard).not.toBeNull()
+    expect(within(topSupplierCard as HTMLElement).getByText('supplier-alpha@nexus-mail.local')).toBeInTheDocument()
+    expect(within(topSupplierCard as HTMLElement).getByText('完成率：58.00%')).toBeInTheDocument()
+
+    const supplierRankTable = screen.getByText('供应商待结算排行').closest('.semi-card')
+    expect(supplierRankTable).not.toBeNull()
+    expect(within(supplierRankTable as HTMLElement).getByText('supplier-beta@nexus-mail.local')).toBeInTheDocument()
+    expect(within(supplierRankTable as HTMLElement).getByText('92.00%')).toBeInTheDocument()
+
+    const disputeCard = screen.getByText('争议发生率').closest('.semi-card')
+    expect(disputeCard).not.toBeNull()
+    expect(within(disputeCard as HTMLElement).getByText('20.00%')).toBeInTheDocument()
+
+    const revenueCard = screen.getByText('已完成订单流水').closest('.semi-card')
+    expect(revenueCard).not.toBeNull()
+    expect(within(revenueCard as HTMLElement).getByText('¥12.00')).toBeInTheDocument()
+
+    expect(screen.getByText('当前重点关注供应商')).toBeInTheDocument()
+    expect(screen.getByText('鉴权拒绝总数：1')).toBeInTheDocument()
   })
 })
