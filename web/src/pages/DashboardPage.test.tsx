@@ -135,6 +135,7 @@ describe('DashboardPage shared-console journey hub', () => {
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '管理 API Keys' }))
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    view.unmount()
   })
 
   it('hides unavailable journey cards when the server menu does not expose those shared routes', async () => {
@@ -153,7 +154,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
   })
 
-  it('links the dashboard integration lane to api keys, webhooks, and docs with shared route constants', async () => {
+  it('shows the dashboard integration lane using the shared API Keys route constant without leaking extra CTA buttons', async () => {
     const user = userEvent.setup()
 
     const view = renderDashboard()
@@ -163,6 +164,8 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scoped.getByText('最后完成 API 接入')).toBeInTheDocument()
     expect(scoped.getByText('继续进入 API Keys、Webhook 与文档，完成程序化调用、回调联调与真实接口验证准备。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+    expect(scoped.queryByRole('button', { name: /Webhook 设置/ })).not.toBeInTheDocument()
+    expect(scoped.queryByRole('button', { name: /API 文档/ })).not.toBeInTheDocument()
 
     await user.click(scoped.getByRole('button', { name: '管理 API Keys' }))
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
