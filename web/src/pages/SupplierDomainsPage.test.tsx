@@ -64,10 +64,7 @@ function renderSupplierDomainsPage() {
 
 function getDomainTableRow(domainName: string) {
   const domainTable = screen.getByTestId('supplier-domains-table-card')
-  const cell = within(domainTable).getByText(domainName)
-  const row = cell.closest('tr') ?? cell.closest('[role="row"]')
-  expect(row).not.toBeNull()
-  return row as HTMLElement
+  return within(domainTable).getByRole('row', { name: new RegExp(domainName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })
 }
 
 describe('SupplierDomainsPage', () => {

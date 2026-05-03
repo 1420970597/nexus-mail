@@ -66,10 +66,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
 }
 
 function getApiKeyRow(name: string) {
-  const cell = screen.getByText(name)
-  const row = cell.closest('tr') ?? cell.closest('[role="row"]')
-  expect(row).not.toBeNull()
-  return row as HTMLElement
+  return screen.getByRole('row', { name: new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })
 }
 
 describe('ApiKeysPage', () => {
