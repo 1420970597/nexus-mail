@@ -144,10 +144,9 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    const emptyState = screen.getByText('当前暂无订单，可先前往项目市场下单。').closest('.semi-empty')
-    expect(emptyState).not.toBeNull()
-    expect(within(emptyState as HTMLElement).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
-    await user.click(within(emptyState as HTMLElement).getByRole('button', { name: '查看 API 接入准备' }))
+    const emptyActions = screen.getByTestId('orders-empty-state-actions')
+    expect(within(emptyActions).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
+    await user.click(within(emptyActions).getByRole('button', { name: '查看 API 接入准备' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
 

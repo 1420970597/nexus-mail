@@ -207,7 +207,7 @@ export function OrdersPage() {
                 dataSource={items}
                 empty={
                   <Empty description="当前暂无订单，可先前往项目市场下单。" image={null}>
-                    <Space>
+                    <Space data-testid="orders-empty-state-actions">
                       {canOpenProjects ? (
                         <Button type="primary" theme="solid" onClick={() => navigate(PROJECTS_ROUTE)}>
                           前往项目市场
