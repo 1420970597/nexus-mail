@@ -426,7 +426,7 @@ export function SupplierSettlementsPage() {
         />
       </Card>
 
-      <Card title="项目报表" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading}>
+      <Card title="项目报表" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-reports-card">
         <Form layout="horizontal" labelPosition="left" initValues={reportDraft}>
           <Form.Input
             field="from"
