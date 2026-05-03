@@ -112,9 +112,22 @@ function roleCopy(role?: string) {
   }
 }
 
-function MetricCard({ title, value, description, icon }: { title: string; value: string; description: string; icon: JSX.Element }) {
+function MetricCard({
+  title,
+  value,
+  description,
+  icon,
+  testId,
+}: {
+  title: string
+  value: string
+  description: string
+  icon: JSX.Element
+  testId?: string
+}) {
   return (
     <Card
+      data-testid={testId}
       style={{
         flex: '1 1 220px',
         minWidth: 220,
@@ -385,7 +398,13 @@ export function WebhooksPage() {
         <MetricCard title="端点总数" value={formatCount(items.length)} description={`活跃 ${formatCount(activeEndpoints.length)} / 已停用 ${formatCount(items.length - activeEndpoints.length)}`} icon={<IconServer />} />
         <MetricCard title="投递成功" value={formatCount(deliveryStats.sent)} description={`已聚合 ${formatCount(deliveryStats.total)} 条最近 delivery`} icon={<IconBolt />} />
         <MetricCard title="失败 / 排队中" value={formatCount(attentionCount)} description="优先排查 failed，并观察 pending 队列消化情况" icon={<IconActivity />} />
-        <MetricCard title="最近回调" value={latestDelivery} description="最近一次成功送达的回调时间" icon={<IconArticle />} />
+        <MetricCard
+          title="最近回调"
+          value={latestDelivery}
+          description="最近一次成功送达的回调时间"
+          icon={<IconArticle />}
+          testId="webhooks-latest-delivery-metric"
+        />
       </Space>
 
       <Banner
