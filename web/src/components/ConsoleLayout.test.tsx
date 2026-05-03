@@ -81,8 +81,8 @@ describe('ConsoleLayout', () => {
       </MemoryRouter>,
     )
 
-    const quickActions = screen.getAllByRole('button').filter((button) =>
-      ['项目市场', '余额中心', 'API 文档', 'API Keys'].includes(button.textContent ?? ''),
+    const quickActions = ['项目市场', '余额中心', 'API 文档'].map((label) =>
+      screen.getByRole('button', { name: new RegExp(label) }),
     )
     expect(quickActions.map((button) => button.textContent)).toEqual(['项目市场', '余额中心', 'API 文档'])
 

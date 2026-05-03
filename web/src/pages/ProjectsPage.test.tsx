@@ -124,11 +124,10 @@ describe('ProjectsPage', () => {
 
     expect(await screen.findByText('Discord')).toBeInTheDocument()
 
-    const orderButtons = screen.getAllByRole('button', { name: /立即下单|库存不足/ })
-    expect(orderButtons[0]).toBeEnabled()
-    expect(orderButtons[1]).toBeDisabled()
+    expect(screen.getByRole('button', { name: '立即下单' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '库存不足' })).toBeDisabled()
 
-    await user.click(orderButtons[0])
+    await user.click(screen.getByRole('button', { name: '立即下单' }))
 
     await screen.findByText('项目市场')
     expect(mockedCreateActivationOrder).toHaveBeenCalledWith('discord', 21)

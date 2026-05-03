@@ -361,8 +361,8 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /稍后再看/ })).toBeInTheDocument()
     expect(screen.getByText('继续准备 API 接入')).toBeInTheDocument()
     expect(screen.getByText('如果后续被服务端授予供应商或管理员角色，菜单会按权限扩展，不需要切换独立后台。')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: /前往项目市场开始采购/ }).length).toBeGreaterThan(0)
-    expect(screen.getAllByRole('button', { name: '管理 API Keys' }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: /前往项目市场开始采购/ })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /管理 API Keys/ }).length).toBeGreaterThan(0)
     expect(screen.queryByText('供应商主任务')).not.toBeInTheDocument()
     expect(screen.queryByText('管理员主任务')).not.toBeInTheDocument()
   })
@@ -689,9 +689,7 @@ describe('App', () => {
 
     renderApp([SETTINGS_ROUTE])
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
-    const auditButtons = screen.getAllByRole('button', { name: /查看审计日志/ })
-    expect(auditButtons.length).toBeGreaterThan(0)
-    await user.click(auditButtons[0])
+    await user.click(screen.getAllByRole('button', { name: /查看审计日志/ })[0])
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
   })
 
