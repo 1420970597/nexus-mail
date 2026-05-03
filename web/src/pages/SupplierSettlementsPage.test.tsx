@@ -190,7 +190,9 @@ describe('SupplierSettlementsPage', () => {
     renderSupplierSettlementsPage()
 
     expect(await screen.findByText('Discord 首单')).toBeInTheDocument()
-    expect(screen.getAllByText('discord').length).toBeGreaterThan(0)
+    const reportSection = screen.getByText('项目报表').closest('.semi-card')
+    expect(reportSection).not.toBeNull()
+    expect(within(reportSection as HTMLElement).getByText(/^discord$/i)).toBeInTheDocument()
     expect(screen.getByText('¥1899.00')).toBeInTheDocument()
     expect(screen.getByText('¥77.00')).toBeInTheDocument()
     expect(screen.getByText('主力供给')).toBeInTheDocument()
