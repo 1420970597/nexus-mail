@@ -202,9 +202,10 @@ describe('SupplierOfferingsPage', () => {
     renderSupplierOfferingsPage()
     expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
 
-    expect(screen.queryByRole('button', { name: /查看供应商资源/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /打开供应商结算/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    const missionFlow = screen.getByTestId('supplier-offerings-mission-flow')
+    expect(within(missionFlow).queryByRole('button', { name: /查看供应商资源/ })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: /打开供应商结算/ })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
 
     const fallbackCard = screen.getByTestId('supplier-offerings-mission-fallback')
     expect(within(fallbackCard).getByRole('heading', { name: '返回推荐工作台' })).toBeInTheDocument()

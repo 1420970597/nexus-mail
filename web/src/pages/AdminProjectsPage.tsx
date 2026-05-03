@@ -238,6 +238,7 @@ export function AdminProjectsPage() {
 
       {missionCards.length > 0 ? (
         <Card
+          data-testid="admin-pricing-mission-flow"
           title={<span style={{ color: '#f8fafc' }}>管理员任务流</span>}
           style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
           bodyStyle={{ padding: 20 }}

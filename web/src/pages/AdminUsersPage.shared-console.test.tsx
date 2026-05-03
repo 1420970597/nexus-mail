@@ -173,9 +173,10 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     renderAdminUsersPage()
 
     expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    const missionFlow = screen.getByTestId('admin-users-mission-flow')
+    expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(screen.queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
     expect(screen.queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
     expect(screen.queryByText('API 文档 · /docs')).not.toBeInTheDocument()

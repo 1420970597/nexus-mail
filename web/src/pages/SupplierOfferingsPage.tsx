@@ -262,7 +262,7 @@ export function SupplierOfferingsPage() {
         </Space>
       </Card>
 
-      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card data-testid="supplier-offerings-mission-flow" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
             <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>

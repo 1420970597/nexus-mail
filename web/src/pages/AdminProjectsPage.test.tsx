@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
@@ -118,22 +118,26 @@ describe('AdminProjectsPage', () => {
 
   it('navigates through risk, audit, and integration mission cards inside the shared console', async () => {
     const user = userEvent.setup()
-    renderAdminProjectsPage()
+    let view = renderAdminProjectsPage()
 
     expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '查看风控中心' }))
+    const missionFlow = screen.getByTestId('admin-pricing-mission-flow')
+    await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
     expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
 
-    renderAdminProjectsPage()
+    view.unmount()
+    view = renderAdminProjectsPage()
     expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '查看审计日志' }))
+    await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '查看审计日志' }))
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
 
-    renderAdminProjectsPage()
+    view.unmount()
+    view = renderAdminProjectsPage()
     expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
+    await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    view.unmount()
   })
 
   it('submits project updates through the real admin service contract', async () => {
