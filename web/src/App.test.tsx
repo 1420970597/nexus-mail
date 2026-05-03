@@ -640,7 +640,7 @@ describe('App', () => {
     renderApp(['/profile'])
 
     await waitFor(() => expect(screen.getByText('供应商运营焦点')).toBeInTheDocument())
-    await user.click(screen.getAllByRole('button', { name: '前往域名管理' })[0])
+    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
@@ -664,7 +664,7 @@ describe('App', () => {
     expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
     expect(screen.getAllByText('域名池运营').length).toBeGreaterThan(0)
     expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
-    await user.click(screen.getAllByRole('button', { name: '前往域名管理' })[0])
+    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
@@ -690,7 +690,9 @@ describe('App', () => {
 
     renderApp([SETTINGS_ROUTE])
     await waitFor(() => expect(screen.getByText('审计追踪')).toBeInTheDocument())
-    await user.click(screen.getAllByRole('button', { name: /查看审计日志/ })[0])
+    const auditButtons = screen.getAllByRole('button', { name: /查看审计日志/ })
+    expect(auditButtons.length).toBeGreaterThan(0)
+    await user.click(auditButtons[0])
     expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
   })
 
