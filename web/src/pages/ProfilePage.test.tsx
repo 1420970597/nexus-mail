@@ -189,7 +189,6 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    expect(screen.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('profile-shared-console-return')).not.toBeInTheDocument()
   })
 

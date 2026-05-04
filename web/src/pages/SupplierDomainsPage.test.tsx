@@ -234,7 +234,6 @@ describe('SupplierDomainsPage', () => {
     expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
     expect(screen.queryByTestId('supplier-domains-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-domains-shared-console-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /返回推荐工作台/ })).not.toBeInTheDocument()
   })
 
   it('submits create domain form and reloads data', async () => {

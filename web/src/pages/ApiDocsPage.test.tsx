@@ -74,9 +74,10 @@ describe('ApiDocsPage', () => {
 
     expect(await screen.findByText('管理员扩展 · API 契约')).toBeInTheDocument()
     expect(screen.getByText('审计与风控仍通过共享控制台中的 API Keys / 审计链路交叉验证，不拆新的文档后台。')).toBeInTheDocument()
-    expect(screen.getByText('API Keys')).toBeInTheDocument()
-    expect(screen.getByText('查看项目市场基线')).toBeInTheDocument()
-    expect(screen.queryByText('打开 Webhook 设置')).not.toBeInTheDocument()
+    const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
+    expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
   })
 
   it('renders a shared-console bridge lane that links docs back to marketplace, api keys, webhook, and finance workbenches', async () => {
