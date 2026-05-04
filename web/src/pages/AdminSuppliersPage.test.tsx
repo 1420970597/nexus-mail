@@ -147,10 +147,7 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).getByText('审计回放闭环')).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
-    const bridgeCard = bridge.closest('.semi-card')
-    expect(bridgeCard).not.toBeNull()
-    const bridgeScope = within(bridgeCard as HTMLElement)
-    expect(bridgeScope.getByText('共享接入桥接')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
     expect(within(bridge).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
     expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
