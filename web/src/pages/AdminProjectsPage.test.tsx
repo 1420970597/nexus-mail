@@ -45,15 +45,17 @@ function seedAdminMenu() {
 function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
-        <Route path={ADMIN_PRICING_ROUTE} element={<AdminProjectsPage />} />
-        <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
-        <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
-      </Routes>
+      <main aria-label="控制台主内容">
+        <Routes>
+          <Route path={ADMIN_PRICING_ROUTE} element={<AdminProjectsPage />} />
+          <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
+          <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
+          <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+          <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
+          <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+          <Route path="/" element={<div>共享控制台首页</div>} />
+        </Routes>
+      </main>
     </MemoryRouter>,
   )
 }
@@ -194,9 +196,11 @@ describe('AdminProjectsPage', () => {
     renderAdminProjectsPage()
 
     expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('admin-pricing-mission-flow')).not.toBeInTheDocument()
+    const mainContent = screen.getByRole('main', { name: '控制台主内容' })
+    expect(within(mainContent).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+    expect(within(mainContent).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
+    expect(within(mainContent).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
 
     const fallbackButton = screen.getByTestId('admin-pricing-fallback-button')
     expect(fallbackButton).toBeInTheDocument()

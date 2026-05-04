@@ -122,6 +122,7 @@ export function OrdersPage() {
     <>
       <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
         <Card
+          data-testid="orders-shared-console-hero"
           style={{
             width: '100%',
             borderRadius: 24,

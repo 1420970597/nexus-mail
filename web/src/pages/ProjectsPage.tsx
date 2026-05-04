@@ -97,6 +97,7 @@ export function ProjectsPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="projects-shared-console-hero"
         style={{
           width: '100%',
           borderRadius: 24,
