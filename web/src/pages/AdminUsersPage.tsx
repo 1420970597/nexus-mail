@@ -348,7 +348,7 @@ export function AdminUsersPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
+          <Card data-testid="admin-users-shared-console-bridge" title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
             <Space vertical align="start" spacing={12}>
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。
