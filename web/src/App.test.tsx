@@ -473,7 +473,8 @@ describe('App', () => {
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
     await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
 
-    expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
+    const onboardingRegion = await expectDefaultUserFirstRunLane()
+    void onboardingRegion
     expect(mockedGetMenu).toHaveBeenCalled()
     await waitFor(() => {
       const menuPaths = useAuthStore.getState().menu.map((item) => item.path)
@@ -497,9 +498,13 @@ describe('App', () => {
       ],
     })
 
+    mockedGetDashboardOverview.mockResolvedValueOnce({
+      message: 'dashboard ready',
+      stats: { projects: 6, suppliers: 1, orders: 5 },
+    })
     renderApp(['/'])
 
-    expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
+    expect(await screen.findByTestId('app-sidebar-shared-group')).toBeInTheDocument()
 
     const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
     expect(within(sharedGroup).getByText('项目市场')).toBeInTheDocument()

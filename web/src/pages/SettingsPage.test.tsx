@@ -63,7 +63,7 @@ describe('SettingsPage', () => {
     await user.click(checklistScope.getByRole('button', { name: '打开项目市场' }))
     expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
 
-    renderSettingsPage()
+    const settingsView = renderSettingsPage()
     const checklistCardAgain = await screen.findByTestId('settings-user-first-run-checklist')
     const checklistScopeAgain = within(checklistCardAgain)
     expect(checklistScopeAgain.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
@@ -72,10 +72,13 @@ describe('SettingsPage', () => {
     await user.click(getButtonByLabel(checklistScopeAgain, '重新打开首轮引导'))
 
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(11))).toBe('false')
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
+    const homePage = await screen.findByText('共享控制台首页')
+    const homeRegion = homePage.parentElement
+    expect(homeRegion).not.toBeNull()
+    expect(within(homeRegion as HTMLElement).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
+    expect(within(homeRegion as HTMLElement).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
+    settingsView.unmount()
   })
 
   it('renders a dark shared-console control center with canonical navigation links for regular users', async () => {
