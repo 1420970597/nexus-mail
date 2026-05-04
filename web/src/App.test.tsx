@@ -291,7 +291,7 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByText('规则命中概览')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '保存规则' })).toBeInTheDocument()
   })
 
@@ -711,11 +711,11 @@ describe('App', () => {
     })
 
     const riskView = renderApp(['/admin/risk'])
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByText('规则命中概览')).toBeInTheDocument()
 
     riskView.unmount()
     renderApp(['/admin/audit'])
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-audit-events-table-card')).toBeInTheDocument()
   })
 
   it('renders webhook settings page for authenticated admin', async () => {
@@ -775,8 +775,7 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('规则命中概览')).toBeInTheDocument()
+    expect(await screen.findByText('规则命中概览')).toBeInTheDocument()
     expect(screen.getByText('处置建议')).toBeInTheDocument()
     expect(screen.getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
     expect(screen.getByText('高风险')).toBeInTheDocument()
@@ -803,18 +802,16 @@ describe('App', () => {
 
     renderApp(['/admin/audit'])
 
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('高风险动作')).toBeInTheDocument()
-    const auditTable = screen.getByTestId('admin-audit-events-table-card')
+    const auditTable = await screen.findByTestId('admin-audit-events-table-card')
     expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
     expect(within(auditTable).getByText('blocked')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
   })
 
-  it('blocks supplier routes for plain users', async () => {
+  it('redirects plain users from supplier routes back into the shared shared-shell dashboard lane', async () => {
     setSession('user')
     renderApp([SUPPLIER_RESOURCES_ROUTE])
-    expect(await screen.findAllByText('控制台总览')).not.toHaveLength(0)
+    expect(await screen.findByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
   })
 
   it('renders admin dashboard deep statistics', async () => {
