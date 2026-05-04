@@ -18,7 +18,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home-route">共享控制台首页</div>} />
         <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
         <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
@@ -72,11 +72,9 @@ describe('SettingsPage', () => {
     await user.click(getButtonByLabel(checklistScopeAgain, '重新打开首轮引导'))
 
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(11))).toBe('false')
-    const homePage = await screen.findByText('共享控制台首页')
-    const homeRegion = homePage.parentElement
-    expect(homeRegion).not.toBeNull()
-    expect(within(homeRegion as HTMLElement).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
-    expect(within(homeRegion as HTMLElement).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
+    const homeRegion = await screen.findByTestId('shared-console-home-route')
+    expect(within(homeRegion).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
+    expect(within(homeRegion).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
     settingsView.unmount()
   })
