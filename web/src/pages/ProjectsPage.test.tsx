@@ -211,7 +211,7 @@ describe('ProjectsPage', () => {
 
     expect(await screen.findByText('共享控制台采购切片')).toBeInTheDocument()
     const heroCard = screen.getByTestId('projects-shared-console-hero')
-    expect(within(heroCard).queryByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).not.toBeInTheDocument()
+    expect(within(heroCard).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 
   it('renders a mission-control next-step lane for procurement, fulfillment, and integration', async () => {

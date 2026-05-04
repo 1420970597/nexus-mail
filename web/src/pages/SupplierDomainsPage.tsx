@@ -472,7 +472,7 @@ export function SupplierDomainsPage() {
               </Space>
             </Card>
 
-            <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+            <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} data-testid="supplier-domains-region-metrics">
               <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                 <div>
                   <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>

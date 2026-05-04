@@ -221,9 +221,10 @@ describe('SupplierDomainsPage', () => {
     await waitFor(() => expect(mockedError).toHaveBeenCalledWith('overview failed'))
     expect(await screen.findByText('overview failed，请先恢复真实 /supplier/resources/overview 后再继续域名运营。')).toBeInTheDocument()
     const tableCard = screen.getByTestId('supplier-domains-table-card')
-    expect(within(tableCard).queryByText('暂无域名池记录，可先在右侧创建第一条域名。')).not.toBeInTheDocument()
-    expect(screen.getByText('域名池加载失败时暂停显示区域统计，请先恢复上游概览接口。')).toBeInTheDocument()
-    expect(screen.queryByText('暂无可统计区域。')).not.toBeInTheDocument()
+    expect(within(tableCard).queryByText('当前暂无域名池记录，请稍后再试。')).not.toBeInTheDocument()
+    const metricsRegion = screen.getByTestId('supplier-domains-region-metrics')
+    expect(within(metricsRegion).getByText('域名池加载失败时暂停显示区域统计，请先恢复上游概览接口。')).toBeInTheDocument()
+    expect(within(metricsRegion).queryByText('暂无可统计区域。')).not.toBeInTheDocument()
   })
 
   it('hides fallback when current page is the only visible supplier workspace', async () => {
