@@ -617,6 +617,7 @@ export function DashboardPage() {
                   {nextSteps.map((step) => (
                     <Col xs={24} md={12} xl={6} key={step.key}>
                       <Card
+                        data-testid={`dashboard-next-step-${step.key}`}
                         style={{
                           height: '100%',
                           borderRadius: 18,
@@ -633,7 +634,13 @@ export function DashboardPage() {
                           <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
                             {step.description}
                           </Typography.Paragraph>
-                          <Button type="primary" theme="borderless" onClick={() => navigate(step.path)} style={{ color: '#86efac' }}>
+                          <Button
+                            data-testid={`dashboard-next-step-action-${step.key}`}
+                            type="primary"
+                            theme="borderless"
+                            onClick={() => navigate(step.path)}
+                            style={{ color: '#86efac' }}
+                          >
                             {step.button}
                           </Button>
                         </Space>
