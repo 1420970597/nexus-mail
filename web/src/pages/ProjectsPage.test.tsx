@@ -191,7 +191,7 @@ describe('ProjectsPage', () => {
     expect(screen.getByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).toBeInTheDocument()
   })
 
-  it('hides the docs continuation CTA when the server menu does not expose docs access', async () => {
+  it('hides the docs continuation CTA from the procurement hero when the server menu does not expose docs access', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',

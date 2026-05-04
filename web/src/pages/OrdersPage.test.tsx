@@ -201,7 +201,7 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
   })
 
-  it('hides the API continuation CTA when the server menu does not expose API key management', async () => {
+  it('hides the API continuation CTA from the fulfillment hero when the server menu does not expose API key management', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',
