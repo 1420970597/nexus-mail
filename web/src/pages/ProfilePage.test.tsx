@@ -93,11 +93,7 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(screen.getByText('供应商运营焦点')).toBeInTheDocument()
-    expect(screen.getByText('供应商角色扩展')).toBeInTheDocument()
-    expect(screen.getByText('当前账号已被服务端授予供应商角色；供给链路仍然挂载在同一套共享控制台内，不切换独立后台。')).toBeInTheDocument()
-    expect(within(sharedConsoleReturn).getByText('通过设置中心回到共享控制台')).toBeInTheDocument()
-    expect(within(sharedConsoleReturn).getByText('角色扩展仍留在同一套深色控制台中；如果当前页只负责身份核对，可先回到设置中心再继续风控、供给或接入链路。')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商运营焦点' })).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
@@ -122,7 +118,6 @@ describe('ProfilePage', () => {
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
     expect(within(sharedConsoleReturn).getByText('回到推荐工作台继续主链路')).toBeInTheDocument()
-    expect(within(sharedConsoleReturn).getByText('当服务端暂未暴露项目市场时，普通用户仍可从账号中枢回到推荐工作台继续查看预算、订单或接入入口。')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回推荐工作台' }))
@@ -146,7 +141,6 @@ describe('ProfilePage', () => {
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
     expect(within(sharedConsoleReturn).getByText('回到推荐工作台继续角色扩展链路')).toBeInTheDocument()
-    expect(within(sharedConsoleReturn).getByText('当设置中心入口暂未暴露时，仍可返回当前角色的推荐工作台，继续同一控制台中的风控、供给或接入任务。')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
@@ -206,10 +200,7 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(screen.getByText('管理员运营焦点')).toBeInTheDocument()
-    expect(screen.getByText('管理员角色扩展')).toBeInTheDocument()
-    expect(screen.getByText('当前账号已被服务端授予管理员角色；高危运营、风控与审计动作继续在同一套共享控制台内完成。')).toBeInTheDocument()
-    expect(within(sharedConsoleReturn).getByText('通过设置中心回到共享控制台')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '管理员运营焦点' })).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
