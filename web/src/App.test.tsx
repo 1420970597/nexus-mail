@@ -583,10 +583,15 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
-    expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
-    expect(screen.getByText('先完成基础采购路径')).toBeInTheDocument()
-    expect(screen.getByText('后续角色能力仍在同一壳内扩展')).toBeInTheDocument()
+    const onboardingRegion = await expectDefaultUserFirstRunLane()
+    const onboardingScope = within(onboardingRegion)
+    expect(onboardingScope.getByRole('button', { name: '查看余额中心' })).toBeInTheDocument()
+    expect(onboardingScope.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
+    expect(onboardingScope.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
+    expect(onboardingScope.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+    expect(within(onboardingScope.getByTestId('dashboard-next-step-api-keys')).getByRole('heading', { name: '最后完成 API 接入' })).toBeInTheDocument()
+    expect(within(onboardingScope.getByTestId('dashboard-next-step-api-keys')).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
