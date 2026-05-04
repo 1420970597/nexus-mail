@@ -85,7 +85,7 @@ describe('SupplierDomainsPage', () => {
     ])
   })
 
-  it('renders supplier domain mission-control shell and shared-console guidance', async () => {
+  it('renders the supplier domain mission-control shell with scoped shared-console contracts', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({
       domains: [
         { id: 1, name: 'mail.nexus.test', region: 'global', status: 'active', catch_all: true },
@@ -97,21 +97,19 @@ describe('SupplierDomainsPage', () => {
 
     renderSupplierDomainsPage()
 
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('域名池运营中枢')).toBeInTheDocument()
-    expect(screen.getByText('供应商主任务流')).toBeInTheDocument()
-    expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(screen.getByText('共享控制台联动')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
+    const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
+    expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
+    const sharedConsoleBridge = screen.getByTestId('supplier-domains-shared-console-bridge')
+    expect(within(sharedConsoleBridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).toBeInTheDocument()
+    expect(within(sharedConsoleBridge).getByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).toBeInTheDocument()
+    expect(within(sharedConsoleBridge).getByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).toBeInTheDocument()
     expect(screen.getByText('单一供应商工作台')).toBeInTheDocument()
     expect(screen.getByText('域名 readiness 优先')).toBeInTheDocument()
     expect(screen.getByText('角色扩展但不伪造升级')).toBeInTheDocument()
-    expect(screen.getByText('先确认域名池与 Catch-All 覆盖')).toBeInTheDocument()
-    expect(screen.getByText('当前域名运营阶段')).toBeInTheDocument()
-    expect(screen.getByText('继续补齐邮箱池与账号映射')).toBeInTheDocument()
-    expect(screen.getByText('再进入供货规则编排')).toBeInTheDocument()
-    expect(screen.getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
-    expect(screen.getByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
-    expect(screen.getByText(`API 文档 · ${DOCS_ROUTE}`)).toBeInTheDocument()
   })
 
   it('shows loaded domain summaries and records from the real overview payload', async () => {
