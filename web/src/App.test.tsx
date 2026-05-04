@@ -215,11 +215,11 @@ describe('App', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders login page when unauthenticated', async () => {
+  it('renders the login shell when unauthenticated', async () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp([DEFAULT_LOGIN_ROUTE])
-    expect(await screen.findByText('登录 Nexus-Mail')).toBeInTheDocument()
-    expect(screen.getByText('邮件接码业务的统一运营控制台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录 Nexus-Mail' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
   })
 
   it('clears local session on bootstrap failure without revoking refresh session server-side', async () => {
