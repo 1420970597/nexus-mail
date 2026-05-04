@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AppSidebar, SHARED_CONSOLE_MENU_LOADING_LABEL } from './AppSidebar'
@@ -14,7 +14,7 @@ function renderSidebar(ui: React.ReactNode, initialEntries: string[] = ['/']) {
 
 async function renderSidebarAndWait(ui: React.ReactNode, initialEntries: string[] = ['/']) {
   renderSidebar(ui, initialEntries)
-  await waitFor(() => expect(screen.getByText('Nexus-Mail')).toBeInTheDocument())
+  await screen.findByRole('heading', { name: 'Nexus-Mail' })
 }
 
 describe('AppSidebar', () => {
@@ -89,9 +89,10 @@ describe('AppSidebar', () => {
 
     await renderSidebarAndWait(<AppSidebar />, ['/supplier/domains'])
 
-    const selectedItems = Array.from(document.querySelectorAll('.semi-navigation-item-selected'))
-    expect(selectedItems.length).toBeGreaterThan(0)
-    expect(selectedItems.some((item) => item.textContent?.includes('域名管理'))).toBe(true)
+    const supplierGroup = screen.getByTestId('app-sidebar-supplier-group')
+    const selectedItems = supplierGroup.querySelectorAll('.semi-navigation-item-selected')
+    expect(selectedItems).toHaveLength(1)
+    expect(selectedItems[0]?.textContent).toContain('域名管理')
   })
 
   it('navigates to the clicked menu item inside the shared sidebar', async () => {
@@ -115,7 +116,7 @@ describe('AppSidebar', () => {
       </Routes>,
       ['/'],
     )
-    await waitFor(() => expect(screen.getByText('Nexus-Mail')).toBeInTheDocument())
+    await screen.findByRole('heading', { name: 'Nexus-Mail' })
 
     const menu = screen.getByRole('menu')
     await user.click(within(menu).getByRole('menuitem', { name: /Webhook 设置/ }))

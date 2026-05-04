@@ -85,12 +85,13 @@ describe('ConsoleLayout', () => {
       </MemoryRouter>,
     )
 
-    const quickActions = ['项目市场', '余额中心', 'API 文档'].map((label) =>
-      screen.getByRole('button', { name: new RegExp(label) }),
+    const quickActions = screen.getByTestId('console-layout-quick-actions')
+    const quickActionButtons = within(quickActions).getAllByRole('button').filter((button) =>
+      ['项目市场', '余额中心', 'API 文档'].includes(button.textContent?.trim() ?? ''),
     )
-    expect(quickActions.map((button) => button.textContent)).toEqual(['项目市场', '余额中心', 'API 文档'])
+    expect(quickActionButtons.map((button) => button.textContent?.trim())).toEqual(['项目市场', '余额中心', 'API 文档'])
 
-    await user.click(screen.getByRole('button', { name: /项目市场/ }))
+    await user.click(within(quickActions).getByRole('button', { name: /项目市场/ }))
     expect(await screen.findAllByText('项目市场')).not.toHaveLength(0)
   })
 })
