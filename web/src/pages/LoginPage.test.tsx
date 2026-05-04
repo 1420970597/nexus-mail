@@ -58,9 +58,9 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    const registerJourney = screen.getByRole('heading', { name: '注册后默认进入共享控制台' }).closest('.semi-card')
-    expect(registerJourney).not.toBeNull()
-    const registerJourneyScope = within(registerJourney as HTMLElement)
+    const registerJourney = screen.getByTestId('login-register-journey')
+    const registerJourneyScope = within(registerJourney)
+    expect(registerJourneyScope.getByRole('heading', { name: '注册后默认进入共享控制台' })).toBeInTheDocument()
 
     expect(registerJourneyScope.getByText('Shared Console')).toBeInTheDocument()
     expect(registerJourneyScope.getByText(/Registration → API Keys → Webhooks → Docs/)).toBeInTheDocument()

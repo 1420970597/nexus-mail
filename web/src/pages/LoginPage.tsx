@@ -204,6 +204,7 @@ export function LoginPage() {
               </Row>
 
               <Card
+                data-testid="login-register-journey"
                 bodyStyle={{ padding: 20 }}
                 style={{
                   width: '100%',

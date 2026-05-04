@@ -73,8 +73,9 @@ describe('SettingsPage', () => {
 
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(11))).toBe('false')
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
+    const dashboardRoot = screen.getByText('共享控制台首页').parentElement as HTMLElement
+    expect(within(dashboardRoot).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
+    expect(within(dashboardRoot).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
   })
 

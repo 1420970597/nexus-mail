@@ -461,6 +461,7 @@ export function SettingsPage() {
         </Col>
         <Col xs={24} xl={16}>
           <Card
+            data-testid="settings-shortcut-cards"
             title="控制台运行快捷入口"
             style={{ width: '100%', borderRadius: 24 }}
             bodyStyle={{ padding: 20 }}
