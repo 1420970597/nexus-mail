@@ -220,7 +220,9 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
-    expect(screen.queryByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).not.toBeInTheDocument()
+    const heroCard = screen.getByText('共享控制台履约切片').closest('.semi-card')
+    expect(heroCard).not.toBeNull()
+    expect(within(heroCard as HTMLElement).queryByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).not.toBeInTheDocument()
   })
 
   it('renders a mission-control continuation lane from orders into API integration and procurement replay', async () => {

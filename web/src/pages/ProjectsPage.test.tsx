@@ -210,7 +210,9 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('共享控制台采购切片')).toBeInTheDocument()
-    expect(screen.queryByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).not.toBeInTheDocument()
+    const heroCard = screen.getByText('共享控制台采购切片').closest('.semi-card')
+    expect(heroCard).not.toBeNull()
+    expect(within(heroCard as HTMLElement).queryByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).not.toBeInTheDocument()
   })
 
   it('renders a mission-control next-step lane for procurement, fulfillment, and integration', async () => {
