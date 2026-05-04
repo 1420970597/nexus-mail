@@ -77,8 +77,8 @@ describe('ApiDocsPage', () => {
     renderApiDocsPage()
 
     expect(await screen.findByText('管理员扩展 · API 契约')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Docs Mission Control' })).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
+    expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
     expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()

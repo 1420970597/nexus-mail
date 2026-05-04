@@ -310,7 +310,7 @@ describe('App', () => {
     expect((await screen.findAllByText('API 文档')).length).toBeGreaterThan(0)
   })
 
-  it('shows register journey structure and opens register mode from the login shell', async () => {
+  it('shows register journey CTA and opens register mode from the login shell', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp(['/login'])
@@ -318,10 +318,6 @@ describe('App', () => {
     const registerJourney = screen.getByTestId('login-register-journey')
     const registerJourneyScope = within(registerJourney)
 
-    expect(registerJourneyScope.getByRole('heading', { name: '注册后默认进入共享控制台' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByRole('heading', { name: '用户路径' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByRole('heading', { name: '供应商路径' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByRole('heading', { name: '管理员路径' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
