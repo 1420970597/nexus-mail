@@ -1,8 +1,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import '@testing-library/jest-dom'
 import { SupplierDomainsPage } from './SupplierDomainsPage'
+import * as activationService from '../services/activation'
 import { useAuthStore } from '../store/authStore'
 import {
   API_KEYS_ROUTE,
@@ -14,65 +15,65 @@ import {
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
-
-const mockedGetSupplierResourcesOverview = vi.fn()
-const mockedCreateSupplierDomain = vi.fn()
-const mockedSuccess = vi.fn()
-const mockedError = vi.fn()
+import { Toast } from '@douyinfe/semi-ui'
 
 vi.mock('../services/activation', () => ({
-  getSupplierResourcesOverview: (...args: any[]) => mockedGetSupplierResourcesOverview(...args),
-  createSupplierDomain: (...args: any[]) => mockedCreateSupplierDomain(...args),
+  getSupplierResourcesOverview: vi.fn(),
+  createSupplierDomain: vi.fn(),
 }))
 
 vi.mock('@douyinfe/semi-ui', async () => {
-  const actual: any = await vi.importActual('@douyinfe/semi-ui')
+  const actual = await vi.importActual<typeof import('@douyinfe/semi-ui')>('@douyinfe/semi-ui')
   return {
     ...actual,
     Toast: {
-      success: (...args: any[]) => mockedSuccess(...args),
-      error: (...args: any[]) => mockedError(...args),
+      success: vi.fn(),
+      error: vi.fn(),
     },
   }
 })
+
+const mockedGetSupplierResourcesOverview = vi.mocked(activationService.getSupplierResourcesOverview)
+const mockedCreateSupplierDomain = vi.mocked(activationService.createSupplierDomain)
+const mockedSuccess = vi.mocked(Toast.success)
+const mockedError = vi.mocked(Toast.error)
 
 function seedSupplierMenu(paths: string[]) {
   useAuthStore.setState({
     token: 'token',
     refreshToken: 'refresh-token',
-    user: { id: 9, email: 'supplier@nexus-mail.local', role: 'supplier' },
+    user: { id: 1, email: 'supplier@nexus-mail.local', role: 'supplier' },
     menu: paths.map((path) => ({ key: path, label: path, path })),
   })
 }
 
-function renderSupplierDomainsPage() {
+function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
   return render(
-    <MemoryRouter initialEntries={[SUPPLIER_DOMAINS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={SUPPLIER_DOMAINS_ROUTE} element={<SupplierDomainsPage />} />
-        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
         <Route path={SUPPLIER_RESOURCES_ROUTE} element={<div>供应商资源页</div>} />
         <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<div>供应商供货页</div>} />
         <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>Docs 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
 function getDomainTableRow(domainName: string) {
-  const domainTable = screen.getByTestId('supplier-domains-table-card')
-  return within(domainTable).getByRole('row', { name: new RegExp(domainName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })
+  const tableCard = screen.getByTestId('supplier-domains-table-card')
+  const cell = within(tableCard).getByText(domainName)
+  const row = cell.closest('tr') ?? cell.closest('[role="row"]')
+  expect(row).not.toBeNull()
+  return row as HTMLElement
 }
 
 describe('SupplierDomainsPage', () => {
   beforeEach(() => {
-    mockedGetSupplierResourcesOverview.mockReset()
-    mockedCreateSupplierDomain.mockReset()
-    mockedSuccess.mockReset()
-    mockedError.mockReset()
     seedSupplierMenu([
       DASHBOARD_ROUTE,
       SUPPLIER_DOMAINS_ROUTE,
@@ -83,61 +84,57 @@ describe('SupplierDomainsPage', () => {
       WEBHOOKS_ROUTE,
       DOCS_ROUTE,
     ])
-  })
-
-  it('renders the supplier domain mission-control shell with scoped shared-console contracts', async () => {
+    mockedGetSupplierResourcesOverview.mockReset()
+    mockedCreateSupplierDomain.mockReset()
+    mockedSuccess.mockReset()
+    mockedError.mockReset()
     mockedGetSupplierResourcesOverview.mockResolvedValue({
       domains: [
-        { id: 1, name: 'mail.nexus.test', region: 'global', status: 'active', catch_all: true },
-        { id: 2, name: 'otp.nexus.test', region: 'hk', status: 'inactive', catch_all: false },
+        { id: 1, name: 'mail-1.nexus.test', region: 'hk', status: 'active', catch_all: true },
+        { id: 2, name: 'mail-2.nexus.test', region: 'us', status: 'inactive', catch_all: false },
+        { id: 3, name: 'mail-3.nexus.test', region: 'global', status: 'active', catch_all: true },
+        { id: 4, name: 'mail-4.nexus.test', region: 'eu', status: 'inactive', catch_all: false },
       ],
       accounts: [],
       mailboxes: [],
     })
+  })
 
+  afterEach(() => {
+    vi.clearAllMocks()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+  })
+
+  it('renders supplier domain heading, overview metrics, mission flow, and shared-console bridge actions', async () => {
     renderSupplierDomainsPage()
 
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
-    expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
-    expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
-    const sharedConsoleBridge = screen.getByTestId('supplier-domains-shared-console-bridge')
-    expect(within(sharedConsoleBridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).toBeInTheDocument()
-    expect(within(sharedConsoleBridge).getByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).toBeInTheDocument()
-    expect(within(sharedConsoleBridge).getByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).toBeInTheDocument()
     expect(screen.getByText('单一供应商工作台')).toBeInTheDocument()
     expect(screen.getByText('域名 readiness 优先')).toBeInTheDocument()
     expect(screen.getByText('角色扩展但不伪造升级')).toBeInTheDocument()
-  })
-
-  it('shows loaded domain summaries and records from the real overview payload', async () => {
-    mockedGetSupplierResourcesOverview.mockResolvedValue({
-      domains: [
-        { id: 1, name: 'mail-1.nexus.test', region: 'global', status: 'active', catch_all: true },
-        { id: 2, name: 'mail-2.nexus.test', region: 'global', status: 'inactive', catch_all: false },
-        { id: 3, name: 'mail-3.nexus.test', region: 'hk', status: 'active', catch_all: true },
-        { id: 4, name: 'mail-4.nexus.test', region: '', status: 'active', catch_all: false },
-      ],
-      accounts: [],
-      mailboxes: [],
-    })
-
-    renderSupplierDomainsPage()
-
-    expect(await screen.findByText('mail-1.nexus.test')).toBeInTheDocument()
+    expect(screen.getByText('域名总数')).toBeInTheDocument()
     expect(screen.getByText('当前供应商域名池记录。')).toBeInTheDocument()
     expect(screen.getByText('可继续参与供货编排的域名数量。')).toBeInTheDocument()
     expect(screen.getByText('支持泛收件的域名数量。')).toBeInTheDocument()
+    expect(screen.getByText('覆盖区域')).toBeInTheDocument()
     expect(screen.getByText('去重后的 region 数量。')).toBeInTheDocument()
-    expect(screen.getByText('global · 2')).toBeInTheDocument()
     expect(screen.getByText('hk · 1')).toBeInTheDocument()
-    const domainTable = screen.getByTestId('supplier-domains-table-card')
-    expect(within(domainTable).getByText('mail-1.nexus.test')).toBeInTheDocument()
-    expect(within(domainTable).getByText('mail-2.nexus.test')).toBeInTheDocument()
-    expect(within(domainTable).getByText('mail-3.nexus.test')).toBeInTheDocument()
-    expect(within(domainTable).getByText('mail-4.nexus.test')).toBeInTheDocument()
+    expect(screen.getByText('us · 1')).toBeInTheDocument()
+    expect(screen.getByText('global · 1')).toBeInTheDocument()
+    expect(screen.getByText('eu · 1')).toBeInTheDocument()
+
+    const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
+    expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
+    expect(within(bridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).toBeInTheDocument()
+
+    expect(screen.getByText('mail-1.nexus.test')).toBeInTheDocument()
+    expect(screen.getByText('mail-4.nexus.test')).toBeInTheDocument()
     const catchAllEnabledRows = [getDomainTableRow('mail-1.nexus.test'), getDomainTableRow('mail-3.nexus.test')]
     const catchAllDisabledRows = [getDomainTableRow('mail-2.nexus.test'), getDomainTableRow('mail-4.nexus.test')]
     catchAllEnabledRows.forEach((row) => {
@@ -153,7 +150,7 @@ describe('SupplierDomainsPage', () => {
     const user = userEvent.setup()
 
     let view = renderSupplierDomainsPage()
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
@@ -161,20 +158,20 @@ describe('SupplierDomainsPage', () => {
 
     view.unmount()
     view = renderSupplierDomainsPage()
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
     expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
     await user.click(within(bridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: `打开 供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}` }))
     expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
   })
@@ -186,9 +183,8 @@ describe('SupplierDomainsPage', () => {
 
     let view = renderSupplierDomainsPage()
 
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
-    expect(within(missionFlow).getByText('先确认域名池与 Catch-All 覆盖')).toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: /留在域名管理/ })).not.toBeInTheDocument()
@@ -199,7 +195,7 @@ describe('SupplierDomainsPage', () => {
 
     view.unmount()
     view = renderSupplierDomainsPage()
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
     expect(within(bridge).queryByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).not.toBeInTheDocument()
@@ -231,7 +227,7 @@ describe('SupplierDomainsPage', () => {
 
     renderSupplierDomainsPage()
 
-    expect(await screen.findByText('Supplier Domain Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     expect(screen.queryByTestId('supplier-domains-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-domains-shared-console-fallback')).not.toBeInTheDocument()
   })

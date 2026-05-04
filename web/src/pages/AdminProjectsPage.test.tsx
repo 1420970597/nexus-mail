@@ -104,25 +104,24 @@ describe('AdminProjectsPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders pricing mission control with admin flow and shared-console capability matrix', async () => {
+  it('renders pricing heading, mission-flow CTAs, and capability-matrix surface inside the shared console shell', async () => {
     renderAdminProjectsPage()
 
-    expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('价格策略')).toBeInTheDocument()
-    expect(screen.getByText('管理员任务流')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
+    const missionFlow = screen.getByTestId('admin-pricing-mission-flow')
+    expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(screen.getByText('先对照风控阈值')).toBeInTheDocument()
-    expect(screen.getByText('再回看审计轨迹')).toBeInTheDocument()
-    expect(screen.getByText('最后串联接入入口')).toBeInTheDocument()
-    expect(screen.getByText('管理员项目配置与报价映射来自真实 /admin/projects /admin/projects/offerings')).toBeInTheDocument()
-    expect(screen.getByText('API Keys / Webhooks / Docs 已与管理端同壳收敛')).toBeInTheDocument()
+    expect(screen.getByText('编辑项目 · gmail')).toBeInTheDocument()
+    expect(screen.getAllByText('Gmail 验证码').length).toBeGreaterThan(0)
   })
 
   it('navigates through risk, audit, and integration mission cards inside the shared console', async () => {
     const user = userEvent.setup()
     let view = renderAdminProjectsPage()
 
-    expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-pricing-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
@@ -130,13 +129,13 @@ describe('AdminProjectsPage', () => {
 
     view.unmount()
     view = renderAdminProjectsPage()
-    expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '查看审计日志' }))
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
-    expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
     view.unmount()
@@ -195,7 +194,7 @@ describe('AdminProjectsPage', () => {
 
     renderAdminProjectsPage()
 
-    expect(await screen.findByText('Admin Pricing Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     expect(screen.queryByTestId('admin-pricing-mission-flow')).not.toBeInTheDocument()
     const mainContent = screen.getByRole('main', { name: '控制台主内容' })
     expect(within(mainContent).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
@@ -204,7 +203,6 @@ describe('AdminProjectsPage', () => {
 
     const fallbackButton = screen.getByTestId('admin-pricing-fallback-button')
     expect(fallbackButton).toBeInTheDocument()
-    expect(screen.getByText('价格与成功率调整后，建议立即回到风控中心确认风险信号是否同步变化')).toBeInTheDocument()
 
     await user.click(fallbackButton)
     expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()

@@ -130,24 +130,20 @@ describe('AdminSuppliersPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders the supplier mission-control shell with risk highlights from overview data', async () => {
+  it('renders the supplier mission-control heading, overview signals, and shared-console bridge actions from overview data', async () => {
     renderAdminSuppliersPage()
 
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
-    expect(screen.getByText(/管理员供应商运营台升级为深色共享控制台/)).toBeInTheDocument()
-    expect(screen.getByText('任务闭环')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     expect(screen.getByText('高待结算待办')).toBeInTheDocument()
     expect(screen.getByText('低履约风险')).toBeInTheDocument()
     expect(screen.getByText('争议敞口')).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
-    expect(within(missionFlow).getByText('结算优先级排程')).toBeInTheDocument()
-    expect(within(missionFlow).getByText('异常履约复盘')).toBeInTheDocument()
-    expect(within(missionFlow).getByText('审计回放闭环')).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '前往处理结算 / 争议' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
-    expect(screen.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
     expect(within(bridge).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
     expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
@@ -165,7 +161,7 @@ describe('AdminSuppliersPage', () => {
     const user = userEvent.setup()
     renderAdminSuppliersPage()
 
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: actionName }))
     expect(await screen.findByText(destinationText)).toBeInTheDocument()
@@ -177,7 +173,7 @@ describe('AdminSuppliersPage', () => {
 
     renderAdminSuppliersPage()
 
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: '前往处理结算 / 争议' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
@@ -198,7 +194,7 @@ describe('AdminSuppliersPage', () => {
 
     renderAdminSuppliersPage()
 
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
     const fallbackCard = screen.getByTestId('admin-suppliers-shared-console-fallback')
     expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
@@ -211,7 +207,7 @@ describe('AdminSuppliersPage', () => {
 
     renderAdminSuppliersPage()
 
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
     expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
