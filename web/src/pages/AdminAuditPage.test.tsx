@@ -67,21 +67,20 @@ describe('AdminAuditPage', () => {
     })
   })
 
-  it('renders audit mission control shell with shared-console follow-up guidance', async () => {
+  it('renders audit mission control shell with heading, action lanes, and shared bridge contracts', async () => {
     renderAdminAuditPage()
 
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('审计日志')).toBeInTheDocument()
-    expect(screen.getByText(/将真实 `\/api\/v1\/admin\/audit` 回放、风险联动、高危运营后果与接入契约复盘放在同一套深色共享控制台中/)).toBeInTheDocument()
-    expect(screen.getByText('高风险动作')).toBeInTheDocument()
-    expect(screen.getByText('审计总数')).toBeInTheDocument()
-    expect(screen.getByText('查询条件')).toBeInTheDocument()
-    expect(screen.getByText('最近动作')).toBeInTheDocument()
-    expect(screen.getByText('管理员主任务流')).toBeInTheDocument()
-    expect(screen.getByText('共享接入桥接')).toBeInTheDocument()
-    expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(screen.getByText('风控中心 · /admin/risk')).toBeInTheDocument()
-    expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+    const missionFlow = screen.getByTestId('admin-audit-mission-flow')
+    expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '打开资金工作台' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
+    expect(within(bridge).getByText('风控中心 · /admin/risk')).toBeInTheDocument()
+    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
+
     const auditTable = screen.getByTestId('admin-audit-events-table-card')
     expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
     expect(within(auditTable).getByText('blocked by whitelist')).toBeInTheDocument()
