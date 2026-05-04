@@ -161,9 +161,11 @@ describe('ApiKeysPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-    expect(screen.getByText('共享控制台 · 供应商扩展')).toBeInTheDocument()
-    expect(screen.getByText(/优先设置固定出口 IP 白名单/)).toBeInTheDocument()
+    const heading = await screen.findByRole('heading', { name: '开发者 API 接入工作台' })
+    expect(heading).toBeInTheDocument()
+    const heroScope = within(screen.getByTestId('api-keys-hero-card'))
+    expect(heroScope.getByText('共享控制台 · 供应商扩展')).toBeInTheDocument()
+    expect(heroScope.getByText(/优先设置固定出口 IP 白名单/)).toBeInTheDocument()
   })
 
   it('loads and creates api key with trimmed scopes and whitelist', async () => {
@@ -287,14 +289,18 @@ describe('ApiKeysPage', () => {
   it('renders audit trail and shared navigation bridge actions', async () => {
     renderApiKeysPage()
 
-    expect(await screen.findByText('创建 API Key')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '创建 API Key' })).toBeInTheDocument()
     const auditCard = screen.getByTestId('api-keys-audit-log-card')
     const auditScope = within(auditCard)
     expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
     expect(auditScope.getByText('create')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
+
+    const bridgeHeading = screen.getByRole('heading', { name: 'API Keys → Webhook → 文档' })
+    expect(bridgeHeading).toBeInTheDocument()
+    const bridgeScope = within(screen.getByTestId('api-keys-shared-console-bridge'))
+    expect(bridgeScope.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
   })
 
   it('navigates to shared integration routes from the bridge card and creation banner', async () => {

@@ -230,6 +230,7 @@ export function ApiKeysPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="api-keys-hero-card"
         style={{
           width: '100%',
           borderRadius: 24,
@@ -281,6 +282,7 @@ export function ApiKeysPage() {
       />
 
       <Card
+        data-testid="api-keys-shared-console-bridge"
         style={{
           width: '100%',
           borderRadius: 22,
