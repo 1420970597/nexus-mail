@@ -82,7 +82,7 @@ describe('AdminRiskPage', () => {
   it('renders risk mission control shell with shared-console guidance and runtime metrics', async () => {
     renderAdminRiskPage()
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     expect(screen.getByText('风控中心')).toBeInTheDocument()
     expect(screen.getByText(/将真实风险信号、规则编辑、审计回放与高危运营处置统一收敛/)).toBeInTheDocument()
     expect(screen.getByText('高风险信号')).toBeInTheDocument()
@@ -103,7 +103,7 @@ describe('AdminRiskPage', () => {
     const user = userEvent.setup()
     let view = renderAdminRiskPage()
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看审计日志' }))
@@ -111,14 +111,14 @@ describe('AdminRiskPage', () => {
 
     view.unmount()
     view = renderAdminRiskPage()
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
     expect(await screen.findByText('资金工作台页面')).toBeInTheDocument()
 
     view.unmount()
     renderAdminRiskPage()
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     const finalMissionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
@@ -138,7 +138,7 @@ describe('AdminRiskPage', () => {
 
     renderAdminRiskPage()
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-risk-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
@@ -165,7 +165,7 @@ describe('AdminRiskPage', () => {
 
     renderAdminRiskPage()
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     expect(screen.queryByTestId('admin-risk-shared-console-fallback')).not.toBeInTheDocument()
   })
 
@@ -173,7 +173,7 @@ describe('AdminRiskPage', () => {
     const user = userEvent.setup()
     renderAdminRiskPage()
 
-    expect(await screen.findByText('Risk Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '保存规则' }))
 

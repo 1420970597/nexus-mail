@@ -93,8 +93,8 @@ describe('AdminUsersPage shared-console admin workbench', () => {
   it('renders admin finance mission-control shell with metrics and shared-console guidance', async () => {
     renderAdminUsersPage()
 
-    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('用户管理')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    expect(screen.getByText('Admin Finance Mission Control')).toBeInTheDocument()
     expect(screen.getByText('钱包调整面')).toBeInTheDocument()
     expect(screen.getByText('等待管理员确认结算的供应商金额')).toBeInTheDocument()
     expect(screen.getByText('当前筛选结果中的待处理争议数')).toBeInTheDocument()
@@ -110,21 +110,21 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     const user = userEvent.setup()
     let view = renderAdminUsersPage()
 
-    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
     expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminUsersPage()
-    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const auditMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(auditMissionFlow).getByRole('button', { name: '查看审计日志' }))
     expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminUsersPage()
-    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const integrationMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(integrationMissionFlow).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
@@ -172,7 +172,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
 
     renderAdminUsersPage()
 
-    expect(await screen.findByText('Admin Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-users-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
