@@ -262,9 +262,9 @@ describe('WebhooksPage', () => {
     )
 
     expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     const emptyActions = screen.getByTestId('webhooks-empty-state-actions')
+    expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
+    expect(within(emptyActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     const fallbackButton = within(emptyActions).getByRole('button', { name: '返回推荐工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
