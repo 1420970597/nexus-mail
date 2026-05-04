@@ -96,7 +96,7 @@ describe('DashboardPage shared-console journey hub', () => {
   it('renders a cross-console journey lane for budget, procurement, fulfillment, and integration', async () => {
     renderDashboard()
 
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     const lane = screen.getByTestId('dashboard-next-steps-lane')
     const scoped = within(lane)
     expect(scoped.getByText('先确认预算与钱包状态')).toBeInTheDocument()
@@ -143,8 +143,8 @@ describe('DashboardPage shared-console journey hub', () => {
 
     renderDashboard()
 
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
-    const lane = screen.getByTestId('dashboard-next-steps-lane')
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const lane = await screen.findByTestId('dashboard-next-steps-lane')
     const scoped = within(lane)
     expect(scoped.queryByText('先确认预算与钱包状态')).not.toBeInTheDocument()
     expect(scoped.getByText('再进入项目市场采购')).toBeInTheDocument()
