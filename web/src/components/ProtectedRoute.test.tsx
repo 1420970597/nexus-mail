@@ -6,12 +6,32 @@ import { describe, expect, it, vi } from 'vitest'
 import { ProtectedRoute, SupplierRoute, AdminRoute } from './ProtectedRoute'
 import { useAuthStore } from '../store/authStore'
 
+function LoginPage() {
+  return <h1>登录页</h1>
+}
+
+function SharedDashboardPage() {
+  return <h1>共享控制台首页</h1>
+}
+
+function ProtectedPage() {
+  return <h1>受保护页面</h1>
+}
+
+function SupplierPage() {
+  return <h1>供应商资源页</h1>
+}
+
+function AdminPage() {
+  return <h1>管理员风控页</h1>
+}
+
 function renderRoute(element: JSX.Element, initialEntry = '/protected') {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path="/login" element={<div>登录页</div>} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<SharedDashboardPage />} />
         <Route path="/protected" element={element} />
       </Routes>
     </MemoryRouter>,
@@ -24,12 +44,12 @@ describe('ProtectedRoute', () => {
 
     renderRoute(
       <ProtectedRoute>
-        <div>受保护页面</div>
+        <ProtectedPage />
       </ProtectedRoute>,
     )
 
-    expect(await screen.findByText('登录页')).toBeInTheDocument()
-    expect(screen.queryByText('受保护页面')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录页' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '受保护页面' })).not.toBeInTheDocument()
   })
 
   it('renders children when a session token exists', async () => {
@@ -42,12 +62,11 @@ describe('ProtectedRoute', () => {
 
     renderRoute(
       <ProtectedRoute>
-        <div>受保护页面</div>
+        <ProtectedPage />
       </ProtectedRoute>,
     )
 
-    expect(await screen.findByText('受保护页面')).toBeInTheDocument()
-    expect(screen.queryByText('登录页')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '受保护页面' })).toBeInTheDocument()
   })
 })
 
@@ -62,12 +81,12 @@ describe('SupplierRoute', () => {
 
     renderRoute(
       <SupplierRoute>
-        <div>供应商资源页</div>
+        <SupplierPage />
       </SupplierRoute>,
     )
 
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
-    expect(screen.queryByText('供应商资源页')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '供应商资源页' })).not.toBeInTheDocument()
   })
 
   it('allows supplier users to access supplier pages', async () => {
@@ -80,11 +99,11 @@ describe('SupplierRoute', () => {
 
     renderRoute(
       <SupplierRoute>
-        <div>供应商资源页</div>
+        <SupplierPage />
       </SupplierRoute>,
     )
 
-    expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源页' })).toBeInTheDocument()
   })
 
   it('allows admin users to access supplier pages from the same shared console shell', async () => {
@@ -97,11 +116,11 @@ describe('SupplierRoute', () => {
 
     renderRoute(
       <SupplierRoute>
-        <div>供应商资源页</div>
+        <SupplierPage />
       </SupplierRoute>,
     )
 
-    expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源页' })).toBeInTheDocument()
   })
 
   it('sends unauthenticated visitors to login before evaluating supplier-role access', async () => {
@@ -109,12 +128,12 @@ describe('SupplierRoute', () => {
 
     renderRoute(
       <SupplierRoute>
-        <div>供应商资源页</div>
+        <SupplierPage />
       </SupplierRoute>,
     )
 
-    expect(await screen.findByText('登录页')).toBeInTheDocument()
-    expect(screen.queryByText('供应商资源页')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录页' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '供应商资源页' })).not.toBeInTheDocument()
   })
 })
 
@@ -124,12 +143,12 @@ describe('AdminRoute', () => {
 
     renderRoute(
       <AdminRoute>
-        <div>管理员风控页</div>
+        <AdminPage />
       </AdminRoute>,
     )
 
-    expect(await screen.findByText('登录页')).toBeInTheDocument()
-    expect(screen.queryByText('管理员风控页')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录页' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '管理员风控页' })).not.toBeInTheDocument()
   })
 
   it('keeps non-admin roles out of admin-only pages', async () => {
@@ -142,12 +161,12 @@ describe('AdminRoute', () => {
 
     renderRoute(
       <AdminRoute>
-        <div>管理员风控页</div>
+        <AdminPage />
       </AdminRoute>,
     )
 
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
-    expect(screen.queryByText('管理员风控页')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '管理员风控页' })).not.toBeInTheDocument()
   })
 
   it('renders admin-only content for admin roles', async () => {
@@ -160,10 +179,10 @@ describe('AdminRoute', () => {
 
     renderRoute(
       <AdminRoute>
-        <div>管理员风控页</div>
+        <AdminPage />
       </AdminRoute>,
     )
 
-    expect(await screen.findByText('管理员风控页')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '管理员风控页' })).toBeInTheDocument()
   })
 })

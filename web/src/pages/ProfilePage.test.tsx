@@ -102,7 +102,9 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByText('通过设置中心回到共享控制台')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByText('角色扩展仍留在同一套深色控制台中；如果当前页只负责身份核对，可先回到设置中心再继续风控、供给或接入链路。')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
+    const roleFocusSection = screen.getByRole('heading', { name: '供应商运营焦点' }).parentElement
+    expect(roleFocusSection).not.toBeNull()
+    expect(within(roleFocusSection as HTMLElement).queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByText('设置中心页面')).toBeInTheDocument()
@@ -214,7 +216,9 @@ describe('ProfilePage', () => {
     expect(screen.getByText('当前账号已被服务端授予管理员角色；高危运营、风控与审计动作继续在同一套共享控制台内完成。')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByText('通过设置中心回到共享控制台')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
+    const adminRoleFocusSection = screen.getByRole('heading', { name: '管理员运营焦点' }).parentElement
+    expect(adminRoleFocusSection).not.toBeNull()
+    expect(within(adminRoleFocusSection as HTMLElement).queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByText('设置中心页面')).toBeInTheDocument()
