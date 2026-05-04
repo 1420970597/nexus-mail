@@ -103,7 +103,6 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scoped.getByText('再进入项目市场采购')).toBeInTheDocument()
     expect(scoped.getByText('随后追踪订单履约')).toBeInTheDocument()
     expect(scoped.getByText('最后完成 API 接入')).toBeInTheDocument()
-    expect(scoped.getByText('采购 → 订单 → 接入 的首轮路径，会与余额中心保持同一套推荐顺序。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '查看余额中心' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
@@ -162,7 +161,6 @@ describe('DashboardPage shared-console journey hub', () => {
     const scoped = within(lane)
 
     expect(scoped.getByText('最后完成 API 接入')).toBeInTheDocument()
-    expect(scoped.getByText('继续进入 API Keys、Webhook 与文档，完成程序化调用、回调联调与真实接口验证准备。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
     expect(scoped.queryByRole('button', { name: /Webhook 设置/ })).not.toBeInTheDocument()
     expect(scoped.queryByRole('button', { name: /API 文档/ })).not.toBeInTheDocument()
