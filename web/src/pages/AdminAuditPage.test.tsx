@@ -90,7 +90,7 @@ describe('AdminAuditPage', () => {
     const user = userEvent.setup()
     let view = renderAdminAuditPage()
 
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-audit-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
@@ -98,14 +98,14 @@ describe('AdminAuditPage', () => {
 
     view.unmount()
     view = renderAdminAuditPage()
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('admin-audit-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
     expect(await screen.findByText('资金工作台页面')).toBeInTheDocument()
 
     view.unmount()
     renderAdminAuditPage()
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const finalMissionFlow = screen.getByTestId('admin-audit-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
@@ -125,7 +125,7 @@ describe('AdminAuditPage', () => {
 
     renderAdminAuditPage()
 
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-audit-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
@@ -152,7 +152,7 @@ describe('AdminAuditPage', () => {
 
     renderAdminAuditPage()
 
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     expect(screen.queryByTestId('admin-audit-shared-console-fallback')).not.toBeInTheDocument()
   })
 
@@ -160,7 +160,7 @@ describe('AdminAuditPage', () => {
     const user = userEvent.setup()
     renderAdminAuditPage()
 
-    expect(await screen.findByText('Audit Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     await user.type(screen.getByLabelText('用户 ID'), '9')
     await user.type(screen.getByLabelText('API Key ID'), '22')
