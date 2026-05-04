@@ -310,7 +310,7 @@ describe('App', () => {
     expect((await screen.findAllByText('API 文档')).length).toBeGreaterThan(0)
   })
 
-  it('shows register journey guidance and role entry descriptions on the login shell', async () => {
+  it('shows register journey structure and opens register mode from the login shell', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp(['/login'])
@@ -321,12 +321,12 @@ describe('App', () => {
     expect(registerJourneyScope.getByRole('heading', { name: '注册后默认进入共享控制台' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '用户路径' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '供应商路径' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('如账号已被授予供应商角色，可在同一控制台继续进入域名管理、供货规则、资源与结算页面。')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('登录后实际可见菜单与工作台能力，以账号当前角色和服务端返回权限为准。')).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '管理员路径' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
     expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
-    expect(screen.getByText('仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '创建账户并进入控制台' })).toBeInTheDocument()
   })
 
   async function openRegisterMode(user: ReturnType<typeof userEvent.setup>) {

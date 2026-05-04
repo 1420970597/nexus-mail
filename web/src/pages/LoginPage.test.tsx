@@ -53,7 +53,7 @@ describe('LoginPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('shows shared integration stage cards on the registration shell and opens register mode from the CTA', async () => {
+  it('shows shared integration stage structure on the registration shell and opens register mode from the CTA', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
@@ -64,11 +64,12 @@ describe('LoginPage', () => {
     expect(registerJourneyScope.getByRole('heading', { name: '用户路径' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '供应商路径' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '管理员路径' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
 
     expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
-    expect(screen.getByText('仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '创建账户并进入控制台' })).toBeInTheDocument()
   })
 
   it('submits registration, persists the shared-console session, and redirects into the shared home route', async () => {
