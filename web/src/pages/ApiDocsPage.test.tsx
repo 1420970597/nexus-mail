@@ -27,7 +27,7 @@ describe('ApiDocsPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders a shared-console docs mission control for regular users and navigates to API keys', async () => {
+  it('renders a shared-console docs mission control with bridge and loop CTAs for regular users and navigates to API keys', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -43,18 +43,22 @@ describe('ApiDocsPage', () => {
 
     renderApiDocsPage()
 
-    expect(await screen.findByText('Docs Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('共享控制台 · API 契约')).toBeInTheDocument()
-    expect(screen.getByText('注册后连续路径')).toBeInTheDocument()
-    expect(screen.getByText('公开文档、API Keys、Webhook 联调与真实订单回放保持在同一套深色共享控制台里，不再跳到独立后台或外置说明页。')).toBeInTheDocument()
-    expect(screen.getByText('统一接入路径')).toBeInTheDocument()
-    expect(screen.getByText('3. 真实 API 回放')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Docs Mission Control' })).toBeInTheDocument()
     expect(screen.getByText('OpenAPI 3 / Redoc')).toBeInTheDocument()
     expect(screen.getByText('API Keys')).toBeInTheDocument()
     expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
+    const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
+    expect(within(bridgeLane).getByRole('button', { name: '查看项目市场基线' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+
     const loopLane = screen.getByTestId('docs-shared-console-loop')
+    expect(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
