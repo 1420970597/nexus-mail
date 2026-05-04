@@ -343,6 +343,7 @@ describe('App', () => {
 
   async function expectDefaultUserFirstRunLane() {
     const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
+    expect(screen.getByRole('heading', { name: '欢迎进入共享控制台' })).toBeInTheDocument()
     const scoped = within(onboardingRegion)
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
@@ -544,10 +545,12 @@ describe('App', () => {
     })
 
     const firstView = renderApp(['/'])
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    const firstLane = await expectDefaultUserFirstRunLane()
+    expect(within(firstLane).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
-    await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
-    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
+    await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
+    await waitFor(() => expect(screen.queryByRole('heading', { name: '欢迎进入共享控制台' })).not.toBeInTheDocument())
+    expect(screen.queryByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
     firstView.unmount()
 
     useAuthStore.setState({
@@ -572,7 +575,8 @@ describe('App', () => {
     })
 
     renderApp(['/'])
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
+    const secondLane = await expectDefaultUserFirstRunLane()
+    expect(within(secondLane).getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(2))).toBeNull()
   })
 
@@ -593,8 +597,9 @@ describe('App', () => {
     expect(within(onboardingScope.getByTestId('dashboard-next-step-api-keys')).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
-    await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
-    expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
+    await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
+    await waitFor(() => expect(screen.queryByRole('heading', { name: '欢迎进入共享控制台' })).not.toBeInTheDocument())
+    expect(screen.queryByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
   })
 
   it('does not show first-run onboarding guidance for supplier dashboard', async () => {
