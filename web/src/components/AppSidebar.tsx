@@ -80,6 +80,7 @@ export function AppSidebar() {
         {menuReady ? (
           <>
             <SidebarGroup
+              testId="app-sidebar-shared-group"
               title="基础工作台"
               description="所有角色共享的采购、订单与集成入口"
               selectedPath={location.pathname}
@@ -88,6 +89,7 @@ export function AppSidebar() {
             />
             {supplierItems.length > 0 ? (
               <SidebarGroup
+                testId="app-sidebar-supplier-group"
                 title="供应商扩展"
                 description="域名池、资源供给、供货规则与结算闭环"
                 selectedPath={location.pathname}
@@ -97,6 +99,7 @@ export function AppSidebar() {
             ) : null}
             {adminItems.length > 0 ? (
               <SidebarGroup
+                testId="app-sidebar-admin-group"
                 title="管理员扩展"
                 description="用户运营、供应商经营、风控审计与 Webhook"
                 selectedPath={location.pathname}
@@ -107,6 +110,7 @@ export function AppSidebar() {
           </>
         ) : (
           <div
+            data-testid="app-sidebar-loading-card"
             style={{
               marginBottom: 14,
               borderRadius: 16,
@@ -133,12 +137,14 @@ export function AppSidebar() {
 }
 
 function SidebarGroup({
+  testId,
   title,
   description,
   items,
   selectedPath,
   navigate,
 }: {
+  testId?: string
   title: string
   description: string
   items: MenuItem[]
@@ -151,6 +157,7 @@ function SidebarGroup({
 
   return (
     <div
+      data-testid={testId}
       style={{
         marginBottom: 14,
         borderRadius: 16,

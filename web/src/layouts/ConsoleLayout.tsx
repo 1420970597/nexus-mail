@@ -144,7 +144,13 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
               {roleIntro(user?.role)}
             </Typography.Text>
           </Space>
-          <Space align="center" spacing={12} wrap style={{ justifyContent: 'flex-end' }}>
+          <Space
+            data-testid="console-layout-quick-actions"
+            align="center"
+            spacing={12}
+            wrap
+            style={{ justifyContent: 'flex-end' }}
+          >
             {visibleQuickActions.slice(0, 3).map((item) => (
               <Button
                 key={item.path}

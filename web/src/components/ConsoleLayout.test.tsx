@@ -47,10 +47,11 @@ describe('ConsoleLayout', () => {
     const mainContent = screen.getByRole('main', { name: '控制台主内容' })
     expect(mainContent).toBeInTheDocument()
 
-    expect(screen.getByRole('button', { name: /用户管理/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /审计日志/ })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /API Keys/ })).not.toBeInTheDocument()
+    const quickActions = screen.getByTestId('console-layout-quick-actions')
+    expect(within(quickActions).getByRole('button', { name: /用户管理/ })).toBeInTheDocument()
+    expect(within(quickActions).getByRole('button', { name: /审计日志/ })).toBeInTheDocument()
+    expect(within(quickActions).queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
+    expect(within(quickActions).queryByRole('button', { name: /API Keys/ })).not.toBeInTheDocument()
   })
 
   it('renders quick actions in shared route schema order and navigates through them', async () => {
