@@ -212,7 +212,7 @@ describe('WebhooksPage', () => {
 
     let view = renderWebhooksPage()
 
-    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
@@ -220,21 +220,18 @@ describe('WebhooksPage', () => {
     view.unmount()
     seedRole('user')
     view = renderWebhooksPage()
-    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
-  it('renders a shared integration loop card with api keys and docs CTAs', async () => {
+  it('renders a shared integration loop card with scoped CTA contracts instead of long copy snapshots', async () => {
     renderWebhooksPage()
 
-    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationLoop = screen.getByTestId('webhooks-first-integration-loop')
     expect(within(integrationLoop).getByText('注册后首轮回调联调建议')).toBeInTheDocument()
-    expect(
-      within(integrationLoop).getByText('在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。'),
-    ).toBeInTheDocument()
     expect(within(integrationLoop).getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
     expect(within(integrationLoop).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
