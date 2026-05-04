@@ -339,12 +339,12 @@ describe('App', () => {
 
   async function expectDefaultUserFirstRunLane() {
     const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
-    expect(within(onboardingRegion).getByText('预算 → 采购 → 履约 → 接入')).toBeInTheDocument()
-    expect(within(onboardingRegion).getByText('采购 → 订单 → 接入 的首轮路径，会与余额中心保持同一套推荐顺序。')).toBeInTheDocument()
-    expect(within(onboardingRegion).getByText('再进入项目市场采购')).toBeInTheDocument()
-    expect(within(onboardingRegion).getByText('随后追踪订单履约')).toBeInTheDocument()
-    expect(within(onboardingRegion).getByText('最后完成 API 接入')).toBeInTheDocument()
-    expect(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    const scoped = within(onboardingRegion)
+    expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    expect(scoped.queryByRole('button', { name: '前往域名管理' })).not.toBeInTheDocument()
+    expect(scoped.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     return onboardingRegion
   }
 
@@ -421,22 +421,21 @@ describe('App', () => {
     setSession('user')
 
     const dashboardView = renderApp(['/'])
-
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /稍后再看/ }))
-    await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
+    const onboardingRegion = await expectDefaultUserFirstRunLane()
+    await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
 
     dashboardView.unmount()
     renderApp([SETTINGS_ROUTE])
 
-    await waitFor(() => expect(screen.getByText('首次使用清单')).toBeInTheDocument())
-    expect(screen.getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /重新打开首轮引导/ }))
+    const checklist = await screen.findByTestId('settings-user-first-run-checklist')
+    expect(within(checklist).getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
+    await user.click(within(checklist).getByRole('button', { name: /重新打开首轮引导/ }))
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('false')
-    expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
-    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
-    expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
+
+    const reopenedOnboarding = await expectDefaultUserFirstRunLane()
+    expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
+    expect(within(reopenedOnboarding).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
   })
 
   it('waits for server menu instead of rendering fallback privileged navigation from client role state', () => {
@@ -537,7 +536,7 @@ describe('App', () => {
 
     const firstView = renderApp(['/'])
     expect(await screen.findByText('欢迎进入共享控制台')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /稍后再看/ }))
+    await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
     firstView.unmount()
@@ -579,7 +578,7 @@ describe('App', () => {
     expect(screen.getByText('当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。')).toBeInTheDocument()
     expect(screen.getByText('先完成基础采购路径')).toBeInTheDocument()
     expect(screen.getByText('后续角色能力仍在同一壳内扩展')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /稍后再看/ }))
+    await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(screen.queryByText('欢迎进入共享控制台')).not.toBeInTheDocument())
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true')
   })

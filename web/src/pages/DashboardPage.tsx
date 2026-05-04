@@ -494,7 +494,13 @@ export function DashboardPage() {
                       </Typography.Paragraph>
                     </div>
                   </Space>
-                  <Button theme="borderless" icon={<IconRotate />} style={{ color: '#d0d6e0' }} onClick={dismissUserFirstRun}>
+                  <Button
+                    data-testid="dashboard-first-run-dismiss"
+                    theme="borderless"
+                    icon={<IconRotate />}
+                    style={{ color: '#d0d6e0' }}
+                    onClick={dismissUserFirstRun}
+                  >
                     稍后再看
                   </Button>
                 </Space>
