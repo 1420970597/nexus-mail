@@ -210,7 +210,7 @@ describe('SupplierSettlementsPage', () => {
     const user = userEvent.setup()
     let view = renderSupplierSettlementsPage()
 
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
@@ -218,13 +218,13 @@ describe('SupplierSettlementsPage', () => {
 
     view.unmount()
     view = renderSupplierSettlementsPage()
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
     expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
@@ -243,7 +243,7 @@ describe('SupplierSettlementsPage', () => {
 
     let view = renderSupplierSettlementsPage()
 
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
@@ -261,7 +261,7 @@ describe('SupplierSettlementsPage', () => {
 
     view.unmount()
     view = renderSupplierSettlementsPage()
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
 
     const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回推荐工作台/ })
     await user.click(fallbackButton)
@@ -278,7 +278,7 @@ describe('SupplierSettlementsPage', () => {
 
     renderSupplierSettlementsPage()
 
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     expect(screen.queryByTestId('supplier-settlements-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-settlements-shared-console-fallback')).not.toBeInTheDocument()
   })
@@ -297,7 +297,7 @@ describe('SupplierSettlementsPage', () => {
 
     renderSupplierSettlementsPage()
 
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     const missionFallback = screen.getByTestId('supplier-settlements-mission-fallback')
     const sharedConsoleFallback = screen.getByTestId('supplier-settlements-shared-console-fallback')
 
@@ -316,7 +316,7 @@ describe('SupplierSettlementsPage', () => {
     const user = userEvent.setup()
     renderSupplierSettlementsPage()
 
-    expect(await screen.findByText('Supplier Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
 
     await user.type(screen.getByLabelText('项目键'), 'telegram')
     await user.clear(screen.getByRole('spinbutton', { name: '成功成本（分）' }))
