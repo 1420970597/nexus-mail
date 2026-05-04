@@ -54,7 +54,7 @@ describe('SettingsPage', () => {
 
     renderSettingsPage()
 
-    expect(await screen.findByText('首次使用清单')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '首次使用清单' })).toBeInTheDocument()
     expect(screen.getByText('新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。')).toBeInTheDocument()
 
     const checklistCard = screen.getByTestId('settings-user-first-run-checklist')
