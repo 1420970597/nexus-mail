@@ -114,15 +114,16 @@ describe('BalancePage', () => {
   it('renders finance mission control with shared-console integration cards for regular users', async () => {
     renderBalancePage()
 
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
     expect(screen.getByText('资金任务流')).toBeInTheDocument()
     expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(screen.getByText('先确认采购预算与库存')).toBeInTheDocument()
     expect(screen.getByText('再追踪冻结与退款链路')).toBeInTheDocument()
     expect(screen.getByText('最后串联接入与回调')).toBeInTheDocument()
+    expect(screen.getByText('订单争议申请')).toBeInTheDocument()
+    expect(screen.getByText('普通用户先完成预算确认，再串联订单、争议与接入路径')).toBeInTheDocument()
     expect(screen.getByText('角色差异仍共用单壳')).toBeInTheDocument()
     expect(screen.getByText('资金观察与售后同层')).toBeInTheDocument()
-    expect(screen.getByText('普通用户先完成预算确认，再串联订单、争议与接入路径')).toBeInTheDocument()
     expect(screen.getByText('本次会话新提交的争议')).toBeInTheDocument()
   })
 

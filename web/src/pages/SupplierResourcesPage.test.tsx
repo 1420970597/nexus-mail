@@ -122,9 +122,9 @@ describe('SupplierResourcesPage', () => {
   it('renders the supplier resource mission control shell and shared-console bridge guidance', async () => {
     renderPage()
 
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('在同一套深色共享控制台里统一维护域名池、邮箱池与第三方邮箱账号池，让供给准备、健康检查与后续供货规则保持单壳闭环。')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     expect(screen.getByText('供应商任务流')).toBeInTheDocument()
+    expect(screen.getByText('单一供应商工作台')).toBeInTheDocument()
     expect(screen.getByText('先维护域名池与 Catch-All')).toBeInTheDocument()
     expect(screen.getByText('继续收敛供货规则')).toBeInTheDocument()
     expect(screen.getByText('最后观察结算与争议')).toBeInTheDocument()
@@ -133,7 +133,6 @@ describe('SupplierResourcesPage', () => {
     expect(screen.getByTestId('supplier-resources-bridge-api-keys')).toHaveTextContent(`API Keys · ${API_KEYS_ROUTE}`)
     expect(screen.getByTestId('supplier-resources-bridge-webhooks')).toHaveTextContent(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)
     expect(screen.getByTestId('supplier-resources-bridge-docs')).toHaveTextContent(`API 文档 · ${DOCS_ROUTE}`)
-    expect(screen.getByText('先维护域名池与 Catch-All')).toBeInTheDocument()
     expect(screen.getByText('健康账号')).toBeInTheDocument()
     expect(screen.getByText('可用邮箱池')).toBeInTheDocument()
   })
