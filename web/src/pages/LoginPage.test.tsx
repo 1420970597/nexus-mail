@@ -61,18 +61,9 @@ describe('LoginPage', () => {
     const registerJourney = screen.getByTestId('login-register-journey')
     const registerJourneyScope = within(registerJourney)
     expect(registerJourneyScope.getByRole('heading', { name: '注册后默认进入共享控制台' })).toBeInTheDocument()
-
-    expect(registerJourneyScope.getByText('Shared Console')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText(/Registration → API Keys → Webhooks → Docs/)).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('注册完成后建议立即创建首个 API Key、绑定出口白名单，并继续接入 Webhook / API 文档。')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('先发放最小权限 API Key')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('再验证 Webhook 回调')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('最后回到 API 文档')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('注册后首轮接入建议')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('从注册成功、生成首个 API Key、配置白名单，到发起一次 Webhook 测试投递，都建议留在同一深色控制台中逐步完成。')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('Registration → API Keys')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('Webhook delivery rehearsal')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('Docs + replay')).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '用户路径' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '供应商路径' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '管理员路径' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
 
