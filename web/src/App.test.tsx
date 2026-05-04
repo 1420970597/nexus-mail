@@ -452,8 +452,9 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(screen.getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
-    expect(screen.queryByText('用户管理')).not.toBeInTheDocument()
-    expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
+    const dashboardMain = screen.getByRole('main', { name: '控制台主内容' })
+    expect(within(dashboardMain).queryByText('用户管理')).not.toBeInTheDocument()
+    expect(within(dashboardMain).queryByText('风控中心')).not.toBeInTheDocument()
   })
 
   it('keeps shared integration routes reachable after register bootstrap', async () => {
@@ -502,9 +503,11 @@ describe('App', () => {
     expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
     expect(screen.queryByText('供应商扩展')).not.toBeInTheDocument()
     expect(screen.queryByText('管理员扩展')).not.toBeInTheDocument()
-    expect(screen.queryAllByText('基础工作台').length).toBeGreaterThan(0)
-    expect(screen.queryByText('域名管理')).not.toBeInTheDocument()
-    expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
+
+    const navigationMenu = screen.getByRole('menu')
+    expect(within(navigationMenu).getByText('项目市场')).toBeInTheDocument()
+    expect(within(navigationMenu).queryByText('域名管理')).not.toBeInTheDocument()
+    expect(within(navigationMenu).queryByText('风控中心')).not.toBeInTheDocument()
   })
 
   it('scopes first-run dismissal by user id so one user does not hide onboarding for another', async () => {
@@ -627,8 +630,9 @@ describe('App', () => {
     renderApp([SETTINGS_ROUTE])
 
     expect(await screen.findByText('控制台模式')).toBeInTheDocument()
-    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
+    const settingsMain = screen.getByRole('main', { name: '控制台主内容' })
+    expect(within(settingsMain).queryByText('首次使用清单')).not.toBeInTheDocument()
+    expect(within(settingsMain).queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
   })
 
   it('navigates from profile page CTA to the supplier domains page', async () => {

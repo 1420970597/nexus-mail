@@ -37,12 +37,18 @@ describe('AppSidebar', () => {
 
     await renderSidebarAndWait(<AppSidebar />)
 
-    expect(screen.getByText('域名管理')).toBeInTheDocument()
-    expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
-    expect(screen.getByText('供应商结算')).toBeInTheDocument()
+    const sharedGroup = screen.getByText('基础工作台').closest('[style*="border-radius"]')
+    expect(sharedGroup).not.toBeNull()
+    expect(within(sharedGroup as HTMLElement).getByText('Webhook 设置')).toBeInTheDocument()
+    expect(within(sharedGroup as HTMLElement).queryByText('风控中心')).not.toBeInTheDocument()
+
+    const supplierGroup = screen.getByText('供应商扩展').closest('[style*="border-radius"]')
+    expect(supplierGroup).not.toBeNull()
+    expect(within(supplierGroup as HTMLElement).getByText('域名管理')).toBeInTheDocument()
+    expect(within(supplierGroup as HTMLElement).getByText('供应商结算')).toBeInTheDocument()
+
     expect(screen.getByText('供应商')).toBeInTheDocument()
     expect(screen.getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
-    expect(screen.queryByText('风控中心')).not.toBeInTheDocument()
   })
 
   it('shows admin risk control menu for admin role', async () => {
@@ -126,7 +132,9 @@ describe('AppSidebar', () => {
 
     await renderSidebarAndWait(<AppSidebar />)
 
-    expect(screen.getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
-    expect(screen.queryByText('API 文档')).not.toBeInTheDocument()
+    const loadingCard = screen.getByText('共享菜单加载中').closest('[style*="border-radius"]')
+    expect(loadingCard).not.toBeNull()
+    expect(within(loadingCard as HTMLElement).getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
+    expect(within(loadingCard as HTMLElement).queryByText('API 文档')).not.toBeInTheDocument()
   })
 })

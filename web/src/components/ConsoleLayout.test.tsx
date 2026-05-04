@@ -44,10 +44,12 @@ describe('ConsoleLayout', () => {
     const breadcrumbNav = screen.getByRole('navigation')
     expect(within(breadcrumbNav).getByText('风控中心')).toBeInTheDocument()
     expect(screen.getByText('运营指挥台')).toBeInTheDocument()
-    expect(screen.getByRole('main', { name: '控制台主内容' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
+    const mainContent = screen.getByRole('main', { name: '控制台主内容' })
+    expect(mainContent).toBeInTheDocument()
+
     expect(screen.getByRole('button', { name: /用户管理/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /审计日志/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /API Keys/ })).not.toBeInTheDocument()
   })
 
