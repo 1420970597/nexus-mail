@@ -107,7 +107,7 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台采购切片')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     expect(screen.getByText('可售项目')).toBeInTheDocument()
     expect(screen.getByText('可立即下单')).toBeInTheDocument()
     expect(screen.getByText('最高成功率')).toBeInTheDocument()
@@ -188,7 +188,7 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台采购切片')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     expect(screen.getByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).toBeInTheDocument()
   })
 
@@ -210,7 +210,7 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台采购切片')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('projects-shared-console-hero')
     expect(within(heroCard).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })

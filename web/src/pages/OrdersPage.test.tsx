@@ -125,7 +125,7 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
     expect(screen.getByText('待收信')).toBeInTheDocument()
     expect(screen.getByText('READY / FINISHED / TIMEOUT 全部来自真实 API 返回')).toBeInTheDocument()
   })
@@ -220,7 +220,7 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('orders-shared-console-hero')
     expect(within(heroCard).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
   })
