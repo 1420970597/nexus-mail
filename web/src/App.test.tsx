@@ -482,10 +482,10 @@ describe('App', () => {
     })
   })
 
-  it('hides supplier and admin-only menu labels for a newly registered user shell', async () => {
+  it('keeps the post-login sidebar scoped to the shared group when a plain user has no supplier/admin routes', async () => {
     useAuthStore.setState({
-      token: 'user-token',
-      refreshToken: 'user-refresh',
+      token: 'register-token',
+      refreshToken: 'register-refresh',
       user: { id: 8, email: 'new@example.com', role: 'user' },
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
@@ -501,13 +501,13 @@ describe('App', () => {
     renderApp(['/'])
 
     expect((await screen.findAllByText('控制台总览')).length).toBeGreaterThan(0)
-    expect(screen.queryByText('供应商扩展')).not.toBeInTheDocument()
-    expect(screen.queryByText('管理员扩展')).not.toBeInTheDocument()
 
-    const navigationMenu = screen.getByRole('menu')
-    expect(within(navigationMenu).getByText('项目市场')).toBeInTheDocument()
-    expect(within(navigationMenu).queryByText('域名管理')).not.toBeInTheDocument()
-    expect(within(navigationMenu).queryByText('风控中心')).not.toBeInTheDocument()
+    const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
+    expect(within(sharedGroup).getByText('项目市场')).toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar-supplier-group')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar-admin-group')).not.toBeInTheDocument()
+    expect(within(sharedGroup).queryByText('域名管理')).not.toBeInTheDocument()
+    expect(within(sharedGroup).queryByText('风控中心')).not.toBeInTheDocument()
   })
 
   it('scopes first-run dismissal by user id so one user does not hide onboarding for another', async () => {

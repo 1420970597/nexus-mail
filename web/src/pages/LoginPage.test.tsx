@@ -77,7 +77,7 @@ describe('LoginPage', () => {
     expect(screen.getByText('仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。')).toBeInTheDocument()
   })
 
-  it('submits registration and persists the shared-console session', async () => {
+  it('submits registration, persists the shared-console session, and redirects into the shared home route', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
