@@ -112,7 +112,7 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
-  it('hides the first-run checklist for supplier users while keeping shared shortcuts', async () => {
+  it('hides the user first-run checklist for supplier users while keeping shared shortcuts', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -130,7 +130,7 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByText('设置中心')).toBeInTheDocument()
-    expect(screen.queryByText('首次使用清单')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
     expect(screen.getByText('控制台运行快捷入口')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查看供应商资源' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '前往供应商结算' })).toBeInTheDocument()
