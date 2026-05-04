@@ -76,7 +76,7 @@ describe('SupplierOfferingsPage', () => {
     })
   })
 
-  it('renders supplier mission-control shell with metrics and shared-console guidance', async () => {
+  it('renders supplier offering mission shell with scoped metrics and shared-console guidance', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({
       domains: [
         { id: 11, name: 'mail.nexus.test', region: 'global', status: 'active', catch_all: true },
@@ -116,9 +116,9 @@ describe('SupplierOfferingsPage', () => {
 
     renderSupplierOfferingsPage()
 
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     expect(screen.getByText('供货规则编排中枢')).toBeInTheDocument()
-    expect(screen.getByText('供应商主任务流')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
     expect(screen.getByText('共享控制台联动')).toBeInTheDocument()
     expect(screen.getByText('单一登录后控制台')).toBeInTheDocument()
     expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
@@ -137,20 +137,20 @@ describe('SupplierOfferingsPage', () => {
     const user = userEvent.setup()
 
     let view = renderSupplierOfferingsPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
     expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierOfferingsPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开供应商结算/ }))
     expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierOfferingsPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
   })
@@ -171,7 +171,7 @@ describe('SupplierOfferingsPage', () => {
     const user = userEvent.setup()
 
     renderSupplierOfferingsPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('supplier-offerings-shared-console-bridge')
     expect(within(bridge).queryByRole('button', { name: `API Keys · ${API_KEYS_ROUTE}` })).not.toBeInTheDocument()
@@ -201,7 +201,7 @@ describe('SupplierOfferingsPage', () => {
     const user = userEvent.setup()
 
     renderSupplierOfferingsPage()
-    expect(await screen.findByText('Supplier Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('supplier-offerings-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: /查看供应商资源/ })).not.toBeInTheDocument()
