@@ -151,7 +151,7 @@ describe('SupplierResourcesPage', () => {
   it('renders the three resource save actions for supplier workflows', async () => {
     renderPage()
 
-    await screen.findByText('Supplier Resource Mission Control')
+    await screen.findByRole('heading', { name: '供应商资源' })
 
     expect(screen.getByRole('button', { name: '保存域名' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '保存账号' })).toBeInTheDocument()
@@ -162,7 +162,7 @@ describe('SupplierResourcesPage', () => {
     const user = userEvent.setup()
 
     let view = renderPage()
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /前往域名管理/ }))
@@ -170,14 +170,14 @@ describe('SupplierResourcesPage', () => {
 
     view.unmount()
     view = renderPage()
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: /查看供货规则/ }))
     expect(await screen.findByText('供应商供货页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     const finalMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: /打开供应商结算/ }))
     expect(await screen.findByText('供应商结算页面')).toBeInTheDocument()
@@ -187,20 +187,20 @@ describe('SupplierResourcesPage', () => {
     const user = userEvent.setup()
 
     let view = renderPage()
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     await user.click(screen.getByTestId('supplier-resources-bridge-api-keys'))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-resources-bridge-webhooks'))
     expect(await screen.findByText('Webhook 页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-resources-bridge-docs'))
     expect(await screen.findByText('Docs 页面')).toBeInTheDocument()
   })
@@ -219,7 +219,7 @@ describe('SupplierResourcesPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
     expect(within(missionFlow).queryByRole('button', { name: '前往域名管理' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看供货规则' })).not.toBeInTheDocument()
@@ -253,7 +253,7 @@ describe('SupplierResourcesPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-bridge-api-keys')).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
     expect(within(bridge).queryByTestId('supplier-resources-bridge-webhooks')).not.toBeInTheDocument()
@@ -271,7 +271,7 @@ describe('SupplierResourcesPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-mission-fallback')).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
   })
@@ -290,7 +290,7 @@ describe('SupplierResourcesPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     const missionFallback = screen.getByTestId('supplier-resources-mission-fallback')
     expect(within(missionFallback).getByText('返回推荐工作台继续供应商主链路')).toBeInTheDocument()
@@ -308,7 +308,7 @@ describe('SupplierResourcesPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    expect(await screen.findByText('Supplier Resource Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     await user.type(screen.getByPlaceholderText('mail.nexus.example'), 'us-mail.nexus.test')
     await user.clear(screen.getByPlaceholderText('global / hk / us'))

@@ -132,7 +132,7 @@ describe('BalancePage', () => {
 
     let view = renderBalancePage()
 
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     const missionCards = await screen.findByTestId('balance-mission-cards')
     await user.click(within(missionCards).getByRole('button', { name: /前往项目市场/ }))
@@ -140,7 +140,7 @@ describe('BalancePage', () => {
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     const refreshedMissionCards = await screen.findByTestId('balance-mission-cards')
     const ordersMissionCard = within(refreshedMissionCards).getByTestId('balance-orders-mission-card')
@@ -149,14 +149,14 @@ describe('BalancePage', () => {
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     await user.click(await screen.findByTestId('balance-open-api-keys'))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     const secondCapabilityActions = await screen.findByTestId('balance-capability-actions')
     await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
@@ -164,7 +164,7 @@ describe('BalancePage', () => {
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     const thirdCapabilityActions = await screen.findByTestId('balance-capability-actions')
     await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
@@ -184,7 +184,7 @@ describe('BalancePage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
     const missionCards = screen.getByTestId('balance-mission-cards')
     expect(within(missionCards).queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
     expect(within(missionCards).queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
@@ -201,7 +201,7 @@ describe('BalancePage', () => {
 
     renderBalancePage()
 
-    expect(await screen.findByText('Finance Mission Control')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
     expect(screen.queryByTestId('balance-shared-console-fallback')).not.toBeInTheDocument()
   })
 

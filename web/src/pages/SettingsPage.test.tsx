@@ -100,8 +100,6 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
-    expect(screen.getByText('Console Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('接入与账户设置不再停留在浅色占位页，而是收敛为与仪表盘一致的深色共享控制台工作台。')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台运行快捷入口' })).toBeInTheDocument()
     expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
