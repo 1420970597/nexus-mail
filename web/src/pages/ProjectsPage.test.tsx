@@ -86,17 +86,18 @@ describe('ProjectsPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders a procurement shared-console slice shell', async () => {
+  it('renders a procurement shared-console slice shell with semantic hero signals', async () => {
     render(
       <MemoryRouter>
         <ProjectsPage />
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台采购切片')).toBeInTheDocument()
-    expect(screen.getByText('项目市场')).toBeInTheDocument()
-    expect(screen.getByText('让注册后的首轮采购、订单回流与 API 接入准备都保持在同一套深色共享控制台里继续完成。')).toBeInTheDocument()
-    expect(screen.getByText('采购路径信号')).toBeInTheDocument()
+    const heroCard = await screen.findByTestId('projects-shared-console-hero')
+    const heroScope = within(heroCard)
+    expect(heroScope.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    expect(heroScope.getByText('采购路径信号')).toBeInTheDocument()
+    expect(heroScope.getByText('单一登录后控制台 · 用户采购工作台')).toBeInTheDocument()
   })
 
   it('renders shared-console hero and aggregated procurement metrics', async () => {

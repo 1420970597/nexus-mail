@@ -104,17 +104,18 @@ describe('OrdersPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders the fulfillment shared-console slice shell', async () => {
+  it('renders the fulfillment shared-console slice shell with semantic hero signals', async () => {
     render(
       <MemoryRouter>
         <OrdersPage />
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('共享控制台履约切片')).toBeInTheDocument()
-    expect(screen.getByText('订单中心')).toBeInTheDocument()
-    expect(screen.getByText('把首轮采购后的邮箱分配、提取结果、履约终态与接入回放统一收敛在同一套深色共享控制台内。')).toBeInTheDocument()
-    expect(screen.getByText('履约路径信号')).toBeInTheDocument()
+    const heroCard = await screen.findByTestId('orders-shared-console-hero')
+    const heroScope = within(heroCard)
+    expect(heroScope.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    expect(heroScope.getByText('履约路径信号')).toBeInTheDocument()
+    expect(heroScope.getByText('READY / FINISHED / TIMEOUT 全部来自真实 API 返回')).toBeInTheDocument()
   })
 
   it('renders the unified order workbench with real-order messaging', async () => {
