@@ -49,13 +49,10 @@ describe('ProfilePage', () => {
     let view = renderProfilePage()
 
     expect(screen.getByText('Profile Mission Control')).toBeInTheDocument()
-    expect(screen.getByText('账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。')).toBeInTheDocument()
-    expect(screen.getByText('用户接入焦点')).toBeInTheDocument()
-    expect(screen.getByText('控制台桥接能力')).toBeInTheDocument()
-    expect(screen.getByText('深色共享账号中枢')).toBeInTheDocument()
-    expect(screen.getByText('采购与订单串联')).toBeInTheDocument()
-    expect(screen.getByText('集成准备')).toBeInTheDocument()
-    expect(screen.getByText('当前账号默认以用户身份进入共享控制台；如后续被服务端授予供应商或管理员角色，菜单会继续在同一壳内扩展。')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '个人资料' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '用户接入焦点' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
 
     const capabilityRegion = screen.getByTestId('profile-capability-bridge')
     expect(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' })).toBeInTheDocument()
