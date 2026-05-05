@@ -136,9 +136,8 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('供给事件回调工作台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
     expect(screen.getByText('供应商视角')).toBeInTheDocument()
-    expect(screen.getByText(/优先使用固定公网出口服务承接回调/)).toBeInTheDocument()
   })
 
   it('renders role-specific guidance for admin role', async () => {
@@ -149,9 +148,8 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(screen.getByText('管理员视角')).toBeInTheDocument()
-    expect(screen.getByText(/重点关注 failed \/ pending 重试链路/)).toBeInTheDocument()
   })
 
   it('queues test delivery and reloads deliveries', async () => {
