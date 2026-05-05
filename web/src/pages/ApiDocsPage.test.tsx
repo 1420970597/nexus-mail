@@ -103,11 +103,14 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     const scoped = within(bridgeLane)
-    expect(scoped.getByText('文档 → 真实业务 → 接入回放')).toBeInTheDocument()
     expect(scoped.getByText('回到项目市场校验真实业务输入')).toBeInTheDocument()
     expect(scoped.getByText('收敛最小权限 API Key')).toBeInTheDocument()
     expect(scoped.getByText('完成 Webhook 回调联调')).toBeInTheDocument()
     expect(scoped.getByText('返回资金工作台核对预算与售后')).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '查看项目市场基线' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '打开余额中心' })).toBeInTheDocument()
 
     await user.click(scoped.getByRole('button', { name: '查看项目市场基线' }))
     expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
@@ -182,11 +185,14 @@ describe('ApiDocsPage', () => {
 
     let view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
-    expect(screen.getByText('先回到 API Keys 收口最小权限')).toBeInTheDocument()
-    expect(screen.getByText('随后校验 Webhook delivery')).toBeInTheDocument()
-    expect(screen.getByText('最后回到业务主链路复放')).toBeInTheDocument()
 
     let loopLane = screen.getByTestId('docs-shared-console-loop')
+    expect(within(loopLane).getByText('先回到 API Keys 收口最小权限')).toBeInTheDocument()
+    expect(within(loopLane).getByText('随后校验 Webhook delivery')).toBeInTheDocument()
+    expect(within(loopLane).getByText('最后回到业务主链路复放')).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
     expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
 
