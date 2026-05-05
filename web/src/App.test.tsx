@@ -669,7 +669,7 @@ describe('App', () => {
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
-  it('renders dashboard with role mission panel and navigable next actions for supplier', async () => {
+  it('renders supplier dashboard CTA flow and routes into supplier domains', async () => {
     const user = userEvent.setup()
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
