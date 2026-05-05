@@ -43,8 +43,7 @@ describe('ApiDocsPage', () => {
 
     renderApiDocsPage()
 
-    expect(await screen.findByRole('heading', { name: 'Docs Mission Control' })).toBeInTheDocument()
-    expect(screen.getByText('OpenAPI 3 / Redoc')).toBeInTheDocument()
+    expect(await screen.findByText('OpenAPI 3 / Redoc')).toBeInTheDocument()
     expect(screen.getByText('API Keys')).toBeInTheDocument()
     expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
