@@ -625,8 +625,8 @@ describe('App', () => {
 
     renderApp([SETTINGS_ROUTE])
 
-    expect(await screen.findByText('首次使用清单')).toBeInTheDocument()
-    expect(screen.getByText('重新打开首轮引导')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '首次使用清单' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
   })
 
   it('does not show onboarding checklist on settings page for supplier role', async () => {
@@ -686,7 +686,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商主任务' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
     expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))

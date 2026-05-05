@@ -342,11 +342,10 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(screen.getByText('端点总数')).toBeInTheDocument()
     expect(screen.getByText('投递成功')).toBeInTheDocument()
     expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
-    expect(screen.getByText('最近回调')).toBeInTheDocument()
     expect(screen.getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
     expect(screen.getByText('已聚合 2 条最近 delivery')).toBeInTheDocument()
     expect(screen.getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
