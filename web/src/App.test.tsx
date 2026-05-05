@@ -295,7 +295,7 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '保存规则' })).toBeInTheDocument()
   })
 
-  it('falls back to the first server-menu route when no preferred role landing route exists', async () => {
+  it('falls back to the docs workspace when no preferred role landing route exists', async () => {
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
     mockedGetMenu.mockResolvedValueOnce({
@@ -307,7 +307,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect((await screen.findAllByText('API 文档')).length).toBeGreaterThan(0)
+    expect((await screen.findAllByTitle('nexus-mail-api-docs')).length).toBeGreaterThan(0)
   })
 
   it('shows register journey CTA and opens register mode from the login shell', async () => {
@@ -613,7 +613,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByText('供应商主任务')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '供应商主任务' })).toBeInTheDocument()
     const dashboardMain = screen.getByRole('main', { name: '控制台主内容' })
     expect(within(dashboardMain).queryByText('普通用户首轮引导')).not.toBeInTheDocument()
     expect(within(dashboardMain).queryByRole('button', { name: '查看结算页' })).not.toBeInTheDocument()

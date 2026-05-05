@@ -224,14 +224,16 @@ describe('WebhooksPage', () => {
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 
-  it('renders a shared integration loop card with scoped CTA contracts instead of long copy snapshots', async () => {
+  it('renders a shared integration loop card with scoped CTA contracts and no fallback when shared destinations are available', async () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationLoop = screen.getByTestId('webhooks-first-integration-loop')
-    expect(within(integrationLoop).getByText('注册后首轮回调联调建议')).toBeInTheDocument()
-    expect(within(integrationLoop).getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
-    expect(within(integrationLoop).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    const loopScope = within(integrationLoop)
+    expect(loopScope.getByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    expect(loopScope.getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
+    expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(loopScope.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
   it('suppresses unavailable shared integration CTAs when the server menu hides them and falls back to the recommended workspace', async () => {
