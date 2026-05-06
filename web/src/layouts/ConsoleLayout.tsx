@@ -124,25 +124,27 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
           }}
         >
           <Space vertical spacing={8} align="start" style={{ flex: 1, minWidth: 0 }}>
-            <Breadcrumb routes={breadcrumbRoutes} style={{ color: 'rgba(208,214,224,0.72)' }} />
-            <Space spacing={10} align="center" wrap>
-              <Typography.Title
-                heading={5}
-                style={{
-                  margin: 0,
-                  color: '#f7f8f8',
-                  fontWeight: 600,
-                  letterSpacing: '-0.18px',
-                }}
-              >
-                {resolveRouteTitle(location.pathname)}
-              </Typography.Title>
-              <Tag color={roleColor(user?.role)}>{roleLabel(user?.role)}</Tag>
-              <Tag color="cyan" prefixIcon={<IconHistogram />}>单一登录后控制台</Tag>
-            </Space>
-            <Typography.Text style={{ color: 'rgba(208,214,224,0.74)', fontSize: 13, lineHeight: 1.6 }}>
-              {roleIntro(user?.role)}
-            </Typography.Text>
+            <div data-testid="console-layout-header-summary" role="group" aria-label="当前页面摘要" style={{ width: '100%' }}>
+              <Breadcrumb routes={breadcrumbRoutes} style={{ color: 'rgba(208,214,224,0.72)' }} />
+              <Space spacing={10} align="center" wrap>
+                <Typography.Title
+                  heading={5}
+                  style={{
+                    margin: 0,
+                    color: '#f7f8f8',
+                    fontWeight: 600,
+                    letterSpacing: '-0.18px',
+                  }}
+                >
+                  {resolveRouteTitle(location.pathname)}
+                </Typography.Title>
+                <Tag color={roleColor(user?.role)}>{roleLabel(user?.role)}</Tag>
+                <Tag color="cyan" prefixIcon={<IconHistogram />}>单一登录后控制台</Tag>
+              </Space>
+              <Typography.Text style={{ color: 'rgba(208,214,224,0.74)', fontSize: 13, lineHeight: 1.6 }}>
+                {roleIntro(user?.role)}
+              </Typography.Text>
+            </div>
           </Space>
           <Space
             data-testid="console-layout-quick-actions"

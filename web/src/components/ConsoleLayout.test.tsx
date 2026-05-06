@@ -41,9 +41,9 @@ describe('ConsoleLayout', () => {
 
     renderLayout('/admin/risk')
 
-    const breadcrumbNav = screen.getByRole('navigation')
-    expect(within(breadcrumbNav).getByText('风控中心')).toBeInTheDocument()
-    expect(screen.getByText('运营指挥台')).toBeInTheDocument()
+    const headerSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(headerSummary).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    expect(within(headerSummary).getByLabelText('Tag: 单一登录后控制台')).toBeInTheDocument()
     const mainContent = screen.getByRole('main', { name: '控制台主内容' })
     expect(mainContent).toBeInTheDocument()
 

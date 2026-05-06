@@ -64,15 +64,17 @@ export function AppSidebar() {
             Nexus-Mail
           </Typography.Title>
           <Typography.Text style={{ color: 'rgba(208,214,224,0.74)' }}>Single login, multi-role workspace</Typography.Text>
-          <Space spacing={8} align="center" wrap>
-            <Tag color={meta.color}>{meta.label}</Tag>
-            <Tag color="grey">{meta.pill}</Tag>
-          </Space>
-          <Typography.Paragraph
-            style={{ color: 'rgba(138,143,152,0.96)', marginBottom: 0, fontSize: 12, lineHeight: 1.7 }}
-          >
-            {meta.description}
-          </Typography.Paragraph>
+          <div data-testid="app-sidebar-role-summary" role="group" aria-label="当前角色摘要" style={{ width: '100%' }}>
+            <Space spacing={8} align="center" wrap>
+              <Tag color={meta.color}>{meta.label}</Tag>
+              <Tag color="grey">{meta.pill}</Tag>
+            </Space>
+            <Typography.Paragraph
+              style={{ color: 'rgba(138,143,152,0.96)', marginBottom: 0, fontSize: 12, lineHeight: 1.7 }}
+            >
+              {meta.description}
+            </Typography.Paragraph>
+          </div>
         </Space>
       </div>
 

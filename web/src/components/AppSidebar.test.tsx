@@ -47,8 +47,9 @@ describe('AppSidebar', () => {
     expect(within(supplierGroup).getByText('域名管理')).toBeInTheDocument()
     expect(within(supplierGroup).getByText('供应商结算')).toBeInTheDocument()
 
-    expect(screen.getByText('供应商')).toBeInTheDocument()
-    expect(screen.getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
+    const roleSummary = screen.getByTestId('app-sidebar-role-summary')
+    expect(within(roleSummary).getByText('供应商')).toBeInTheDocument()
+    expect(within(roleSummary).getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
   })
 
   it('shows admin risk control menu for admin role', async () => {
@@ -67,12 +68,17 @@ describe('AppSidebar', () => {
 
     await renderSidebarAndWait(<AppSidebar />)
 
-    expect(screen.getByText('风控中心')).toBeInTheDocument()
-    expect(screen.getByText('审计日志')).toBeInTheDocument()
-    expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
-    expect(screen.getByText('余额中心')).toBeInTheDocument()
-    expect(screen.getByText('管理员')).toBeInTheDocument()
-    expect(screen.getByText('风控 / 审计 / 运营配置')).toBeInTheDocument()
+    const adminGroup = screen.getByTestId('app-sidebar-admin-group')
+    expect(within(adminGroup).getByText('风控中心')).toBeInTheDocument()
+    expect(within(adminGroup).getByText('审计日志')).toBeInTheDocument()
+
+    const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
+    expect(within(sharedGroup).getByText('Webhook 设置')).toBeInTheDocument()
+    expect(within(sharedGroup).getByText('余额中心')).toBeInTheDocument()
+
+    const roleSummary = screen.getByTestId('app-sidebar-role-summary')
+    expect(within(roleSummary).getByText('管理员')).toBeInTheDocument()
+    expect(within(roleSummary).getByText('风控 / 审计 / 运营配置')).toBeInTheDocument()
   })
 
   it('marks the current route as selected inside the navigation menu', async () => {
