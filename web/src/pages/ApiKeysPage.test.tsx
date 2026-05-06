@@ -54,12 +54,47 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={PROJECTS_ROUTE} element={<div data-testid="route-stub-projects">项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div data-testid="route-stub-orders">订单中心页面</div>} />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={(
+            <section data-testid="route-stub-projects">
+              <h1>项目市场</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={ORDERS_ROUTE}
+          element={(
+            <section data-testid="route-stub-orders">
+              <h1>订单中心</h1>
+            </section>
+          )}
+        />
         <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
-        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="route-stub-webhooks">Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div data-testid="route-stub-docs">API 文档页面</div>} />
-        <Route path="/" element={<div data-testid="route-stub-dashboard">控制台总览</div>} />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section data-testid="route-stub-webhooks">
+              <h1>Webhook 设置</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="route-stub-docs">
+              <h1>API 文档</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="route-stub-dashboard">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -311,18 +346,21 @@ describe('ApiKeysPage', () => {
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /返回项目市场/ }))
     expect(await screen.findByTestId('route-stub-projects')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     mockedCreateAPIKey.mockResolvedValueOnce({
       plaintext_key: 'nmx_created_secret_2',
@@ -373,6 +411,7 @@ describe('ApiKeysPage', () => {
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
   })
 
   it('shows shared-console fallback when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {
@@ -413,6 +452,7 @@ describe('ApiKeysPage', () => {
     const fallback = screen.getByTestId('api-keys-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByTestId('route-stub-dashboard')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('opens confirmation modal with precise revoke warning copy', async () => {
