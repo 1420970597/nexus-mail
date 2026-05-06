@@ -42,12 +42,54 @@ function renderSupplierOfferingsPage() {
     <MemoryRouter initialEntries={[SUPPLIER_OFFERINGS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<SupplierOfferingsPage />} />
-        <Route path={DASHBOARD_ROUTE} element={<div>控制台总览</div>} />
-        <Route path={SUPPLIER_RESOURCES_ROUTE} element={<div>供应商资源页</div>} />
-        <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>Docs 页面</div>} />
+        <Route
+          path={DASHBOARD_ROUTE}
+          element={
+            <section data-testid="supplier-offerings-route-stub-shared-home">
+              <h1>控制台总览</h1>
+            </section>
+          }
+        />
+        <Route
+          path={SUPPLIER_RESOURCES_ROUTE}
+          element={
+            <section data-testid="supplier-offerings-route-stub-resources">
+              <h1>供应商资源</h1>
+            </section>
+          }
+        />
+        <Route
+          path={SUPPLIER_SETTLEMENTS_ROUTE}
+          element={
+            <section data-testid="supplier-offerings-route-stub-settlements">
+              <h1>供应商结算</h1>
+            </section>
+          }
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={
+            <section data-testid="supplier-offerings-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          }
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={
+            <section data-testid="supplier-offerings-route-stub-webhooks">
+              <h1>Webhook 设置</h1>
+            </section>
+          }
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={
+            <section data-testid="supplier-offerings-route-stub-docs">
+              <h1>API 文档与接入控制台</h1>
+            </section>
+          }
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -162,19 +204,22 @@ describe('SupplierOfferingsPage', () => {
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
-    expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-offerings-route-stub-resources')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierOfferingsPage()
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开供应商结算/ }))
-    expect(await screen.findByText('供应商结算页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-offerings-route-stub-settlements')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商结算' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierOfferingsPage()
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-offerings-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('suppresses hidden shared-console bridge actions and falls back to the preferred workspace when integration routes are absent from the menu', async () => {
