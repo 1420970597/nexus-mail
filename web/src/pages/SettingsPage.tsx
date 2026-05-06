@@ -449,6 +449,7 @@ export function SettingsPage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={8}>
           <Card
+            data-testid="settings-session-card"
             title="当前登录会话"
             style={{ height: '100%', borderRadius: 24 }}
             bodyStyle={{ padding: 20 }}

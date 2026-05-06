@@ -410,8 +410,9 @@ describe('App', () => {
     const onboardingRegion = await expectDefaultUserFirstRunLane()
     await user.click(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ }))
 
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
-    expect(screen.getByText('当前密钥')).toBeInTheDocument()
+    const apiKeysHeroCard = await screen.findByTestId('api-keys-hero-card')
+    expect(within(apiKeysHeroCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '当前密钥' })).toBeInTheDocument()
   })
 
   it('keeps settings guidance entry available after dismissing first-run mission cards for default user', async () => {
@@ -641,7 +642,8 @@ describe('App', () => {
 
     renderApp([SETTINGS_ROUTE])
 
-    expect(await screen.findByText('控制台模式')).toBeInTheDocument()
+    const sessionCard = await screen.findByTestId('settings-session-card')
+    expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     const settingsMain = screen.getByRole('main', { name: '控制台主内容' })
     expect(within(settingsMain).queryByText('首次使用清单')).not.toBeInTheDocument()
     expect(within(settingsMain).queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()

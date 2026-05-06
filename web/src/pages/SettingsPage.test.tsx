@@ -104,6 +104,8 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('heading', { name: '控制台运行快捷入口' })).toBeInTheDocument()
     expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(screen.getByText('深色共享工作台')).toBeInTheDocument()
+    const sessionCard = screen.getByTestId('settings-session-card')
+    expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     const missionCards = screen.getByTestId('settings-mission-cards')
     expect(within(missionCards).getByText('先完成 API 密钥发放')).toBeInTheDocument()
     expect(screen.getByText('Docs / Webhooks / API Keys 已统一到单一壳内导航。')).toBeInTheDocument()
