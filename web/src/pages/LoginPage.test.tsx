@@ -57,6 +57,23 @@ describe('LoginPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
+  it('renders a compact shared-console hero with one scoped registration runway', () => {
+    renderLoginPage()
+
+    expect(screen.getByText('Nexus-Mail · Shared Console')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
+    expect(screen.getByTestId('login-hero-signal-grid')).toBeInTheDocument()
+
+    const registerJourneyScope = getRegisterJourneyScope()
+    expect(registerJourneyScope.getByRole('heading', { name: '注册后进入同一套控制台' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('Registration → API Keys')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('Webhook delivery rehearsal')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('Docs + replay')).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
+    expect(screen.queryByText('注册后首轮接入建议')).not.toBeInTheDocument()
+    expect(screen.queryByText('新用户首次进入控制台后的最短路径')).not.toBeInTheDocument()
+  })
+
   it('opens register mode from the shared-console registration journey CTA', async () => {
     const user = userEvent.setup()
 
