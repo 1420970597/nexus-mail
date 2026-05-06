@@ -395,9 +395,9 @@ export function WebhooksPage() {
       </Card>
 
       <Space wrap style={{ width: '100%' }} spacing={16}>
-        <MetricCard title="端点总数" value={formatCount(items.length)} description={`活跃 ${formatCount(activeEndpoints.length)} / 已停用 ${formatCount(items.length - activeEndpoints.length)}`} icon={<IconServer />} />
-        <MetricCard title="投递成功" value={formatCount(deliveryStats.sent)} description={`已聚合 ${formatCount(deliveryStats.total)} 条最近 delivery`} icon={<IconBolt />} />
-        <MetricCard title="失败 / 排队中" value={formatCount(attentionCount)} description="优先排查 failed，并观察 pending 队列消化情况" icon={<IconActivity />} />
+        <MetricCard title="端点总数" value={formatCount(items.length)} description={`活跃 ${formatCount(activeEndpoints.length)} / 已停用 ${formatCount(items.length - activeEndpoints.length)}`} icon={<IconServer />} testId="webhooks-endpoint-metric" />
+        <MetricCard title="投递成功" value={formatCount(deliveryStats.sent)} description={`已聚合 ${formatCount(deliveryStats.total)} 条最近 delivery`} icon={<IconBolt />} testId="webhooks-sent-delivery-metric" />
+        <MetricCard title="失败 / 排队中" value={formatCount(attentionCount)} description="优先排查 failed，并观察 pending 队列消化情况" icon={<IconActivity />} testId="webhooks-attention-delivery-metric" />
         <MetricCard
           title="最近回调"
           value={latestDelivery}

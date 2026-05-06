@@ -343,12 +343,19 @@ describe('WebhooksPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
-    expect(screen.getByText('端点总数')).toBeInTheDocument()
-    expect(screen.getByText('投递成功')).toBeInTheDocument()
-    expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
-    expect(screen.getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
-    expect(screen.getByText('已聚合 2 条最近 delivery')).toBeInTheDocument()
-    expect(screen.getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
+
+    const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
+    expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
+    expect(within(endpointMetric).getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
+
+    const sentMetric = screen.getByTestId('webhooks-sent-delivery-metric')
+    expect(within(sentMetric).getByText('投递成功')).toBeInTheDocument()
+    expect(within(sentMetric).getByText('已聚合 2 条最近 delivery')).toBeInTheDocument()
+
+    const attentionMetric = screen.getByTestId('webhooks-attention-delivery-metric')
+    expect(within(attentionMetric).getByText('失败 / 排队中')).toBeInTheDocument()
+    expect(within(attentionMetric).getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
+
     const deliveryMetrics = screen.getByTestId('webhooks-latest-delivery-metric')
     expect(within(deliveryMetrics).getByText('最近回调')).toBeInTheDocument()
     expect(within(deliveryMetrics).getByText('2026-04-29T00:03:00Z')).toBeInTheDocument()
