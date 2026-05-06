@@ -10,15 +10,15 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={PROFILE_ROUTE} element={<ProfilePage />} />
-        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path={SETTINGS_ROUTE} element={<div>设置中心页面</div>} />
-        <Route path="/supplier/domains" element={<div>域名管理页面</div>} />
-        <Route path="/admin/risk" element={<div>风控中心页面</div>} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route path={PROJECTS_ROUTE} element={<div data-testid="projects-route-stub">项目市场页面</div>} />
+        <Route path={ORDERS_ROUTE} element={<div data-testid="orders-route-stub">订单中心页面</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div data-testid="api-docs-route-stub">API 文档页面</div>} />
+        <Route path={SETTINGS_ROUTE} element={<div data-testid="settings-route-stub">设置中心页面</div>} />
+        <Route path="/supplier/domains" element={<div data-testid="supplier-domains-route-stub">域名管理页面</div>} />
+        <Route path="/admin/risk" element={<div data-testid="admin-risk-route-stub">风控中心页面</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home-route-stub">共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -59,19 +59,19 @@ describe('ProfilePage', () => {
     expect(within(capabilityRegion).getByRole('button', { name: '打开 API 文档' })).toBeInTheDocument()
 
     await user.click(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
     const webhookRegion = screen.getByTestId('profile-capability-bridge')
     await user.click(within(webhookRegion).getByRole('button', { name: '打开 Webhook 设置' }))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
     const docsRegion = screen.getByTestId('profile-capability-bridge')
     await user.click(within(docsRegion).getByRole('button', { name: '打开 API 文档' }))
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-docs-route-stub')).toBeInTheDocument()
   })
 
   it('keeps the supplier return card isolated from user-only focus copy when settings is available', async () => {
@@ -97,7 +97,7 @@ describe('ProfilePage', () => {
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByText('设置中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-route-stub')).toBeInTheDocument()
   })
 
   it('scopes the user fallback CTA to the shared-console return region when project access is hidden', async () => {
@@ -120,7 +120,7 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
   it('scopes the supplier fallback CTA to the dedicated fallback region when settings is hidden', async () => {
@@ -143,7 +143,7 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
   it('scopes the admin fallback CTA to the dedicated fallback region when settings is hidden', async () => {
@@ -166,7 +166,7 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
   it('hides the shared-console return CTA when admin stays on profile as the only visible route', () => {
@@ -204,6 +204,6 @@ describe('ProfilePage', () => {
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByText('设置中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-route-stub')).toBeInTheDocument()
   })
 })
