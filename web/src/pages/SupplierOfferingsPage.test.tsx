@@ -42,7 +42,7 @@ function renderSupplierOfferingsPage() {
     <MemoryRouter initialEntries={[SUPPLIER_OFFERINGS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<SupplierOfferingsPage />} />
-        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>控制台总览</div>} />
         <Route path={SUPPLIER_RESOURCES_ROUTE} element={<div>供应商资源页</div>} />
         <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<div>供应商结算页</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
@@ -205,7 +205,7 @@ describe('SupplierOfferingsPage', () => {
     expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
     expect(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button')).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-offerings-shared-console-fallback-button'))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
   })
 
   it('shows a mission fallback card and returns to dashboard when no supplier follow-up routes remain', async () => {
@@ -235,7 +235,7 @@ describe('SupplierOfferingsPage', () => {
     expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByTestId('supplier-offerings-mission-fallback-button'))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
   })
 
   it('submits create offering form and reloads data', async () => {

@@ -59,7 +59,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
         <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
         <Route path={WEBHOOKS_ROUTE} element={<div data-testid="route-stub-webhooks">Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div data-testid="route-stub-docs">API 文档页面</div>} />
-        <Route path="/" element={<div data-testid="route-stub-dashboard">共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="route-stub-dashboard">控制台总览</div>} />
       </Routes>
     </MemoryRouter>,
   )

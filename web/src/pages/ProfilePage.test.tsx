@@ -18,7 +18,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route path={SETTINGS_ROUTE} element={<div data-testid="settings-route-stub">设置中心页面</div>} />
         <Route path="/supplier/domains" element={<div data-testid="supplier-domains-route-stub">域名管理页面</div>} />
         <Route path="/admin/risk" element={<div data-testid="admin-risk-route-stub">风控中心页面</div>} />
-        <Route path="/" element={<div data-testid="shared-console-home-route-stub">共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home-route-stub">控制台总览</div>} />
       </Routes>
     </MemoryRouter>,
   )

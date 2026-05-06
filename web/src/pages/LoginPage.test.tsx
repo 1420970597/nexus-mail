@@ -24,7 +24,7 @@ function renderLoginPage(initialEntry = '/login') {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<div data-testid="shared-console-home">共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home">控制台总览</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />

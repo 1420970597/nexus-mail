@@ -16,7 +16,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
         <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<ApiDocsPage />} />
-        <Route path="/" element={<div data-testid="shared-console-home">共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home">控制台总览</div>} />
       </Routes>
     </MemoryRouter>,
   )

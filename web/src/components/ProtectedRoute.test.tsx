@@ -11,7 +11,7 @@ function LoginPage() {
 }
 
 function SharedDashboardPage() {
-  return <h1>共享控制台首页</h1>
+  return <h1>控制台总览</h1>
 }
 
 function ProtectedPage() {
@@ -85,7 +85,7 @@ describe('SupplierRoute', () => {
       </SupplierRoute>,
     )
 
-    expect(await screen.findByRole('heading', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '供应商资源页' })).not.toBeInTheDocument()
   })
 
@@ -165,7 +165,7 @@ describe('AdminRoute', () => {
       </AdminRoute>,
     )
 
-    expect(await screen.findByRole('heading', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '管理员风控页' })).not.toBeInTheDocument()
   })
 

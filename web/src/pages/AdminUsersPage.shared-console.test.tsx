@@ -32,7 +32,7 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
         <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
         <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div>控制台总览</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -186,6 +186,6 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(fallbackCard).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
   })
 })
