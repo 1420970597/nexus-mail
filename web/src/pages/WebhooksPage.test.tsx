@@ -258,7 +258,7 @@ describe('WebhooksPage', () => {
       <MemoryRouter initialEntries={[WEBHOOKS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-          <Route path="/" element={<div data-testid="shared-console-home">共享控制台首页</div>} />
+          <Route path="/" element={<section data-testid="shared-console-home-route-stub"><h1>控制台总览</h1></section>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -270,7 +270,8 @@ describe('WebhooksPage', () => {
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
-    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('renders shared-console metrics and delivery operations for admin role', async () => {
