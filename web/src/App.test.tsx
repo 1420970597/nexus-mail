@@ -252,10 +252,10 @@ describe('App', () => {
     expect(useAuthStore.getState().refreshToken).toBe('stored-refresh-token')
   })
 
-  it('renders the admin risk workspace when starting from the preferred admin route after session bootstrap', async () => {
+  it('renders admin risk page with scoped overview and rule editor contracts', async () => {
     setSession('admin')
-    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValueOnce({
+    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValue({
       role: 'admin',
       items: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
@@ -289,8 +289,10 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    expect(await screen.findByText('规则命中概览')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '保存规则' })).toBeInTheDocument()
+    const overviewCard = await screen.findByTestId('admin-risk-overview-card')
+    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
+    const ruleEditorCard = screen.getByTestId('admin-risk-rule-editor-card')
+    expect(within(ruleEditorCard).getByRole('button', { name: '保存规则' })).toBeInTheDocument()
   })
 
   it('falls back to the docs workspace when no preferred role landing route exists', async () => {

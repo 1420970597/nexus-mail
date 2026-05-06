@@ -400,6 +400,7 @@ export function AdminRiskPage() {
 
       <Card
         title="可配置风控规则"
+        data-testid="admin-risk-rule-editor-card"
         style={{ width: '100%' }}
         headerExtraContent={
           <Button theme="solid" loading={saving} onClick={saveRules}>
