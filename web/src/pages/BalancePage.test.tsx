@@ -153,14 +153,14 @@ describe('BalancePage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders finance mission control through scoped hero, mission, and capability regions for regular users', async () => {
+  it('renders balance hero, mission, and capability regions for regular users', async () => {
     renderBalancePage()
 
     const heading = await screen.findByRole('heading', { name: '余额中心' })
     expect(heading).toBeInTheDocument()
 
     const hero = screen.getByTestId('balance-hero-card')
-    expect(within(hero).getByText('Finance Mission Control')).toBeInTheDocument()
+    expect(within(hero).getByText('余额任务总览')).toBeInTheDocument()
     expect(within(hero).getByText('资金工作台已与共享控制台深色壳对齐：先确认余额与预算，再回到订单、API Keys、Webhook 与 API 文档完成业务闭环。')).toBeInTheDocument()
 
     const missionCards = screen.getByTestId('balance-mission-cards')
@@ -178,7 +178,7 @@ describe('BalancePage', () => {
     expect(within(disputesCard).getByText('本次会话新提交的争议')).toBeInTheDocument()
   })
 
-  it('navigates through the finance mission cards and shared-console bridge CTAs', async () => {
+  it('navigates through the balance mission cards and shared-console bridge CTAs', async () => {
     const user = userEvent.setup()
 
     let view = renderBalancePage()

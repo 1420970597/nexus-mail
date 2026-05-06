@@ -64,7 +64,7 @@ const sharedConsoleBridgeCards: SharedConsoleBridgeCard[] = [
   {
     key: 'balance',
     title: '返回资金工作台核对预算与售后',
-    description: '将文档中的资金、争议与余额相关接口重新映射到共享控制台的 Finance Mission Control，避免接入与售后割裂。',
+    description: '将文档中的资金、争议与余额相关接口重新映射到共享控制台的余额任务总览，避免接入与售后割裂。',
     button: '打开余额中心',
     path: BALANCE_ROUTE,
     tag: 'Finance',

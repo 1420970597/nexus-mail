@@ -35,6 +35,7 @@ describe('ApiDocsPage', () => {
       user: { id: 31, email: 'user@nexus-mail.local', role: 'user' },
       menu: [
         { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'balance', label: '余额中心', path: BALANCE_ROUTE },
         { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
         { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
         { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
@@ -48,6 +49,7 @@ describe('ApiDocsPage', () => {
 
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(within(bridgeLane).getByRole('heading', { name: '文档 → 真实业务 → 接入回放' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByText('将文档中的资金、争议与余额相关接口重新映射到共享控制台的余额任务总览，避免接入与售后割裂。')).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '查看项目市场基线' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
