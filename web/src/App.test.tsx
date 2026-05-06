@@ -228,9 +228,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    await waitFor(() => {
-      expect(screen.getByText('登录 Nexus-Mail')).toBeInTheDocument()
-    })
+    expect(await screen.findByRole('heading', { name: '登录 Nexus-Mail' })).toBeInTheDocument()
 
     expect(authService.logoutSession).not.toHaveBeenCalled()
     expect(useAuthStore.getState()).toMatchObject({
