@@ -52,11 +52,46 @@ function renderBalancePage(initialEntry = '/balance') {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/balance" element={<BalancePage />} />
-        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={(
+            <section data-testid="balance-route-stub-projects">
+              <h1>项目市场</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={ORDERS_ROUTE}
+          element={(
+            <section data-testid="balance-route-stub-orders">
+              <h1>订单中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="balance-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section data-testid="balance-route-stub-webhooks">
+              <h1>Webhook 设置</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="balance-route-stub-docs">
+              <h1>API 文档</h1>
+            </section>
+          )}
+        />
         <Route
           path="/"
           element={(
@@ -143,7 +178,8 @@ describe('BalancePage', () => {
 
     const missionCards = await screen.findByTestId('balance-mission-cards')
     await user.click(within(missionCards).getByRole('button', { name: /前往项目市场/ }))
-    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('balance-route-stub-projects')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
@@ -152,14 +188,16 @@ describe('BalancePage', () => {
     const refreshedMissionCards = await screen.findByTestId('balance-mission-cards')
     const ordersMissionCard = within(refreshedMissionCards).getByTestId('balance-orders-mission-card')
     await user.click(within(ordersMissionCard).getByRole('button', { name: /查看订单中心/ }))
-    expect(await screen.findByText('订单中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('balance-route-stub-orders')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     await user.click(await screen.findByTestId('balance-open-api-keys'))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('balance-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
@@ -167,7 +205,8 @@ describe('BalancePage', () => {
 
     const secondCapabilityActions = await screen.findByTestId('balance-capability-actions')
     await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('balance-route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
@@ -175,7 +214,8 @@ describe('BalancePage', () => {
 
     const thirdCapabilityActions = await screen.findByTestId('balance-capability-actions')
     await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('balance-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable finance CTA targets and returns to the preferred workspace', async () => {
