@@ -57,7 +57,14 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="balance-route-stub-shared-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -178,7 +185,14 @@ describe('BalancePage', () => {
       <MemoryRouter initialEntries={[BALANCE_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path={BALANCE_ROUTE} element={<BalancePage />} />
-          <Route path="/" element={<div>共享控制台首页</div>} />
+          <Route
+            path="/"
+            element={(
+              <section data-testid="balance-route-stub-shared-home">
+                <h1>控制台总览</h1>
+              </section>
+            )}
+          />
           <Route path="*" element={<FallbackRouteProbe />} />
         </Routes>
       </MemoryRouter>,

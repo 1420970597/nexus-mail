@@ -53,7 +53,14 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
           <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
           <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-          <Route path="/" element={<div>共享控制台首页</div>} />
+          <Route
+            path="/"
+            element={(
+              <section data-testid="admin-pricing-route-stub-shared-home">
+                <h1>控制台总览</h1>
+              </section>
+            )}
+          />
         </Routes>
       </main>
     </MemoryRouter>,
@@ -205,6 +212,7 @@ describe('AdminProjectsPage', () => {
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-pricing-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })

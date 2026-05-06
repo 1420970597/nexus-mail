@@ -58,7 +58,14 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
+        <Route
+          path={DASHBOARD_ROUTE}
+          element={(
+            <section data-testid="supplier-domains-route-stub-shared-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -191,7 +198,8 @@ describe('SupplierDomainsPage', () => {
 
     const missionFallback = screen.getByTestId('supplier-domains-mission-fallback')
     await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-domains-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
@@ -204,7 +212,8 @@ describe('SupplierDomainsPage', () => {
 
     const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-domains-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('shows explicit overview failure state instead of empty-state copy when overview loading fails', async () => {
