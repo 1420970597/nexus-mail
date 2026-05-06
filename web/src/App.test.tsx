@@ -728,10 +728,17 @@ describe('App', () => {
 
     renderApp(['/webhooks'])
 
-    expect(await screen.findByText('Webhook 运维与回调观测')).toBeInTheDocument()
-    expect(screen.getByText('端点总数')).toBeInTheDocument()
-    expect(screen.getByText('失败 / 排队中')).toBeInTheDocument()
-    expect(screen.getByText('当前 endpoint')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+
+    const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
+    expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
+
+    const attentionMetric = screen.getByTestId('webhooks-attention-delivery-metric')
+    expect(within(attentionMetric).getByText('失败 / 排队中')).toBeInTheDocument()
+
+    const currentEndpointCard = screen.getByTestId('webhooks-current-endpoints-card')
+    expect(within(currentEndpointCard).getByText('当前 endpoint')).toBeInTheDocument()
+    expect(within(currentEndpointCard).getByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: '发送测试投递' })).toBeInTheDocument()
   })
 

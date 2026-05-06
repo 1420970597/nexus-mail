@@ -542,7 +542,7 @@ export function WebhooksPage() {
         </Space>
       </Card>
 
-      <Card title="当前 endpoint" style={{ width: '100%' }} loading={loading}>
+      <Card data-testid="webhooks-current-endpoints-card" title="当前 endpoint" style={{ width: '100%' }} loading={loading}>
         {hasEndpoints ? (
           <Table
             pagination={false}
