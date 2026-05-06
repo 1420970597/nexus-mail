@@ -52,10 +52,38 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={DASHBOARD_ROUTE} element={<DashboardPage />} />
-        <Route path={BALANCE_ROUTE} element={<div>余额中心页面</div>} />
-        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>开发者 API 接入工作台</div>} />
+        <Route
+          path={BALANCE_ROUTE}
+          element={
+            <section data-testid="dashboard-balance-route-stub">
+              <h1>余额中心</h1>
+            </section>
+          }
+        />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={
+            <section data-testid="dashboard-projects-route-stub">
+              <h1>项目市场</h1>
+            </section>
+          }
+        />
+        <Route
+          path={ORDERS_ROUTE}
+          element={
+            <section data-testid="dashboard-orders-route-stub">
+              <h1>订单中心</h1>
+            </section>
+          }
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={
+            <section data-testid="dashboard-api-keys-route-stub">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          }
+        />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
         <Route path={SETTINGS_ROUTE} element={<div>设置中心页面</div>} />
@@ -117,25 +145,29 @@ describe('DashboardPage shared-console journey hub', () => {
     let view = renderDashboard()
     let lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '查看余额中心' }))
-    expect(await screen.findByText('余额中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('dashboard-balance-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '前往项目市场' }))
-    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('dashboard-projects-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '查看订单中心' }))
-    expect(await screen.findByText('订单中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('dashboard-orders-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '管理 API Keys' }))
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByTestId('dashboard-api-keys-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     view.unmount()
   })
 
