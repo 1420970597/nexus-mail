@@ -63,6 +63,9 @@ describe('LoginPage', () => {
     expect(screen.getByText('Nexus-Mail · Shared Console')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
     expect(screen.getByTestId('login-hero-signal-grid')).toBeInTheDocument()
+    expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '登录并进入 Shared Console' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()
 
     const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('heading', { name: '注册后进入同一套控制台' })).toBeInTheDocument()
@@ -84,8 +87,8 @@ describe('LoginPage', () => {
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
 
-    expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '创建账户并进入控制台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '创建账号并进入 Shared Console' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
   })
 
   it('submits registration, persists the shared-console session, and redirects into the shared home route', async () => {
@@ -97,7 +100,7 @@ describe('LoginPage', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
-    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
     expect(useAuthStore.getState()).toMatchObject({
@@ -117,7 +120,7 @@ describe('LoginPage', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123?')
-    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     expect(await screen.findByText('两次输入的密码不一致')).toBeInTheDocument()
     expect(mockedRegister).not.toHaveBeenCalled()

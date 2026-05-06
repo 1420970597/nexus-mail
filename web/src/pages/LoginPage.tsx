@@ -9,13 +9,13 @@ type AuthMode = 'login' | 'register'
 
 const modeCopy: Record<AuthMode, { title: string; button: string; helper: string }> = {
   login: {
-    title: '登录 Nexus-Mail',
-    button: '登录并进入控制台',
+    title: '登录并进入 Shared Console',
+    button: '登录并进入统一控制台',
     helper: '使用统一控制台访问用户、供应商与管理员能力。',
   },
   register: {
-    title: '注册 Nexus-Mail',
-    button: '创建账户并进入控制台',
+    title: '创建账号并进入 Shared Console',
+    button: '注册并进入统一控制台',
     helper: '仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。',
   },
 }
@@ -286,13 +286,15 @@ export function LoginPage() {
           </Col>
           <Col xs={24} lg={10}>
             <Card
+              data-testid="login-auth-shell"
               bodyStyle={{ padding: 28 }}
               style={{
                 width: '100%',
                 borderRadius: 24,
-                background: 'rgba(255,255,255,0.94)',
-                border: '1px solid rgba(255,255,255,0.55)',
-                boxShadow: '0 32px 80px rgba(15, 23, 42, 0.28)',
+                background: 'linear-gradient(180deg, rgba(15,16,17,0.96) 0%, rgba(25,26,27,0.98) 100%)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: 'rgba(0,0,0,0.38) 0px 24px 64px',
+                backdropFilter: 'blur(18px)',
               }}
             >
               <Space vertical spacing={18} align="start" style={{ width: '100%' }}>

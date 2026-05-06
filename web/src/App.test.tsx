@@ -218,7 +218,7 @@ describe('App', () => {
   it('renders the login shell when unauthenticated', async () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp([DEFAULT_LOGIN_ROUTE])
-    expect(await screen.findByRole('heading', { name: '登录 Nexus-Mail' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录并进入 Shared Console' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
   })
 
@@ -228,7 +228,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByRole('heading', { name: '登录 Nexus-Mail' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录并进入 Shared Console' })).toBeInTheDocument()
 
     expect(authService.logoutSession).not.toHaveBeenCalled()
     expect(useAuthStore.getState()).toMatchObject({
@@ -321,8 +321,8 @@ describe('App', () => {
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    expect(screen.getByRole('heading', { name: '注册 Nexus-Mail' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '创建账户并进入控制台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '创建账号并进入 Shared Console' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
   })
 
   async function openRegisterMode(user: ReturnType<typeof userEvent.setup>) {
@@ -333,7 +333,7 @@ describe('App', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), email)
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
-    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith(email, 'Password123!'))
   }
 
@@ -472,7 +472,7 @@ describe('App', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
-    await user.click(screen.getByRole('button', { name: '创建账户并进入控制台' }))
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     const onboardingRegion = await expectDefaultUserFirstRunLane()
     void onboardingRegion
