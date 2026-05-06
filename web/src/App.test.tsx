@@ -762,7 +762,8 @@ describe('App', () => {
 
     renderApp(['/webhooks'])
 
-    await user.click(await screen.findByRole('button', { name: '发送测试投递' }))
+    const currentEndpointCard = await screen.findByTestId('webhooks-current-endpoints-card')
+    await user.click(within(currentEndpointCard).getByTestId('webhooks-send-test-button-11'))
     await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
     await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2))
     expect(await screen.findByText('测试投递已入队，系统将异步真实回调目标地址')).toBeInTheDocument()
