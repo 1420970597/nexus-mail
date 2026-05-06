@@ -232,15 +232,15 @@ export function ProjectsPage() {
           </Card>
         </Col>
         <Col xs={24} xl={7}>
-          <Card title="采购动作提示" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+          <Card title="采购动作提示" data-testid="projects-action-guidance-card" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-              <Card style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
+              <Card data-testid="projects-guidance-procurement-card" style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
                 <Typography.Title heading={5} style={{ marginTop: 0 }}>先挑库存，再下单</Typography.Title>
                 <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
                   优先比较成功率、库存与来源类型，再决定是否下单；保持采购动作、订单追踪和 API 接入都在同一控制台完成。
                 </Typography.Paragraph>
               </Card>
-              <Card style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
+              <Card data-testid="projects-guidance-next-step-card" style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
                 <Typography.Title heading={5} style={{ marginTop: 0 }}>下单后下一步</Typography.Title>
                 <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
                   成功创建订单后，直接前往订单中心查看邮箱分配、提取结果和是否 READY / FINISHED，无需跳转到独立后台。
@@ -251,7 +251,7 @@ export function ProjectsPage() {
                   </Button>
                 ) : null}
               </Card>
-              <Card style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
+              <Card data-testid="projects-guidance-fallback-card" style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
                 <Typography.Title heading={5} style={{ marginTop: 0 }}>共享控制台回退路径</Typography.Title>
                 <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
                   如果当前库存为空或本页不再是你的首选入口，可通过统一菜单权限回到该角色最合适的工作台，而不是寻找另一套后台。

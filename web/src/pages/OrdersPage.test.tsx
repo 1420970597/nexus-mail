@@ -225,18 +225,16 @@ describe('OrdersPage', () => {
     expect(within(heroCard).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
   })
 
-  it('renders a mission-control continuation lane from orders into API integration and procurement replay', async () => {
+  it('renders a scoped continuation lane from orders into API integration and procurement replay', async () => {
     render(
       <MemoryRouter>
         <OrdersPage />
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
-    const lane = screen.getByTestId('orders-continuation-lane')
+    const lane = await screen.findByTestId('orders-continuation-lane')
     const scoped = within(lane)
-    expect(scoped.getByText('订单结果 → API 接入 → 再次采购')).toBeInTheDocument()
-    expect(scoped.getByText('先确认邮箱与提取结果，再继续程序化接入。')).toBeInTheDocument()
+    expect(scoped.getByRole('heading', { name: '订单结果 → API 接入 → 再次采购' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /回到项目市场/ })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
   })

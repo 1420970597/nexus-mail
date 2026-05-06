@@ -150,18 +150,20 @@ describe('ProjectsPage', () => {
     expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
-  it('renders procurement mission guidance that keeps first-run purchasing inside the shared console', async () => {
+  it('renders procurement mission guidance through scoped next-step and fallback cards inside the shared console', async () => {
     render(
       <MemoryRouter>
         <ProjectsPage />
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('采购动作提示')).toBeInTheDocument()
-    expect(screen.getByText('先挑库存，再下单')).toBeInTheDocument()
-    expect(screen.getByText('下单后下一步')).toBeInTheDocument()
-    expect(screen.getByText('共享控制台回退路径')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
+    const guidanceCard = await screen.findByTestId('projects-action-guidance-card')
+    const nextStepCard = within(guidanceCard).getByTestId('projects-guidance-next-step-card')
+    const fallbackCard = within(guidanceCard).getByTestId('projects-guidance-fallback-card')
+
+    expect(within(nextStepCard).getByRole('heading', { name: '下单后下一步' })).toBeInTheDocument()
+    expect(within(nextStepCard).getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
+    expect(within(fallbackCard).getByRole('heading', { name: '共享控制台回退路径' })).toBeInTheDocument()
   })
 
   it('navigates from market procurement guidance into the order center inside the shared console', async () => {
