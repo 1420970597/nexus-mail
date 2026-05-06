@@ -184,6 +184,7 @@ export function BalancePage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="balance-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -343,7 +344,7 @@ export function BalancePage() {
         </Col>
       </Row>
 
-      <Card title="本次会话新提交的争议" style={{ width: '100%', borderRadius: 24 }}>
+      <Card title="本次会话新提交的争议" data-testid="balance-session-disputes-card" style={{ width: '100%', borderRadius: 24 }}>
         <Table
           pagination={false}
           rowKey="id"

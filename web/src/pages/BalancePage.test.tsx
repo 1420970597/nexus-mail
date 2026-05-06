@@ -153,20 +153,29 @@ describe('BalancePage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders finance mission control with shared-console integration cards for regular users', async () => {
+  it('renders finance mission control through scoped hero, mission, and capability regions for regular users', async () => {
     renderBalancePage()
 
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
-    expect(screen.getByText('资金任务流')).toBeInTheDocument()
-    expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(screen.getByText('先确认采购预算与库存')).toBeInTheDocument()
-    expect(screen.getByText('再追踪冻结与退款链路')).toBeInTheDocument()
-    expect(screen.getByText('最后串联接入与回调')).toBeInTheDocument()
-    expect(screen.getByText('订单争议申请')).toBeInTheDocument()
-    expect(screen.getByText('普通用户先完成预算确认，再串联订单、争议与接入路径')).toBeInTheDocument()
-    expect(screen.getByText('角色差异仍共用单壳')).toBeInTheDocument()
-    expect(screen.getByText('资金观察与售后同层')).toBeInTheDocument()
-    expect(screen.getByText('本次会话新提交的争议')).toBeInTheDocument()
+    const heading = await screen.findByRole('heading', { name: '余额中心' })
+    expect(heading).toBeInTheDocument()
+
+    const hero = screen.getByTestId('balance-hero-card')
+    expect(within(hero).getByText('Finance Mission Control')).toBeInTheDocument()
+    expect(within(hero).getByText('资金工作台已与共享控制台深色壳对齐：先确认余额与预算，再回到订单、API Keys、Webhook 与 API 文档完成业务闭环。')).toBeInTheDocument()
+
+    const missionCards = screen.getByTestId('balance-mission-cards')
+    expect(within(missionCards).getByText('资金任务流')).toBeInTheDocument()
+    expect(within(missionCards).getByText('先确认采购预算与库存')).toBeInTheDocument()
+    expect(within(missionCards).getByText('再追踪冻结与退款链路')).toBeInTheDocument()
+    expect(within(missionCards).getByText('最后串联接入与回调')).toBeInTheDocument()
+
+    const capabilityMatrix = screen.getByTestId('balance-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('角色差异仍共用单壳')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('资金观察与售后同层')).toBeInTheDocument()
+
+    const disputesCard = screen.getByTestId('balance-session-disputes-card')
+    expect(within(disputesCard).getByText('本次会话新提交的争议')).toBeInTheDocument()
   })
 
   it('navigates through the finance mission cards and shared-console bridge CTAs', async () => {
