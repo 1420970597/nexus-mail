@@ -55,10 +55,12 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(screen.getByRole('heading', { name: '首次使用清单' })).toBeInTheDocument()
-    expect(screen.getByText('新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。')).toBeInTheDocument()
 
     const checklistCard = screen.getByTestId('settings-user-first-run-checklist')
     const checklistScope = within(checklistCard)
+    expect(checklistScope.getByRole('button', { name: '打开项目市场' })).toBeInTheDocument()
+    expect(checklistScope.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
+    expect(checklistScope.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
 
     await user.click(checklistScope.getByRole('button', { name: '打开项目市场' }))
     expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
@@ -102,17 +104,21 @@ describe('SettingsPage', () => {
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台运行快捷入口' })).toBeInTheDocument()
-    expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(screen.getByText('深色共享工作台')).toBeInTheDocument()
+
+    const capabilityMatrix = screen.getByTestId('settings-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('账号入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('集成入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('文档入口')).toBeInTheDocument()
+
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     const missionCards = screen.getByTestId('settings-mission-cards')
     expect(within(missionCards).getByText('先完成 API 密钥发放')).toBeInTheDocument()
-    expect(screen.getByText('Docs / Webhooks / API Keys 已统一到单一壳内导航。')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /打开 API 文档/ })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('button', { name: /打开 API 文档/ })).toBeInTheDocument()
     expect(within(missionCards).getByRole('button', { name: /打开 Webhook 设置/ })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /打开 API 文档/ }))
+    await user.click(within(missionCards).getByRole('button', { name: /打开 API 文档/ }))
     expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
   })
 

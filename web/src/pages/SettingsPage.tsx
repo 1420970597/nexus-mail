@@ -390,6 +390,7 @@ export function SettingsPage() {
         </Col>
         <Col xs={24} xl={9}>
           <Card
+            data-testid="settings-capability-matrix"
             title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
             style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}

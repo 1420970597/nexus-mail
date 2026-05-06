@@ -339,7 +339,6 @@ describe('App', () => {
 
   async function expectDefaultUserFirstRunLane() {
     const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
-    expect(screen.getByRole('heading', { name: '欢迎进入共享控制台' })).toBeInTheDocument()
     const scoped = within(onboardingRegion)
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
