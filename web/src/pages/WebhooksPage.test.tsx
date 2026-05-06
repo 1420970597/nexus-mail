@@ -161,7 +161,7 @@ describe('WebhooksPage', () => {
     )
 
     await screen.findByText('https://hooks.example.com/nexus-mail')
-    await user.click(screen.getByRole('button', { name: '发送测试投递' }))
+    await user.click(screen.getByTestId('webhooks-send-test-button-11'))
 
     await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
     expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2)

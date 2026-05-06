@@ -334,6 +334,7 @@ export function WebhooksPage() {
         render: (_: unknown, record: WebhookEndpointRecord) => (
           <Space>
             <Button
+              data-testid={`webhooks-send-test-button-${record.id}`}
               theme="solid"
               type="primary"
               loading={testingID === record.id}

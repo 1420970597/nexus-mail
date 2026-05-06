@@ -744,7 +744,7 @@ describe('App', () => {
     const currentEndpointCard = screen.getByTestId('webhooks-current-endpoints-card')
     expect(within(currentEndpointCard).getByText('当前 endpoint')).toBeInTheDocument()
     expect(within(currentEndpointCard).getByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
-    expect(await screen.findByRole('button', { name: '发送测试投递' })).toBeInTheDocument()
+    expect(within(currentEndpointCard).getByTestId('webhooks-send-test-button-11')).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
