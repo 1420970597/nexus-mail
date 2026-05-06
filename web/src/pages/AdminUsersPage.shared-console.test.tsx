@@ -29,10 +29,22 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={ADMIN_USERS_ROUTE} element={<AdminUsersPage />} />
-        <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
-        <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={DASHBOARD_ROUTE} element={<div>控制台总览</div>} />
+        <Route
+          path={ADMIN_RISK_ROUTE}
+          element={<section data-testid="admin-users-route-stub-risk"><h1>风控中心</h1></section>}
+        />
+        <Route
+          path={ADMIN_AUDIT_ROUTE}
+          element={<section data-testid="admin-users-route-stub-audit"><h1>审计日志</h1></section>}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={<section data-testid="admin-users-route-stub-api-keys"><h1>API Keys</h1></section>}
+        />
+        <Route
+          path={DASHBOARD_ROUTE}
+          element={<section data-testid="admin-users-route-stub-dashboard"><h1>控制台总览</h1></section>}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -114,21 +126,24 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
-    expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
+    const riskRouteStub = await screen.findByTestId('admin-users-route-stub-risk')
+    expect(within(riskRouteStub).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminUsersPage()
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const auditMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(auditMissionFlow).getByRole('button', { name: '查看审计日志' }))
-    expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
+    const auditRouteStub = await screen.findByTestId('admin-users-route-stub-audit')
+    expect(within(auditRouteStub).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminUsersPage()
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     const integrationMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(integrationMissionFlow).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    const apiKeysRouteStub = await screen.findByTestId('admin-users-route-stub-api-keys')
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
   })
 
   it('submits wallet adjustment, settlement and dispute resolution flows', async () => {
@@ -186,6 +201,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(fallbackCard).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+    const dashboardRouteStub = await screen.findByTestId('admin-users-route-stub-dashboard')
+    expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })

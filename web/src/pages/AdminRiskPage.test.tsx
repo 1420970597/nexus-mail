@@ -22,10 +22,22 @@ function renderAdminRiskPage(initialEntry = ADMIN_RISK_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={ADMIN_RISK_ROUTE} element={<AdminRiskPage />} />
-        <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
-        <Route path={ADMIN_USERS_ROUTE} element={<div>资金工作台页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path="/" element={<div>控制台总览</div>} />
+        <Route
+          path={ADMIN_AUDIT_ROUTE}
+          element={<section data-testid="admin-risk-route-stub-audit"><h1>审计日志</h1></section>}
+        />
+        <Route
+          path={ADMIN_USERS_ROUTE}
+          element={<section data-testid="admin-risk-route-stub-users"><h1>用户管理</h1></section>}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={<section data-testid="admin-risk-route-stub-api-keys"><h1>API Keys</h1></section>}
+        />
+        <Route
+          path="/"
+          element={<section data-testid="admin-risk-route-stub-dashboard"><h1>控制台总览</h1></section>}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -118,21 +130,24 @@ describe('AdminRiskPage', () => {
 
     const missionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看审计日志' }))
-    expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
+    const auditRouteStub = await screen.findByTestId('admin-risk-route-stub-audit')
+    expect(within(auditRouteStub).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminRiskPage()
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
-    expect(await screen.findByText('资金工作台页面')).toBeInTheDocument()
+    const usersRouteStub = await screen.findByTestId('admin-risk-route-stub-users')
+    expect(within(usersRouteStub).getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
 
     view.unmount()
     renderAdminRiskPage()
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     const finalMissionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    const apiKeysRouteStub = await screen.findByTestId('admin-risk-route-stub-api-keys')
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
@@ -163,7 +178,8 @@ describe('AdminRiskPage', () => {
     expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+    const dashboardRouteStub = await screen.findByTestId('admin-risk-route-stub-dashboard')
+    expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides the fallback slice when the risk page is the only visible admin route', async () => {
