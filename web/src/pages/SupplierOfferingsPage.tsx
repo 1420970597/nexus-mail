@@ -41,14 +41,17 @@ function MetricCard({
   value,
   description,
   icon,
+  testId,
 }: {
   title: string
   value: string
   description: string
   icon: JSX.Element
+  testId?: string
 }) {
   return (
     <Card
+      data-testid={testId}
       style={{
         flex: '1 1 220px',
         minWidth: 220,
@@ -227,6 +230,7 @@ export function SupplierOfferingsPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="supplier-offerings-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -254,10 +258,34 @@ export function SupplierOfferingsPage() {
             style={{ width: '100%', background: 'rgba(15, 23, 42, 0.32)', borderRadius: 18, border: '1px solid rgba(148,163,184,0.18)' }}
           />
           <Space wrap spacing={16} style={{ width: '100%' }}>
-            <MetricCard title="可售规则数" value={String(metrics.total)} description="当前已经进入共享控制台供给编排的规则总数。" icon={<IconBolt />} />
-            <MetricCard title="覆盖项目" value={String(metrics.projectCount)} description="已被至少一条供货规则接管的 project_key 数量。" icon={<IconActivity />} />
-            <MetricCard title="高成功率规则" value={String(metrics.highConfidence)} description="成功率 ≥ 90% 的规则数量，可作为主推供给池。" icon={<IconTickCircle />} />
-            <MetricCard title="可挂接域名池" value={String(metrics.readyDomains)} description="状态 active 的域名池数量，可继续映射到项目规则。" icon={<IconServer />} />
+            <MetricCard
+              testId="supplier-offerings-metric-total"
+              title="可售规则数"
+              value={String(metrics.total)}
+              description="当前已经进入共享控制台供给编排的规则总数。"
+              icon={<IconBolt />}
+            />
+            <MetricCard
+              testId="supplier-offerings-metric-projects"
+              title="覆盖项目"
+              value={String(metrics.projectCount)}
+              description="已被至少一条供货规则接管的 project_key 数量。"
+              icon={<IconActivity />}
+            />
+            <MetricCard
+              testId="supplier-offerings-metric-high-confidence"
+              title="高成功率规则"
+              value={String(metrics.highConfidence)}
+              description="成功率 ≥ 90% 的规则数量，可作为主推供给池。"
+              icon={<IconTickCircle />}
+            />
+            <MetricCard
+              testId="supplier-offerings-metric-ready-domains"
+              title="可挂接域名池"
+              value={String(metrics.readyDomains)}
+              description="状态 active 的域名池数量，可继续映射到项目规则。"
+              icon={<IconServer />}
+            />
           </Space>
         </Space>
       </Card>
@@ -344,6 +372,7 @@ export function SupplierOfferingsPage() {
           <Space wrap spacing={16} style={{ width: '100%' }}>
             {consolePillars.map((pillar) => (
               <Card
+                data-testid={`supplier-offerings-console-pillar-${pillar.key}`}
                 key={pillar.key}
                 style={{
                   flex: '1 1 240px',
@@ -449,6 +478,8 @@ export function SupplierOfferingsPage() {
             )}
           </Space>
           <Table
+            data-testid="supplier-offerings-table"
+            aria-label="当前可售规则表格"
             pagination={false}
             rowKey="id"
             dataSource={offerings}
