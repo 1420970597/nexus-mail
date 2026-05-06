@@ -359,6 +359,7 @@ describe('WebhooksPage', () => {
     const deliveryMetrics = screen.getByTestId('webhooks-latest-delivery-metric')
     expect(within(deliveryMetrics).getByText('最近回调')).toBeInTheDocument()
     expect(within(deliveryMetrics).getByText('2026-04-29T00:03:00Z')).toBeInTheDocument()
-    expect(screen.getByText(/重点关注 failed \/ pending 重试链路与 last_error/)).toBeInTheDocument()
+    const guidanceRegion = screen.getByTestId('webhooks-role-guidance')
+    expect(within(guidanceRegion).getByText(/重点关注 failed \/ pending 重试链路与 last_error/)).toBeInTheDocument()
   })
 })

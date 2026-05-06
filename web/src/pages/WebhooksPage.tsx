@@ -364,6 +364,7 @@ export function WebhooksPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="webhooks-role-guidance"
         style={{
           width: '100%',
           borderRadius: 24,
