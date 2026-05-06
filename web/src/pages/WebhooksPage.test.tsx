@@ -36,9 +36,9 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div data-testid="api-docs-route-stub">API 文档页面</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -122,10 +122,11 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(mockedGetWebhookEndpoints).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledWith(11))
-    expect(screen.getByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
+    const currentEndpointCard = screen.getByTestId('webhooks-current-endpoints-card')
+    expect(within(currentEndpointCard).getByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
   })
 
   it('renders role-specific guidance for supplier role', async () => {
@@ -213,7 +214,7 @@ describe('WebhooksPage', () => {
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
 
     view.unmount()
     seedRole('user')
@@ -221,7 +222,7 @@ describe('WebhooksPage', () => {
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-docs-route-stub')).toBeInTheDocument()
   })
 
   it('renders a shared integration loop card with scoped CTA contracts and no fallback when shared destinations are available', async () => {

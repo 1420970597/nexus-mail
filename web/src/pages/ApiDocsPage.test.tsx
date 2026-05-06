@@ -11,12 +11,12 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-        <Route path={BALANCE_ROUTE} element={<div>余额中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
+        <Route path={PROJECTS_ROUTE} element={<div data-testid="projects-route-stub">项目市场页面</div>} />
+        <Route path={BALANCE_ROUTE} element={<div data-testid="balance-route-stub">余额中心页面</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<ApiDocsPage />} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home">共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -57,7 +57,7 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
 
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
   })
 
   it('shows role-aware admin shortcuts without leaking unavailable actions', async () => {
@@ -111,7 +111,7 @@ describe('ApiDocsPage', () => {
     expect(scoped.getByRole('button', { name: '打开余额中心' })).toBeInTheDocument()
 
     await user.click(scoped.getByRole('button', { name: '查看项目市场基线' }))
-    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('projects-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
@@ -125,14 +125,14 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const thirdBridgeLane = screen.getByTestId('docs-shared-console-bridge')
     await user.click(within(thirdBridgeLane).getByRole('button', { name: '打开 Webhook 设置' }))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const fourthBridgeLane = screen.getByTestId('docs-shared-console-bridge')
     await user.click(within(fourthBridgeLane).getByRole('button', { name: '打开余额中心' }))
-    expect(await screen.findByText('余额中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('balance-route-stub')).toBeInTheDocument()
   })
 
   it('falls back to the preferred shared workspace when bridge destinations are unavailable', async () => {
@@ -163,7 +163,7 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(within(loopLane).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 
   it('keeps docs-to-integration loop actions inside the shared console after reading docs', async () => {
@@ -192,7 +192,7 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
@@ -206,6 +206,6 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
     loopLane = screen.getByTestId('docs-shared-console-loop')
     await user.click(within(loopLane).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 })

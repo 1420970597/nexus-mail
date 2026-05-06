@@ -669,7 +669,7 @@ describe('App', () => {
     const profileIdentityCard = await screen.findByTestId('profile-primary-identity-card')
     expect(within(profileIdentityCard).getByText('supplier@nexus-mail.local')).toBeInTheDocument()
     await user.click(within(profileIdentityCard).getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
   })
 
   it('renders supplier dashboard CTA flow and routes into supplier domains', async () => {
@@ -694,7 +694,7 @@ describe('App', () => {
     expect(within(supplierRouteMap).getByText('共享接入')).toBeInTheDocument()
     expect(within(supplierRouteMap).getByText('/settings')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
   })
 
   it('renders admin risk and audit workspaces for authenticated admin routes', async () => {
