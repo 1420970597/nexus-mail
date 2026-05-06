@@ -248,7 +248,7 @@ describe('OrdersPage', () => {
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+          <Route path={PROJECTS_ROUTE} element={<div data-testid="orders-projects-route-stub">项目市场页面</div>} />
           <Route path={API_KEYS_ROUTE} element={<div>开发者 API 接入工作台</div>} />
         </Routes>
       </MemoryRouter>,
@@ -256,7 +256,7 @@ describe('OrdersPage', () => {
 
     expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /回到项目市场/ }))
-    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-projects-route-stub')).toBeInTheDocument()
   })
 
   it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
@@ -276,7 +276,7 @@ describe('OrdersPage', () => {
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/" element={<div>控制台总览页面</div>} />
+          <Route path="/" element={<div data-testid="orders-shared-console-home-route">控制台总览页面</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -284,6 +284,6 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     const emptyActions = screen.getByTestId('orders-empty-state-actions')
     await user.click(within(emptyActions).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('控制台总览页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-shared-console-home-route')).toBeInTheDocument()
   })
 })

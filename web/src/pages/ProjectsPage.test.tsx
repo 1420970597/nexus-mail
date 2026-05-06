@@ -171,14 +171,14 @@ describe('ProjectsPage', () => {
       <MemoryRouter initialEntries={['/projects']}>
         <Routes>
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/orders" element={<div>订单中心页面</div>} />
+          <Route path="/orders" element={<div data-testid="orders-route-stub">订单中心页面</div>} />
         </Routes>
       </MemoryRouter>,
     )
 
     expect(await screen.findByText('采购动作提示')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '打开订单中心' }))
-    expect(await screen.findByText('订单中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-route-stub')).toBeInTheDocument()
   })
 
   it('shows an integration CTA in the hero so newly registered users can continue API onboarding from the market view', async () => {
@@ -237,14 +237,14 @@ describe('ProjectsPage', () => {
       <MemoryRouter initialEntries={['/projects']}>
         <Routes>
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/api-keys" element={<div>开发者 API 接入工作台</div>} />
+          <Route path="/api-keys" element={<div data-testid="projects-api-keys-route-stub">开发者 API 接入工作台</div>} />
         </Routes>
       </MemoryRouter>,
     )
 
     expect(await screen.findByText('注册后首轮采购路径')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByTestId('projects-api-keys-route-stub')).toBeInTheDocument()
   })
 
   it('shows a return-to-recommended-workspace CTA in the empty state when the user lands here from another preferred workspace', async () => {
@@ -264,7 +264,7 @@ describe('ProjectsPage', () => {
       <MemoryRouter initialEntries={['/projects']}>
         <Routes>
           <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/" element={<div>控制台总览页面</div>} />
+          <Route path="/" element={<div data-testid="projects-shared-console-home-route">控制台总览页面</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -272,6 +272,6 @@ describe('ProjectsPage', () => {
     expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
     const emptyActions = await screen.findByTestId('projects-empty-state-actions')
     await user.click(within(emptyActions).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('控制台总览页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('projects-shared-console-home-route')).toBeInTheDocument()
   })
 })
