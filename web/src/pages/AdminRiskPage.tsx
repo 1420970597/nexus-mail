@@ -238,7 +238,7 @@ export function AdminRiskPage() {
         </Space>
       </Card>
 
-      <Space wrap style={{ width: '100%' }} spacing={16}>
+      <Space wrap style={{ width: '100%' }} spacing={16} data-testid="admin-risk-mission-signals">
         {missionSignals.map((item) => (
           <Card
             key={item.key}
@@ -335,12 +335,14 @@ export function AdminRiskPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} md={12} xl={6}>
-          <MetricCard
-            title="高风险"
-            value={String(summary?.high_risk_signal_count ?? 0)}
-            description="建议优先查看并联动审计排查"
-            icon={<IconAlertTriangle />}
-          />
+          <div data-testid="admin-risk-high-risk-metric">
+            <MetricCard
+              title="高风险"
+              value={String(summary?.high_risk_signal_count ?? 0)}
+              description="建议优先查看并联动审计排查"
+              icon={<IconAlertTriangle />}
+            />
+          </div>
         </Col>
         <Col xs={24} md={12} xl={6}>
           <MetricCard

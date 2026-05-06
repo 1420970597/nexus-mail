@@ -707,7 +707,8 @@ describe('App', () => {
     })
 
     const riskView = renderApp(['/admin/risk'])
-    expect(await screen.findByText('规则命中概览')).toBeInTheDocument()
+    const overviewCard = await screen.findByTestId('admin-risk-overview-card')
+    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
 
     riskView.unmount()
     renderApp(['/admin/audit'])
@@ -786,7 +787,9 @@ describe('App', () => {
 
     const riskSignalsTable = screen.getByTestId('admin-risk-signals-table-card')
     expect(within(riskSignalsTable).getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
-    expect(screen.getByText('高风险')).toBeInTheDocument()
+
+    const highRiskMetric = screen.getByTestId('admin-risk-high-risk-metric')
+    expect(within(highRiskMetric).getByText('高风险')).toBeInTheDocument()
   })
 
   it('renders admin audit page with filters and highlighted denied actions', async () => {

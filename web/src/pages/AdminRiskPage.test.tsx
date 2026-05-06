@@ -85,18 +85,29 @@ describe('AdminRiskPage', () => {
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     expect(screen.getByText('风控中心')).toBeInTheDocument()
     expect(screen.getByText(/将真实风险信号、规则编辑、审计回放与高危运营处置统一收敛/)).toBeInTheDocument()
-    expect(screen.getByText('高风险信号')).toBeInTheDocument()
-    expect(screen.getByText('观察中信号')).toBeInTheDocument()
-    expect(screen.getByText('生效规则')).toBeInTheDocument()
-    expect(screen.getByText('共享控制台联动')).toBeInTheDocument()
-    expect(screen.getByText('管理员主任务流')).toBeInTheDocument()
-    expect(screen.getByText('共享接入桥接')).toBeInTheDocument()
-    expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(screen.getByText('审计日志 · /admin/audit')).toBeInTheDocument()
-    expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
-    expect(screen.getByText('高风险')).toBeInTheDocument()
-    expect(screen.getByText('规则命中概览')).toBeInTheDocument()
-    expect(screen.getByText('处置建议')).toBeInTheDocument()
+
+    const missionSignals = screen.getByTestId('admin-risk-mission-signals')
+    expect(within(missionSignals).getByText('高风险信号')).toBeInTheDocument()
+    expect(within(missionSignals).getByText('观察中信号')).toBeInTheDocument()
+    expect(within(missionSignals).getByText('生效规则')).toBeInTheDocument()
+    expect(within(missionSignals).getByText('共享控制台联动')).toBeInTheDocument()
+
+    const missionFlow = screen.getByTestId('admin-risk-mission-flow')
+    expect(within(missionFlow).getByText('管理员主任务流')).toBeInTheDocument()
+
+    const bridge = screen.getByTestId('admin-risk-shared-console-bridge')
+    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
+    expect(within(bridge).getByText('审计日志 · /admin/audit')).toBeInTheDocument()
+    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
+
+    const highRiskMetric = screen.getByTestId('admin-risk-high-risk-metric')
+    expect(within(highRiskMetric).getByText('高风险')).toBeInTheDocument()
+
+    const overviewCard = screen.getByTestId('admin-risk-overview-card')
+    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
+
+    const actionsCard = screen.getByTestId('admin-risk-actions-card')
+    expect(within(actionsCard).getByText('处置建议')).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to audit, finance, and api key pages', async () => {
