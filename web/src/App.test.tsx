@@ -307,7 +307,10 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect((await screen.findAllByTitle('nexus-mail-api-docs')).length).toBeGreaterThan(0)
+    expect(await screen.findByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    expect(screen.getByTestId('docs-shared-console-loop')).toBeInTheDocument()
+    expect(screen.getByTestId('docs-shared-console-bridge')).toBeInTheDocument()
+    expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
   })
 
   it('shows register journey CTA and opens register mode from the login shell', async () => {

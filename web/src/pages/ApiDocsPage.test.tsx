@@ -27,7 +27,7 @@ describe('ApiDocsPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders a shared-console docs mission control with bridge and loop CTAs for regular users and navigates to API keys', async () => {
+  it('renders a shared-console docs workspace with a semantic Chinese page heading, bridge and loop CTAs for regular users, and navigates to API keys', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -43,15 +43,18 @@ describe('ApiDocsPage', () => {
 
     renderApiDocsPage()
 
+    expect(screen.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
+    expect(within(bridgeLane).getByRole('heading', { name: '文档 → 真实业务 → 接入回放' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '查看项目市场基线' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
+    expect(within(loopLane).getByRole('heading', { name: '文档与接入工作台继续保持单壳闭环' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
@@ -60,7 +63,7 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
   })
 
-  it('shows role-aware admin shortcuts without leaking unavailable actions', async () => {
+  it('shows role-aware admin shortcuts with the semantic docs heading and without leaking unavailable actions', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -73,6 +76,7 @@ describe('ApiDocsPage', () => {
 
     renderApiDocsPage()
 
+    expect(screen.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
     expect(await screen.findByLabelText('Tag: 管理员扩展 · API 契约')).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')

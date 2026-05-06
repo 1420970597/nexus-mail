@@ -107,21 +107,21 @@ function roleCopy(role?: string) {
     case 'admin':
       return {
         badge: '管理员扩展 · API 契约',
-        title: 'Docs Mission Control',
+        title: 'API 文档与接入控制台',
         description: '审计与风控仍通过共享控制台中的 API Keys / 审计链路交叉验证，不拆新的文档后台。',
         helper: '在同一套深色壳内查看 OpenAPI、核对最小权限 Key 与真实回调契约，再回到管理端处置风险信号。',
       }
     case 'supplier':
       return {
         badge: '供应商扩展 · API 契约',
-        title: 'Docs Mission Control',
+        title: 'API 文档与接入控制台',
         description: '围绕供给链路、Webhook 回调与资源接口保持单一登录后控制台，不拆第二套供应商文档后台。',
         helper: '先核对 endpoint / scopes / 白名单，再回到供货、域名与结算工作台继续真实 API 联调。',
       }
     default:
       return {
         badge: '共享控制台 · API 契约',
-        title: 'Docs Mission Control',
+        title: 'API 文档与接入控制台',
         description: '公开文档、API Keys、Webhook 联调与真实订单回放保持在同一套深色共享控制台里，不再跳到独立后台或外置说明页。',
         helper: '保持注册 → API Keys → Webhooks → Docs 的连续路径，再回到项目市场与订单中心验证真实业务链路。',
       }
