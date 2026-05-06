@@ -18,10 +18,38 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={ADMIN_AUDIT_ROUTE} element={<AdminAuditPage />} />
-        <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
-        <Route path={ADMIN_USERS_ROUTE} element={<div>资金工作台页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route
+          path={ADMIN_RISK_ROUTE}
+          element={(
+            <section data-testid="admin-audit-route-stub-risk">
+              <h1>风控中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={ADMIN_USERS_ROUTE}
+          element={(
+            <section data-testid="admin-audit-route-stub-users">
+              <h1>用户管理</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="admin-audit-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="admin-audit-route-stub-shared-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -94,21 +122,24 @@ describe('AdminAuditPage', () => {
 
     const missionFlow = screen.getByTestId('admin-audit-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
-    expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-audit-route-stub-risk')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('admin-audit-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
-    expect(await screen.findByText('资金工作台页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-audit-route-stub-users')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
 
     view.unmount()
     renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const finalMissionFlow = screen.getByTestId('admin-audit-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-audit-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
@@ -139,7 +170,8 @@ describe('AdminAuditPage', () => {
     expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-audit-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides the fallback slice when the audit page is the only visible admin route', async () => {

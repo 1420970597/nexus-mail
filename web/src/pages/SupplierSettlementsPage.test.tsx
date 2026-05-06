@@ -128,12 +128,54 @@ function renderSupplierSettlementsPage() {
     <MemoryRouter initialEntries={[SUPPLIER_SETTLEMENTS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<SupplierSettlementsPage />} />
-        <Route path={SUPPLIER_RESOURCES_ROUTE} element={<div>供应商资源页</div>} />
-        <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<div>供应商供货页</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>Docs 页面</div>} />
-        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
+        <Route
+          path={SUPPLIER_RESOURCES_ROUTE}
+          element={(
+            <section data-testid="supplier-settlements-route-stub-resources">
+              <h1>供应商资源</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={SUPPLIER_OFFERINGS_ROUTE}
+          element={(
+            <section data-testid="supplier-settlements-route-stub-offerings">
+              <h1>供货规则编排中枢</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="supplier-settlements-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section data-testid="supplier-settlements-route-stub-webhooks">
+              <h1>Webhook 设置</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="supplier-settlements-route-stub-docs">
+              <h1>API 文档</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DASHBOARD_ROUTE}
+          element={(
+            <section data-testid="supplier-settlements-route-stub-shared-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -179,6 +221,7 @@ describe('SupplierSettlementsPage', () => {
     const missionScope = within(missionFlow)
     expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
+    const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
     expect(screen.getByText('待结算余额')).toBeInTheDocument()
     expect(screen.getByText('活跃成本模型')).toBeInTheDocument()
     expect(screen.getByText('开放争议')).toBeInTheDocument()
@@ -186,7 +229,6 @@ describe('SupplierSettlementsPage', () => {
     expect(missionScope.getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
     expect(missionScope.getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
     expect(missionScope.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
-    const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
     expect(within(bridge).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
     expect(within(bridge).getByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
     expect(within(bridge).getByText(`API 文档 · ${DOCS_ROUTE}`)).toBeInTheDocument()
@@ -214,19 +256,22 @@ describe('SupplierSettlementsPage', () => {
 
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
-    expect(await screen.findByText('供应商资源页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-settlements-route-stub-resources')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
-    expect(await screen.findByText('供应商供货页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-settlements-route-stub-offerings')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-settlements-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable supplier and shared-console ctas then falls back to the preferred workspace when downstream routes are absent', async () => {
@@ -257,7 +302,8 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.getByTestId('supplier-settlements-shared-console-fallback')).toBeInTheDocument()
 
     await user.click(screen.getByTestId('supplier-settlements-shared-console-fallback-button'))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
@@ -265,7 +311,8 @@ describe('SupplierSettlementsPage', () => {
 
     const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回推荐工作台/ })
     await user.click(fallbackButton)
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides the fallback slices when supplier settlements is the only visible route', async () => {
@@ -306,7 +353,8 @@ describe('SupplierSettlementsPage', () => {
     expect(within(sharedConsoleFallback).queryByRole('button', { name: /返回推荐工作台/ })).not.toBeInTheDocument()
 
     await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('submits supplier cost profile and dispute actions then reloads data', async () => {
