@@ -67,6 +67,20 @@ describe('LoginPage', () => {
     expect(screen.getByRole('heading', { name: '登录并进入 Shared Console' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()
 
+    const authShell = screen.getByTestId('login-auth-shell')
+    expect(within(authShell).getByText('统一控制台认证')).toBeInTheDocument()
+    const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
+    expect(modeSwitch).toHaveAttribute('role', 'tablist')
+    expect(modeSwitch).toHaveAttribute('aria-label', '认证模式切换')
+    const loginButton = within(modeSwitch).getByRole('tab', { name: '登录' })
+    const registerButton = within(modeSwitch).getByRole('tab', { name: '注册' })
+    expect(loginButton).toHaveAttribute('aria-selected', 'true')
+    expect(registerButton).toHaveAttribute('aria-selected', 'false')
+
+    const guidanceBanner = within(authShell).getByTestId('login-auth-guidance-banner')
+    expect(within(guidanceBanner).getByText(/已有账号可直接进入共享控制台/)).toBeInTheDocument()
+    expect(within(authShell).getByText(/登录后进入同一套控制台布局；菜单与页面能力由角色控制/)).toBeInTheDocument()
+
     const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('heading', { name: '注册后进入同一套控制台' })).toBeInTheDocument()
     expect(registerJourneyScope.getByText('Registration → API Keys')).toBeInTheDocument()
@@ -75,6 +89,28 @@ describe('LoginPage', () => {
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
     expect(screen.queryByText('注册后首轮接入建议')).not.toBeInTheDocument()
     expect(screen.queryByText('新用户首次进入控制台后的最短路径')).not.toBeInTheDocument()
+  })
+
+  it('switches the embedded auth guidance when moving from login to register mode', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    const authShell = screen.getByTestId('login-auth-shell')
+    expect(within(within(authShell).getByTestId('login-auth-guidance-banner')).getByText(/已有账号可直接进入共享控制台/)).toBeInTheDocument()
+
+    const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
+    await user.click(within(modeSwitch).getByRole('tab', { name: '注册' }))
+
+    expect(screen.getByRole('heading', { name: '创建账号并进入 Shared Console' })).toBeInTheDocument()
+    const registerButton = within(modeSwitch).getByRole('tab', { name: '注册' })
+    const loginButton = within(modeSwitch).getByRole('tab', { name: '登录' })
+    expect(registerButton).toHaveAttribute('aria-selected', 'true')
+    expect(loginButton).toHaveAttribute('aria-selected', 'false')
+    const registerBanner = within(screen.getByTestId('login-auth-guidance-banner'))
+    expect(registerBanner.getByText(/注册成功后不会跳转到独立新手页/)).toBeInTheDocument()
+    expect(registerBanner.getByText(/项目市场 → 订单中心 → API Keys/)).toBeInTheDocument()
+    expect(registerBanner.queryByText(/已有账号可直接进入共享控制台/)).not.toBeInTheDocument()
   })
 
   it('opens register mode from the shared-console registration journey CTA', async () => {

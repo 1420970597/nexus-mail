@@ -468,7 +468,8 @@ describe('App', () => {
 
     renderApp([DEFAULT_LOGIN_ROUTE])
 
-    await user.click(await screen.findByRole('button', { name: '注册' }))
+    const authModeSwitch = await screen.findByTestId('login-auth-mode-switch')
+    await user.click(within(authModeSwitch).getByRole('tab', { name: '注册' }))
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')

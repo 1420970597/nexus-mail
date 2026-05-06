@@ -300,10 +300,26 @@ export function LoginPage() {
               <Space vertical spacing={18} align="start" style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
                   <div>
-                    <Typography.Title heading={3} style={{ marginBottom: 8 }}>
+                    <Typography.Text
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginBottom: 10,
+                        color: 'rgba(138,143,152,0.96)',
+                        fontSize: 12,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      统一控制台认证
+                    </Typography.Text>
+                    <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8', letterSpacing: '-0.24px' }}>
                       {copy.title}
                     </Typography.Title>
-                    <Typography.Paragraph style={{ margin: 0, color: '#475569' }}>{copy.helper}</Typography.Paragraph>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.82)', lineHeight: 1.65 }}>
+                      {copy.helper}
+                    </Typography.Paragraph>
                   </div>
                   <div
                     style={{
@@ -323,37 +339,94 @@ export function LoginPage() {
                 </Space>
 
                 <div
+                  data-testid="login-auth-mode-switch"
+                  role="tablist"
+                  aria-label="认证模式切换"
                   style={{
                     width: '100%',
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                    gap: 12,
+                    gap: 10,
                     padding: 6,
                     borderRadius: 18,
-                    background: '#eef2ff',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: 'rgba(0,0,0,0.22) 0px 0px 0px 1px inset',
                   }}
                 >
-                  <Button theme={mode === 'login' ? 'solid' : 'borderless'} type={mode === 'login' ? 'primary' : 'tertiary'} onClick={() => switchMode('login')}>
+                  <Button
+                    role="tab"
+                    aria-selected={mode === 'login'}
+                    theme={mode === 'login' ? 'solid' : 'borderless'}
+                    type={mode === 'login' ? 'primary' : 'tertiary'}
+                    style={
+                      mode === 'login'
+                        ? {
+                            borderRadius: 12,
+                            background: '#5e6ad2',
+                            border: '1px solid rgba(130, 143, 255, 0.9)',
+                            boxShadow: '0 10px 24px rgba(94,106,210,0.28)',
+                          }
+                        : {
+                            borderRadius: 12,
+                            color: '#d0d6e0',
+                          }
+                    }
+                    onClick={() => switchMode('login')}
+                  >
                     登录
                   </Button>
-                  <Button theme={mode === 'register' ? 'solid' : 'borderless'} type={mode === 'register' ? 'primary' : 'tertiary'} onClick={() => switchMode('register')}>
+                  <Button
+                    role="tab"
+                    aria-selected={mode === 'register'}
+                    theme={mode === 'register' ? 'solid' : 'borderless'}
+                    type={mode === 'register' ? 'primary' : 'tertiary'}
+                    style={
+                      mode === 'register'
+                        ? {
+                            borderRadius: 12,
+                            background: '#5e6ad2',
+                            border: '1px solid rgba(130, 143, 255, 0.9)',
+                            boxShadow: '0 10px 24px rgba(94,106,210,0.28)',
+                          }
+                        : {
+                            borderRadius: 12,
+                            color: '#d0d6e0',
+                          }
+                    }
+                    onClick={() => switchMode('register')}
+                  >
                     注册
                   </Button>
                 </div>
 
                 {mode === 'login' ? (
                   <Banner
+                    data-testid="login-auth-guidance-banner"
                     type="info"
                     fullMode={false}
+                    closeIcon={null}
                     description="已有账号可直接进入共享控制台；若首次使用，可先注册并在同一壳内按角色扩展工作台。"
-                    style={{ width: '100%' }}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.035)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: '#d0d6e0',
+                    }}
                   />
                 ) : (
                   <Banner
+                    data-testid="login-auth-guidance-banner"
                     type="success"
                     fullMode={false}
-                    description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局，并先按“项目市场 → 订单中心 → API 接入”完成首轮引导。"
-                    style={{ width: '100%' }}
+                    closeIcon={null}
+                    description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局，并先按“项目市场 → 订单中心 → API Keys”完成首轮引导。"
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.035)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: '#d0d6e0',
+                    }}
                   />
                 )}
 
@@ -363,6 +436,7 @@ export function LoginPage() {
                     label="邮箱"
                     placeholder="name@example.com"
                     rules={[{ required: true, message: '请输入邮箱' }]}
+                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)', color: '#f7f8f8' }}
                   />
                   <Form.Input
                     field="password"
@@ -370,6 +444,7 @@ export function LoginPage() {
                     mode="password"
                     placeholder={mode === 'login' ? '请输入密码' : '至少 8 位密码'}
                     rules={[{ required: true, message: '请输入密码' }]}
+                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)', color: '#f7f8f8' }}
                   />
                   {mode === 'register' ? (
                     <Form.Input
@@ -378,6 +453,7 @@ export function LoginPage() {
                       mode="password"
                       placeholder="再次输入密码"
                       rules={[{ required: true, message: '请再次输入密码' }]}
+                      fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)', color: '#f7f8f8' }}
                     />
                   ) : null}
                   {error ? <Typography.Text type="danger">{error}</Typography.Text> : null}
