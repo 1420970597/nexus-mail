@@ -230,7 +230,8 @@ describe('WebhooksPage', () => {
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationLoop = screen.getByTestId('webhooks-first-integration-loop')
     const loopScope = within(integrationLoop)
-    expect(loopScope.getByText('注册后首轮回调联调建议')).toBeInTheDocument()
+    expect(loopScope.getByRole('heading', { name: '1. 创建首个 endpoint' })).toBeInTheDocument()
+    expect(loopScope.getByRole('heading', { name: '2. 验证 test delivery' })).toBeInTheDocument()
     expect(loopScope.getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
     expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
@@ -253,20 +254,19 @@ describe('WebhooksPage', () => {
       <MemoryRouter initialEntries={[WEBHOOKS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-          <Route path="/" element={<div>共享控制台首页</div>} />
+          <Route path="/" element={<div data-testid="shared-console-home">共享控制台首页</div>} />
         </Routes>
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
-    const emptyActions = screen.getByTestId('webhooks-empty-state-actions')
+    const emptyActions = await screen.findByTestId('webhooks-empty-state-actions')
     expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     const fallbackButton = within(emptyActions).getByRole('button', { name: '返回推荐工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 
   it('renders shared-console metrics and delivery operations for admin role', async () => {

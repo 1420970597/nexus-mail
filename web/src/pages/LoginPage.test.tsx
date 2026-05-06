@@ -24,13 +24,17 @@ function renderLoginPage(initialEntry = '/login') {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route path="/" element={<div data-testid="shared-console-home">共享控制台首页</div>} />
         <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
         <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
       </Routes>
     </MemoryRouter>,
   )
+}
+
+function getRegisterJourneyScope() {
+  return within(screen.getByTestId('login-register-journey'))
 }
 
 describe('LoginPage', () => {
@@ -58,8 +62,7 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    const registerJourney = screen.getByTestId('login-register-journey')
-    const registerJourneyScope = within(registerJourney)
+    const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
@@ -73,7 +76,7 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
@@ -85,7 +88,7 @@ describe('LoginPage', () => {
       refreshToken: 'register-refresh',
       user: { id: 8, email: 'new@example.com', role: 'user' },
     })
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 
   it('blocks registration when confirmation password does not match', async () => {
@@ -93,7 +96,7 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    await user.click(screen.getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
     await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
     await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
     await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123?')
