@@ -664,8 +664,9 @@ describe('App', () => {
 
     renderApp(['/profile'])
 
-    await waitFor(() => expect(screen.getByText('供应商运营焦点')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
+    const profileIdentityCard = await screen.findByTestId('profile-primary-identity-card')
+    expect(within(profileIdentityCard).getByText('supplier@nexus-mail.local')).toBeInTheDocument()
+    await user.click(within(profileIdentityCard).getByRole('button', { name: '前往域名管理' }))
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
 
@@ -687,8 +688,9 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(await screen.findByRole('heading', { name: '供应商主任务' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
-    expect(screen.getByText('设置中心继续连接 Webhook、API Keys 与共享会话说明。')).toBeInTheDocument()
+    const supplierRouteMap = screen.getByTestId('dashboard-role-surface-map')
+    expect(within(supplierRouteMap).getByText('共享接入')).toBeInTheDocument()
+    expect(within(supplierRouteMap).getByText('/settings')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '前往域名管理' }))
     expect(await screen.findByText('域名池运营中枢')).toBeInTheDocument()
   })
@@ -778,9 +780,14 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    expect(await screen.findByText('规则命中概览')).toBeInTheDocument()
-    expect(screen.getByText('处置建议')).toBeInTheDocument()
-    expect(screen.getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
+    const overviewCard = await screen.findByTestId('admin-risk-overview-card')
+    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
+
+    const actionsCard = screen.getByTestId('admin-risk-actions-card')
+    expect(within(actionsCard).getByText('处置建议')).toBeInTheDocument()
+
+    const riskSignalsTable = screen.getByTestId('admin-risk-signals-table-card')
+    expect(within(riskSignalsTable).getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
     expect(screen.getByText('高风险')).toBeInTheDocument()
   })
 
@@ -863,7 +870,9 @@ describe('App', () => {
     const revenueCard = screen.getByTestId('dashboard-finished-revenue-card')
     expect(within(revenueCard).getByText('¥12.00')).toBeInTheDocument()
 
+    const adminSummaryCard = screen.getByTestId('dashboard-admin-ops-summary-card')
+    expect(within(adminSummaryCard).getByText('鉴权拒绝总数：1')).toBeInTheDocument()
+
     expect(screen.getByText('当前重点关注供应商')).toBeInTheDocument()
-    expect(screen.getByText('鉴权拒绝总数：1')).toBeInTheDocument()
   })
 })

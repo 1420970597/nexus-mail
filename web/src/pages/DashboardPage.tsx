@@ -675,7 +675,7 @@ export function DashboardPage() {
           </Card>
         </Col>
         <Col xs={24} xl={10}>
-          <Card style={metricCardStyle('rgba(14,165,233,0.24)')} bodyStyle={{ padding: 22 }}>
+          <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-role-surface-map" bodyStyle={{ padding: 22 }}>
             <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
               <div>
                 <Tag color="cyan">共享壳中的角色菜单映射</Tag>
@@ -745,7 +745,7 @@ export function DashboardPage() {
             <Col span={8}><Card title="鉴权拒绝率" style={metricCardStyle('rgba(239,68,68,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.audit.denied_rate_bps)}</Typography.Title></Card></Col>
           </Row>
 
-          <Card title="管理员运营摘要" style={{ width: '100%' }}>
+          <Card title="管理员运营摘要" data-testid="dashboard-admin-ops-summary-card" style={{ width: '100%' }}>
             <Space wrap>
               <Tag color="blue">项目：{adminSummary.projects.active}/{adminSummary.projects.total} 启用</Tag>
               <Tag color="green">完成订单：{adminSummary.orders.finished}</Tag>

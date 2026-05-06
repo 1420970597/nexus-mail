@@ -227,6 +227,7 @@ export function ProfilePage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={10}>
           <Card
+            data-testid="profile-primary-identity-card"
             style={{
               height: '100%',
               borderRadius: 24,

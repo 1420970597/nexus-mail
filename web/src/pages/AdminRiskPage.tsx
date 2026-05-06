@@ -376,7 +376,7 @@ export function AdminRiskPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={14}>
-          <Card title="规则命中概览" style={{ width: '100%' }}>
+          <Card title="规则命中概览" data-testid="admin-risk-overview-card" style={{ width: '100%' }}>
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
               <Tag color="red" prefixIcon={<IconAlertTriangle />}>高风险信号：{highSignals.length} 条</Tag>
               <Tag color="orange" prefixIcon={<IconHistogram />}>中风险信号：{mediumSignals.length} 条</Tag>
@@ -386,7 +386,7 @@ export function AdminRiskPage() {
           </Card>
         </Col>
         <Col xs={24} xl={10}>
-          <Card title="处置建议" style={{ width: '100%' }}>
+          <Card title="处置建议" data-testid="admin-risk-actions-card" style={{ width: '100%' }}>
             <Space vertical align="start" spacing={12}>
               <Tag color="red">1. 先打开审计日志查看 denied_whitelist / denied_rate_limit 来源 API Key</Tag>
               <Tag color="orange">2. 若高风险持续增长，收紧阈值并通知调用方修复重试策略</Tag>
@@ -481,7 +481,7 @@ export function AdminRiskPage() {
         />
       </Card>
 
-      <Card title="风险信号" style={{ width: '100%' }}>
+      <Card title="风险信号" data-testid="admin-risk-signals-table-card" style={{ width: '100%' }}>
         <Table
           pagination={false}
           rowKey={(record) => `${record?.category ?? 'unknown'}-${record?.title ?? 'signal'}`}
