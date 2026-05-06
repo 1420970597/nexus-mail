@@ -27,13 +27,13 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={ADMIN_SUPPLIERS_ROUTE} element={<AdminSuppliersPage />} />
-        <Route path={ADMIN_USERS_ROUTE} element={<div>结算与争议页面</div>} />
-        <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
-        <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
-        <Route path={DASHBOARD_ROUTE} element={<div>共享控制台首页</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route path={ADMIN_USERS_ROUTE} element={<div data-testid="admin-suppliers-route-stub-users">结算与争议页面</div>} />
+        <Route path={ADMIN_RISK_ROUTE} element={<div data-testid="admin-suppliers-route-stub-risk">风控中心页面</div>} />
+        <Route path={ADMIN_AUDIT_ROUTE} element={<div data-testid="admin-suppliers-route-stub-audit">审计日志页面</div>} />
+        <Route path={DASHBOARD_ROUTE} element={<div data-testid="admin-suppliers-route-stub-shared-home">共享控制台首页</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div data-testid="admin-suppliers-route-stub-api-keys">API Keys 页面</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="admin-suppliers-route-stub-webhooks">Webhook 设置页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div data-testid="admin-suppliers-route-stub-docs">API 文档页面</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -154,17 +154,17 @@ describe('AdminSuppliersPage', () => {
   })
 
   it.each([
-    ['前往处理结算 / 争议', '结算与争议页面'],
-    ['查看风控中心', '风控中心页面'],
-    ['查看审计日志', '审计日志页面'],
-  ])('navigates from mission-control action %s to the expected page', async (actionName, destinationText) => {
+    ['前往处理结算 / 争议', 'admin-suppliers-route-stub-users'],
+    ['查看风控中心', 'admin-suppliers-route-stub-risk'],
+    ['查看审计日志', 'admin-suppliers-route-stub-audit'],
+  ])('navigates from mission-control action %s to the expected page', async (actionName, destinationTestId) => {
     const user = userEvent.setup()
     renderAdminSuppliersPage()
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: actionName }))
-    expect(await screen.findByText(destinationText)).toBeInTheDocument()
+    expect(await screen.findByTestId(destinationTestId)).toBeInTheDocument()
   })
 
   it('suppresses unavailable action and bridge CTAs based on menu truth and falls back to dashboard', async () => {
@@ -186,7 +186,7 @@ describe('AdminSuppliersPage', () => {
 
     const fallbackButton = within(bridge).getByRole('button', { name: '返回推荐工作台' })
     await user.click(fallbackButton)
-    expect(await screen.findByText('共享控制台首页')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-suppliers-route-stub-shared-home')).toBeInTheDocument()
   })
 
   it('shows the scoped fallback card when every downstream admin action is hidden', async () => {
