@@ -733,7 +733,7 @@ export function DashboardPage() {
           </Row>
 
           <Row gutter={16} style={{ width: '100%' }}>
-            <Col span={6}><Card title="订单完成率" style={metricCardStyle('rgba(59,130,246,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.completion_rate_bps)}</Typography.Title></Card></Col>
+            <Col span={6}><Card title="订单完成率" data-testid="dashboard-order-completion-rate-card" style={metricCardStyle('rgba(59,130,246,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.completion_rate_bps)}</Typography.Title></Card></Col>
             <Col span={6}><Card title="订单超时率" style={metricCardStyle('rgba(249,115,22,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.timeout_rate_bps)}</Typography.Title></Card></Col>
             <Col span={6}><Card title="订单取消率" style={metricCardStyle('rgba(239,68,68,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.orders.cancel_rate_bps)}</Typography.Title></Card></Col>
             <Col span={6}><Card title="争议发生率" data-testid="dashboard-dispute-rate-card" style={metricCardStyle('rgba(168,85,247,0.12)')}><Typography.Title heading={3} style={{ margin: 0, color: '#f7f8f8' }}>{percentLabel(adminSummary.disputes.dispute_rate_bps)}</Typography.Title></Card></Col>

@@ -855,11 +855,19 @@ describe('App', () => {
       recent_audit: [],
     } as any)
     renderApp(['/'])
-    expect(await screen.findByText('订单完成率')).toBeInTheDocument()
-    expect(await screen.findByText('争议发生率')).toBeInTheDocument()
-    expect(await screen.findByText('已完成订单流水')).toBeInTheDocument()
+    const completionRateCard = await screen.findByTestId('dashboard-order-completion-rate-card')
+    expect(within(completionRateCard).getByText('订单完成率')).toBeInTheDocument()
+
+    const disputeCard = screen.getByTestId('dashboard-dispute-rate-card')
+    expect(within(disputeCard).getByText('争议发生率')).toBeInTheDocument()
+    expect(within(disputeCard).getByText('20.00%')).toBeInTheDocument()
+
+    const revenueCard = screen.getByTestId('dashboard-finished-revenue-card')
+    expect(within(revenueCard).getByText('已完成订单流水')).toBeInTheDocument()
+    expect(within(revenueCard).getByText('¥12.00')).toBeInTheDocument()
 
     const topSupplierCard = screen.getByTestId('dashboard-top-supplier-card')
+    expect(within(topSupplierCard).getByText('当前重点关注供应商')).toBeInTheDocument()
     expect(within(topSupplierCard).getByText('supplier-alpha@nexus-mail.local')).toBeInTheDocument()
     expect(within(topSupplierCard).getByText('完成率：58.00%')).toBeInTheDocument()
 
@@ -867,15 +875,7 @@ describe('App', () => {
     expect(within(supplierRankTable).getByText('supplier-beta@nexus-mail.local')).toBeInTheDocument()
     expect(within(supplierRankTable).getByText('92.00%')).toBeInTheDocument()
 
-    const disputeCard = screen.getByTestId('dashboard-dispute-rate-card')
-    expect(within(disputeCard).getByText('20.00%')).toBeInTheDocument()
-
-    const revenueCard = screen.getByTestId('dashboard-finished-revenue-card')
-    expect(within(revenueCard).getByText('¥12.00')).toBeInTheDocument()
-
     const adminSummaryCard = screen.getByTestId('dashboard-admin-ops-summary-card')
     expect(within(adminSummaryCard).getByText('鉴权拒绝总数：1')).toBeInTheDocument()
-
-    expect(screen.getByText('当前重点关注供应商')).toBeInTheDocument()
   })
 })
