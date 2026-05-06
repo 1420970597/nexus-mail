@@ -102,6 +102,8 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('settings-hero-card')
+    expect(within(heroCard).getByText('设置中枢')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台运行快捷入口' })).toBeInTheDocument()
 

@@ -191,6 +191,7 @@ export function AdminAuditPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="admin-audit-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -201,7 +202,7 @@ export function AdminAuditPage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="red" shape="circle">Audit Mission Control</Tag>
+          <Tag color="red" shape="circle">审计中枢</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>

@@ -217,6 +217,8 @@ describe('SupplierSettlementsPage', () => {
     renderSupplierSettlementsPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('supplier-settlements-hero-card')
+    expect(within(heroCard).getByText('资金争议中枢')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
     const missionScope = within(missionFlow)
     expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()

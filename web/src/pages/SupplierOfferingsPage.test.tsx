@@ -159,6 +159,7 @@ describe('SupplierOfferingsPage', () => {
     renderSupplierOfferingsPage()
 
     const heroCard = await screen.findByTestId('supplier-offerings-hero-card')
+    expect(within(heroCard).getByText('供货规则中枢')).toBeInTheDocument()
     expect(within(heroCard).getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     const totalMetric = within(heroCard).getByTestId('supplier-offerings-metric-total')
     expect(within(totalMetric).getByText('可售规则数')).toBeInTheDocument()

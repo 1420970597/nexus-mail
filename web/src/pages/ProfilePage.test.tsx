@@ -49,6 +49,8 @@ describe('ProfilePage', () => {
     let view = renderProfilePage()
 
     expect(await screen.findByRole('heading', { name: '个人资料' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('profile-hero-card')
+    expect(within(heroCard).getByText('个人资料中枢')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '用户接入焦点' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '集成准备' })).toBeInTheDocument()

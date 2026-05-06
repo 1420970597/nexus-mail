@@ -196,6 +196,7 @@ export function AdminRiskPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="admin-risk-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -207,7 +208,7 @@ export function AdminRiskPage() {
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
           <Tag color="red" shape="circle">
-            Risk Mission Control
+            风控中枢
           </Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>

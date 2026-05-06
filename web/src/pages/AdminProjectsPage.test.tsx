@@ -115,6 +115,8 @@ describe('AdminProjectsPage', () => {
     renderAdminProjectsPage()
 
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('admin-pricing-hero-card')
+    expect(within(heroCard).getByText('价格策略中枢')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-pricing-mission-flow')
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()

@@ -158,6 +158,8 @@ describe('SupplierDomainsPage', () => {
     renderSupplierDomainsPage()
 
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('supplier-domains-hero-card')
+    expect(within(heroCard).getByText('域名运营中枢')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
     expect(screen.getByText('单一供应商工作台')).toBeInTheDocument()
     expect(screen.getByText('域名 readiness 优先')).toBeInTheDocument()

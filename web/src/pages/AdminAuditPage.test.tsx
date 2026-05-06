@@ -99,6 +99,8 @@ describe('AdminAuditPage', () => {
     renderAdminAuditPage()
 
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('admin-audit-hero-card')
+    expect(within(heroCard).getByText('审计中枢')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('admin-audit-mission-flow')
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '打开资金工作台' })).toBeInTheDocument()

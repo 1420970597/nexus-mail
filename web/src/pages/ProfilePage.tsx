@@ -192,6 +192,7 @@ export function ProfilePage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="profile-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -202,7 +203,7 @@ export function ProfilePage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">Profile Mission Control</Tag>
+          <Tag color="cyan" shape="circle">个人资料中枢</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>个人资料</Typography.Title>

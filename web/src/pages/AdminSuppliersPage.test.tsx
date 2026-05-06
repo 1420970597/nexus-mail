@@ -183,6 +183,8 @@ describe('AdminSuppliersPage', () => {
     renderAdminSuppliersPage()
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('admin-suppliers-hero-card')
+    expect(within(heroCard).getByText('供应商运营中枢')).toBeInTheDocument()
     expect(screen.getByText('高待结算待办')).toBeInTheDocument()
     expect(screen.getByText('低履约风险')).toBeInTheDocument()
     expect(screen.getByText('争议敞口')).toBeInTheDocument()

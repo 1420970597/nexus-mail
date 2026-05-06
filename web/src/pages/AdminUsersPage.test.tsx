@@ -100,6 +100,9 @@ describe('AdminUsersPage dispute handling', () => {
       </MemoryRouter>,
     )
 
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('admin-users-hero-card')
+    expect(within(heroCard).getByText('用户运营中枢')).toBeInTheDocument()
     expect(await screen.findByText('验证码错误')).toBeInTheDocument()
     const disputeCard = screen.getByTestId('admin-users-dispute-resolution-card')
 

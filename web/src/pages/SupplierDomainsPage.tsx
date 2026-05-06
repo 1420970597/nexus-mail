@@ -235,6 +235,7 @@ export function SupplierDomainsPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="supplier-domains-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -245,7 +246,7 @@ export function SupplierDomainsPage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <Tag color="blue" size="large">Supplier Domain Mission Control</Tag>
+          <Tag color="blue" size="large">域名运营中枢</Tag>
           <Space vertical align="start" spacing={8}>
             <Typography.Title heading={2} style={{ margin: 0, color: '#f8fafc' }}>
               域名池运营中枢

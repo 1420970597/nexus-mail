@@ -95,6 +95,8 @@ describe('AdminRiskPage', () => {
     renderAdminRiskPage()
 
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('admin-risk-hero-card')
+    expect(within(heroCard).getByText('风控中枢')).toBeInTheDocument()
     expect(screen.getByText('风控中心')).toBeInTheDocument()
     expect(screen.getByText(/将真实风险信号、规则编辑、审计回放与高危运营处置统一收敛/)).toBeInTheDocument()
 

@@ -241,7 +241,7 @@ export function SupplierOfferingsPage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <Tag color="purple" size="large">Supplier Mission Control</Tag>
+          <Tag color="purple" size="large">供货规则中枢</Tag>
           <Space vertical align="start" spacing={8}>
             <Typography.Title heading={2} style={{ margin: 0, color: '#f8fafc' }}>
               供货规则编排中枢

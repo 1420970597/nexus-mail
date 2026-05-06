@@ -169,6 +169,7 @@ export function AdminSuppliersPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="admin-suppliers-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -179,7 +180,7 @@ export function AdminSuppliersPage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">Supplier Mission Control</Tag>
+          <Tag color="cyan" shape="circle">供应商运营中枢</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>供应商管理</Typography.Title>

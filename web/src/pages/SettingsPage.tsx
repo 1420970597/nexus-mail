@@ -297,6 +297,7 @@ export function SettingsPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="settings-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -307,7 +308,7 @@ export function SettingsPage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">Console Mission Control</Tag>
+          <Tag color="cyan" shape="circle">设置中枢</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>设置中心</Typography.Title>

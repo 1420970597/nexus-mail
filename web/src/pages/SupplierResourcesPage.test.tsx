@@ -172,6 +172,8 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
+    const heroCard = screen.getByTestId('supplier-resources-hero-card')
+    expect(within(heroCard).getByText('资源运营中枢')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
     expect(within(missionFlow).getByRole('heading', { name: '先维护域名池与 Catch-All' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('heading', { name: '继续收敛供货规则' })).toBeInTheDocument()

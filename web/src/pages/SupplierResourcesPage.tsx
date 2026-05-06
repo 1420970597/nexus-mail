@@ -326,6 +326,7 @@ export function SupplierResourcesPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="supplier-resources-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -337,7 +338,7 @@ export function SupplierResourcesPage() {
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
           <Tag color="green" shape="circle">
-            Supplier Resource Mission Control
+            资源运营中枢
           </Tag>
           <div>
             <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>

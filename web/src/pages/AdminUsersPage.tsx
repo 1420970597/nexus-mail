@@ -261,6 +261,7 @@ export function AdminUsersPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="admin-users-hero-card"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -271,7 +272,7 @@ export function AdminUsersPage() {
         bodyStyle={{ padding: 28 }}
       >
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Tag color="red" shape="circle">Admin Finance Mission Control</Tag>
+          <Tag color="red" shape="circle">用户运营中枢</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>用户管理</Typography.Title>
