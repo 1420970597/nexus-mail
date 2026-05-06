@@ -54,12 +54,12 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
+        <Route path={PROJECTS_ROUTE} element={<div data-testid="route-stub-projects">项目市场页面</div>} />
+        <Route path={ORDERS_ROUTE} element={<div data-testid="route-stub-orders">订单中心页面</div>} />
         <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path="/" element={<div>共享控制台首页</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="route-stub-webhooks">Webhook 设置页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div data-testid="route-stub-docs">API 文档页面</div>} />
+        <Route path="/" element={<div data-testid="route-stub-dashboard">共享控制台首页</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -303,26 +303,26 @@ describe('ApiKeysPage', () => {
     expect(bridgeScope.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
   })
 
-  it('navigates to shared integration routes from the bridge card and creation banner', async () => {
+  it('navigates to shared integration routes from the scoped bridge before and after key creation', async () => {
     const user = userEvent.setup()
 
     let view = renderApiKeysPage()
 
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /继续配置 Webhook/ }))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
+    expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /查看 API 文档/ }))
+    expect(await screen.findByTestId('route-stub-docs')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
     expect(await screen.findByText('默认密钥')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /返回项目市场/ }))
-    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /返回项目市场/ }))
+    expect(await screen.findByTestId('route-stub-projects')).toBeInTheDocument()
 
     mockedCreateAPIKey.mockResolvedValueOnce({
       plaintext_key: 'nmx_created_secret_2',
@@ -371,8 +371,8 @@ describe('ApiKeysPage', () => {
     await user.type(screen.getByLabelText('权限范围'), 'activation:write')
     await user.click(screen.getByRole('button', { name: '创建新密钥' }))
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /继续配置 Webhook/ }))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
+    expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
   })
 
   it('shows shared-console fallback when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {
@@ -392,6 +392,27 @@ describe('ApiKeysPage', () => {
     const fallback = screen.getByTestId('api-keys-shared-console-fallback')
     expect(within(fallback).getByRole('button', { name: /返回推荐工作台/ })).toBeInTheDocument()
     expect(within(fallback).getByText(/当 Webhook、文档与项目入口暂未由服务端暴露时/)).toBeInTheDocument()
+  })
+
+  it('navigates via the scoped fallback CTA to the preferred shared-console route stub', async () => {
+    const user = userEvent.setup()
+
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 3, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      ],
+    })
+
+    renderApiKeysPage()
+
+    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const fallback = screen.getByTestId('api-keys-shared-console-fallback')
+    await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
+    expect(await screen.findByTestId('route-stub-dashboard')).toBeInTheDocument()
   })
 
   it('opens confirmation modal with precise revoke warning copy', async () => {
