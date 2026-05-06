@@ -137,8 +137,9 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
-    expect(screen.getByText('供应商视角')).toBeInTheDocument()
+    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    expect(within(guidanceRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+    expect(within(guidanceRegion).getByText('供应商视角')).toBeInTheDocument()
   })
 
   it('renders role-specific guidance for admin role', async () => {
@@ -149,8 +150,9 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
-    expect(screen.getByText('管理员视角')).toBeInTheDocument()
+    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    expect(within(guidanceRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    expect(within(guidanceRegion).getByText('管理员视角')).toBeInTheDocument()
   })
 
   it('queues test delivery and reloads deliveries', async () => {
@@ -203,7 +205,8 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
+    const currentEndpointsCard = await screen.findByTestId('webhooks-current-endpoints-card')
+    expect(within(currentEndpointsCard).getByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
   })
 
   it('renders shared-console navigation actions for the first integration loop', async () => {
@@ -343,7 +346,9 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    expect(within(guidanceRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    expect(within(guidanceRegion).getByText('管理员视角')).toBeInTheDocument()
 
     const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
     expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
@@ -360,7 +365,6 @@ describe('WebhooksPage', () => {
     const deliveryMetrics = screen.getByTestId('webhooks-latest-delivery-metric')
     expect(within(deliveryMetrics).getByText('最近回调')).toBeInTheDocument()
     expect(within(deliveryMetrics).getByText('2026-04-29T00:03:00Z')).toBeInTheDocument()
-    const guidanceRegion = screen.getByTestId('webhooks-role-guidance')
     expect(within(guidanceRegion).getByText(/重点关注 failed \/ pending 重试链路与 last_error/)).toBeInTheDocument()
   })
 })
