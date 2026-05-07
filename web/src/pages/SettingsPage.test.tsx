@@ -190,7 +190,7 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('hides the user first-run checklist for supplier users while keeping shared shortcuts', async () => {
+  it('hides the user first-run checklist for supplier users while keeping supplier/shared shortcuts scoped to the runtime shortcut lane', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -210,8 +210,11 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('设置中心')).toBeInTheDocument()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
     expect(screen.getByText('控制台运行快捷入口')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查看供应商资源' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '前往供应商结算' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+
+    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    expect(within(shortcutLane).getByRole('button', { name: '查看供应商资源' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('button', { name: '前往供应商结算' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('button', { name: '打开项目市场' })).not.toBeInTheDocument()
   })
 })
