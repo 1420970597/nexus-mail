@@ -445,6 +445,7 @@ export function DashboardPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        data-testid="dashboard-hero-card"
         style={{
           width: '100%',
           borderRadius: 24,
@@ -576,10 +577,10 @@ export function DashboardPage() {
               </Space>
             </Card>
           ) : null}
-          <Row gutter={[16, 16]} style={{ width: '100%' }}>
+          <Row gutter={[16, 16]} style={{ width: '100%' }} data-testid="dashboard-role-actions">
             {actions.map((item) => (
               <Col xs={24} lg={8} key={item.title}>
-                <Card style={metricCardStyle(item.accent)} bodyStyle={{ padding: 18 }}>
+                <Card data-testid={`dashboard-role-action-${item.key}`} style={metricCardStyle(item.accent)} bodyStyle={{ padding: 18 }}>
                   <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                     <Tag color="grey" prefixIcon={item.icon}>{item.title}</Tag>
                     <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>

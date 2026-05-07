@@ -203,7 +203,8 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
-    expect(screen.getByText('共享控制台入口')).toBeInTheDocument()
+    const heroCard = screen.getByTestId('dashboard-hero-card')
+    expect(within(heroCard).getByText('共享控制台入口')).toBeInTheDocument()
     const lane = screen.getByTestId('dashboard-next-steps-lane')
     const scoped = within(lane)
     expect(scoped.getByTestId('dashboard-next-step-balance')).toBeInTheDocument()
@@ -340,7 +341,12 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
-    expect(screen.getByText('共享控制台入口')).toBeInTheDocument()
+    const heroCard = screen.getByTestId('dashboard-hero-card')
+    expect(within(heroCard).getByText('共享控制台入口')).toBeInTheDocument()
+    const roleActions = screen.getByTestId('dashboard-role-actions')
+    expect(within(roleActions).getByTestId('dashboard-role-action-admin-suppliers')).toBeInTheDocument()
+    expect(within(roleActions).getByTestId('dashboard-role-action-admin-risk')).toBeInTheDocument()
+    expect(within(roleActions).getByTestId('dashboard-role-action-webhooks')).toBeInTheDocument()
     const roleSurfaceMap = await screen.findByTestId('dashboard-role-surface-map')
     const scopedSurface = within(roleSurfaceMap)
     expect(scopedSurface.getByText('基础工作台')).toBeInTheDocument()
@@ -428,6 +434,9 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const roleActions = screen.getByTestId('dashboard-role-actions')
+    expect(within(roleActions).getByTestId('dashboard-role-action-supplier-domains')).toBeInTheDocument()
+    expect(within(roleActions).getByTestId('dashboard-role-action-supplier-offerings')).toBeInTheDocument()
     const roleSurfaceMap = await screen.findByTestId('dashboard-role-surface-map')
     const scopedSurface = within(roleSurfaceMap)
     expect(scopedSurface.getByText('基础工作台')).toBeInTheDocument()
@@ -436,8 +445,8 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scopedSurface.getByText(SUPPLIER_DOMAINS_ROUTE)).toBeInTheDocument()
     expect(scopedSurface.getByText(SETTINGS_ROUTE)).toBeInTheDocument()
 
-    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '调整供货规则' })).toBeInTheDocument()
+    expect(within(roleActions).getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
+    expect(within(roleActions).getByRole('button', { name: '调整供货规则' })).toBeInTheDocument()
     expect(screen.queryByTestId('dashboard-next-steps-lane')).not.toBeInTheDocument()
   })
 
@@ -446,13 +455,15 @@ describe('DashboardPage shared-console journey hub', () => {
     const user = userEvent.setup()
 
     let view = renderDashboard()
-    await user.click(await screen.findByRole('button', { name: '前往域名管理' }))
+    let roleActions = await screen.findByTestId('dashboard-role-actions')
+    await user.click(within(roleActions).getByRole('button', { name: '前往域名管理' }))
     expect(await screen.findByTestId('dashboard-supplier-domains-route-stub')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
-    await user.click(await screen.findByRole('button', { name: '调整供货规则' }))
+    roleActions = await screen.findByTestId('dashboard-role-actions')
+    await user.click(within(roleActions).getByRole('button', { name: '调整供货规则' }))
     expect(await screen.findByTestId('dashboard-supplier-offerings-route-stub')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     view.unmount()
