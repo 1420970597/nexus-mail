@@ -183,19 +183,30 @@ describe('SupplierResourcesPage', () => {
     expect(screen.getByTestId('supplier-resources-bridge-api-keys')).toHaveTextContent(`API Keys · ${API_KEYS_ROUTE}`)
     expect(screen.getByTestId('supplier-resources-bridge-webhooks')).toHaveTextContent(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)
     expect(screen.getByTestId('supplier-resources-bridge-docs')).toHaveTextContent(`API 文档 · ${DOCS_ROUTE}`)
-    expect(screen.getByText('健康账号')).toBeInTheDocument()
-    expect(screen.getByText('可用邮箱池')).toBeInTheDocument()
+
+    const healthyAccountsMetric = screen.getByTestId('supplier-resources-metric-healthy-accounts')
+    expect(within(healthyAccountsMetric).getByText('健康账号')).toBeInTheDocument()
+    expect(within(healthyAccountsMetric).getByText('1')).toBeInTheDocument()
+
+    const availableMailboxesMetric = screen.getByTestId('supplier-resources-metric-available-mailboxes')
+    expect(within(availableMailboxesMetric).getByText('可用邮箱池')).toBeInTheDocument()
+    expect(within(availableMailboxesMetric).getByText('1')).toBeInTheDocument()
   })
 
   it('shows loaded resource summaries and records from the real overview payload', async () => {
     renderPage()
 
-    expect(await screen.findByText('mail.nexus.test')).toBeInTheDocument()
-    expect(screen.getByText('agent-001@mail.nexus.test')).toBeInTheDocument()
-    expect(screen.getByText('gmail')).toBeInTheDocument()
-    expect(screen.getByText('已开启')).toBeInTheDocument()
-    expect(screen.getByText('healthy')).toBeInTheDocument()
-    expect(screen.getByText('global')).toBeInTheDocument()
+    const domainsTable = await screen.findByTestId('supplier-resources-domains-table-card')
+    expect(within(domainsTable).getByText('mail.nexus.test')).toBeInTheDocument()
+    expect(within(domainsTable).getByText('global')).toBeInTheDocument()
+    expect(within(domainsTable).getByText('已开启')).toBeInTheDocument()
+
+    const accountsTable = screen.getByTestId('supplier-resources-accounts-table-card')
+    expect(within(accountsTable).getByText('gmail')).toBeInTheDocument()
+    expect(within(accountsTable).getByText('healthy')).toBeInTheDocument()
+
+    const mailboxesTable = screen.getByTestId('supplier-resources-mailboxes-table-card')
+    expect(within(mailboxesTable).getByText('agent-001@mail.nexus.test')).toBeInTheDocument()
   })
 
   it('renders the three resource save actions for supplier workflows', async () => {

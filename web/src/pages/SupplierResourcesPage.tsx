@@ -44,14 +44,17 @@ function MetricCard({
   value,
   description,
   icon,
+  testId,
 }: {
   title: string
   value: string
   description: string
   icon: JSX.Element
+  testId?: string
 }) {
   return (
     <Card
+      data-testid={testId}
       style={{
         flex: '1 1 220px',
         minWidth: 220,
@@ -363,10 +366,34 @@ export function SupplierResourcesPage() {
       </Card>
 
       <Space wrap style={{ width: '100%' }} spacing={16}>
-        <MetricCard title="域名池" value={String(data.domains.length)} description="当前供应商可运营的域名总数" icon={<IconServer />} />
-        <MetricCard title="Active 域名" value={String(activeDomains)} description="仍可参与供货的域名记录" icon={<IconTickCircle />} />
-        <MetricCard title="健康账号" value={String(healthyAccounts)} description="健康状态为 healthy 的第三方邮箱账号" icon={<IconActivity />} />
-        <MetricCard title="可用邮箱池" value={String(availableMailboxes)} description="状态为 available 的邮箱 / 别名记录" icon={<IconMail />} />
+        <MetricCard
+          testId="supplier-resources-metric-domains"
+          title="域名池"
+          value={String(data.domains.length)}
+          description="当前供应商可运营的域名总数"
+          icon={<IconServer />}
+        />
+        <MetricCard
+          testId="supplier-resources-metric-active-domains"
+          title="Active 域名"
+          value={String(activeDomains)}
+          description="仍可参与供货的域名记录"
+          icon={<IconTickCircle />}
+        />
+        <MetricCard
+          testId="supplier-resources-metric-healthy-accounts"
+          title="健康账号"
+          value={String(healthyAccounts)}
+          description="健康状态为 healthy 的第三方邮箱账号"
+          icon={<IconActivity />}
+        />
+        <MetricCard
+          testId="supplier-resources-metric-available-mailboxes"
+          title="可用邮箱池"
+          value={String(availableMailboxes)}
+          description="状态为 available 的邮箱 / 别名记录"
+          icon={<IconMail />}
+        />
       </Space>
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
@@ -590,7 +617,7 @@ export function SupplierResourcesPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={8}>
-          <Card title="域名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+          <Card data-testid="supplier-resources-domains-table-card" title="域名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
             <Table
               pagination={false}
               rowKey="id"
@@ -605,7 +632,7 @@ export function SupplierResourcesPage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card title="第三方邮箱账号池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+          <Card data-testid="supplier-resources-accounts-table-card" title="第三方邮箱账号池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
             <Table
               pagination={false}
               rowKey="id"
@@ -622,7 +649,7 @@ export function SupplierResourcesPage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card title="邮箱池 / 别名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+          <Card data-testid="supplier-resources-mailboxes-table-card" title="邮箱池 / 别名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
             <Table
               pagination={false}
               rowKey="id"
