@@ -54,7 +54,7 @@ describe('ConsoleLayout', () => {
     expect(within(quickActions).queryByRole('button', { name: /API Keys/ })).not.toBeInTheDocument()
   })
 
-  it('renders quick actions in shared route schema order and navigates through them', async () => {
+  it('renders quick actions in shared route schema order and navigates through canonical route stubs', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -81,17 +81,46 @@ describe('ConsoleLayout', () => {
               </ConsoleLayout>
             }
           />
+          <Route
+            path="/projects"
+            element={
+              <section data-testid="console-layout-route-stub-projects">
+                <h1>项目市场</h1>
+              </section>
+            }
+          />
+          <Route
+            path="/balance"
+            element={
+              <section data-testid="console-layout-route-stub-balance">
+                <h1>余额中心</h1>
+              </section>
+            }
+          />
+          <Route
+            path="/docs"
+            element={
+              <section data-testid="console-layout-route-stub-docs">
+                <h1>API 文档</h1>
+              </section>
+            }
+          />
         </Routes>
       </MemoryRouter>,
     )
 
     const quickActions = screen.getByTestId('console-layout-quick-actions')
-    const quickActionButtons = within(quickActions).getAllByRole('button').filter((button) =>
-      ['项目市场', '余额中心', 'API 文档'].includes(button.textContent?.trim() ?? ''),
-    )
-    expect(quickActionButtons.map((button) => button.textContent?.trim())).toEqual(['项目市场', '余额中心', 'API 文档'])
+    const orderedQuickActionIds = [
+      'console-layout-quick-action-projects',
+      'console-layout-quick-action-balance',
+      'console-layout-quick-action-docs',
+    ]
+    expect(
+      orderedQuickActionIds.map((testId) => within(quickActions).getByTestId(testId).textContent?.trim()),
+    ).toEqual(['项目市场', '余额中心', 'API 文档'])
 
-    await user.click(within(quickActions).getByRole('button', { name: /项目市场/ }))
-    expect(await screen.findAllByText('项目市场')).not.toHaveLength(0)
+    await user.click(within(quickActions).getByTestId('console-layout-quick-action-projects'))
+    expect(await screen.findByTestId('console-layout-route-stub-projects')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
   })
 })

@@ -156,6 +156,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
             {visibleQuickActions.slice(0, 3).map((item) => (
               <Button
                 key={item.path}
+                data-testid={`console-layout-quick-action-${item.path === '/' ? 'dashboard' : item.path.slice(1).replace(/\//g, '-')}`}
                 icon={item.icon}
                 theme="borderless"
                 style={{
