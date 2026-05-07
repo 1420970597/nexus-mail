@@ -114,9 +114,10 @@ describe('ProfilePage', () => {
     expect(await screen.findByRole('heading', { name: '个人资料' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('profile-hero-card')
     expect(within(heroCard).getByText('个人资料中枢')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '用户接入焦点' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
+    const roleFocusCard = screen.getByTestId('profile-role-focus-card')
+    expect(within(roleFocusCard).getByRole('heading', { name: '用户接入焦点' })).toBeInTheDocument()
+    expect(within(roleFocusCard).getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
+    expect(within(roleFocusCard).getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
 
     const capabilityRegion = screen.getByTestId('profile-capability-bridge')
     expect(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()

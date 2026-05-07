@@ -262,7 +262,7 @@ export function ProfilePage() {
           </Card>
         </Col>
         <Col xs={24} xl={14}>
-          <Card title={profileScene.title} style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 24 }}>
+          <Card data-testid="profile-role-focus-card" title={profileScene.title} style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 24 }}>
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
               {profileScene.focuses.map((item) => (
                 <Card
