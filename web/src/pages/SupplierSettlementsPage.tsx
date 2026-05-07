@@ -54,9 +54,16 @@ function sectionCardStyle() {
   }
 }
 
-function MetricCard({ title, value, description, color }: { title: string; value: string; description: string; color: string }) {
+function MetricCard({
+  title,
+  value,
+  description,
+  color,
+  testId,
+}: { title: string; value: string; description: string; color: string; testId?: string }) {
   return (
     <Card
+      data-testid={testId}
       style={{
         flex: '1 1 220px',
         minWidth: 220,
@@ -265,10 +272,10 @@ export function SupplierSettlementsPage() {
             style={{ width: '100%', background: 'rgba(15, 23, 42, 0.42)', borderRadius: 18, border: '1px solid rgba(148,163,184,0.18)' }}
           />
           <Space wrap spacing={16} style={{ width: '100%' }}>
-            <MetricCard title="待结算余额" value={metrics.pendingSettlement} description="等待平台确认或进入周期结算的供应商金额。" color="rgba(34,197,94,0.35)" />
-            <MetricCard title="活跃成本模型" value={metrics.activeProfiles} description="status=active 的项目成本模型数，可直接参与毛利测算。" color="rgba(59,130,246,0.35)" />
-            <MetricCard title="开放争议" value={metrics.openDisputes} description="当前仍待处理的争议单数量，需要继续跟进售后闭环。" color="rgba(249,115,22,0.35)" />
-            <MetricCard title={metrics.entryLabel} value={metrics.entryTotal} description="当前已加载结算流水列表的金额总和，用于快速感知资金规模。" color="rgba(168,85,247,0.35)" />
+            <MetricCard testId="supplier-settlements-metric-pending" title="待结算余额" value={metrics.pendingSettlement} description="等待平台确认或进入周期结算的供应商金额。" color="rgba(34,197,94,0.35)" />
+            <MetricCard testId="supplier-settlements-metric-active-profiles" title="活跃成本模型" value={metrics.activeProfiles} description="status=active 的项目成本模型数，可直接参与毛利测算。" color="rgba(59,130,246,0.35)" />
+            <MetricCard testId="supplier-settlements-metric-open-disputes" title="开放争议" value={metrics.openDisputes} description="当前仍待处理的争议单数量，需要继续跟进售后闭环。" color="rgba(249,115,22,0.35)" />
+            <MetricCard testId="supplier-settlements-metric-entry-total" title={metrics.entryLabel} value={metrics.entryTotal} description="当前已加载结算流水列表的金额总和，用于快速感知资金规模。" color="rgba(168,85,247,0.35)" />
           </Space>
         </Space>
       </Card>
