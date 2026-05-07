@@ -119,7 +119,11 @@ describe('LoginPage', () => {
     expect(within(authShell).getByTestId('login-auth-guidance-banner')).toBeInTheDocument()
 
     const registerJourneyScope = getRegisterJourneyScope()
-    expect(registerJourneyScope.getByRole('heading', { name: '注册后进入同一套控制台' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '首轮接入路径' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: 'API Keys 起步' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: 'Webhook 联调' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '文档回放' })).toBeInTheDocument()
+    expect(registerJourneyScope.queryByRole('heading', { name: '注册后进入同一套控制台' })).not.toBeInTheDocument()
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
   })
 

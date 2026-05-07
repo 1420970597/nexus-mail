@@ -63,16 +63,16 @@ const roleWorkspaceCards = [
 
 const integrationRunway = [
   {
-    title: '注册后配置 API Keys',
-    description: '注册成功后立即落到共享控制台，从同一壳里生成首个 API Key 并确认最小权限。',
+    title: 'API Keys 起步',
+    description: '注册成功后立即进入共享控制台，在第一屏完成首个 API Key 与最小权限确认。',
   },
   {
-    title: 'Webhook 回调联调',
-    description: '继续配置白名单与 Webhook endpoint，发起一次真实 test delivery 作为首次联调。',
+    title: 'Webhook 联调',
+    description: '沿同一导航继续配置回调地址与白名单，并发起一次真实 test delivery。',
   },
   {
-    title: '文档回放校验',
-    description: '回到 API 文档核对请求契约，再用真实 API 回放验证集成链路。',
+    title: '文档回放',
+    description: '回到 API 文档核对请求契约，再用真实 API 回放验证整条接入链路。',
   },
 ]
 
@@ -274,10 +274,10 @@ export function LoginPage() {
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                   <div>
                     <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
-                      注册后进入同一套控制台
+                      首轮接入路径
                     </Typography.Title>
-                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.7)', margin: 0, maxWidth: 620, lineHeight: 1.72 }}>
-                      保持单一深色共享壳：先创建账户，再在同一导航骨架里完成 API Keys、Webhook 与 Docs 的首轮接入联调。
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, maxWidth: 560, lineHeight: 1.68, fontSize: 14 }}>
+                      注册后直接进入同一深色控制台，用更短的首轮路径完成 API 接入、回调联调与文档回放。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
@@ -291,10 +291,10 @@ export function LoginPage() {
                             border: '1px solid rgba(255,255,255,0.05)',
                           }}
                         >
-                          <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.14px' }}>
+                          <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.14px' }}>
                             {item.title}
                           </Typography.Title>
-                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, fontSize: 13, lineHeight: 1.68 }}>
+                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, fontSize: 12, lineHeight: 1.6 }}>
                             {item.description}
                           </Typography.Paragraph>
                         </Card>
