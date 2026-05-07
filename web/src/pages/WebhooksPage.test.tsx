@@ -36,9 +36,23 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">开发者 API 接入工作台</div>} />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="webhooks-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
         <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-        <Route path={DOCS_ROUTE} element={<div data-testid="api-docs-route-stub">API 文档</div>} />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="webhooks-route-stub-docs">
+              <h1>API 文档</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -217,7 +231,8 @@ describe('WebhooksPage', () => {
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
-    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
+    expect(await screen.findByTestId('webhooks-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     seedRole('user')
@@ -225,7 +240,8 @@ describe('WebhooksPage', () => {
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByTestId('api-docs-route-stub')).toBeInTheDocument()
+    expect(await screen.findByTestId('webhooks-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
   })
 
   it('renders a shared integration loop card with scoped CTA contracts and no fallback when shared destinations are available', async () => {
