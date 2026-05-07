@@ -131,7 +131,7 @@ describe('SupplierResourcesPage', () => {
       refreshToken: 'refresh',
       user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
         { key: 'supplier-domains', label: '域名管理', path: SUPPLIER_DOMAINS_ROUTE },
         { key: 'supplier-offerings', label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
@@ -279,7 +279,7 @@ describe('SupplierResourcesPage', () => {
       refreshToken: 'refresh',
       user: { id: 8, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
       ],
     })
@@ -313,7 +313,7 @@ describe('SupplierResourcesPage', () => {
       refreshToken: 'refresh',
       user: { id: 10, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
         { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
       ],
@@ -351,7 +351,7 @@ describe('SupplierResourcesPage', () => {
       refreshToken: 'refresh',
       user: { id: 11, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
       ],
     })

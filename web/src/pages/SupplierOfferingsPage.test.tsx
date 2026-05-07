@@ -107,13 +107,13 @@ describe('SupplierOfferingsPage', () => {
       refreshToken: 'refresh',
       user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { label: '仪表盘', path: DASHBOARD_ROUTE },
         { label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
         { label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
         { label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
         { label: 'API Keys', path: API_KEYS_ROUTE },
-        { label: 'Webhook', path: WEBHOOKS_ROUTE },
-        { label: 'Docs', path: DOCS_ROUTE },
+        { label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { label: 'API 文档', path: DOCS_ROUTE },
       ],
     })
   })
@@ -231,7 +231,7 @@ describe('SupplierOfferingsPage', () => {
       refreshToken: 'refresh',
       user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { label: '仪表盘', path: DASHBOARD_ROUTE },
         { label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
         { label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
       ],
@@ -251,7 +251,8 @@ describe('SupplierOfferingsPage', () => {
     expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
     expect(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button')).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-offerings-shared-console-fallback-button'))
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('shows a mission fallback card and returns to dashboard when no supplier follow-up routes remain', async () => {
@@ -262,7 +263,7 @@ describe('SupplierOfferingsPage', () => {
       refreshToken: 'refresh',
       user: { id: 7, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { label: '仪表盘', path: DASHBOARD_ROUTE },
         { label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
       ],
     })
@@ -281,7 +282,8 @@ describe('SupplierOfferingsPage', () => {
     expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByTestId('supplier-offerings-mission-fallback-button'))
-    expect(await screen.findByText('控制台总览')).toBeInTheDocument()
+    expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('submits create offering form and reloads data', async () => {

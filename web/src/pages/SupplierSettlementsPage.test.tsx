@@ -196,13 +196,13 @@ describe('SupplierSettlementsPage', () => {
       refreshToken: 'refresh',
       user: { id: 88, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
         { key: 'supplier-offerings', label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
         { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
         { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
-        { key: 'webhooks', label: 'Webhook', path: WEBHOOKS_ROUTE },
-        { key: 'docs', label: 'Docs', path: DOCS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
       ],
     })
     seedFinancePayload()
@@ -293,7 +293,7 @@ describe('SupplierSettlementsPage', () => {
       refreshToken: 'refresh',
       user: { id: 89, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
       ],
     })
@@ -349,7 +349,7 @@ describe('SupplierSettlementsPage', () => {
       refreshToken: 'refresh',
       user: { id: 89, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
-        { key: 'dashboard', label: '共享控制台首页', path: DASHBOARD_ROUTE },
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
         { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
       ],
     })
