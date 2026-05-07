@@ -243,15 +243,21 @@ describe('SupplierSettlementsPage', () => {
   it('shows real supplier settlement records, reports, and disputes from loaded payloads', async () => {
     renderSupplierSettlementsPage()
 
-    expect(await screen.findByText('Discord 首单')).toBeInTheDocument()
+    const entriesSection = await screen.findByTestId('supplier-settlements-entries-card')
+    expect(within(entriesSection).getByText('Discord 首单')).toBeInTheDocument()
+    expect(within(entriesSection).getByText('¥32.00')).toBeInTheDocument()
+
     const reportSection = screen.getByTestId('supplier-settlements-reports-card')
     expect(within(reportSection).getByText(/^discord$/i)).toBeInTheDocument()
-    expect(screen.getByText('¥1899.00')).toBeInTheDocument()
-    expect(screen.getByText('¥77.00')).toBeInTheDocument()
-    expect(screen.getByText('主力供给')).toBeInTheDocument()
-    expect(screen.getByText('验证码错误')).toBeInTheDocument()
-    expect(screen.getByText('¥388.00')).toBeInTheDocument()
-    expect(screen.getByText('¥235.00')).toBeInTheDocument()
+    expect(within(reportSection).getByText('¥388.00')).toBeInTheDocument()
+    expect(within(reportSection).getByText('¥235.00')).toBeInTheDocument()
+
+    const costProfilesSection = screen.getByTestId('supplier-settlements-cost-profiles-card')
+    expect(within(costProfilesSection).getByText('主力供给')).toBeInTheDocument()
+
+    const disputesSection = screen.getByTestId('supplier-settlements-disputes-card')
+    expect(within(disputesSection).getByText('验证码错误')).toBeInTheDocument()
+    expect(within(disputesSection).getByText('¥0.00')).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to supplier resource, offering, and api key pages', async () => {

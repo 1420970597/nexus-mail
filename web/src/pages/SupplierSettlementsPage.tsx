@@ -408,7 +408,7 @@ export function SupplierSettlementsPage() {
         </Space>
       </Card>
 
-      <Card title="供应商成本模型" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading}>
+      <Card title="供应商成本模型" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-cost-profiles-card">
         <Form form={costForm} layout="horizontal" labelPosition="left" initValues={{ currency: 'CNY', status: 'active' }}>
           <Form.Input field="project_key" label="项目键" maxLength={64} rules={[{ required: true, message: '请输入项目键' }]} />
           <Form.InputNumber field="cost_per_success" label="成功成本（分）" min={0} rules={[{ required: true, message: '请输入成功成本' }]} style={{ width: '100%' }} />
@@ -475,7 +475,7 @@ export function SupplierSettlementsPage() {
         />
       </Card>
 
-      <Card title="供应商争议单" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading}>
+      <Card title="供应商争议单" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-disputes-card">
         <Form form={disputeForm} layout="horizontal" labelPosition="left">
           <Form.InputNumber field="order_id" label="订单 ID" rules={[{ required: true, message: '请输入订单 ID' }]} style={{ width: '100%' }} />
           <Form.Input field="reason" label="争议原因" rules={[{ required: true, message: '请输入争议原因' }]} />
@@ -498,7 +498,7 @@ export function SupplierSettlementsPage() {
         />
       </Card>
 
-      <Card title="结算流水" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading}>
+      <Card title="结算流水" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-entries-card">
         <Table
           pagination={false}
           rowKey="id"
