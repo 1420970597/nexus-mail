@@ -194,6 +194,7 @@ interface RoleMissionStep {
 }
 
 interface RoleSurfaceItem {
+  key: string
   label: string
   route: string
   summary: string
@@ -355,33 +356,33 @@ function roleSurface(menu: MenuItem[], role?: string): RoleSurfaceItem[] {
   const itemsByPath = new Map(menu.map((item) => [item.path, item]))
 
   if (role === 'admin') {
-    const surfaces: RoleSurfaceItem[] = [{ label: '基础工作台', route: '/', summary: '总览、共享入口与实时概览都从这里开始。' }]
+    const surfaces: RoleSurfaceItem[] = [{ key: 'basic', label: '基础工作台', route: '/', summary: '总览、共享入口与实时概览都从这里开始。' }]
     if (itemsByPath.has('/admin/risk')) {
-      surfaces.push({ label: '管理员扩展', route: '/admin/risk', summary: '风控中心、审计日志、供应商管理等管理动作在此展开。' })
+      surfaces.push({ key: 'admin-risk', label: '管理员扩展', route: '/admin/risk', summary: '风控中心、审计日志、供应商管理等管理动作在此展开。' })
     }
     if (itemsByPath.has('/webhooks')) {
-      surfaces.push({ label: '共享接入', route: '/webhooks', summary: 'Webhook 与 API 文档仍留在共享控制台内。' })
+      surfaces.push({ key: 'webhooks', label: '共享接入', route: '/webhooks', summary: 'Webhook 与 API 文档仍留在共享控制台内。' })
     }
     return surfaces
   }
 
   if (role === 'supplier') {
-    const surfaces: RoleSurfaceItem[] = [{ label: '基础工作台', route: '/', summary: '总览页先聚合供给侧最重要的下一步动作。' }]
+    const surfaces: RoleSurfaceItem[] = [{ key: 'basic', label: '基础工作台', route: '/', summary: '总览页先聚合供给侧最重要的下一步动作。' }]
     if (itemsByPath.has('/supplier/domains')) {
-      surfaces.push({ label: '供应商扩展', route: '/supplier/domains', summary: '域名池、资源、供货规则与结算围绕供给闭环展开。' })
+      surfaces.push({ key: 'supplier-domains', label: '供应商扩展', route: '/supplier/domains', summary: '域名池、资源、供货规则与结算围绕供给闭环展开。' })
     }
     if (itemsByPath.has('/settings')) {
-      surfaces.push({ label: '共享接入', route: '/settings', summary: '设置中心继续连接 Webhook、API Keys 与共享会话说明。' })
+      surfaces.push({ key: 'settings', label: '共享接入', route: '/settings', summary: '设置中心继续连接 Webhook、API Keys 与共享会话说明。' })
     }
     return surfaces
   }
 
-  const surfaces: RoleSurfaceItem[] = [{ label: '基础工作台', route: '/', summary: '总览页负责把采购、订单与集成入口组织在同一壳里。' }]
+  const surfaces: RoleSurfaceItem[] = [{ key: 'basic', label: '基础工作台', route: '/', summary: '总览页负责把采购、订单与集成入口组织在同一壳里。' }]
   if (itemsByPath.has('/projects')) {
-    surfaces.push({ label: '采购执行', route: '/projects', summary: '项目市场与订单中心承接真实购买链路。' })
+    surfaces.push({ key: 'projects', label: '采购执行', route: '/projects', summary: '项目市场与订单中心承接真实购买链路。' })
   }
   if (itemsByPath.has(API_KEYS_ROUTE)) {
-    surfaces.push({ label: '集成入口', route: API_KEYS_ROUTE, summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' })
+    surfaces.push({ key: 'api-keys', label: '集成入口', route: API_KEYS_ROUTE, summary: 'API Keys、Webhook 与文档是共享控制台中的接入层。' })
   }
   return surfaces
 }
@@ -686,7 +687,12 @@ export function DashboardPage() {
                 </Typography.Paragraph>
               </div>
               {roleSurfaceItems.map((item) => (
-                <Card key={item.label} bodyStyle={{ padding: 16 }} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <Card
+                  key={item.key}
+                  data-testid={`dashboard-role-surface-${item.key}`}
+                  bodyStyle={{ padding: 16 }}
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
                   <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
                     <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
                       <Typography.Text strong style={{ color: '#f7f8f8' }}>{item.label}</Typography.Text>
