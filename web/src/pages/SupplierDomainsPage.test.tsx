@@ -121,6 +121,13 @@ function getDomainTableRow(domainName: string) {
   return row as HTMLElement
 }
 
+async function expectMetricCard(testId: string, title: string, value: string, description: string) {
+  const card = screen.getByTestId(testId)
+  expect(within(card).getByText(title)).toBeInTheDocument()
+  expect(await within(card).findByRole('heading', { name: value })).toBeInTheDocument()
+  expect(within(card).getByText(description)).toBeInTheDocument()
+}
+
 describe('SupplierDomainsPage', () => {
   beforeEach(() => {
     seedSupplierMenu([
@@ -154,35 +161,40 @@ describe('SupplierDomainsPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders supplier domain heading, overview metrics, mission flow, and shared-console bridge actions', async () => {
+  it('renders supplier domain heading, scoped overview metrics, mission flow, and shared-console bridge actions', async () => {
     renderSupplierDomainsPage()
 
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('supplier-domains-hero-card')
     expect(within(heroCard).getByText('域名运营中枢')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
-    expect(screen.getByText('单一供应商工作台')).toBeInTheDocument()
-    expect(screen.getByText('域名 readiness 优先')).toBeInTheDocument()
-    expect(screen.getByText('角色扩展但不伪造升级')).toBeInTheDocument()
-    expect(screen.getByText('域名总数')).toBeInTheDocument()
-    expect(screen.getByText('当前供应商域名池记录。')).toBeInTheDocument()
-    expect(screen.getByText('可继续参与供货编排的域名数量。')).toBeInTheDocument()
-    expect(screen.getByText('支持泛收件的域名数量。')).toBeInTheDocument()
-    expect(screen.getByText('覆盖区域')).toBeInTheDocument()
-    expect(screen.getByText('去重后的 region 数量。')).toBeInTheDocument()
-    expect(screen.getByText('hk · 1')).toBeInTheDocument()
-    expect(screen.getByText('us · 1')).toBeInTheDocument()
-    expect(screen.getByText('global · 1')).toBeInTheDocument()
-    expect(screen.getByText('eu · 1')).toBeInTheDocument()
 
+    const missionSection = screen.getByTestId('supplier-domains-mission-section')
+    expect(within(missionSection).getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
     expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
+
+    const capabilityMatrix = screen.getByTestId('supplier-domains-capability-matrix')
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('单一供应商工作台')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('域名 readiness 优先')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('角色扩展但不伪造升级')).toBeInTheDocument()
+
+    await expectMetricCard('supplier-domains-metric-total', '域名总数', '4', '当前供应商域名池记录。')
+    await expectMetricCard('supplier-domains-metric-active', 'Active 域名', '2', '可继续参与供货编排的域名数量。')
+    await expectMetricCard('supplier-domains-metric-catch-all', 'Catch-All 已开启', '2', '支持泛收件的域名数量。')
+    await expectMetricCard('supplier-domains-metric-regions', '覆盖区域', '4', '去重后的 region 数量。')
 
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
     expect(within(bridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).toBeInTheDocument()
+
+    const regionMetrics = screen.getByTestId('supplier-domains-region-metrics')
+    expect(within(regionMetrics).getByText('hk · 1')).toBeInTheDocument()
+    expect(within(regionMetrics).getByText('us · 1')).toBeInTheDocument()
+    expect(within(regionMetrics).getByText('global · 1')).toBeInTheDocument()
+    expect(within(regionMetrics).getByText('eu · 1')).toBeInTheDocument()
 
     expect(screen.getByText('mail-1.nexus.test')).toBeInTheDocument()
     expect(screen.getByText('mail-4.nexus.test')).toBeInTheDocument()

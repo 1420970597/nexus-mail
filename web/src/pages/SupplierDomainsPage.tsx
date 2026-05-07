@@ -60,14 +60,17 @@ function MetricCard({
   value,
   description,
   icon,
+  testId,
 }: {
   title: string
   value: string
   description: string
   icon: JSX.Element
+  testId?: string
 }) {
   return (
     <Card
+      data-testid={testId}
       style={{
         flex: '1 1 220px',
         minWidth: 220,
@@ -263,15 +266,39 @@ export function SupplierDomainsPage() {
             style={{ width: '100%', background: 'rgba(15, 23, 42, 0.32)', borderRadius: 18, border: '1px solid rgba(148,163,184,0.18)' }}
           />
           <Space wrap spacing={16} style={{ width: '100%' }}>
-            <MetricCard title="域名总数" value={String(summary.total)} description="当前供应商域名池记录。" icon={<IconServer />} />
-            <MetricCard title="Active 域名" value={String(summary.active)} description="可继续参与供货编排的域名数量。" icon={<IconTickCircle />} />
-            <MetricCard title="Catch-All 已开启" value={String(summary.catchAll)} description="支持泛收件的域名数量。" icon={<IconBolt />} />
-            <MetricCard title="覆盖区域" value={String(summary.regions)} description="去重后的 region 数量。" icon={<IconActivity />} />
+            <MetricCard
+              testId="supplier-domains-metric-total"
+              title="域名总数"
+              value={String(summary.total)}
+              description="当前供应商域名池记录。"
+              icon={<IconServer />}
+            />
+            <MetricCard
+              testId="supplier-domains-metric-active"
+              title="Active 域名"
+              value={String(summary.active)}
+              description="可继续参与供货编排的域名数量。"
+              icon={<IconTickCircle />}
+            />
+            <MetricCard
+              testId="supplier-domains-metric-catch-all"
+              title="Catch-All 已开启"
+              value={String(summary.catchAll)}
+              description="支持泛收件的域名数量。"
+              icon={<IconBolt />}
+            />
+            <MetricCard
+              testId="supplier-domains-metric-regions"
+              title="覆盖区域"
+              value={String(summary.regions)}
+              description="去重后的 region 数量。"
+              icon={<IconActivity />}
+            />
           </Space>
         </Space>
       </Card>
 
-      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card data-testid="supplier-domains-mission-section" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
             <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
@@ -321,7 +348,7 @@ export function SupplierDomainsPage() {
         </Space>
       </Card>
 
-      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card data-testid="supplier-domains-capability-matrix" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
             <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
