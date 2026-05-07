@@ -50,6 +50,7 @@ describe('AppSidebar', () => {
     const roleSummary = screen.getByTestId('app-sidebar-role-summary')
     expect(within(roleSummary).getByText('供应商')).toBeInTheDocument()
     expect(within(roleSummary).getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
+    expect(screen.getByText('单一登录 · 按角色切换工作区')).toBeInTheDocument()
   })
 
   it('shows admin risk control menu for admin role', async () => {
@@ -117,7 +118,14 @@ describe('AppSidebar', () => {
     renderSidebar(
       <Routes>
         <Route path="*" element={<AppSidebar />} />
-        <Route path="/projects" element={<div>项目市场页面</div>} />
+        <Route
+          path="/projects"
+          element={
+            <section data-testid="app-sidebar-route-stub-projects">
+              <h1>项目市场</h1>
+            </section>
+          }
+        />
         <Route path="/webhooks" element={<section data-testid="app-sidebar-route-stub-webhooks"><h1>Webhook 设置</h1></section>} />
       </Routes>,
       ['/'],

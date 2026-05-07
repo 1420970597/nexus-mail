@@ -63,7 +63,7 @@ export function AppSidebar() {
           >
             Nexus-Mail
           </Typography.Title>
-          <Typography.Text style={{ color: 'rgba(208,214,224,0.74)' }}>Single login, multi-role workspace</Typography.Text>
+          <Typography.Text style={{ color: 'rgba(208,214,224,0.74)' }}>单一登录 · 按角色切换工作区</Typography.Text>
           <div data-testid="app-sidebar-role-summary" role="group" aria-label="当前角色摘要" style={{ width: '100%' }}>
             <Space spacing={8} align="center" wrap>
               <Tag color={meta.color}>{meta.label}</Tag>

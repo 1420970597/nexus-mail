@@ -84,9 +84,30 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
             </section>
           }
         />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path={SETTINGS_ROUTE} element={<div>设置中心页面</div>} />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={
+            <section data-testid="dashboard-webhooks-route-stub">
+              <h1>Webhook 设置</h1>
+            </section>
+          }
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={
+            <section data-testid="dashboard-docs-route-stub">
+              <h1>API 文档</h1>
+            </section>
+          }
+        />
+        <Route
+          path={SETTINGS_ROUTE}
+          element={
+            <section data-testid="dashboard-settings-route-stub">
+              <h1>设置中心</h1>
+            </section>
+          }
+        />
       </Routes>
     </MemoryRouter>,
   )

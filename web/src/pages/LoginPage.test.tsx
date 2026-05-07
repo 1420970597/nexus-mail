@@ -25,9 +25,30 @@ function renderLoginPage(initialEntry = '/login') {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<div data-testid="shared-console-home">控制台总览</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={
+            <section data-testid="login-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          }
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={
+            <section data-testid="login-route-stub-webhooks">
+              <h1>Webhook 设置</h1>
+            </section>
+          }
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={
+            <section data-testid="login-route-stub-docs">
+              <h1>API 文档</h1>
+            </section>
+          }
+        />
       </Routes>
     </MemoryRouter>,
   )
