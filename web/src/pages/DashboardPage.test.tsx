@@ -105,7 +105,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={
             <section data-testid="dashboard-webhooks-route-stub">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           }
         />
@@ -113,7 +113,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
           path={DOCS_ROUTE}
           element={
             <section data-testid="dashboard-docs-route-stub">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           }
         />
@@ -281,7 +281,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scoped.queryByTestId('dashboard-next-step-docs')).not.toBeInTheDocument()
 
     await user.click(scoped.getByTestId('dashboard-next-step-action-api-keys'))
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     view.unmount()
   })
 

@@ -54,7 +54,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="settings-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -70,7 +70,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="settings-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
         />
@@ -187,7 +187,7 @@ describe('SettingsPage', () => {
 
     await user.click(within(missionCards).getByRole('button', { name: /打开 API 文档/ }))
     expect(await screen.findByTestId('settings-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('hides the user first-run checklist for supplier users while keeping shared shortcuts', async () => {

@@ -75,7 +75,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
         />
@@ -83,7 +83,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -384,7 +384,7 @@ describe('ApiKeysPage', () => {
     await within(firstKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
@@ -392,7 +392,7 @@ describe('ApiKeysPage', () => {
     await within(secondKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
@@ -453,7 +453,7 @@ describe('ApiKeysPage', () => {
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
   })
 
   it('shows shared-console fallback when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {

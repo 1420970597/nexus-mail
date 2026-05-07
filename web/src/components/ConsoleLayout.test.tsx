@@ -101,7 +101,7 @@ describe('ConsoleLayout', () => {
             path="/docs"
             element={
               <section data-testid="console-layout-route-stub-docs">
-                <h1>API 文档</h1>
+                <h1>API 文档与接入控制台</h1>
               </section>
             }
           />

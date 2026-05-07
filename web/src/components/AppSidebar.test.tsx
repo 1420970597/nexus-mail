@@ -127,7 +127,14 @@ describe('AppSidebar', () => {
             </section>
           }
         />
-        <Route path="/webhooks" element={<section data-testid="app-sidebar-route-stub-webhooks"><h1>Webhook 设置</h1></section>} />
+        <Route
+          path="/webhooks"
+          element={
+            <section data-testid="app-sidebar-route-stub-webhooks">
+              <h1>开发者 Webhook 接入工作台</h1>
+            </section>
+          }
+        />
       </Routes>,
       ['/'],
     )
@@ -136,7 +143,7 @@ describe('AppSidebar', () => {
     const menu = screen.getByRole('menu')
     await user.click(within(menu).getByRole('menuitem', { name: /Webhook 设置/ }))
     expect(await screen.findByTestId('app-sidebar-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
   })
 
   it('shows loading copy while waiting for server menu items', async () => {

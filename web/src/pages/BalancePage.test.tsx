@@ -80,7 +80,7 @@ function renderBalancePage(initialEntry = '/balance') {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="balance-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
         />
@@ -88,7 +88,7 @@ function renderBalancePage(initialEntry = '/balance') {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="balance-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -215,7 +215,7 @@ describe('BalancePage', () => {
     const secondCapabilityActions = await screen.findByTestId('balance-capability-actions')
     await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
     expect(await screen.findByTestId('balance-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
@@ -224,7 +224,7 @@ describe('BalancePage', () => {
     const thirdCapabilityActions = await screen.findByTestId('balance-capability-actions')
     await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
     expect(await screen.findByTestId('balance-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable finance CTA targets and returns to the preferred workspace', async () => {
