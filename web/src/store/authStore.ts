@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 export type Role = 'user' | 'supplier' | 'admin'
+export type AuthBootstrapStatus = 'idle' | 'loading' | 'ready'
 
 export interface CurrentUser {
   id: number
@@ -19,13 +20,16 @@ interface AuthState {
   refreshToken: string | null
   user: CurrentUser | null
   menu: MenuItem[]
+  bootstrapStatus: AuthBootstrapStatus
   setSession: (token: string, refreshToken: string, user: CurrentUser) => void
   setUser: (user: CurrentUser | null) => void
   setMenu: (menu: MenuItem[]) => void
+  setBootstrapStatus: (status: AuthBootstrapStatus) => void
   logout: () => void
 }
 
 const tokenKey = 'nexus-mail-token'
+const refreshTokenKey = 'nexus-mail-refresh-token'
 const userKey = 'nexus-mail-user'
 const menuKey = 'nexus-mail-menu'
 
@@ -37,22 +41,24 @@ function readSessionValue(key: string) {
 }
 
 const initialToken = readSessionValue(tokenKey)
+const initialRefreshToken = readSessionValue(refreshTokenKey)
 const initialUser = readSessionValue(userKey)
 const initialMenu = readSessionValue(menuKey)
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: initialToken,
-  refreshToken: null,
+  refreshToken: initialRefreshToken,
   user: initialUser ? (JSON.parse(initialUser) as CurrentUser) : null,
   menu: initialMenu ? (JSON.parse(initialMenu) as MenuItem[]) : [],
+  bootstrapStatus: initialToken ? 'loading' : 'idle',
   setSession: (token, refreshToken, user) => {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem(tokenKey, token)
+      window.sessionStorage.setItem(refreshTokenKey, refreshToken)
       window.sessionStorage.setItem(userKey, JSON.stringify(user))
       window.sessionStorage.removeItem(menuKey)
-      window.sessionStorage.removeItem('nexus-mail-refresh-token')
     }
-    set({ token, refreshToken, user, menu: [] })
+    set({ token, refreshToken, user, menu: [], bootstrapStatus: 'loading' })
   },
   setUser: (user) => {
     if (typeof window !== 'undefined') {
@@ -70,13 +76,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     set({ menu })
   },
+  setBootstrapStatus: (bootstrapStatus) => set({ bootstrapStatus }),
   logout: () => {
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem(tokenKey)
-      window.sessionStorage.removeItem('nexus-mail-refresh-token')
+      window.sessionStorage.removeItem(refreshTokenKey)
       window.sessionStorage.removeItem(userKey)
       window.sessionStorage.removeItem(menuKey)
     }
-    set({ token: null, refreshToken: null, user: null, menu: [] })
+    set({ token: null, refreshToken: null, user: null, menu: [], bootstrapStatus: 'idle' })
   },
 }))

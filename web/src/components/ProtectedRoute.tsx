@@ -10,9 +10,12 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
 }
 
 function RoleRoute({ children, allowedRoles }: { children: JSX.Element; allowedRoles: Role[] }) {
-  const { token, user } = useAuthStore()
+  const { token, user, bootstrapStatus } = useAuthStore()
   if (!token) {
     return <Navigate to="/login" replace />
+  }
+  if (bootstrapStatus !== 'ready') {
+    return children
   }
   if (!user || !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />

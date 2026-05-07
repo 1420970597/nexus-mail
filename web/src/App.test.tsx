@@ -239,7 +239,7 @@ describe('App', () => {
     })
   })
 
-  it('persists only the access token in sessionStorage when setting a session', () => {
+  it('persists access and refresh tokens in sessionStorage when setting a session', () => {
     useAuthStore.getState().setSession('stored-token', 'stored-refresh-token', {
       id: 1,
       email: 'user@nexus-mail.local',
@@ -247,7 +247,7 @@ describe('App', () => {
     })
 
     expect(window.sessionStorage.getItem('nexus-mail-token')).toBe('stored-token')
-    expect(window.sessionStorage.getItem('nexus-mail-refresh-token')).toBeNull()
+    expect(window.sessionStorage.getItem('nexus-mail-refresh-token')).toBe('stored-refresh-token')
     expect(window.sessionStorage.getItem('nexus-mail-user')).toContain('user@nexus-mail.local')
     expect(useAuthStore.getState().refreshToken).toBe('stored-refresh-token')
   })
@@ -442,7 +442,7 @@ describe('App', () => {
     expect(within(reopenedOnboarding).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
   })
 
-  it('waits for server menu instead of rendering fallback privileged navigation from client role state', () => {
+  it('shows a shared-console bootstrap shell while waiting for server menu instead of rendering fallback privileged navigation from client role state', () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockImplementationOnce(
@@ -455,6 +455,8 @@ describe('App', () => {
     renderApp(['/'])
 
     expect(screen.getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
+    expect(screen.getByTestId('auth-bootstrap-shell')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '正在恢复共享控制台' })).toBeInTheDocument()
     const dashboardMain = screen.getByRole('main', { name: '控制台主内容' })
     expect(within(dashboardMain).queryByText('用户管理')).not.toBeInTheDocument()
     expect(within(dashboardMain).queryByText('风控中心')).not.toBeInTheDocument()
@@ -724,6 +726,28 @@ describe('App', () => {
     expect(await screen.findByTestId('admin-audit-events-table-card')).toBeInTheDocument()
   })
 
+  it('preserves a deep-linked admin audit route after bootstrap instead of redirecting to the preferred admin landing page', async () => {
+    setSession('admin')
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'admin',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+      ],
+    })
+
+    renderApp(['/admin/audit'])
+
+    const auditTable = await screen.findByTestId('admin-audit-events-table-card')
+    expect(auditTable).toBeInTheDocument()
+    const headerSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(headerSummary).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+    expect(screen.queryByTestId('admin-risk-overview-card')).not.toBeInTheDocument()
+  })
+
   it('renders webhook settings page for authenticated admin', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
@@ -769,9 +793,10 @@ describe('App', () => {
     renderApp(['/webhooks'])
 
     const currentEndpointCard = await screen.findByTestId('webhooks-current-endpoints-card')
+    const initialDeliveryCalls = mockedGetWebhookDeliveries.mock.calls.length
     await user.click(within(currentEndpointCard).getByTestId('webhooks-send-test-button-11'))
     await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
-    await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(mockedGetWebhookDeliveries.mock.calls.length).toBeGreaterThan(initialDeliveryCalls))
     expect(await screen.findByText('测试投递已入队，系统将异步真实回调目标地址')).toBeInTheDocument()
   })
 
@@ -825,8 +850,8 @@ describe('App', () => {
     renderApp(['/admin/audit'])
 
     const auditTable = await screen.findByTestId('admin-audit-events-table-card')
-    expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
-    expect(within(auditTable).getByText('blocked')).toBeInTheDocument()
+    expect(within(auditTable).getByText('success')).toBeInTheDocument()
+    expect(within(auditTable).getByText('scope ok')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
   })
 

@@ -40,7 +40,7 @@ function renderRoute(element: JSX.Element, initialEntry = '/protected') {
 
 describe('ProtectedRoute', () => {
   it('redirects unauthenticated users to login', async () => {
-    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [], bootstrapStatus: 'idle' })
 
     renderRoute(
       <ProtectedRoute>
@@ -58,6 +58,7 @@ describe('ProtectedRoute', () => {
       refreshToken: 'refresh',
       user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
       menu: [],
+      bootstrapStatus: 'ready',
     })
 
     renderRoute(
@@ -77,6 +78,7 @@ describe('SupplierRoute', () => {
       refreshToken: 'refresh',
       user: { id: 2, email: 'user@nexus-mail.local', role: 'user' },
       menu: [],
+      bootstrapStatus: 'ready',
     })
 
     renderRoute(
@@ -95,6 +97,7 @@ describe('SupplierRoute', () => {
       refreshToken: 'refresh',
       user: { id: 3, email: 'supplier@nexus-mail.local', role: 'supplier' },
       menu: [],
+      bootstrapStatus: 'ready',
     })
 
     renderRoute(
@@ -112,6 +115,7 @@ describe('SupplierRoute', () => {
       refreshToken: 'refresh',
       user: { id: 4, email: 'admin@nexus-mail.local', role: 'admin' },
       menu: [],
+      bootstrapStatus: 'ready',
     })
 
     renderRoute(
@@ -124,7 +128,7 @@ describe('SupplierRoute', () => {
   })
 
   it('sends unauthenticated visitors to login before evaluating supplier-role access', async () => {
-    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [], bootstrapStatus: 'idle' })
 
     renderRoute(
       <SupplierRoute>
@@ -139,7 +143,7 @@ describe('SupplierRoute', () => {
 
 describe('AdminRoute', () => {
   it('sends unauthenticated visitors to login before evaluating admin-role access', async () => {
-    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [], bootstrapStatus: 'idle' })
 
     renderRoute(
       <AdminRoute>
@@ -157,6 +161,7 @@ describe('AdminRoute', () => {
       refreshToken: 'refresh',
       user: { id: 5, email: 'supplier@nexus-mail.local', role: 'supplier' },
       menu: [],
+      bootstrapStatus: 'ready',
     })
 
     renderRoute(
@@ -175,6 +180,7 @@ describe('AdminRoute', () => {
       refreshToken: 'refresh',
       user: { id: 6, email: 'admin@nexus-mail.local', role: 'admin' },
       menu: [],
+      bootstrapStatus: 'ready',
     })
 
     renderRoute(

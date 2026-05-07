@@ -19,7 +19,7 @@ async function renderSidebarAndWait(ui: React.ReactNode, initialEntries: string[
 
 describe('AppSidebar', () => {
   afterEach(() => {
-    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [], bootstrapStatus: 'idle' })
   })
 
   it('shows supplier domain, webhook and settlement menu for supplier role', async () => {
@@ -33,6 +33,7 @@ describe('AppSidebar', () => {
         { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
         { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
       ],
+      bootstrapStatus: 'ready',
     })
 
     await renderSidebarAndWait(<AppSidebar />)
@@ -66,6 +67,7 @@ describe('AppSidebar', () => {
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
       ],
+      bootstrapStatus: 'ready',
     })
 
     await renderSidebarAndWait(<AppSidebar />)
@@ -93,6 +95,7 @@ describe('AppSidebar', () => {
         { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
         { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
       ],
+      bootstrapStatus: 'ready',
     })
 
     await renderSidebarAndWait(<AppSidebar />, ['/supplier/domains'])
@@ -114,6 +117,7 @@ describe('AppSidebar', () => {
         { key: 'projects', label: '项目市场', path: '/projects' },
         { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
       ],
+      bootstrapStatus: 'ready',
     })
 
     renderSidebar(
@@ -152,6 +156,7 @@ describe('AppSidebar', () => {
       refreshToken: 'refresh-token',
       user: { id: 5, email: 'loading@nexus-mail.local', role: 'user' },
       menu: [],
+      bootstrapStatus: 'loading',
     })
 
     await renderSidebarAndWait(<AppSidebar />)

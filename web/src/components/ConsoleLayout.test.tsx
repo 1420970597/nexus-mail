@@ -37,6 +37,7 @@ describe('ConsoleLayout', () => {
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
         { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
       ],
+      bootstrapStatus: 'ready',
     })
 
     renderLayout('/admin/risk')
@@ -68,6 +69,7 @@ describe('ConsoleLayout', () => {
         { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
         { key: 'docs', label: 'API 文档', path: '/docs' },
       ],
+      bootstrapStatus: 'ready',
     })
 
     render(

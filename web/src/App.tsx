@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef } from 'react'
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AdminRoute, ProtectedRoute, SupplierRoute } from './components/ProtectedRoute'
 import { ConsoleLayout } from './layouts/ConsoleLayout'
 import { getCurrentUser, getMenu, logoutSession } from './services/auth'
@@ -52,10 +52,60 @@ function RouteFallback() {
   return <div aria-label="route-loading" />
 }
 
+function AuthBootstrapShell() {
+  return (
+    <div
+      data-testid="auth-bootstrap-shell"
+      style={{
+        minHeight: 'calc(100vh - 156px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 32,
+      }}
+    >
+      <div
+        style={{
+          width: 'min(520px, 100%)',
+          borderRadius: 28,
+          background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: 'rgba(0,0,0,0.28) 0px 16px 48px',
+          padding: 28,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <span
+            style={{
+              alignSelf: 'flex-start',
+              borderRadius: 9999,
+              background: 'rgba(94,106,210,0.18)',
+              border: '1px solid rgba(113,112,255,0.26)',
+              color: '#d0d6e0',
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              padding: '6px 12px',
+            }}
+          >
+            shared-console bootstrap
+          </span>
+          <h2 style={{ margin: 0, color: '#f7f8f8', fontSize: 24, lineHeight: 1.2 }}>正在恢复共享控制台</h2>
+          <p style={{ margin: 0, color: 'rgba(208,214,224,0.78)', lineHeight: 1.7 }}>
+            正在同步当前账号、角色菜单与深链落点，确保刷新页面后仍停留在同一套登录后工作台，而不是回退到错误角色页。
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Shell() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const initialPathRef = useRef(location.pathname)
   const redirectedOnceRef = useRef(false)
-  const { token, refreshToken, logout, setMenu, setUser } = useAuthStore()
+  const { token, refreshToken, bootstrapStatus, logout, setBootstrapStatus, setMenu, setUser } = useAuthStore()
 
   useEffect(() => {
     if (!token) {
@@ -63,6 +113,7 @@ function Shell() {
     }
 
     let active = true
+    setBootstrapStatus('loading')
 
     Promise.all([getCurrentUser(), getMenu()])
       .then(([currentUser, menu]) => {
@@ -71,7 +122,8 @@ function Shell() {
         }
         setUser(currentUser.user)
         setMenu(menu.items)
-        if (!redirectedOnceRef.current && menu.role === currentUser.user.role) {
+        setBootstrapStatus('ready')
+        if (!redirectedOnceRef.current && menu.role === currentUser.user.role && initialPathRef.current === DEFAULT_SHARED_ROUTE) {
           const preferredRoute = resolvePostAuthLandingRoute(menu.items, currentUser.user.role)
           redirectedOnceRef.current = true
           if (preferredRoute !== DEFAULT_SHARED_ROUTE) {
@@ -90,7 +142,7 @@ function Shell() {
     return () => {
       active = false
     }
-  }, [logout, navigate, setMenu, setUser, token])
+  }, [logout, navigate, setBootstrapStatus, setMenu, setUser, token])
 
   const handleLogout = async () => {
     try {
@@ -106,29 +158,33 @@ function Shell() {
 
   return (
     <ConsoleLayout onLogout={handleLogout}>
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-          <Route path={DASHBOARD_ROUTE} element={<DashboardPage />} />
-          <Route path={PROJECTS_ROUTE} element={<ProjectsPage />} />
-          <Route path={ORDERS_ROUTE} element={<OrdersPage />} />
-          <Route path={BALANCE_ROUTE} element={<BalancePage />} />
-          <Route path={PROFILE_ROUTE} element={<ProfilePage />} />
-          <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
-          <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-          <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
-          <Route path={SUPPLIER_DOMAINS_ROUTE} element={<SupplierRoute><SupplierDomainsPage /></SupplierRoute>} />
-          <Route path={SUPPLIER_RESOURCES_ROUTE} element={<SupplierRoute><SupplierResourcesPage /></SupplierRoute>} />
-          <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<SupplierRoute><SupplierOfferingsPage /></SupplierRoute>} />
-          <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<SupplierRoute><SupplierSettlementsPage /></SupplierRoute>} />
-          <Route path={ADMIN_USERS_ROUTE} element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-          <Route path={ADMIN_SUPPLIERS_ROUTE} element={<AdminRoute><AdminSuppliersPage /></AdminRoute>} />
-          <Route path={ADMIN_PRICING_ROUTE} element={<AdminRoute><AdminProjectsPage /></AdminRoute>} />
-          <Route path={ADMIN_RISK_ROUTE} element={<AdminRoute><AdminRiskPage /></AdminRoute>} />
-          <Route path={ADMIN_AUDIT_ROUTE} element={<AdminRoute><AdminAuditPage /></AdminRoute>} />
-          <Route path={DOCS_ROUTE} element={<ApiDocsPage />} />
-          <Route path="*" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
-        </Routes>
-      </Suspense>
+      {bootstrapStatus !== 'ready' ? (
+        <AuthBootstrapShell />
+      ) : (
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path={DASHBOARD_ROUTE} element={<DashboardPage />} />
+            <Route path={PROJECTS_ROUTE} element={<ProjectsPage />} />
+            <Route path={ORDERS_ROUTE} element={<OrdersPage />} />
+            <Route path={BALANCE_ROUTE} element={<BalancePage />} />
+            <Route path={PROFILE_ROUTE} element={<ProfilePage />} />
+            <Route path={API_KEYS_ROUTE} element={<ApiKeysPage />} />
+            <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
+            <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
+            <Route path={SUPPLIER_DOMAINS_ROUTE} element={<SupplierRoute><SupplierDomainsPage /></SupplierRoute>} />
+            <Route path={SUPPLIER_RESOURCES_ROUTE} element={<SupplierRoute><SupplierResourcesPage /></SupplierRoute>} />
+            <Route path={SUPPLIER_OFFERINGS_ROUTE} element={<SupplierRoute><SupplierOfferingsPage /></SupplierRoute>} />
+            <Route path={SUPPLIER_SETTLEMENTS_ROUTE} element={<SupplierRoute><SupplierSettlementsPage /></SupplierRoute>} />
+            <Route path={ADMIN_USERS_ROUTE} element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+            <Route path={ADMIN_SUPPLIERS_ROUTE} element={<AdminRoute><AdminSuppliersPage /></AdminRoute>} />
+            <Route path={ADMIN_PRICING_ROUTE} element={<AdminRoute><AdminProjectsPage /></AdminRoute>} />
+            <Route path={ADMIN_RISK_ROUTE} element={<AdminRoute><AdminRiskPage /></AdminRoute>} />
+            <Route path={ADMIN_AUDIT_ROUTE} element={<AdminRoute><AdminAuditPage /></AdminRoute>} />
+            <Route path={DOCS_ROUTE} element={<ApiDocsPage />} />
+            <Route path="*" element={<Navigate to={DASHBOARD_ROUTE} replace />} />
+          </Routes>
+        </Suspense>
+      )}
     </ConsoleLayout>
   )
 }
