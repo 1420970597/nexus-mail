@@ -143,10 +143,18 @@ describe('consoleNavigation shared-console contracts', () => {
     expect(visibleQuickActionPaths([{ path: DASHBOARD_ROUTE }, { path: DOCS_ROUTE }], DOCS_ROUTE, 'user')).toEqual([])
   })
 
-  it('resolves stable titles for shared, supplier, and admin routes from the route catalog', () => {
+  it('resolves canonical shell titles for shared, supplier, and admin routes from the route catalog', () => {
     expect(resolveRouteTitle(DASHBOARD_ROUTE)).toBe('控制台总览')
-    expect(resolveRouteTitle(API_KEYS_ROUTE)).toBe('API Keys')
-    expect(resolveRouteTitle(SUPPLIER_SETTLEMENTS_ROUTE)).toBe('供应商结算')
+    expect(resolveRouteTitle(API_KEYS_ROUTE)).toBe('开发者 API 接入工作台')
+    expect(resolveRouteTitle(WEBHOOKS_ROUTE)).toBe('开发者 Webhook 接入工作台')
+    expect(resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier')).toBe('供给事件回调工作台')
+    expect(resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')).toBe('Webhook 运维与回调观测')
+    expect(resolveRouteTitle(DOCS_ROUTE)).toBe('API 文档与接入控制台')
+    expect(resolveRouteTitle(SUPPLIER_DOMAINS_ROUTE)).toBe('域名池运营中枢')
+    expect(resolveRouteTitle(SUPPLIER_RESOURCES_ROUTE)).toBe('供应商资源运营台')
+    expect(resolveRouteTitle(SUPPLIER_RESOURCES_ROUTE, 'supplier')).toBe('供应商资源')
+    expect(resolveRouteTitle(SUPPLIER_OFFERINGS_ROUTE)).toBe('供货规则编排中枢')
+    expect(resolveRouteTitle(SUPPLIER_SETTLEMENTS_ROUTE)).toBe('供应商资金与争议指挥台')
     expect(resolveRouteTitle(ADMIN_AUDIT_ROUTE)).toBe('审计日志')
     expect(resolveRouteTitle('/missing')).toBe('Nexus Console')
   })

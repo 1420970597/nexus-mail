@@ -698,10 +698,12 @@ describe('App', () => {
 
     expect(await screen.findByRole('heading', { name: '供应商主任务' })).toBeInTheDocument()
     const supplierRouteMap = screen.getByTestId('dashboard-role-surface-map')
+    const roleActions = screen.getByTestId('dashboard-role-actions')
     expect(within(supplierRouteMap).getByText('共享接入')).toBeInTheDocument()
     expect(within(supplierRouteMap).getByText('/settings')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    await user.click(within(roleActions).getByRole('button', { name: '前往域名管理' }))
+    const supplierDomainsHero = await screen.findByTestId('supplier-domains-hero-card')
+    expect(within(supplierDomainsHero).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
   })
 
   it('renders admin risk and audit workspaces for authenticated admin routes', async () => {

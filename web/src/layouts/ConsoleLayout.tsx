@@ -59,10 +59,10 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
     let current = ''
     for (const segment of segments) {
       current += `/${segment}`
-      items.push({ path: current, name: resolveRouteTitle(current) })
+      items.push({ path: current, name: resolveRouteTitle(current, user?.role) })
     }
     return items
-  }, [location.pathname])
+  }, [location.pathname, user?.role])
 
   const visibleQuickActions = useMemo(
     () =>
@@ -136,7 +136,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
                     letterSpacing: '-0.18px',
                   }}
                 >
-                  {resolveRouteTitle(location.pathname)}
+                  {resolveRouteTitle(location.pathname, user?.role)}
                 </Typography.Title>
                 <Tag color={roleColor(user?.role)}>{roleLabel(user?.role)}</Tag>
                 <Tag color="cyan" prefixIcon={<IconHistogram />}>单一登录后控制台</Tag>

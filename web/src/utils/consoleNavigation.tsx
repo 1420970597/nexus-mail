@@ -9,6 +9,7 @@ export interface ConsoleRouteDefinition {
   label: string
   path: string
   title: string
+  titleByRole?: Partial<Record<Role, string>>
   group: ConsoleNavGroup
   icon: JSX.Element
   landingPriority: number
@@ -117,7 +118,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'api-keys',
     label: 'API Keys',
     path: API_KEYS_ROUTE,
-    title: 'API Keys',
+    title: '开发者 API 接入工作台',
     group: 'shared',
     icon: <IconSafe />,
     landingPriority: 30,
@@ -128,7 +129,11 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'webhooks',
     label: 'Webhook 设置',
     path: WEBHOOKS_ROUTE,
-    title: 'Webhook 设置',
+    title: '开发者 Webhook 接入工作台',
+    titleByRole: {
+      supplier: '供给事件回调工作台',
+      admin: 'Webhook 运维与回调观测',
+    },
     group: 'shared',
     icon: <IconBolt />,
     landingPriority: 40,
@@ -149,7 +154,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'docs',
     label: 'API 文档',
     path: DOCS_ROUTE,
-    title: 'API 文档',
+    title: 'API 文档与接入控制台',
     group: 'shared',
     icon: <IconArticle />,
     landingPriority: 80,
@@ -160,7 +165,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'supplier-domains',
     label: '域名管理',
     path: SUPPLIER_DOMAINS_ROUTE,
-    title: '域名管理',
+    title: '域名池运营中枢',
     group: 'supplier',
     icon: <IconServer />,
     landingPriority: 0,
@@ -171,7 +176,11 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'supplier-resources',
     label: '供应商资源',
     path: SUPPLIER_RESOURCES_ROUTE,
-    title: '供应商资源',
+    title: '供应商资源运营台',
+    titleByRole: {
+      supplier: '供应商资源',
+      admin: '供应商资源',
+    },
     group: 'supplier',
     icon: <IconPriceTag />,
     landingPriority: 10,
@@ -181,7 +190,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'supplier-offerings',
     label: '供货规则',
     path: SUPPLIER_OFFERINGS_ROUTE,
-    title: '供货规则',
+    title: '供货规则编排中枢',
     group: 'supplier',
     icon: <IconBolt />,
     landingPriority: 20,
@@ -191,7 +200,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     key: 'supplier-settlements',
     label: '供应商结算',
     path: SUPPLIER_SETTLEMENTS_ROUTE,
-    title: '供应商结算',
+    title: '供应商资金与争议指挥台',
     group: 'supplier',
     icon: <IconActivity />,
     landingPriority: 30,
@@ -309,7 +318,10 @@ export function resolveRouteDefinition(path: string) {
   return consoleRoutes.find((route) => route.path === path)
 }
 
-export function resolveRouteTitle(path: string) {
+export function resolveRouteTitle(path: string, role?: Role) {
   const route = resolveRouteDefinition(path)
-  return route?.title ?? 'Nexus Console'
+  if (!route) {
+    return 'Nexus Console'
+  }
+  return route.titleByRole?.[role ?? 'user'] ?? route.title
 }
