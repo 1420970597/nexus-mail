@@ -24,7 +24,14 @@ function renderLoginPage(initialEntry = '/login') {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<div data-testid="shared-console-home">控制台总览</div>} />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="shared-console-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
         <Route
           path={API_KEYS_ROUTE}
           element={
@@ -37,7 +44,7 @@ function renderLoginPage(initialEntry = '/login') {
           path={WEBHOOKS_ROUTE}
           element={
             <section data-testid="login-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           }
         />
@@ -45,7 +52,7 @@ function renderLoginPage(initialEntry = '/login') {
           path={DOCS_ROUTE}
           element={
             <section data-testid="login-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           }
         />

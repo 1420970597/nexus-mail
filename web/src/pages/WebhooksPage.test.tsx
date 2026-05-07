@@ -49,7 +49,7 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="webhooks-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -241,7 +241,7 @@ describe('WebhooksPage', () => {
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByTestId('webhooks-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('renders a shared integration loop card with scoped CTA contracts and no fallback when shared destinations are available', async () => {
