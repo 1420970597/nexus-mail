@@ -66,7 +66,7 @@ function renderPage() {
           path={SUPPLIER_DOMAINS_ROUTE}
           element={(
             <section data-testid="supplier-resources-route-stub-domains">
-              <h1>域名管理</h1>
+              <h1>域名池运营中枢</h1>
             </section>
           )}
         />
@@ -98,7 +98,7 @@ function renderPage() {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="supplier-resources-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>供给事件回调工作台</h1>
             </section>
           )}
         />
@@ -106,7 +106,7 @@ function renderPage() {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="supplier-resources-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -228,7 +228,7 @@ describe('SupplierResourcesPage', () => {
     const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /前往域名管理/ }))
     expect(await screen.findByTestId('supplier-resources-route-stub-domains')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '域名管理' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
@@ -262,14 +262,14 @@ describe('SupplierResourcesPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-resources-bridge-webhooks'))
     expect(await screen.findByTestId('supplier-resources-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-resources-bridge-docs'))
     expect(await screen.findByTestId('supplier-resources-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable supplier and shared-console CTAs then falls back to the preferred workspace', async () => {
