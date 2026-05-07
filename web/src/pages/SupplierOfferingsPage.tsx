@@ -77,7 +77,7 @@ function MetricCard({
 const missionSteps = [
   {
     key: 'resources',
-    tag: 'Resources',
+    tag: '资源准备',
     title: '先确认资源池已就绪',
     description: '先检查域名池、邮箱池与账号健康，再决定哪些项目规则应进入可售状态。',
     button: '查看供应商资源',
@@ -86,7 +86,7 @@ const missionSteps = [
   },
   {
     key: 'settlements',
-    tag: 'Settlement',
+    tag: '结算反馈',
     title: '再追踪结算与争议反馈',
     description: '供货规则稳定后回到供应商结算页，观察待结算余额、争议与履约反馈是否需要反调价格。',
     button: '打开供应商结算',
@@ -95,7 +95,7 @@ const missionSteps = [
   },
   {
     key: 'api-keys',
-    tag: 'Shared Console',
+    tag: '统一控制台',
     title: '保持接入能力仍在同一控制台',
     description: 'API Keys、Webhook 与 Docs 继续留在统一深色壳中，供应商只是在同一控制台追加供给侧操作。',
     button: '打开 API Keys',

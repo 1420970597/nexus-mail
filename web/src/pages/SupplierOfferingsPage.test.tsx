@@ -176,6 +176,9 @@ describe('SupplierOfferingsPage', () => {
 
     const missionFlow = screen.getByTestId('supplier-offerings-mission-flow')
     expect(within(missionFlow).getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
+    expect(within(missionFlow).getByText('资源准备')).toBeInTheDocument()
+    expect(within(missionFlow).getByText('结算反馈')).toBeInTheDocument()
+    expect(within(missionFlow).getByText('统一控制台')).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: /打开供应商结算/ })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
