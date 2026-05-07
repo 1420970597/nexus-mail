@@ -57,7 +57,7 @@ const firstRunMissionCards: FirstRunMissionCard[] = [
     key: 'procurement',
     title: '先完成基础采购路径',
     description: '从项目市场确认真实库存与价格，再进入订单中心完成首次下单与结果追踪。',
-    tag: 'Shared Console',
+    tag: '共享控制台',
     path: sharedFirstRunRoutes.projects,
     button: '前往项目市场开始采购',
   },
@@ -65,7 +65,7 @@ const firstRunMissionCards: FirstRunMissionCard[] = [
     key: 'integration',
     title: '继续准备 API 接入',
     description: '在同一套深色工作台里继续进入 API Keys、Webhook 与 API 文档，完成自动化联调。',
-    tag: 'Integration',
+    tag: '统一接入',
     path: sharedFirstRunRoutes.apiKeys,
     button: '管理 API Keys',
   },
@@ -73,7 +73,7 @@ const firstRunMissionCards: FirstRunMissionCard[] = [
     key: 'roles',
     title: '后续角色能力仍在同一壳内扩展',
     description: '如果后续被服务端授予供应商或管理员角色，菜单会按权限扩展，不需要切换独立后台。',
-    tag: 'Role-aware',
+    tag: '角色扩展',
     path: sharedFirstRunRoutes.settings,
     button: '查看角色与控制台说明',
   },
@@ -510,6 +510,7 @@ export function DashboardPage() {
                   {firstRunMissionCards.map((card) => (
                     <Col xs={24} xl={8} key={card.key}>
                       <Card
+                        data-testid={`dashboard-first-run-mission-card-${card.key}`}
                         style={{
                           height: '100%',
                           borderRadius: 20,
