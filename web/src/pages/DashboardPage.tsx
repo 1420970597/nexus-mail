@@ -654,7 +654,7 @@ export function DashboardPage() {
           </Col>
         ) : null}
         <Col xs={24} xl={14}>
-          <Card style={metricCardStyle('rgba(94,106,210,0.24)')} bodyStyle={{ padding: 22 }}>
+          <Card data-testid="dashboard-role-guidance" style={metricCardStyle('rgba(94,106,210,0.24)')} bodyStyle={{ padding: 22 }}>
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
               <div>
                 <Tag color="blue">角色工作台导引</Tag>

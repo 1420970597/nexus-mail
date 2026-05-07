@@ -617,11 +617,13 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByRole('heading', { name: '供应商主任务' })).toBeInTheDocument()
-    const dashboardMain = screen.getByRole('main', { name: '控制台主内容' })
-    expect(within(dashboardMain).queryByText('普通用户首轮引导')).not.toBeInTheDocument()
-    expect(within(dashboardMain).queryByRole('button', { name: '查看结算页' })).not.toBeInTheDocument()
-    expect(within(dashboardMain).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+    const roleGuidance = await screen.findByTestId('dashboard-role-guidance')
+    const guidanceScope = within(roleGuidance)
+    expect(guidanceScope.getByRole('heading', { name: '供应商主任务' })).toBeInTheDocument()
+    expect(guidanceScope.getByText('维护域名池')).toBeInTheDocument()
+    expect(guidanceScope.queryByText('普通用户首轮引导')).not.toBeInTheDocument()
+    expect(guidanceScope.queryByRole('button', { name: '查看结算页' })).not.toBeInTheDocument()
+    expect(guidanceScope.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
   })
 
   it('shows onboarding checklist on settings page for default user only', async () => {
