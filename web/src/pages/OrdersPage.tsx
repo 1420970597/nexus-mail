@@ -278,7 +278,12 @@ export function OrdersPage() {
             </Card>
           </Col>
           <Col xs={24} xl={7}>
-            <Card title="履约说明" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+            <Card
+              title="履约说明"
+              data-testid="orders-fulfillment-guidance-card"
+              style={{ width: '100%', borderRadius: 24 }}
+              bodyStyle={{ padding: 20 }}
+            >
               <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                 <Card style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>
                   <Typography.Title heading={5} style={{ marginTop: 0 }}>READY 后完成订单</Typography.Title>

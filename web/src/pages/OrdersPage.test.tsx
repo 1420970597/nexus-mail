@@ -138,8 +138,22 @@ describe('OrdersPage', () => {
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-          <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
+          <Route
+            path={PROJECTS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-projects">
+                <h1>项目市场</h1>
+              </section>
+            }
+          />
+          <Route
+            path={API_KEYS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-api-keys">
+                <h1>开发者 API 接入工作台</h1>
+              </section>
+            }
+          />
         </Routes>
       </MemoryRouter>,
     )
@@ -148,7 +162,8 @@ describe('OrdersPage', () => {
     const emptyActions = screen.getByTestId('orders-empty-state-actions')
     expect(within(emptyActions).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     await user.click(within(emptyActions).getByRole('button', { name: '查看 API 接入准备' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('opens result modal for an existing order', async () => {
@@ -167,19 +182,22 @@ describe('OrdersPage', () => {
     expect(within(resultDialog).getByText('123456')).toBeInTheDocument()
   })
 
-  it('renders the first-run order journey card so users know what to do after purchasing', async () => {
+  it('renders the first-run order journey cards through scoped fulfillment guidance and continuation contracts', async () => {
     render(
       <MemoryRouter>
         <OrdersPage />
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('订单中心')).toBeInTheDocument()
-    expect(screen.getByText('履约说明')).toBeInTheDocument()
-    expect(screen.getByText('READY 后完成订单')).toBeInTheDocument()
-    expect(screen.getByText('异常时看结果面板')).toBeInTheDocument()
-    expect(screen.getByText('订单为空时的下一步')).toBeInTheDocument()
-    expect(screen.getByText('接入联调仍在同一控制台继续：可直接回到 API Keys 校验自动化调用')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    const guidanceCard = screen.getByTestId('orders-fulfillment-guidance-card')
+    const guidanceScope = within(guidanceCard)
+    expect(guidanceScope.getByRole('heading', { name: 'READY 后完成订单' })).toBeInTheDocument()
+    expect(guidanceScope.getByRole('heading', { name: '异常时看结果面板' })).toBeInTheDocument()
+    expect(guidanceScope.getByRole('heading', { name: '订单为空时的下一步' })).toBeInTheDocument()
+
+    const continuationLane = screen.getByTestId('orders-continuation-lane')
+    expect(within(continuationLane).getByRole('heading', { name: '订单结果 → API 接入 → 再次采购' })).toBeInTheDocument()
   })
 
   it('navigates from the empty-state api continuation CTA into the api keys workspace', async () => {
@@ -190,8 +208,22 @@ describe('OrdersPage', () => {
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path={API_KEYS_ROUTE} element={<div>开发者 API 接入工作台</div>} />
-          <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
+          <Route
+            path={API_KEYS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-api-keys-empty-state">
+                <h1>开发者 API 接入工作台</h1>
+              </section>
+            }
+          />
+          <Route
+            path={PROJECTS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-projects-empty-state">
+                <h1>项目市场</h1>
+              </section>
+            }
+          />
         </Routes>
       </MemoryRouter>,
     )
@@ -199,7 +231,8 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     const emptyActions = screen.getByTestId('orders-empty-state-actions')
     await user.click(within(emptyActions).getByRole('button', { name: '查看 API 接入准备' }))
-    expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-route-stub-api-keys-empty-state')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('hides the API continuation CTA from the fulfillment hero when the server menu does not expose API key management', async () => {
@@ -246,15 +279,30 @@ describe('OrdersPage', () => {
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path={PROJECTS_ROUTE} element={<div data-testid="orders-projects-route-stub">项目市场页面</div>} />
-          <Route path={API_KEYS_ROUTE} element={<div>开发者 API 接入工作台</div>} />
+          <Route
+            path={PROJECTS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-projects-lane">
+                <h1>项目市场</h1>
+              </section>
+            }
+          />
+          <Route
+            path={API_KEYS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-api-keys-lane">
+                <h1>开发者 API 接入工作台</h1>
+              </section>
+            }
+          />
         </Routes>
       </MemoryRouter>,
     )
 
     expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /回到项目市场/ }))
-    expect(await screen.findByTestId('orders-projects-route-stub')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-route-stub-projects-lane')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
   })
 
   it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
@@ -274,7 +322,14 @@ describe('OrdersPage', () => {
       <MemoryRouter initialEntries={['/orders']}>
         <Routes>
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/" element={<div data-testid="orders-shared-console-home-route">控制台总览页面</div>} />
+          <Route
+            path="/"
+            element={
+              <section data-testid="orders-route-stub-shared-home">
+                <h1>控制台总览</h1>
+              </section>
+            }
+          />
         </Routes>
       </MemoryRouter>,
     )
@@ -282,6 +337,7 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     const emptyActions = screen.getByTestId('orders-empty-state-actions')
     await user.click(within(emptyActions).getByRole('button', { name: '返回推荐工作台' }))
-    expect(await screen.findByTestId('orders-shared-console-home-route')).toBeInTheDocument()
+    expect(await screen.findByTestId('orders-route-stub-shared-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })
