@@ -271,7 +271,7 @@ export function AdminProjectsPage() {
         </Card>
       ) : null}
 
-      <Card title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+      <Card data-testid="admin-pricing-capability-matrix" title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
         <Table
           pagination={false}
           rowKey="key"
@@ -283,7 +283,7 @@ export function AdminProjectsPage() {
         />
       </Card>
 
-      <Card title="项目列表" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+      <Card title="项目列表" data-testid="admin-pricing-project-list-card" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
         <Table
           pagination={false}
           rowKey="id"
@@ -300,7 +300,12 @@ export function AdminProjectsPage() {
         />
       </Card>
 
-      <Card title={selectedProject ? `编辑项目 · ${selectedProject.key}` : '编辑项目'} style={{ width: '100%', borderRadius: 24 }} loading={loading}>
+      <Card
+        data-testid="admin-pricing-project-editor-card"
+        title={selectedProject ? `编辑项目 · ${selectedProject.key}` : '编辑项目'}
+        style={{ width: '100%', borderRadius: 24 }}
+        loading={loading}
+      >
         <Form form={form} layout="horizontal" labelPosition="left">
           <Form.Input field="name" label="项目名称" rules={[{ required: true, message: '请输入项目名称' }]} />
           <Form.Input field="description" label="项目描述" />

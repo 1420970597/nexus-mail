@@ -48,11 +48,46 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
       <main aria-label="控制台主内容">
         <Routes>
           <Route path={ADMIN_PRICING_ROUTE} element={<AdminProjectsPage />} />
-          <Route path={ADMIN_RISK_ROUTE} element={<div>风控中心页面</div>} />
-          <Route path={ADMIN_AUDIT_ROUTE} element={<div>审计日志页面</div>} />
-          <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-          <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-          <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
+          <Route
+            path={ADMIN_RISK_ROUTE}
+            element={(
+              <section data-testid="admin-pricing-route-stub-risk">
+                <h1>风控中心</h1>
+              </section>
+            )}
+          />
+          <Route
+            path={ADMIN_AUDIT_ROUTE}
+            element={(
+              <section data-testid="admin-pricing-route-stub-audit">
+                <h1>审计日志</h1>
+              </section>
+            )}
+          />
+          <Route
+            path={API_KEYS_ROUTE}
+            element={(
+              <section data-testid="admin-pricing-route-stub-api-keys">
+                <h1>开发者 API 接入工作台</h1>
+              </section>
+            )}
+          />
+          <Route
+            path={WEBHOOKS_ROUTE}
+            element={(
+              <section data-testid="admin-pricing-route-stub-webhooks">
+                <h1>Webhook 设置</h1>
+              </section>
+            )}
+          />
+          <Route
+            path={DOCS_ROUTE}
+            element={(
+              <section data-testid="admin-pricing-route-stub-docs">
+                <h1>API 文档</h1>
+              </section>
+            )}
+          />
           <Route
             path="/"
             element={(
@@ -121,9 +156,13 @@ describe('AdminProjectsPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
-    expect(screen.getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(screen.getByText('编辑项目 · gmail')).toBeInTheDocument()
-    expect(screen.getAllByText('Gmail 验证码').length).toBeGreaterThan(0)
+    const capabilityMatrix = screen.getByTestId('admin-pricing-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('管理员扩展菜单仍挂在同一共享控制台，不做独立后台')).toBeInTheDocument()
+    const projectEditorCard = screen.getByTestId('admin-pricing-project-editor-card')
+    expect(within(projectEditorCard).getByText('编辑项目 · gmail')).toBeInTheDocument()
+    const projectListCard = screen.getByTestId('admin-pricing-project-list-card')
+    expect(within(projectListCard).getByText('Gmail 验证码')).toBeInTheDocument()
   })
 
   it('navigates through risk, audit, and integration mission cards inside the shared console', async () => {
@@ -134,19 +173,22 @@ describe('AdminProjectsPage', () => {
 
     const missionFlow = screen.getByTestId('admin-pricing-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
-    expect(await screen.findByText('风控中心页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-pricing-route-stub-risk')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '查看审计日志' }))
-    expect(await screen.findByText('审计日志页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-pricing-route-stub-audit')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-pricing-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     view.unmount()
   })
 
