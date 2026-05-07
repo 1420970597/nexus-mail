@@ -272,7 +272,7 @@ export function BalancePage() {
                 bodyStyle={{ padding: 20 }}
               >
                 <Space vertical align="start" spacing={12}>
-                  <Tag color="blue">Shared Console fallback</Tag>
+                  <Tag color="blue">共享控制台回退</Tag>
                   <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>当前资金页已是唯一可见业务工作台</Typography.Title>
                   <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.76)', maxWidth: 720 }}>
                     当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到推荐工作台继续查看当前角色仍可访问的主链路。

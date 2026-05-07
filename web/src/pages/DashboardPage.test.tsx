@@ -146,6 +146,7 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    expect(screen.getByText('共享控制台入口')).toBeInTheDocument()
     const lane = screen.getByTestId('dashboard-next-steps-lane')
     const scoped = within(lane)
     expect(scoped.getByTestId('dashboard-next-step-balance')).toBeInTheDocument()

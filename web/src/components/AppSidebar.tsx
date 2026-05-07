@@ -55,7 +55,7 @@ export function AppSidebar() {
               color: '#d0d6e0',
             }}
           >
-            Nexus-Mail · Shared Console
+            Nexus-Mail · 统一控制台
           </Tag>
           <Typography.Title
             heading={4}

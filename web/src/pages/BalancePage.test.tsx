@@ -256,6 +256,7 @@ describe('BalancePage', () => {
     expect(within(capabilityActions).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
     expect(within(capabilityActions).queryByRole('button', { name: '打开 API 文档' })).not.toBeInTheDocument()
     const fallback = screen.getByTestId('balance-shared-console-fallback')
+    expect(within(fallback).getByText('共享控制台回退')).toBeInTheDocument()
     expect(within(fallback).getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
   })
 

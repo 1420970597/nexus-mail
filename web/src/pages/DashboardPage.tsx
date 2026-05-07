@@ -454,7 +454,7 @@ export function DashboardPage() {
         bodyStyle={{ padding: 24 }}
       >
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">Shared Console Entry</Tag>
+          <Tag color="cyan" shape="circle">共享控制台入口</Tag>
           <div>
             <Typography.Title heading={2} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.6px' }}>
               控制台总览

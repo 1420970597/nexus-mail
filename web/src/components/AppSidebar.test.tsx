@@ -48,6 +48,7 @@ describe('AppSidebar', () => {
     expect(within(supplierGroup).getByText('供应商结算')).toBeInTheDocument()
 
     const roleSummary = screen.getByTestId('app-sidebar-role-summary')
+    expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
     expect(within(roleSummary).getByText('供应商')).toBeInTheDocument()
     expect(within(roleSummary).getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
     expect(screen.getByText('单一登录 · 按角色切换工作区')).toBeInTheDocument()
