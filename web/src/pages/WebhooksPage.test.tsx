@@ -36,9 +36,9 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">开发者 API 接入工作台</div>} />
         <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-        <Route path={DOCS_ROUTE} element={<div data-testid="api-docs-route-stub">API 文档页面</div>} />
+        <Route path={DOCS_ROUTE} element={<div data-testid="api-docs-route-stub">API 文档</div>} />
       </Routes>
     </MemoryRouter>,
   )

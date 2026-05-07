@@ -11,10 +11,10 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={PROJECTS_ROUTE} element={<div data-testid="projects-route-stub">项目市场页面</div>} />
-        <Route path={BALANCE_ROUTE} element={<div data-testid="balance-route-stub">余额中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置页面</div>} />
+        <Route path={PROJECTS_ROUTE} element={<div data-testid="projects-route-stub">项目市场</div>} />
+        <Route path={BALANCE_ROUTE} element={<div data-testid="balance-route-stub">余额中心</div>} />
+        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">开发者 API 接入工作台</div>} />
+        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置</div>} />
         <Route path={DOCS_ROUTE} element={<ApiDocsPage />} />
         <Route path="/" element={<div data-testid="shared-console-home">控制台总览</div>} />
       </Routes>
@@ -124,7 +124,8 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const secondBridgeLane = screen.getByTestId('docs-shared-console-bridge')
     await user.click(within(secondBridgeLane).getByRole('button', { name: '打开 API Keys 工作台' }))
-    expect(await screen.findByText('API Keys 页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
+    expect(screen.getByText('开发者 API 接入工作台')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
@@ -205,7 +206,8 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
     loopLane = screen.getByTestId('docs-shared-console-loop')
     await user.click(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' }))
-    expect(await screen.findByText('Webhook 设置页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
+    expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()

@@ -18,15 +18,78 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path="/" element={<div data-testid="shared-console-home-route">控制台总览</div>} />
-        <Route path={PROJECTS_ROUTE} element={<div>项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div>订单中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div>API Keys 页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div>API 文档页面</div>} />
-        <Route path={PROFILE_ROUTE} element={<div>个人资料页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div>Webhook 设置页面</div>} />
-        <Route path="/supplier/resources" element={<div>供应商资源页面</div>} />
-        <Route path="/supplier/settlements" element={<div>供应商结算页面</div>} />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="settings-route-stub-shared-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub-projects">
+              <h1>项目市场</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={ORDERS_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub-orders">
+              <h1>订单中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub-api-keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub-docs">
+              <h1>API 文档</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={PROFILE_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub-profile">
+              <h1>个人资料</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub-webhooks">
+              <h1>Webhook 设置</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/supplier/resources"
+          element={(
+            <section data-testid="settings-route-stub-supplier-resources">
+              <h1>供应商资源</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/supplier/settlements"
+          element={(
+            <section data-testid="settings-route-stub-supplier-settlements">
+              <h1>供应商结算</h1>
+            </section>
+          )}
+        />
         <Route path={SETTINGS_ROUTE} element={<SettingsPage />} />
       </Routes>
     </MemoryRouter>,
@@ -63,7 +126,8 @@ describe('SettingsPage', () => {
     expect(checklistScope.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
 
     await user.click(checklistScope.getByRole('button', { name: '打开项目市场' }))
-    expect(await screen.findByText('项目市场页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-route-stub-projects')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     const settingsView = renderSettingsPage()
     const checklistCardAgain = await screen.findByTestId('settings-user-first-run-checklist')
@@ -74,7 +138,8 @@ describe('SettingsPage', () => {
     await user.click(getButtonByLabel(checklistScopeAgain, '重新打开首轮引导'))
 
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(11))).toBe('false')
-    const homeRegion = await screen.findByTestId('shared-console-home-route')
+    const homeRegion = await screen.findByTestId('settings-route-stub-shared-home')
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     expect(within(homeRegion).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(within(homeRegion).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
@@ -121,7 +186,8 @@ describe('SettingsPage', () => {
     expect(within(missionCards).getByRole('button', { name: /打开 Webhook 设置/ })).toBeInTheDocument()
 
     await user.click(within(missionCards).getByRole('button', { name: /打开 API 文档/ }))
-    expect(await screen.findByText('API 文档页面')).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
   })
 
   it('hides the user first-run checklist for supplier users while keeping shared shortcuts', async () => {
