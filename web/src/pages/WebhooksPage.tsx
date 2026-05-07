@@ -386,7 +386,7 @@ export function WebhooksPage() {
               {copy.description}
             </Typography.Paragraph>
           </div>
-          <Space wrap>
+          <Space wrap data-testid="webhooks-role-tips">
             {copy.tips.map((tip) => (
               <Tag key={tip} color="grey" prefixIcon={<IconSafe />}>
                 {tip}

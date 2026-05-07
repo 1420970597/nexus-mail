@@ -367,6 +367,11 @@ describe('WebhooksPage', () => {
     expect(within(guidanceRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(within(guidanceRegion).getByText('管理员视角')).toBeInTheDocument()
 
+    const roleTips = within(guidanceRegion).getByTestId('webhooks-role-tips')
+    expect(within(roleTips).getByText(/failed \/ pending/i)).toBeInTheDocument()
+    expect(within(roleTips).getByText(/last_error/i)).toBeInTheDocument()
+    expect(within(roleTips).getByText(/测试投递返回 202/i)).toBeInTheDocument()
+
     const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
     expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
     expect(within(endpointMetric).getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
@@ -377,11 +382,12 @@ describe('WebhooksPage', () => {
 
     const attentionMetric = screen.getByTestId('webhooks-attention-delivery-metric')
     expect(within(attentionMetric).getByText('失败 / 排队中')).toBeInTheDocument()
+    expect(within(attentionMetric).getByText('1')).toBeInTheDocument()
     expect(within(attentionMetric).getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
 
     const deliveryMetrics = screen.getByTestId('webhooks-latest-delivery-metric')
     expect(within(deliveryMetrics).getByText('最近回调')).toBeInTheDocument()
+    expect(within(deliveryMetrics).getByText('最近一次成功送达的回调时间')).toBeInTheDocument()
     expect(within(deliveryMetrics).getByText('2026-04-29T00:03:00Z')).toBeInTheDocument()
-    expect(within(guidanceRegion).getByText(/重点关注 failed \/ pending 重试链路与 last_error/)).toBeInTheDocument()
   })
 })
