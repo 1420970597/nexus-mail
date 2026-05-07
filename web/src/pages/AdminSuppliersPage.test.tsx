@@ -179,15 +179,32 @@ describe('AdminSuppliersPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders the supplier mission-control heading, overview signals, and shared-console bridge actions from overview data', async () => {
+  it('renders the supplier mission-control heading, scoped overview signals, and shared-console links from overview data', async () => {
     renderAdminSuppliersPage()
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('admin-suppliers-hero-card')
     expect(within(heroCard).getByText('供应商运营中枢')).toBeInTheDocument()
-    expect(screen.getByText('高待结算待办')).toBeInTheDocument()
-    expect(screen.getByText('低履约风险')).toBeInTheDocument()
-    expect(screen.getByText('争议敞口')).toBeInTheDocument()
+
+    const pendingMetric = screen.getByTestId('admin-suppliers-metric-pending')
+    expect(within(pendingMetric).getByText('高待结算待办')).toBeInTheDocument()
+    expect(within(pendingMetric).getByText('¥156.00')).toBeInTheDocument()
+    expect(within(pendingMetric).getByText('Top supplier ¥96.00')).toBeInTheDocument()
+
+    const riskMetric = screen.getByTestId('admin-suppliers-metric-risk')
+    expect(within(riskMetric).getByText('低履约风险')).toBeInTheDocument()
+    expect(within(riskMetric).getByText('1')).toBeInTheDocument()
+    expect(within(riskMetric).getByText('完成率低于 70% 的供应商数量')).toBeInTheDocument()
+
+    const disputeMetric = screen.getByTestId('admin-suppliers-metric-dispute')
+    expect(within(disputeMetric).getByText('争议敞口')).toBeInTheDocument()
+    expect(within(disputeMetric).getByText('20.00%')).toBeInTheDocument()
+    expect(within(disputeMetric).getByText('1 个开放争议待处理')).toBeInTheDocument()
+
+    const consoleMetric = screen.getByTestId('admin-suppliers-metric-console')
+    expect(within(consoleMetric).getByText('共享控制台联动')).toBeInTheDocument()
+    expect(within(consoleMetric).getByText('结算 / 风控 / 审计')).toBeInTheDocument()
+    expect(within(consoleMetric).getByText('供应商运营动作保持在同一控制台闭环')).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-suppliers-mission-flow')
     expect(within(missionFlow).getByRole('button', { name: '前往处理结算 / 争议' })).toBeInTheDocument()
@@ -195,9 +212,11 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
-    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(within(bridge).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
-    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
+    const sharedLinks = screen.getByTestId('admin-suppliers-shared-console-links')
+    expect(within(sharedLinks).getByText('API Keys · /api-keys')).toBeInTheDocument()
+    expect(within(sharedLinks).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
+    expect(within(sharedLinks).getByText('API 文档 · /docs')).toBeInTheDocument()
+    expect(within(bridge).getByText('即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。')).toBeInTheDocument()
 
     expect(screen.getByText('高待结算供应商')).toBeInTheDocument()
     expect(screen.getByText('58.00%')).toBeInTheDocument()

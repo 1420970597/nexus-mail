@@ -212,6 +212,7 @@ export function AdminSuppliersPage() {
         {missionSignals.map((item) => (
           <Card
             key={item.key}
+            data-testid={`admin-suppliers-metric-${item.key}`}
             style={{
               flex: '1 1 220px',
               minWidth: 220,
@@ -262,11 +263,13 @@ export function AdminSuppliersPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。
               </Typography.Paragraph>
-              {sharedConsoleLinks.map((item) => (
-                <Tag key={item.key} color="grey" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>
-                  {item.label} · {item.path}
-                </Tag>
-              ))}
+              <Space wrap data-testid="admin-suppliers-shared-console-links">
+                {sharedConsoleLinks.map((item) => (
+                  <Tag key={item.key} color="grey" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>
+                    {item.label} · {item.path}
+                  </Tag>
+                ))}
+              </Space>
               {shouldShowFallback ? (
                 <Card
                   data-testid="admin-suppliers-shared-console-fallback"
