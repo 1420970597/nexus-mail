@@ -128,9 +128,9 @@ export function ProfilePage() {
       },
       {
         key: 'api-keys',
-        title: 'API 接入控制面',
+        title: 'API Keys',
         description: '在同一控制台里继续完成 API Keys、白名单与最小权限发放，不拆出独立接入后台。',
-        buttonText: '前往 API Keys',
+        buttonText: '打开 API Keys',
         path: API_KEYS_ROUTE,
         visible: canOpenApiKeys,
       },

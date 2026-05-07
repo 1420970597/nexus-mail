@@ -38,7 +38,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="webhooks-route-stub">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
         />
@@ -46,7 +46,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="api-docs-route-stub">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -119,24 +119,26 @@ describe('ProfilePage', () => {
     expect(screen.getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
 
     const capabilityRegion = screen.getByTestId('profile-capability-bridge')
-    expect(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' })).toBeInTheDocument()
+    expect(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '打开 API 文档' })).toBeInTheDocument()
 
-    await user.click(within(capabilityRegion).getByRole('button', { name: '前往 API Keys' }))
+    await user.click(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
     const webhookRegion = screen.getByTestId('profile-capability-bridge')
     await user.click(within(webhookRegion).getByRole('button', { name: '打开 Webhook 设置' }))
-    expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
+    const webhooksRouteStub = await screen.findByTestId('webhooks-route-stub')
+    expect(within(webhooksRouteStub).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
     const docsRegion = screen.getByTestId('profile-capability-bridge')
     await user.click(within(docsRegion).getByRole('button', { name: '打开 API 文档' }))
-    expect(await screen.findByTestId('api-docs-route-stub')).toBeInTheDocument()
+    const docsRouteStub = await screen.findByTestId('api-docs-route-stub')
+    expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('keeps the supplier return card isolated from user-only focus copy when settings is available', async () => {
