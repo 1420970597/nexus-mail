@@ -767,11 +767,10 @@ describe('App', () => {
     const roleGuidance = await screen.findByTestId('webhooks-role-guidance')
     expect(within(roleGuidance).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
 
-    const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
-    expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
-
-    const attentionMetric = screen.getByTestId('webhooks-attention-delivery-metric')
-    expect(within(attentionMetric).getByText('失败 / 排队中')).toBeInTheDocument()
+    const metricsStrip = screen.getByTestId('webhooks-metrics-strip')
+    expect(within(metricsStrip).getByTestId('webhooks-endpoint-metric')).toBeInTheDocument()
+    expect(within(metricsStrip).getByTestId('webhooks-attention-delivery-metric')).toBeInTheDocument()
+    expect(within(metricsStrip).getByTestId('webhooks-latest-delivery-metric')).toBeInTheDocument()
 
     const currentEndpointCard = screen.getByTestId('webhooks-current-endpoints-card')
     expect(within(currentEndpointCard).getByText('当前 endpoint')).toBeInTheDocument()
