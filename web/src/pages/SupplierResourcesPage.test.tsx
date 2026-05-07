@@ -373,6 +373,35 @@ describe('SupplierResourcesPage', () => {
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
+  it('renders Chinese runtime labels for account and mailbox forms plus the localized accounts column title', async () => {
+    renderPage()
+
+    const accountCard = await screen.findByText('新增第三方邮箱账号')
+    expect(accountCard).toBeInTheDocument()
+
+    expect(screen.getByLabelText('服务商')).toBeInTheDocument()
+    expect(screen.getByLabelText('刷新令牌')).toBeInTheDocument()
+    expect(screen.getByLabelText('密钥引用')).toBeInTheDocument()
+    expect(screen.getByLabelText('桥接端点')).toBeInTheDocument()
+    expect(screen.getByLabelText('桥接标识')).toBeInTheDocument()
+    expect(screen.getByLabelText('本地前缀')).toBeInTheDocument()
+
+    expect(screen.getByPlaceholderText('OAuth2 必填，授权码/App Password 可留空')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('env://NEXUS_QQ_AUTH_CODE')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('127.0.0.1:1143')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('proton-bridge')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Provider')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Refresh Token')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Secret Ref')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Bridge Endpoint')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Bridge Label')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('local part')).not.toBeInTheDocument()
+
+    const accountsTable = screen.getByTestId('supplier-resources-accounts-table-card')
+    expect(within(accountsTable).getByText('服务商')).toBeInTheDocument()
+    expect(within(accountsTable).queryByText('Provider')).not.toBeInTheDocument()
+  })
+
   it('submits supplier domain, account, and mailbox actions then reloads overview data', async () => {
     const user = userEvent.setup()
     renderPage()

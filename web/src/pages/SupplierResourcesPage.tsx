@@ -575,18 +575,18 @@ export function SupplierResourcesPage() {
               录入公网邮箱或桥接账号，确保后续邮箱池与供货规则能引用真实可用账号。
             </Typography.Paragraph>
             <Form form={accountForm} layout="horizontal" labelPosition="top" initValues={{ source_type: 'public_mailbox_account', auth_mode: 'oauth2', protocol_mode: 'imap_pull', status: 'active' }}>
-              <Form.Input field="provider" label="Provider" rules={[{ required: true, message: '请输入 provider' }]} placeholder="outlook / gmail / qq / proton" />
+              <Form.Input field="provider" label="服务商" rules={[{ required: true, message: '请输入服务商' }]} placeholder="outlook / gmail / qq / proton" />
               <Form.Input field="identifier" label="账号标识" rules={[{ required: true, message: '请输入邮箱或账号标识' }]} placeholder="supplier@example.com" />
               <Form.Input field="source_type" label="来源类型" />
               <Form.Input field="auth_mode" label="认证方式" />
               <Form.Input field="protocol_mode" label="协议模式" />
               <Form.Input field="host" label="主机" placeholder="imap.gmail.com / 127.0.0.1" />
               <Form.InputNumber field="port" label="端口" placeholder="993 / 995 / 1143" style={{ width: '100%' }} />
-              <Form.Input field="refresh_token" label="Refresh Token" placeholder="OAuth2 必填，授权码/App Password 可留空" />
+              <Form.Input field="refresh_token" label="刷新令牌" placeholder="OAuth2 必填，授权码/App Password 可留空" />
               <Form.Input field="credential_secret" label="凭证密文" placeholder="App Password / 授权码 / Bridge 密码" />
-              <Form.Input field="secret_ref" label="Secret Ref" placeholder="env://NEXUS_QQ_AUTH_CODE" />
-              <Form.Input field="bridge_endpoint" label="Bridge Endpoint" placeholder="127.0.0.1:1143" />
-              <Form.Input field="bridge_label" label="Bridge Label" placeholder="proton-bridge" />
+              <Form.Input field="secret_ref" label="密钥引用" placeholder="env://NEXUS_QQ_AUTH_CODE" />
+              <Form.Input field="bridge_endpoint" label="桥接端点" placeholder="127.0.0.1:1143" />
+              <Form.Input field="bridge_label" label="桥接标识" placeholder="proton-bridge" />
               <Form.Input field="status" label="状态" />
               <Button theme="solid" type="primary" loading={accountSubmitting} onClick={() => void submitAccount()}>
                 保存账号
@@ -603,7 +603,7 @@ export function SupplierResourcesPage() {
               <Form.Input field="project_key" label="项目键" rules={[{ required: true, message: '请输入项目键' }]} placeholder="openai" />
               <Form.Input field="domain_id" label="域名 ID" placeholder="可选，与 account_id 至少填一项" />
               <Form.Input field="account_id" label="账号 ID" placeholder="可选，与 domain_id 至少填一项" />
-              <Form.Input field="local_part" label="local part" placeholder="agent-001" />
+              <Form.Input field="local_part" label="本地前缀" placeholder="agent-001" />
               <Form.Input field="address" label="完整地址" placeholder="可直接录完整邮箱" />
               <Form.Input field="source_type" label="来源类型" />
               <Form.Input field="status" label="状态" />
@@ -638,7 +638,7 @@ export function SupplierResourcesPage() {
               rowKey="id"
               dataSource={data.accounts}
               columns={[
-                { title: 'Provider', dataIndex: 'provider', key: 'provider' },
+                { title: '服务商', dataIndex: 'provider', key: 'provider' },
                 { title: '账号', dataIndex: 'identifier', key: 'identifier' },
                 { title: '来源', dataIndex: 'source_type', key: 'source_type' },
                 { title: '认证', dataIndex: 'auth_mode', key: 'auth_mode' },
