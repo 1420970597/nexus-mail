@@ -39,7 +39,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="webhooks-route-stub">
-              <h1>Webhook 设置</h1>
+              <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
         />
@@ -242,7 +242,7 @@ describe('ApiDocsPage', () => {
     loopLane = screen.getByTestId('docs-shared-console-loop')
     await user.click(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' }))
     expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
-    expect(screen.getByText('Webhook 设置')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
