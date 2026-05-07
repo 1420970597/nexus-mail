@@ -22,24 +22,19 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
 
 const readinessRows = [
   {
-    label: '统一认证',
-    value: '登录 / 注册同入口',
+    label: '统一入口',
+    value: '登录与注册同入口',
     detail: '不拆独立注册站或额外后台登录页。',
   },
   {
-    label: '共享 shell',
-    value: '注册成功直达控制台',
-    detail: '会话建立后直接进入统一控制台布局。',
-  },
-  {
-    label: '角色菜单',
-    value: '按服务端角色切换',
-    detail: '单壳内按 user / supplier / admin 返回不同菜单。',
+    label: '共享控制台',
+    value: '登录后直达同一壳',
+    detail: '角色差异留在控制台内按菜单与页面能力展开。',
   },
   {
     label: '开发接入',
-    value: 'Keys / Webhooks / Docs',
-    detail: '真实接入路径保留在同一套控制台导航中。',
+    value: 'Keys · Webhooks · Docs',
+    detail: '接入链路保留在同一套控制台导航中。',
   },
 ]
 
@@ -114,11 +109,11 @@ export function LoginPage() {
             <Space vertical spacing={20} align="start" style={{ color: '#e2e8f0', width: '100%' }}>
               <Tagline />
               <div>
-                <Typography.Title heading={1} style={{ color: '#f7f8f8', marginBottom: 10, fontSize: 44, lineHeight: 1.04, letterSpacing: '-1.02px', maxWidth: 620 }}>
+                <Typography.Title heading={1} style={{ color: '#f7f8f8', marginBottom: 10, fontSize: 40, lineHeight: 1.05, letterSpacing: '-0.96px', maxWidth: 560 }}>
                   统一登录后控制台
                 </Typography.Title>
-                <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.78)', fontSize: 16, lineHeight: 1.72, maxWidth: 560, marginBottom: 0 }}>
-                  共享认证入口与共享控制台壳；角色差异只体现在登录后的菜单与页面能力。
+                <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.72)', fontSize: 15, lineHeight: 1.62, maxWidth: 500, marginBottom: 0 }}>
+                  只保留登录入口、共享控制台与接入路径这三个稳定承诺，减少登录前的解释成本。
                 </Typography.Paragraph>
               </div>
               <Card
@@ -132,23 +127,24 @@ export function LoginPage() {
                   backdropFilter: 'blur(12px)',
                 }}
               >
-                <Space vertical spacing={14} align="start" style={{ width: '100%' }}>
+                <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
                   <div>
                     <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
                       控制台入口摘要
                     </Typography.Title>
-                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, lineHeight: 1.68, fontSize: 13 }}>
-                      仅保留当前登录页稳定承诺的入口、共享 shell 与接入能力。
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
+                      登录前只保留统一入口、共享控制台与接入路径三条最小事实。
                     </Typography.Paragraph>
                   </div>
-                  <Row gutter={[12, 12]} style={{ width: '100%' }}>
+                  <Row gutter={[10, 10]} style={{ width: '100%' }}>
                     {readinessRows.map((item) => (
-                      <Col xs={24} md={12} key={item.label}>
+                      <Col xs={24} key={item.label}>
                         <div
+                          data-testid="login-readiness-item"
                           style={{
-                            minHeight: 108,
+                            minHeight: 0,
                             borderRadius: 14,
-                            padding: '13px 14px',
+                            padding: '12px 14px',
                             background: 'rgba(255,255,255,0.02)',
                             border: '1px solid rgba(255,255,255,0.05)',
                           }}
@@ -170,13 +166,13 @@ export function LoginPage() {
                               color: '#f7f8f8',
                               fontSize: 14,
                               fontWeight: 600,
-                              lineHeight: 1.55,
+                              lineHeight: 1.5,
                               marginTop: 8,
                             }}
                           >
                             {item.value}
                           </Typography.Text>
-                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: '8px 0 0', fontSize: 12, lineHeight: 1.62 }}>
+                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.6)', margin: '7px 0 0', fontSize: 12, lineHeight: 1.58 }}>
                             {item.detail}
                           </Typography.Paragraph>
                         </div>
@@ -201,7 +197,7 @@ export function LoginPage() {
                     <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
                       首轮接入路径
                     </Typography.Title>
-                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, maxWidth: 560, lineHeight: 1.68, fontSize: 14 }}>
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
                       注册后沿同一导航完成首个 Key、Webhook 与文档核对。
                     </Typography.Paragraph>
                   </div>
@@ -258,7 +254,7 @@ export function LoginPage() {
                 backdropFilter: 'blur(18px)',
               }}
             >
-              <Space vertical spacing={18} align="start" style={{ width: '100%' }}>
+              <Space vertical spacing={16} align="start" style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
                   <div>
                     <Typography.Text
@@ -278,7 +274,7 @@ export function LoginPage() {
                     <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8', letterSpacing: '-0.24px' }}>
                       {copy.title}
                     </Typography.Title>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.82)', lineHeight: 1.65 }}>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.88)', lineHeight: 1.58, maxWidth: 380 }}>
                       {copy.helper}
                     </Typography.Paragraph>
                   </div>
@@ -374,9 +370,21 @@ export function LoginPage() {
                     color: #f7f8f8 !important;
                   }
 
+                  .login-auth-form-surface .semi-input-wrapper {
+                    background: rgba(255, 255, 255, 0.05) !important;
+                    border-color: rgba(255, 255, 255, 0.14) !important;
+                    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02) !important;
+                  }
+
+                  .login-auth-form-surface .semi-input-wrapper:hover,
+                  .login-auth-form-surface .semi-input-wrapper:focus-within {
+                    border-color: rgba(130, 143, 255, 0.52) !important;
+                    box-shadow: 0 0 0 1px rgba(130, 143, 255, 0.3) !important;
+                  }
+
                   .login-auth-form-surface .semi-input::placeholder,
                   .login-auth-form-surface .semi-input-wrapper input::placeholder {
-                    color: rgba(208, 214, 224, 0.52) !important;
+                    color: rgba(208, 214, 224, 0.68) !important;
                   }
 
                   .login-auth-banner-surface .semi-banner-description,
@@ -399,8 +407,8 @@ export function LoginPage() {
                     description="已有账号可直接进入共享控制台；若首次使用，可先注册，并在同一壳里按角色扩展工作区。"
                     style={{
                       width: '100%',
-                      background: 'rgba(255,255,255,0.028)',
-                      border: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.08)',
                       color: '#e2e8f0',
                     }}
                   />
@@ -414,8 +422,8 @@ export function LoginPage() {
                     description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局，并先按“项目市场 → 订单中心 → API Keys”完成首轮引导。"
                     style={{
                       width: '100%',
-                      background: 'rgba(255,255,255,0.028)',
-                      border: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.08)',
                       color: '#e2e8f0',
                     }}
                   />
