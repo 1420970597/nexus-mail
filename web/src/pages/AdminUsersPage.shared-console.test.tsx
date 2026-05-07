@@ -102,21 +102,37 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders admin finance mission-control shell with metrics and shared-console guidance', async () => {
+  it('renders admin finance mission-control shell with scoped metrics and shared-console bridge contracts', async () => {
     renderAdminUsersPage()
 
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
-    expect(screen.getByText('钱包调整面')).toBeInTheDocument()
-    expect(screen.getByText('等待管理员确认结算的供应商金额')).toBeInTheDocument()
-    expect(screen.getByText('当前筛选结果中的待处理争议数')).toBeInTheDocument()
-    expect(screen.getByText('共享控制台联动')).toBeInTheDocument()
-    expect(screen.getByText('管理员主任务流')).toBeInTheDocument()
+
+    const walletMetric = screen.getByTestId('admin-users-metric-wallet')
+    expect(within(walletMetric).getByText('钱包调整面')).toBeInTheDocument()
+    expect(within(walletMetric).getByText(/人均可用余额/)).toBeInTheDocument()
+
+    const settlementMetric = screen.getByTestId('admin-users-metric-settlement')
+    expect(within(settlementMetric).getByText('待结算总额')).toBeInTheDocument()
+    expect(within(settlementMetric).getByText('优先处理供应商月度或异常结算')).toBeInTheDocument()
+
+    const disputesMetric = screen.getByTestId('admin-users-metric-disputes')
+    expect(within(disputesMetric).getByText('开放争议')).toBeInTheDocument()
+    expect(within(disputesMetric).getByText(/当前退款敞口/)).toBeInTheDocument()
+
+    const consoleMetric = screen.getByTestId('admin-users-metric-console')
+    expect(within(consoleMetric).getByText('共享控制台联动')).toBeInTheDocument()
+    expect(within(consoleMetric).getByText('高危动作、风控与接入留在同一后台闭环')).toBeInTheDocument()
+
+    const missionFlow = screen.getByTestId('admin-users-mission-flow')
+    expect(within(missionFlow).getByRole('heading', { name: '管理员主任务流' })).toBeInTheDocument()
+
     const bridgeCard = screen.getByTestId('admin-users-shared-console-bridge')
     expect(bridgeCard).toBeInTheDocument()
     expect(within(bridgeCard).getByText('即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。')).toBeInTheDocument()
-    expect(screen.getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(screen.getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
-    expect(screen.getByText('API 文档 · /docs')).toBeInTheDocument()
+    const bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
+    expect(within(bridgeLinks).getByText('API Keys · /api-keys')).toBeInTheDocument()
+    expect(within(bridgeLinks).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
+    expect(within(bridgeLinks).getByText('API 文档 · /docs')).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to risk, audit, and api key pages via the admin mission-flow region', async () => {

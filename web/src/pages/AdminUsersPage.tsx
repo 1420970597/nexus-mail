@@ -304,6 +304,7 @@ export function AdminUsersPage() {
         {missionSignals.map((item) => (
           <Card
             key={item.key}
+            data-testid={`admin-users-metric-${item.key}`}
             style={{
               flex: '1 1 220px',
               minWidth: 220,
@@ -354,11 +355,13 @@ export function AdminUsersPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。
               </Typography.Paragraph>
-              {visibleSharedConsoleLinks.map((item) => (
-                <Tag key={item.key} color="grey" prefixIcon={item.icon}>
-                  {item.label} · {item.path}
-                </Tag>
-              ))}
+              <div data-testid="admin-users-shared-console-links">
+                {visibleSharedConsoleLinks.map((item) => (
+                  <Tag key={item.key} color="grey" prefixIcon={item.icon}>
+                    {item.label} · {item.path}
+                  </Tag>
+                ))}
+              </div>
               {shouldShowFallback ? (
                 <Card
                   data-testid="admin-users-shared-console-fallback"
