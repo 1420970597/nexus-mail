@@ -398,12 +398,12 @@ export function SupplierOfferingsPage() {
             ) : null}
             {canOpenWebhooks ? (
               <Button icon={<IconBolt />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
-                Webhook 设置 · {WEBHOOKS_ROUTE}
+                供给事件回调工作台 · {WEBHOOKS_ROUTE}
               </Button>
             ) : null}
             {canOpenDocs ? (
               <Button icon={<IconPriceTag />} onClick={() => navigate(DOCS_ROUTE)}>
-                API 文档 · {DOCS_ROUTE}
+                API 文档与接入控制台 · {DOCS_ROUTE}
               </Button>
             ) : null}
             {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (

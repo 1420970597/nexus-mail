@@ -181,8 +181,8 @@ describe('SupplierResourcesPage', () => {
     const sharedConsoleBridge = screen.getByTestId('supplier-resources-shared-console-bridge')
     expect(within(sharedConsoleBridge).getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
     expect(screen.getByTestId('supplier-resources-bridge-api-keys')).toHaveTextContent(`API Keys · ${API_KEYS_ROUTE}`)
-    expect(screen.getByTestId('supplier-resources-bridge-webhooks')).toHaveTextContent(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)
-    expect(screen.getByTestId('supplier-resources-bridge-docs')).toHaveTextContent(`API 文档 · ${DOCS_ROUTE}`)
+    expect(screen.getByTestId('supplier-resources-bridge-webhooks')).toHaveTextContent(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)
+    expect(screen.getByTestId('supplier-resources-bridge-docs')).toHaveTextContent(`API 文档与接入控制台 · ${DOCS_ROUTE}`)
 
     const healthyAccountsMetric = screen.getByTestId('supplier-resources-metric-healthy-accounts')
     expect(within(healthyAccountsMetric).getByText('健康账号')).toBeInTheDocument()

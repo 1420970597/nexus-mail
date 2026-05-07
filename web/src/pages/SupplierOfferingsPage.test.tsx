@@ -78,7 +78,7 @@ function renderSupplierOfferingsPage() {
           path={WEBHOOKS_ROUTE}
           element={
             <section data-testid="supplier-offerings-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>供给事件回调工作台</h1>
             </section>
           }
         />
@@ -188,8 +188,8 @@ describe('SupplierOfferingsPage', () => {
     const singleShellPillar = within(bridge).getByTestId('supplier-offerings-console-pillar-single-shell')
     expect(within(singleShellPillar).getByText('单一登录后控制台')).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: /API Keys\s*·\s*\/api-keys/ })).toBeInTheDocument()
-    expect(within(bridge).getByRole('button', { name: /Webhook 设置\s*·\s*\/webhooks/ })).toBeInTheDocument()
-    expect(within(bridge).getByRole('button', { name: /API 文档\s*·\s*\/docs/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /供给事件回调工作台\s*·\s*\/webhooks/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /API 文档与接入控制台\s*·\s*\/docs/ })).toBeInTheDocument()
 
     const offeringsTable = screen.getByTestId('supplier-offerings-table')
     expect(within(offeringsTable).getByText('discord')).toBeInTheDocument()
@@ -246,8 +246,8 @@ describe('SupplierOfferingsPage', () => {
 
     const bridge = screen.getByTestId('supplier-offerings-shared-console-bridge')
     expect(within(bridge).queryByRole('button', { name: `API Keys · ${API_KEYS_ROUTE}` })).not.toBeInTheDocument()
-    expect(within(bridge).queryByRole('button', { name: `Webhook 设置 · ${WEBHOOKS_ROUTE}` })).not.toBeInTheDocument()
-    expect(within(bridge).queryByRole('button', { name: `API 文档 · ${DOCS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `供给事件回调工作台 · ${WEBHOOKS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: `API 文档与接入控制台 · ${DOCS_ROUTE}` })).not.toBeInTheDocument()
 
     const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
     expect(fallback).toBeInTheDocument()

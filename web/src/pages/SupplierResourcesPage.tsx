@@ -494,7 +494,7 @@ export function SupplierResourcesPage() {
                     icon={<IconBolt />}
                     onClick={() => navigate(WEBHOOKS_ROUTE)}
                   >
-                    Webhook 设置 · {WEBHOOKS_ROUTE}
+                    供给事件回调工作台 · {WEBHOOKS_ROUTE}
                   </Button>
                 ) : null}
                 {canOpenDocs ? (
@@ -503,7 +503,7 @@ export function SupplierResourcesPage() {
                     icon={<IconPriceTag />}
                     onClick={() => navigate(DOCS_ROUTE)}
                   >
-                    API 文档 · {DOCS_ROUTE}
+                    API 文档与接入控制台 · {DOCS_ROUTE}
                   </Button>
                 ) : null}
               {shouldShowSharedConsoleFallback ? (
