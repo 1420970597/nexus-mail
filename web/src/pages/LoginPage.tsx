@@ -22,64 +22,40 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
 
 const readinessRows = [
   {
-    label: '注册 / 登录',
-    value: '同一入口',
-    detail: '保留统一认证入口，不拆成独立注册站或多后台登录页。',
+    label: '统一认证',
+    value: '登录 / 注册同入口',
+    detail: '不拆独立注册站或额外后台登录页。',
+  },
+  {
+    label: '共享 shell',
+    value: '注册成功直达控制台',
+    detail: '会话建立后直接进入统一控制台布局。',
   },
   {
     label: '角色菜单',
-    value: '服务端角色真值',
-    detail: '登录后仍是同一壳，只按 user / supplier / admin 返回不同菜单。',
+    value: '按服务端角色切换',
+    detail: '单壳内按 user / supplier / admin 返回不同菜单。',
   },
   {
-    label: '控制台首页',
-    value: 'Dashboard 已就绪',
-    detail: '会话建立后直接落到共享 shell，而不是额外营销欢迎页。',
-  },
-  {
-    label: 'API 接入',
+    label: '开发接入',
     value: 'Keys / Webhooks / Docs',
-    detail: '真实接入路径已经在同一套控制台导航中可见。',
-  },
-]
-
-const roleWorkspaceCards = [
-  {
-    title: '用户工作区',
-    summary: '项目市场 / 订单中心 / API Keys',
-    detail: '从下单、订单处理到 API 接入都停留在统一共享壳内。',
-  },
-  {
-    title: '供应商工作区',
-    summary: '资源域名 / 供货规则 / 结算视图',
-    detail: '同一 shell 下切到资源供给与运营结算页面，不切换独立系统。',
-  },
-  {
-    title: '管理员工作区',
-    summary: '总览 / 风控中心 / 审计日志',
-    detail: '保留平台级运营与审计入口，但仍复用统一导航与认证会话。',
+    detail: '真实接入路径保留在同一套控制台导航中。',
   },
 ]
 
 const integrationRunway = [
   {
-    title: 'API Keys 起步',
-    description: '注册成功后立即进入共享控制台，在第一屏完成首个 API Key 与最小权限确认。',
+    title: '创建 Key',
+    description: '生成首个 API Key。',
   },
   {
-    title: 'Webhook 联调',
-    description: '沿同一导航继续配置回调地址与白名单，并发起一次真实 test delivery。',
+    title: '配置 Webhook',
+    description: '补齐回调地址并发起一次联调。',
   },
   {
-    title: '文档回放',
-    description: '回到 API 文档核对请求契约，再用真实 API 回放验证整条接入链路。',
+    title: '对照文档',
+    description: '回到文档核对请求契约。',
   },
-]
-
-const devAccounts = [
-  'admin@nexus-mail.local / Admin123!',
-  'supplier@nexus-mail.local / Supplier123!',
-  'user@nexus-mail.local / User123!',
 ]
 
 export function LoginPage() {
@@ -141,8 +117,8 @@ export function LoginPage() {
                 <Typography.Title heading={1} style={{ color: '#f7f8f8', marginBottom: 10, fontSize: 44, lineHeight: 1.04, letterSpacing: '-1.02px', maxWidth: 620 }}>
                   统一登录后控制台
                 </Typography.Title>
-                <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.78)', fontSize: 16, lineHeight: 1.72, maxWidth: 600, marginBottom: 0 }}>
-                  共享认证入口、共享控制台壳、共享 API 接入路径；角色差异只体现在登录后的菜单与页面能力。
+                <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.78)', fontSize: 16, lineHeight: 1.72, maxWidth: 560, marginBottom: 0 }}>
+                  共享认证入口与共享控制台壳；角色差异只体现在登录后的菜单与页面能力。
                 </Typography.Paragraph>
               </div>
               <Card
@@ -159,10 +135,10 @@ export function LoginPage() {
                 <Space vertical spacing={14} align="start" style={{ width: '100%' }}>
                   <div>
                     <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
-                      真实控制台合同
+                      控制台入口摘要
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, lineHeight: 1.68, fontSize: 13 }}>
-                      只展示当前登录页能够稳定承诺的入口、会话与接入能力，不再使用泛化营销卖点。
+                      仅保留当前登录页稳定承诺的入口、共享 shell 与接入能力。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
@@ -210,57 +186,6 @@ export function LoginPage() {
                 </Space>
               </Card>
               <Card
-                data-testid="login-role-workspaces"
-                bodyStyle={{ padding: 18 }}
-                style={{
-                  width: '100%',
-                  background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
-                  backdropFilter: 'blur(12px)',
-                }}
-              >
-                <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-                  <div>
-                    <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
-                      同一壳内角色工作区
-                    </Typography.Title>
-                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.7)', margin: 0, maxWidth: 620, lineHeight: 1.72 }}>
-                      登录后进入同一套深色 shell，再根据角色菜单切换视图，不拆分前台、供应商站和管理后台入口。
-                    </Typography.Paragraph>
-                  </div>
-                  <Row gutter={[16, 16]} style={{ width: '100%' }}>
-                    {roleWorkspaceCards.map((item) => (
-                      <Col xs={24} md={12} xl={8} key={item.title}>
-                        <Card
-                          bodyStyle={{ padding: 18 }}
-                          style={{
-                            height: '100%',
-                            background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
-                            border: '1px solid rgba(255,255,255,0.06)',
-                            boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
-                            backdropFilter: 'blur(12px)',
-                          }}
-                        >
-                          <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                            <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0, letterSpacing: '-0.18px' }}>
-                              {item.title}
-                            </Typography.Title>
-                            <Typography.Text style={{ color: '#7170ff', fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>
-                              {item.summary}
-                            </Typography.Text>
-                            <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.68)', margin: 0, lineHeight: 1.7, fontSize: 14 }}>
-                              {item.detail}
-                            </Typography.Paragraph>
-                          </Space>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                </Space>
-              </Card>
-
-              <Card
                 data-testid="login-register-journey"
                 bodyStyle={{ padding: 18 }}
                 style={{
@@ -277,7 +202,7 @@ export function LoginPage() {
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, maxWidth: 560, lineHeight: 1.68, fontSize: 14 }}>
-                      注册后直接进入同一深色控制台，用更短的首轮路径完成 API 接入、回调联调与文档回放。
+                      注册后沿同一导航完成首个 Key、Webhook 与文档核对。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
@@ -318,21 +243,6 @@ export function LoginPage() {
                 </Space>
               </Card>
 
-              {import.meta.env.DEV ? (
-                <Banner
-                  type="info"
-                  fullMode={false}
-                  closeIcon={null}
-                  title="开发环境快捷账号"
-                  description={devAccounts.join(' ｜ ')}
-                  style={{
-                    width: '100%',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    color: '#d0d6e0',
-                  }}
-                />
-              ) : null}
             </Space>
           </Col>
           <Col xs={24} lg={10}>
@@ -451,8 +361,37 @@ export function LoginPage() {
                   </Button>
                 </div>
 
+                <style>{`
+                  .login-auth-form-surface .semi-form-field-label,
+                  .login-auth-form-surface .semi-form-field-label-text,
+                  .login-auth-form-surface .semi-form-field-label-required {
+                    color: #f7f8f8 !important;
+                  }
+
+                  .login-auth-form-surface .semi-input,
+                  .login-auth-form-surface .semi-input-wrapper,
+                  .login-auth-form-surface .semi-input-wrapper input {
+                    color: #f7f8f8 !important;
+                  }
+
+                  .login-auth-form-surface .semi-input::placeholder,
+                  .login-auth-form-surface .semi-input-wrapper input::placeholder {
+                    color: rgba(208, 214, 224, 0.52) !important;
+                  }
+
+                  .login-auth-banner-surface .semi-banner-description,
+                  .login-auth-banner-surface .semi-banner-content-body,
+                  .login-auth-banner-surface .semi-banner-content,
+                  .login-auth-banner-surface .semi-typography,
+                  .login-auth-footer-copy.semi-typography,
+                  .login-auth-footer-copy {
+                    color: #e2e8f0 !important;
+                  }
+                `}</style>
+
                 {mode === 'login' ? (
                   <Banner
+                    className="login-auth-banner-surface"
                     data-testid="login-auth-guidance-banner"
                     type="info"
                     fullMode={false}
@@ -462,11 +401,12 @@ export function LoginPage() {
                       width: '100%',
                       background: 'rgba(255,255,255,0.028)',
                       border: '1px solid rgba(255,255,255,0.06)',
-                      color: '#d0d6e0',
+                      color: '#e2e8f0',
                     }}
                   />
                 ) : (
                   <Banner
+                    className="login-auth-banner-surface"
                     data-testid="login-auth-guidance-banner"
                     type="success"
                     fullMode={false}
@@ -476,18 +416,19 @@ export function LoginPage() {
                       width: '100%',
                       background: 'rgba(255,255,255,0.028)',
                       border: '1px solid rgba(255,255,255,0.06)',
-                      color: '#d0d6e0',
+                      color: '#e2e8f0',
                     }}
                   />
                 )}
 
-                <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }}>
+                <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }} className="login-auth-form-surface">
                   <Form.Input
                     field="email"
                     label="邮箱"
                     placeholder="name@example.com"
                     rules={[{ required: true, message: '请输入邮箱' }]}
-                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)', color: '#f7f8f8' }}
+                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
+                    inputStyle={{ color: '#f7f8f8' }}
                   />
                   <Form.Input
                     field="password"
@@ -495,7 +436,8 @@ export function LoginPage() {
                     mode="password"
                     placeholder={mode === 'login' ? '请输入密码' : '至少 8 位密码'}
                     rules={[{ required: true, message: '请输入密码' }]}
-                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)', color: '#f7f8f8' }}
+                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
+                    inputStyle={{ color: '#f7f8f8' }}
                   />
                   {mode === 'register' ? (
                     <Form.Input
@@ -504,7 +446,8 @@ export function LoginPage() {
                       mode="password"
                       placeholder="再次输入密码"
                       rules={[{ required: true, message: '请再次输入密码' }]}
-                      fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)', color: '#f7f8f8' }}
+                      fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
+                      inputStyle={{ color: '#f7f8f8' }}
                     />
                   ) : null}
                   {error ? <Typography.Text type="danger">{error}</Typography.Text> : null}
@@ -514,7 +457,7 @@ export function LoginPage() {
                 </Form>
 
                 <Divider margin="12px" />
-                <Typography.Text type="tertiary">
+                <Typography.Text type="tertiary" className="login-auth-footer-copy">
                   登录后进入同一套控制台布局；菜单与页面能力由角色控制，而不是拆分多个独立后台。
                 </Typography.Text>
               </Space>
