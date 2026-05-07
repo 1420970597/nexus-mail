@@ -23,18 +23,18 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
 const featureCards = [
   {
     icon: <IconSafe size="large" />,
-    title: '统一权限控制台',
-    description: '参考 new-api 的单一控制台结构，登录后通过角色菜单区分用户、供应商、管理员。',
+    title: '统一控制台权限',
+    description: '登录后沿同一壳加载角色菜单，用服务端权限真值切换用户、供应商与管理员工作区。',
   },
   {
     icon: <IconMail size="large" />,
-    title: '真实业务链路',
-    description: '项目市场、订单、API Key、Webhook、风控与审计均对接真实 API，而非占位壳页面。',
+    title: '真实 API 工作流',
+    description: '采购、订单、API Keys、Webhook、风控与审计全部连接真实接口，而不是营销占位面板。',
   },
   {
     icon: <IconUserGroup size="large" />,
-    title: '共享布局与导航',
-    description: '同一套侧边栏、顶栏与内容区骨架，避免冗余独立后台导致体验割裂。',
+    title: '单壳布局骨架',
+    description: '共享侧栏、顶栏与内容区节奏，让注册后旅程直接衔接登录后控制台。',
   },
 ]
 
@@ -130,22 +130,22 @@ export function LoginPage() {
             <Space vertical spacing={20} align="start" style={{ color: '#e2e8f0', width: '100%' }}>
               <Tagline />
               <div>
-                <Typography.Title heading={1} style={{ color: '#f8fafc', marginBottom: 12, fontSize: 48, lineHeight: 1.12 }}>
-                  邮件接码业务的统一运营控制台
+                <Typography.Title heading={1} style={{ color: '#f7f8f8', marginBottom: 10, fontSize: 44, lineHeight: 1.04, letterSpacing: '-1.02px', maxWidth: 620 }}>
+                  统一登录后控制台
                 </Typography.Title>
-                <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.82)', fontSize: 18, maxWidth: 640, marginBottom: 0 }}>
-                  以单一登录入口承载注册、采购、供货、风控与审计能力，保持与 new-api 类似的共享壳体验，减少角色切换成本。
+                <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.78)', fontSize: 16, lineHeight: 1.72, maxWidth: 600, marginBottom: 0 }}>
+                  在一套深色 shared-console 壳中完成注册、采购、供货、风控与审计，登录后再按角色菜单切换工作区，而不是跳进多套独立后台。
                 </Typography.Paragraph>
               </div>
               <Card
                 data-testid="login-hero-signal-grid"
-                bodyStyle={{ padding: 18 }}
+                bodyStyle={{ padding: 16 }}
                 style={{
                   width: '100%',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  boxShadow: 'rgba(0,0,0,0.22) 0px 18px 44px',
-                  backdropFilter: 'blur(14px)',
+                  background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: 'rgba(0,0,0,0.22) 0px 14px 36px',
+                  backdropFilter: 'blur(12px)',
                 }}
               >
                 <Row gutter={[12, 12]} style={{ width: '100%' }}>
@@ -153,20 +153,20 @@ export function LoginPage() {
                     <Col xs={24} md={8} key={item.label}>
                       <div
                         style={{
-                          minHeight: 92,
-                          borderRadius: 16,
-                          padding: '14px 16px',
+                          minHeight: 86,
+                          borderRadius: 14,
+                          padding: '13px 14px',
                           background: 'rgba(255,255,255,0.02)',
-                          border: '1px solid rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.05)',
                         }}
                       >
                         <Typography.Text
                           style={{
                             display: 'block',
                             color: 'rgba(138,143,152,0.96)',
-                            fontSize: 12,
+                            fontSize: 11,
                             textTransform: 'uppercase',
-                            letterSpacing: '0.08em',
+                            letterSpacing: '0.09em',
                           }}
                         >
                           {item.label}
@@ -175,10 +175,10 @@ export function LoginPage() {
                           style={{
                             display: 'block',
                             color: '#f7f8f8',
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: 600,
-                            lineHeight: 1.7,
-                            marginTop: 10,
+                            lineHeight: 1.65,
+                            marginTop: 8,
                           }}
                         >
                           {item.value}
@@ -192,21 +192,21 @@ export function LoginPage() {
                 {featureCards.map((item) => (
                   <Col xs={24} md={12} xl={8} key={item.title}>
                     <Card
-                      bodyStyle={{ padding: 20 }}
+                      bodyStyle={{ padding: 18 }}
                       style={{
                         height: '100%',
-                        background: 'rgba(15, 23, 42, 0.66)',
-                        border: '1px solid rgba(148, 163, 184, 0.18)',
-                        boxShadow: '0 18px 44px rgba(2, 6, 23, 0.24)',
-                        backdropFilter: 'blur(14px)',
+                        background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
+                        backdropFilter: 'blur(12px)',
                       }}
                     >
                       <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                        <div style={{ color: '#7dd3fc' }}>{item.icon}</div>
-                        <Typography.Title heading={5} style={{ color: '#f8fafc', margin: 0 }}>
+                        <div style={{ color: '#7170ff' }}>{item.icon}</div>
+                        <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0, letterSpacing: '-0.18px' }}>
                           {item.title}
                         </Typography.Title>
-                        <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.72)', margin: 0 }}>
+                        <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.68)', margin: 0, lineHeight: 1.7, fontSize: 14 }}>
                           {item.description}
                         </Typography.Paragraph>
                       </Space>
@@ -217,39 +217,39 @@ export function LoginPage() {
 
               <Card
                 data-testid="login-register-journey"
-                bodyStyle={{ padding: 20 }}
+                bodyStyle={{ padding: 18 }}
                 style={{
                   width: '100%',
-                  background: 'rgba(15, 23, 42, 0.66)',
-                  border: '1px solid rgba(96, 165, 250, 0.24)',
-                  boxShadow: '0 18px 44px rgba(2, 6, 23, 0.24)',
-                  backdropFilter: 'blur(14px)',
+                  background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
+                  backdropFilter: 'blur(12px)',
                 }}
               >
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                   <div>
-                    <Typography.Title heading={4} style={{ color: '#f8fafc', marginBottom: 8 }}>
+                    <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
                       注册后进入同一套控制台
                     </Typography.Title>
-                    <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.78)', margin: 0 }}>
-                      保持单一深色共享壳：先完成账户创建，再沿着 API Keys、Webhook 与 Docs 的统一接入跑道完成首轮联调。
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.7)', margin: 0, maxWidth: 620, lineHeight: 1.72 }}>
+                      保持单一深色共享壳：先创建账户，再在同一导航骨架里完成 API Keys、Webhook 与 Docs 的首轮接入联调。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
                     {integrationRunway.map((item) => (
                       <Col xs={24} md={8} key={item.title}>
                         <Card
-                          bodyStyle={{ padding: 16 }}
+                          bodyStyle={{ padding: 14 }}
                           style={{
                             height: '100%',
-                            background: 'rgba(2, 6, 23, 0.28)',
-                            border: '1px solid rgba(148, 163, 184, 0.16)',
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)',
                           }}
                         >
-                          <Typography.Title heading={6} style={{ color: '#f8fafc', marginBottom: 8 }}>
+                          <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.14px' }}>
                             {item.title}
                           </Typography.Title>
-                          <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.7)', margin: 0 }}>
+                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, fontSize: 13, lineHeight: 1.68 }}>
                             {item.description}
                           </Typography.Paragraph>
                         </Card>
@@ -261,6 +261,12 @@ export function LoginPage() {
                     type="primary"
                     icon={<IconArrowRight />}
                     onClick={() => switchMode('register')}
+                    style={{
+                      borderRadius: 12,
+                      background: '#5e6ad2',
+                      border: '1px solid rgba(130, 143, 255, 0.92)',
+                      boxShadow: '0 12px 28px rgba(94,106,210,0.24)',
+                    }}
                   >
                     立即注册，进入共享控制台
                   </Button>
@@ -276,9 +282,9 @@ export function LoginPage() {
                   description={devAccounts.join(' ｜ ')}
                   style={{
                     width: '100%',
-                    background: 'rgba(12, 74, 110, 0.45)',
-                    border: '1px solid rgba(125, 211, 252, 0.28)',
-                    color: '#e0f2fe',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#d0d6e0',
                   }}
                 />
               ) : null}
@@ -306,13 +312,13 @@ export function LoginPage() {
                         alignItems: 'center',
                         gap: 8,
                         marginBottom: 10,
-                        color: 'rgba(138,143,152,0.96)',
-                        fontSize: 12,
+                        color: 'rgba(138,143,152,0.94)',
+                        fontSize: 11,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
+                        letterSpacing: '0.09em',
                       }}
                     >
-                      统一控制台认证
+                      统一控制台登录
                     </Typography.Text>
                     <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8', letterSpacing: '-0.24px' }}>
                       {copy.title}
@@ -323,15 +329,15 @@ export function LoginPage() {
                   </div>
                   <div
                     style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 16,
+                      width: 44,
+                      height: 44,
+                      borderRadius: 14,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+                      background: 'linear-gradient(135deg, rgba(94,106,210,0.92) 0%, rgba(113,112,255,0.88) 100%)',
                       color: '#fff',
-                      boxShadow: '0 14px 30px rgba(59,130,246,0.28)',
+                      boxShadow: '0 12px 28px rgba(94,106,210,0.24)',
                     }}
                   >
                     <IconLock size="large" />
@@ -406,11 +412,11 @@ export function LoginPage() {
                     type="info"
                     fullMode={false}
                     closeIcon={null}
-                    description="已有账号可直接进入共享控制台；若首次使用，可先注册并在同一壳内按角色扩展工作台。"
+                    description="已有账号可直接进入共享控制台；若首次使用，可先注册，并在同一壳里按角色扩展工作区。"
                     style={{
                       width: '100%',
-                      background: 'rgba(255,255,255,0.035)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.028)',
+                      border: '1px solid rgba(255,255,255,0.06)',
                       color: '#d0d6e0',
                     }}
                   />
@@ -423,8 +429,8 @@ export function LoginPage() {
                     description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局，并先按“项目市场 → 订单中心 → API Keys”完成首轮引导。"
                     style={{
                       width: '100%',
-                      background: 'rgba(255,255,255,0.035)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.028)',
+                      border: '1px solid rgba(255,255,255,0.06)',
                       color: '#d0d6e0',
                     }}
                   />
@@ -457,7 +463,7 @@ export function LoginPage() {
                     />
                   ) : null}
                   {error ? <Typography.Text type="danger">{error}</Typography.Text> : null}
-                  <Button htmlType="submit" theme="solid" type="primary" loading={loading} style={{ marginTop: 12, width: '100%', height: 44 }}>
+                  <Button htmlType="submit" theme="solid" type="primary" loading={loading} style={{ marginTop: 12, width: '100%', height: 44, borderRadius: 12, background: '#5e6ad2', border: '1px solid rgba(130, 143, 255, 0.92)', boxShadow: '0 12px 28px rgba(94,106,210,0.24)' }}>
                     {copy.button}
                   </Button>
                 </Form>

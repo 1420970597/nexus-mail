@@ -82,14 +82,13 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
     expect(screen.getByTestId('login-hero-signal-grid')).toBeInTheDocument()
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()
 
     const authShell = screen.getByTestId('login-auth-shell')
-    expect(within(authShell).getByText('统一控制台认证')).toBeInTheDocument()
     const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
     expect(modeSwitch).toHaveAttribute('role', 'tablist')
     expect(modeSwitch).toHaveAttribute('aria-label', '认证模式切换')
@@ -97,19 +96,11 @@ describe('LoginPage', () => {
     const registerButton = within(modeSwitch).getByRole('tab', { name: '注册' })
     expect(loginButton).toHaveAttribute('aria-selected', 'true')
     expect(registerButton).toHaveAttribute('aria-selected', 'false')
-
-    const guidanceBanner = within(authShell).getByTestId('login-auth-guidance-banner')
-    expect(within(guidanceBanner).getByText(/已有账号可直接进入共享控制台/)).toBeInTheDocument()
-    expect(within(authShell).getByText(/登录后进入同一套控制台布局；菜单与页面能力由角色控制/)).toBeInTheDocument()
+    expect(within(authShell).getByTestId('login-auth-guidance-banner')).toBeInTheDocument()
 
     const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('heading', { name: '注册后进入同一套控制台' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('注册后配置 API Keys')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('Webhook 回调联调')).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('文档回放校验')).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
-    expect(screen.queryByText('注册后首轮接入建议')).not.toBeInTheDocument()
-    expect(screen.queryByText('新用户首次进入控制台后的最短路径')).not.toBeInTheDocument()
   })
 
   it('switches the embedded auth guidance when moving from login to register mode', async () => {

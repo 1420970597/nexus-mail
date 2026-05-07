@@ -219,7 +219,7 @@ describe('App', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp([DEFAULT_LOGIN_ROUTE])
     expect(await screen.findByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
   })
 
   it('clears local session on bootstrap failure without revoking refresh session server-side', async () => {
