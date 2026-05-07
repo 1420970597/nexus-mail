@@ -78,12 +78,32 @@ describe('LoginPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders a compact shared-console hero with one scoped registration runway', () => {
+  it('renders a compact shared-console control-plane entry with readiness and role workspace contracts', () => {
     renderLoginPage()
 
     expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
-    expect(screen.getByTestId('login-hero-signal-grid')).toBeInTheDocument()
+
+    const readinessScope = within(screen.getByTestId('login-control-plane-readiness'))
+    expect(readinessScope.getByRole('heading', { name: '真实控制台合同' })).toBeInTheDocument()
+    expect(readinessScope.getByText('注册 / 登录')).toBeInTheDocument()
+    expect(readinessScope.getByText('同一入口')).toBeInTheDocument()
+    expect(readinessScope.getByText('角色菜单')).toBeInTheDocument()
+    expect(readinessScope.getByText('服务端角色真值')).toBeInTheDocument()
+    expect(readinessScope.getByText('控制台首页')).toBeInTheDocument()
+    expect(readinessScope.getByText('Dashboard 已就绪')).toBeInTheDocument()
+    expect(readinessScope.getByText('API 接入')).toBeInTheDocument()
+    expect(readinessScope.getByText('Keys / Webhooks / Docs')).toBeInTheDocument()
+
+    const workspaceScope = within(screen.getByTestId('login-role-workspaces'))
+    expect(workspaceScope.getByRole('heading', { name: '同一壳内角色工作区' })).toBeInTheDocument()
+    expect(workspaceScope.getByRole('heading', { name: '用户工作区' })).toBeInTheDocument()
+    expect(workspaceScope.getByText('项目市场 / 订单中心 / API Keys')).toBeInTheDocument()
+    expect(workspaceScope.getByRole('heading', { name: '供应商工作区' })).toBeInTheDocument()
+    expect(workspaceScope.getByText('资源域名 / 供货规则 / 结算视图')).toBeInTheDocument()
+    expect(workspaceScope.getByRole('heading', { name: '管理员工作区' })).toBeInTheDocument()
+    expect(workspaceScope.getByText('总览 / 风控中心 / 审计日志')).toBeInTheDocument()
+
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()

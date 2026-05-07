@@ -1,5 +1,5 @@
 import { Banner, Button, Card, Col, Divider, Form, Row, Space, Tag, Toast, Typography } from '@douyinfe/semi-ui'
-import { IconArrowRight, IconLock, IconMail, IconSafe, IconUserGroup } from '@douyinfe/semi-icons'
+import { IconArrowRight, IconLock } from '@douyinfe/semi-icons'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, register } from '../services/auth'
@@ -20,36 +20,44 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   },
 }
 
-const featureCards = [
+const readinessRows = [
   {
-    icon: <IconSafe size="large" />,
-    title: '统一控制台权限',
-    description: '登录后沿同一壳加载角色菜单，用服务端权限真值切换用户、供应商与管理员工作区。',
+    label: '注册 / 登录',
+    value: '同一入口',
+    detail: '保留统一认证入口，不拆成独立注册站或多后台登录页。',
   },
   {
-    icon: <IconMail size="large" />,
-    title: '真实 API 工作流',
-    description: '采购、订单、API Keys、Webhook、风控与审计全部连接真实接口，而不是营销占位面板。',
+    label: '角色菜单',
+    value: '服务端角色真值',
+    detail: '登录后仍是同一壳，只按 user / supplier / admin 返回不同菜单。',
   },
   {
-    icon: <IconUserGroup size="large" />,
-    title: '单壳布局骨架',
-    description: '共享侧栏、顶栏与内容区节奏，让注册后旅程直接衔接登录后控制台。',
+    label: '控制台首页',
+    value: 'Dashboard 已就绪',
+    detail: '会话建立后直接落到共享 shell，而不是额外营销欢迎页。',
+  },
+  {
+    label: 'API 接入',
+    value: 'Keys / Webhooks / Docs',
+    detail: '真实接入路径已经在同一套控制台导航中可见。',
   },
 ]
 
-const heroSignals = [
+const roleWorkspaceCards = [
   {
-    label: '统一登录入口',
-    value: '注册 / 登录共用一套入口',
+    title: '用户工作区',
+    summary: '项目市场 / 订单中心 / API Keys',
+    detail: '从下单、订单处理到 API 接入都停留在统一共享壳内。',
   },
   {
-    label: '权限菜单真值',
-    value: '角色菜单由服务端权限返回驱动',
+    title: '供应商工作区',
+    summary: '资源域名 / 供货规则 / 结算视图',
+    detail: '同一 shell 下切到资源供给与运营结算页面，不切换独立系统。',
   },
   {
-    label: '真实 API 联调',
-    value: 'API Keys / Webhooks / Docs 都走真实链路',
+    title: '管理员工作区',
+    summary: '总览 / 风控中心 / 审计日志',
+    detail: '保留平台级运营与审计入口，但仍复用统一导航与认证会话。',
   },
 ]
 
@@ -134,11 +142,11 @@ export function LoginPage() {
                   统一登录后控制台
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.78)', fontSize: 16, lineHeight: 1.72, maxWidth: 600, marginBottom: 0 }}>
-                  在一套深色 shared-console 壳中完成注册、采购、供货、风控与审计，登录后再按角色菜单切换工作区，而不是跳进多套独立后台。
+                  共享认证入口、共享控制台壳、共享 API 接入路径；角色差异只体现在登录后的菜单与页面能力。
                 </Typography.Paragraph>
               </div>
               <Card
-                data-testid="login-hero-signal-grid"
+                data-testid="login-control-plane-readiness"
                 bodyStyle={{ padding: 16 }}
                 style={{
                   width: '100%',
@@ -148,72 +156,109 @@ export function LoginPage() {
                   backdropFilter: 'blur(12px)',
                 }}
               >
-                <Row gutter={[12, 12]} style={{ width: '100%' }}>
-                  {heroSignals.map((item) => (
-                    <Col xs={24} md={8} key={item.label}>
-                      <div
-                        style={{
-                          minHeight: 86,
-                          borderRadius: 14,
-                          padding: '13px 14px',
-                          background: 'rgba(255,255,255,0.02)',
-                          border: '1px solid rgba(255,255,255,0.05)',
-                        }}
-                      >
-                        <Typography.Text
+                <Space vertical spacing={14} align="start" style={{ width: '100%' }}>
+                  <div>
+                    <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
+                      真实控制台合同
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.66)', margin: 0, lineHeight: 1.68, fontSize: 13 }}>
+                      只展示当前登录页能够稳定承诺的入口、会话与接入能力，不再使用泛化营销卖点。
+                    </Typography.Paragraph>
+                  </div>
+                  <Row gutter={[12, 12]} style={{ width: '100%' }}>
+                    {readinessRows.map((item) => (
+                      <Col xs={24} md={12} key={item.label}>
+                        <div
                           style={{
-                            display: 'block',
-                            color: 'rgba(138,143,152,0.96)',
-                            fontSize: 11,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.09em',
+                            minHeight: 108,
+                            borderRadius: 14,
+                            padding: '13px 14px',
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)',
                           }}
                         >
-                          {item.label}
-                        </Typography.Text>
-                        <Typography.Text
-                          style={{
-                            display: 'block',
-                            color: '#f7f8f8',
-                            fontSize: 14,
-                            fontWeight: 600,
-                            lineHeight: 1.65,
-                            marginTop: 8,
-                          }}
-                        >
-                          {item.value}
-                        </Typography.Text>
-                      </div>
-                    </Col>
-                  ))}
-                </Row>
+                          <Typography.Text
+                            style={{
+                              display: 'block',
+                              color: 'rgba(138,143,152,0.96)',
+                              fontSize: 11,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.09em',
+                            }}
+                          >
+                            {item.label}
+                          </Typography.Text>
+                          <Typography.Text
+                            style={{
+                              display: 'block',
+                              color: '#f7f8f8',
+                              fontSize: 14,
+                              fontWeight: 600,
+                              lineHeight: 1.55,
+                              marginTop: 8,
+                            }}
+                          >
+                            {item.value}
+                          </Typography.Text>
+                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: '8px 0 0', fontSize: 12, lineHeight: 1.62 }}>
+                            {item.detail}
+                          </Typography.Paragraph>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </Space>
               </Card>
-              <Row gutter={[16, 16]} style={{ width: '100%' }}>
-                {featureCards.map((item) => (
-                  <Col xs={24} md={12} xl={8} key={item.title}>
-                    <Card
-                      bodyStyle={{ padding: 18 }}
-                      style={{
-                        height: '100%',
-                        background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
-                        backdropFilter: 'blur(12px)',
-                      }}
-                    >
-                      <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                        <div style={{ color: '#7170ff' }}>{item.icon}</div>
-                        <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0, letterSpacing: '-0.18px' }}>
-                          {item.title}
-                        </Typography.Title>
-                        <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.68)', margin: 0, lineHeight: 1.7, fontSize: 14 }}>
-                          {item.description}
-                        </Typography.Paragraph>
-                      </Space>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
+              <Card
+                data-testid="login-role-workspaces"
+                bodyStyle={{ padding: 18 }}
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                  <div>
+                    <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
+                      同一壳内角色工作区
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.7)', margin: 0, maxWidth: 620, lineHeight: 1.72 }}>
+                      登录后进入同一套深色 shell，再根据角色菜单切换视图，不拆分前台、供应商站和管理后台入口。
+                    </Typography.Paragraph>
+                  </div>
+                  <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                    {roleWorkspaceCards.map((item) => (
+                      <Col xs={24} md={12} xl={8} key={item.title}>
+                        <Card
+                          bodyStyle={{ padding: 18 }}
+                          style={{
+                            height: '100%',
+                            background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                            border: '1px solid rgba(255,255,255,0.06)',
+                            boxShadow: '0 14px 34px rgba(2, 6, 23, 0.22)',
+                            backdropFilter: 'blur(12px)',
+                          }}
+                        >
+                          <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                            <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0, letterSpacing: '-0.18px' }}>
+                              {item.title}
+                            </Typography.Title>
+                            <Typography.Text style={{ color: '#7170ff', fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>
+                              {item.summary}
+                            </Typography.Text>
+                            <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.68)', margin: 0, lineHeight: 1.7, fontSize: 14 }}>
+                              {item.detail}
+                            </Typography.Paragraph>
+                          </Space>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </Space>
+              </Card>
 
               <Card
                 data-testid="login-register-journey"
