@@ -9,12 +9,12 @@ type AuthMode = 'login' | 'register'
 
 const modeCopy: Record<AuthMode, { title: string; button: string; helper: string }> = {
   login: {
-    title: '登录并进入 Shared Console',
+    title: '登录并进入统一控制台',
     button: '登录并进入统一控制台',
     helper: '使用统一控制台访问用户、供应商与管理员能力。',
   },
   register: {
-    title: '创建账号并进入 Shared Console',
+    title: '创建账号并进入统一控制台',
     button: '注册并进入统一控制台',
     helper: '仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。',
   },
@@ -40,30 +40,30 @@ const featureCards = [
 
 const heroSignals = [
   {
-    label: 'Single login',
+    label: '统一登录入口',
     value: '注册 / 登录共用一套入口',
   },
   {
-    label: 'Menu truth',
+    label: '权限菜单真值',
     value: '角色菜单由服务端权限返回驱动',
   },
   {
-    label: 'Real APIs',
+    label: '真实 API 联调',
     value: 'API Keys / Webhooks / Docs 都走真实链路',
   },
 ]
 
 const integrationRunway = [
   {
-    title: 'Registration → API Keys',
+    title: '注册后配置 API Keys',
     description: '注册成功后立即落到共享控制台，从同一壳里生成首个 API Key 并确认最小权限。',
   },
   {
-    title: 'Webhook delivery rehearsal',
+    title: 'Webhook 回调联调',
     description: '继续配置白名单与 Webhook endpoint，发起一次真实 test delivery 作为首次联调。',
   },
   {
-    title: 'Docs + replay',
+    title: '文档回放校验',
     description: '回到 API 文档核对请求契约，再用真实 API 回放验证集成链路。',
   },
 ]
@@ -488,7 +488,7 @@ function Tagline() {
         color: '#bfdbfe',
       }}
     >
-      Nexus-Mail · Shared Console
+      Nexus-Mail · 统一控制台
     </Tag>
   )
 }

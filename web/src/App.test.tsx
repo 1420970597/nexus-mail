@@ -218,7 +218,7 @@ describe('App', () => {
   it('renders the login shell when unauthenticated', async () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp([DEFAULT_LOGIN_ROUTE])
-    expect(await screen.findByRole('heading', { name: '登录并进入 Shared Console' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '邮件接码业务的统一运营控制台' })).toBeInTheDocument()
   })
 
@@ -228,7 +228,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByRole('heading', { name: '登录并进入 Shared Console' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
 
     expect(authService.logoutSession).not.toHaveBeenCalled()
     expect(useAuthStore.getState()).toMatchObject({
@@ -324,7 +324,7 @@ describe('App', () => {
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    expect(screen.getByRole('heading', { name: '创建账号并进入 Shared Console' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
   })
 
