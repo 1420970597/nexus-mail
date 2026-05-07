@@ -11,12 +11,47 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path={PROJECTS_ROUTE} element={<div data-testid="projects-route-stub">项目市场</div>} />
-        <Route path={BALANCE_ROUTE} element={<div data-testid="balance-route-stub">余额中心</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">开发者 API 接入工作台</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置</div>} />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={(
+            <section data-testid="projects-route-stub">
+              <h1>项目市场</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={BALANCE_ROUTE}
+          element={(
+            <section data-testid="balance-route-stub">
+              <h1>余额中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="api-keys-route-stub">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section data-testid="webhooks-route-stub">
+              <h1>Webhook 设置</h1>
+            </section>
+          )}
+        />
         <Route path={DOCS_ROUTE} element={<ApiDocsPage />} />
-        <Route path="/" element={<div data-testid="shared-console-home">控制台总览</div>} />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="shared-console-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
