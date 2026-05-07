@@ -10,15 +10,78 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path={PROFILE_ROUTE} element={<ProfilePage />} />
-        <Route path={PROJECTS_ROUTE} element={<div data-testid="projects-route-stub">项目市场页面</div>} />
-        <Route path={ORDERS_ROUTE} element={<div data-testid="orders-route-stub">订单中心页面</div>} />
-        <Route path={API_KEYS_ROUTE} element={<div data-testid="api-keys-route-stub">API Keys 页面</div>} />
-        <Route path={WEBHOOKS_ROUTE} element={<div data-testid="webhooks-route-stub">Webhook 设置页面</div>} />
-        <Route path={DOCS_ROUTE} element={<div data-testid="api-docs-route-stub">API 文档页面</div>} />
-        <Route path={SETTINGS_ROUTE} element={<div data-testid="settings-route-stub">设置中心页面</div>} />
-        <Route path="/supplier/domains" element={<div data-testid="supplier-domains-route-stub">域名管理页面</div>} />
-        <Route path="/admin/risk" element={<div data-testid="admin-risk-route-stub">风控中心页面</div>} />
-        <Route path="/" element={<div data-testid="shared-console-home-route-stub">控制台总览</div>} />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={(
+            <section data-testid="projects-route-stub">
+              <h1>项目市场</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={ORDERS_ROUTE}
+          element={(
+            <section data-testid="orders-route-stub">
+              <h1>订单中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section data-testid="api-keys-route-stub">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section data-testid="webhooks-route-stub">
+              <h1>Webhook 设置</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="api-docs-route-stub">
+              <h1>API 文档</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={SETTINGS_ROUTE}
+          element={(
+            <section data-testid="settings-route-stub">
+              <h1>设置中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/supplier/domains"
+          element={(
+            <section data-testid="supplier-domains-route-stub">
+              <h1>域名池运营中枢</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/admin/risk"
+          element={(
+            <section data-testid="admin-risk-route-stub">
+              <h1>风控中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="shared-console-home-route-stub">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
