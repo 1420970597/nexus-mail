@@ -736,7 +736,8 @@ describe('App', () => {
 
     renderApp(['/webhooks'])
 
-    expect(await screen.findByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    const roleGuidance = await screen.findByTestId('webhooks-role-guidance')
+    expect(within(roleGuidance).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
 
     const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
     expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
