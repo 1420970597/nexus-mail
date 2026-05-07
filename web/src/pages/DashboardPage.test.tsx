@@ -5,6 +5,9 @@ import { DashboardPage } from './DashboardPage'
 import * as authService from '../services/auth'
 import { useAuthStore } from '../store/authStore'
 import {
+  ADMIN_AUDIT_ROUTE,
+  ADMIN_RISK_ROUTE,
+  ADMIN_SUPPLIERS_ROUTE,
   API_KEYS_ROUTE,
   BALANCE_ROUTE,
   DASHBOARD_ROUTE,
@@ -12,6 +15,8 @@ import {
   ORDERS_ROUTE,
   PROJECTS_ROUTE,
   SETTINGS_ROUTE,
+  SUPPLIER_DOMAINS_ROUTE,
+  SUPPLIER_OFFERINGS_ROUTE,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
 
@@ -37,6 +42,11 @@ function seedUserMenu(paths: string[]) {
     [WEBHOOKS_ROUTE]: 'Webhook 设置',
     [DOCS_ROUTE]: 'API 文档',
     [SETTINGS_ROUTE]: '设置中心',
+    [SUPPLIER_DOMAINS_ROUTE]: '域名管理',
+    [SUPPLIER_OFFERINGS_ROUTE]: '供货规则',
+    [ADMIN_SUPPLIERS_ROUTE]: '供应商管理',
+    [ADMIN_RISK_ROUTE]: '风控中心',
+    [ADMIN_AUDIT_ROUTE]: '审计日志',
   }
 
   useAuthStore.setState({
@@ -44,6 +54,13 @@ function seedUserMenu(paths: string[]) {
     refreshToken: 'refresh-token',
     user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
     menu: paths.map((path) => ({ key: path, label: labels[path] ?? path, path })),
+  })
+}
+
+function seedSession(role: 'user' | 'supplier' | 'admin', paths: string[], email = `${role}@nexus-mail.local`) {
+  seedUserMenu(paths)
+  useAuthStore.setState({
+    user: { id: role === 'admin' ? 9 : role === 'supplier' ? 7 : 1, email, role },
   })
 }
 
@@ -105,6 +122,46 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
           element={
             <section data-testid="dashboard-settings-route-stub">
               <h1>设置中心</h1>
+            </section>
+          }
+        />
+        <Route
+          path={SUPPLIER_DOMAINS_ROUTE}
+          element={
+            <section data-testid="dashboard-supplier-domains-route-stub">
+              <h1>域名池运营中枢</h1>
+            </section>
+          }
+        />
+        <Route
+          path={SUPPLIER_OFFERINGS_ROUTE}
+          element={
+            <section data-testid="dashboard-supplier-offerings-route-stub">
+              <h1>供货规则编排中枢</h1>
+            </section>
+          }
+        />
+        <Route
+          path={ADMIN_SUPPLIERS_ROUTE}
+          element={
+            <section data-testid="dashboard-admin-suppliers-route-stub">
+              <h1>供应商管理</h1>
+            </section>
+          }
+        />
+        <Route
+          path={ADMIN_RISK_ROUTE}
+          element={
+            <section data-testid="dashboard-admin-risk-route-stub">
+              <h1>风控中心</h1>
+            </section>
+          }
+        />
+        <Route
+          path={ADMIN_AUDIT_ROUTE}
+          element={
+            <section data-testid="dashboard-admin-audit-route-stub">
+              <h1>审计日志</h1>
             </section>
           }
         />
@@ -225,6 +282,179 @@ describe('DashboardPage shared-console journey hub', () => {
 
     await user.click(scoped.getByTestId('dashboard-next-step-action-api-keys'))
     expect(await screen.findByText('开发者 API 接入工作台')).toBeInTheDocument()
+    view.unmount()
+  })
+
+  it('renders admin role surfaces and admin ops summary inside the shared shell', async () => {
+    seedSession('admin', [DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE, ADMIN_RISK_ROUTE, ADMIN_AUDIT_ROUTE, WEBHOOKS_ROUTE])
+    mockedGetAdminOverview.mockResolvedValue({
+      generated_at: '2026-05-07T13:00:00Z',
+      summary: {
+        users: { total: 12 },
+        orders: {
+          total: 30,
+          waiting_email: 2,
+          ready: 4,
+          finished: 18,
+          canceled: 3,
+          timeout: 5,
+          completion_rate_bps: 6000,
+          timeout_rate_bps: 1667,
+          cancel_rate_bps: 1000,
+          gross_revenue: 888800,
+          average_finished_order_value: 49378,
+        },
+        disputes: { total: 6, open: 2, resolved: 3, rejected: 1, dispute_rate_bps: 2000 },
+        projects: { total: 9, active: 7, inactive: 2 },
+        audit: {
+          total: 42,
+          create: 5,
+          revoke: 2,
+          success: 33,
+          denied_invalid: 1,
+          denied_scope: 2,
+          denied_whitelist: 4,
+          denied_rate_limit: 6,
+          denied_total: 13,
+          denied_rate_bps: 3095,
+        },
+        supplier_settlements: { pending_amount: 123450 },
+      },
+      suppliers: [
+        {
+          user_id: 99,
+          email: 'supplier-top@nexus-mail.local',
+          role: 'supplier',
+          pending_settlement: 82000,
+          order_total: 11,
+          finished_orders: 8,
+          timeout_orders: 2,
+          canceled_orders: 1,
+          completion_rate_bps: 7273,
+          gross_revenue: 512300,
+        },
+      ],
+      recent_audit: [],
+    })
+
+    renderDashboard()
+
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    expect(screen.getByText('共享控制台入口')).toBeInTheDocument()
+    const roleSurfaceMap = await screen.findByTestId('dashboard-role-surface-map')
+    const scopedSurface = within(roleSurfaceMap)
+    expect(scopedSurface.getByText('基础工作台')).toBeInTheDocument()
+    expect(scopedSurface.getByText('管理员扩展')).toBeInTheDocument()
+    expect(scopedSurface.getByText('共享接入')).toBeInTheDocument()
+    expect(scopedSurface.getAllByRole('button', { name: '打开该工作台' })).toHaveLength(3)
+    expect(scopedSurface.queryByTestId('dashboard-next-step-balance')).not.toBeInTheDocument()
+
+    const adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
+    const scopedAdminOps = within(adminOpsSummary)
+    expect(scopedAdminOps.getByText('项目：7/9 启用')).toBeInTheDocument()
+    expect(scopedAdminOps.getByText('完成订单：18')).toBeInTheDocument()
+    expect(scopedAdminOps.getByText('白名单拦截：4')).toBeInTheDocument()
+    expect(scopedAdminOps.getByRole('button', { name: '前往供应商管理查看详情' })).toBeInTheDocument()
+    expect(scopedAdminOps.getByRole('button', { name: '前往风控中心' })).toBeInTheDocument()
+    expect(scopedAdminOps.getByRole('button', { name: '前往审计日志' })).toBeInTheDocument()
+  })
+
+  it('navigates from admin dashboard ops summary to admin routes within the same shared shell', async () => {
+    seedSession('admin', [DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE, ADMIN_RISK_ROUTE, ADMIN_AUDIT_ROUTE])
+    mockedGetAdminOverview.mockResolvedValue({
+      generated_at: '2026-05-07T13:00:00Z',
+      summary: {
+        users: { total: 1 },
+        orders: {
+          total: 4,
+          waiting_email: 0,
+          ready: 0,
+          finished: 2,
+          canceled: 1,
+          timeout: 1,
+          completion_rate_bps: 5000,
+          timeout_rate_bps: 2500,
+          cancel_rate_bps: 2500,
+          gross_revenue: 20000,
+          average_finished_order_value: 10000,
+        },
+        disputes: { total: 1, open: 0, resolved: 1, rejected: 0, dispute_rate_bps: 2500 },
+        projects: { total: 2, active: 1, inactive: 1 },
+        audit: {
+          total: 4,
+          create: 1,
+          revoke: 0,
+          success: 3,
+          denied_invalid: 0,
+          denied_scope: 0,
+          denied_whitelist: 1,
+          denied_rate_limit: 1,
+          denied_total: 2,
+          denied_rate_bps: 5000,
+        },
+        supplier_settlements: { pending_amount: 1000 },
+      },
+      suppliers: [],
+      recent_audit: [],
+    })
+
+    const user = userEvent.setup()
+
+    let view = renderDashboard()
+    let adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
+    await user.click(within(adminOpsSummary).getByRole('button', { name: '前往供应商管理查看详情' }))
+    expect(await screen.findByTestId('dashboard-admin-suppliers-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderDashboard()
+    adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
+    await user.click(within(adminOpsSummary).getByRole('button', { name: '前往风控中心' }))
+    expect(await screen.findByTestId('dashboard-admin-risk-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderDashboard()
+    adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
+    await user.click(within(adminOpsSummary).getByRole('button', { name: '前往审计日志' }))
+    expect(await screen.findByTestId('dashboard-admin-audit-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+    view.unmount()
+  })
+
+  it('renders supplier role surfaces and supplier actions inside the shared shell', async () => {
+    seedSession('supplier', [DASHBOARD_ROUTE, SUPPLIER_DOMAINS_ROUTE, SUPPLIER_OFFERINGS_ROUTE, SETTINGS_ROUTE])
+
+    renderDashboard()
+
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const roleSurfaceMap = await screen.findByTestId('dashboard-role-surface-map')
+    const scopedSurface = within(roleSurfaceMap)
+    expect(scopedSurface.getByText('基础工作台')).toBeInTheDocument()
+    expect(scopedSurface.getByText('供应商扩展')).toBeInTheDocument()
+    expect(scopedSurface.getByText('共享接入')).toBeInTheDocument()
+    expect(scopedSurface.getByText(SUPPLIER_DOMAINS_ROUTE)).toBeInTheDocument()
+    expect(scopedSurface.getByText(SETTINGS_ROUTE)).toBeInTheDocument()
+
+    expect(screen.getByRole('button', { name: '前往域名管理' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '调整供货规则' })).toBeInTheDocument()
+    expect(screen.queryByTestId('dashboard-next-steps-lane')).not.toBeInTheDocument()
+  })
+
+  it('navigates from supplier dashboard actions to supplier routes within the same shared shell', async () => {
+    seedSession('supplier', [DASHBOARD_ROUTE, SUPPLIER_DOMAINS_ROUTE, SUPPLIER_OFFERINGS_ROUTE, SETTINGS_ROUTE])
+    const user = userEvent.setup()
+
+    let view = renderDashboard()
+    await user.click(await screen.findByRole('button', { name: '前往域名管理' }))
+    expect(await screen.findByTestId('dashboard-supplier-domains-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderDashboard()
+    await user.click(await screen.findByRole('button', { name: '调整供货规则' }))
+    expect(await screen.findByTestId('dashboard-supplier-offerings-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     view.unmount()
   })
 })
