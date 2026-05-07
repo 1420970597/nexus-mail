@@ -211,11 +211,13 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
+    const createCard = screen.getByTestId('api-keys-create-card')
     await user.type(screen.getByLabelText('名称'), '新密钥')
     await user.type(screen.getByLabelText('权限范围'), ' finance:write , , activation:read ')
     await user.type(screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24'), ' 10.0.0.0/24, ,127.0.0.1 ')
-    await user.click(screen.getByRole('button', { name: '创建新密钥' }))
+    await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
 
     await waitFor(() =>
       expect(mockedCreateAPIKey).toHaveBeenCalledWith({
@@ -234,7 +236,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('已撤销密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('已撤销密钥')
 
     const activeRow = within(getApiKeyRow('默认密钥'))
     const revokedRow = within(getApiKeyRow('已撤销密钥'))
@@ -250,7 +253,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: '撤销' }))
 
@@ -266,18 +270,47 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
 
+    mockedGetAPIKeys.mockResolvedValueOnce({
+      items: [
+        {
+          id: 1,
+          name: '默认密钥',
+          key_preview: 'nmx_abcd...1234',
+          scopes: ['activation:read'],
+          whitelist: ['172.18.0.1', '10.0.0.0/24'],
+          status: 'active',
+          last_used_at: '2026-01-02T00:00:00Z',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-03T00:00:00Z',
+        },
+        {
+          id: 2,
+          name: '已撤销密钥',
+          key_preview: 'nmx_revoked...9999',
+          scopes: ['finance:write'],
+          whitelist: [],
+          status: 'revoked',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      ],
+    })
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
+    const whitelistInput = within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     expect((whitelistInput as HTMLInputElement).value).toContain('127.0.0.1')
     await user.clear(whitelistInput)
     await user.type(whitelistInput, ' 172.18.0.1 , , 10.0.0.0/24 ')
-    await user.click(screen.getByRole('button', { name: '保存白名单' }))
+    await user.click(within(whitelistEditor).getByRole('button', { name: '保存白名单' }))
 
     await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['172.18.0.1', '10.0.0.0/24']))
     expect(mockedGetAPIKeys).toHaveBeenCalledTimes(2)
-    await waitFor(() => expect(screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24')).toBeInTheDocument())
+    const updatedRow = await screen.findByRole('row', { name: /默认密钥/i })
+    expect(within(updatedRow).getByText('172.18.0.1')).toBeInTheDocument()
+    expect(within(updatedRow).getByText('10.0.0.0/24')).toBeInTheDocument()
   })
 
   it('allows clearing whitelist to remove restrictions and reloads list', async () => {
@@ -288,12 +321,14 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
+    const whitelistInput = within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     await user.clear(whitelistInput)
-    await user.click(screen.getByRole('button', { name: '保存白名单' }))
+    await user.click(within(whitelistEditor).getByRole('button', { name: '保存白名单' }))
 
     await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, []))
     expect(mockedGetAPIKeys).toHaveBeenCalledTimes(2)
@@ -308,17 +343,19 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    const whitelistInput = screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')
+    const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
+    const whitelistInput = within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     await user.clear(whitelistInput)
     await user.type(whitelistInput, 'invalid host')
-    await user.click(screen.getByRole('button', { name: '保存白名单' }))
+    await user.click(within(whitelistEditor).getByRole('button', { name: '保存白名单' }))
 
     await waitFor(() => expect(mockedUpdateAPIKeyWhitelist).toHaveBeenCalledWith(1, ['invalid host']))
     expect(await screen.findByText('白名单格式不合法')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('172.18.0.1,10.0.0.0/24')).toBeInTheDocument()
+    expect(within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')).toBeInTheDocument()
   })
 
   it('renders audit trail and shared navigation bridge actions', async () => {
@@ -343,21 +380,24 @@ describe('ApiKeysPage', () => {
 
     let view = renderApiKeysPage()
 
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const firstKeysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(firstKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Webhook 设置' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const secondKeysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(secondKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('route-stub-docs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const thirdKeysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(thirdKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /返回项目市场/ }))
     expect(await screen.findByTestId('route-stub-projects')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
@@ -404,10 +444,12 @@ describe('ApiKeysPage', () => {
 
     view.unmount()
     renderApiKeysPage()
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const finalKeysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(finalKeysCard).findByText('默认密钥')
+    const createCard = screen.getByTestId('api-keys-create-card')
     await user.type(screen.getByLabelText('名称'), '联调密钥')
     await user.type(screen.getByLabelText('权限范围'), 'activation:write')
-    await user.click(screen.getByRole('button', { name: '创建新密钥' }))
+    await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
@@ -427,7 +469,8 @@ describe('ApiKeysPage', () => {
 
     renderApiKeysPage()
 
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
     const fallback = screen.getByTestId('api-keys-shared-console-fallback')
     expect(within(fallback).getByRole('button', { name: /返回推荐工作台/ })).toBeInTheDocument()
     expect(within(fallback).getByText(/当 Webhook、文档与项目入口暂未由服务端暴露时/)).toBeInTheDocument()
@@ -448,7 +491,8 @@ describe('ApiKeysPage', () => {
 
     renderApiKeysPage()
 
-    expect(await screen.findByText('默认密钥')).toBeInTheDocument()
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(keysCard).findByText('默认密钥')
     const fallback = screen.getByTestId('api-keys-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByTestId('route-stub-dashboard')).toBeInTheDocument()

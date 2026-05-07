@@ -393,7 +393,7 @@ export function ApiKeysPage() {
         />
       ) : null}
 
-      <Card title="创建 API Key" style={{ width: '100%' }}>
+      <Card title="创建 API Key" data-testid="api-keys-create-card" style={{ width: '100%' }}>
         <Form form={form} layout="horizontal" labelPosition="left">
           <Form.Input field="name" label="名称" rules={[{ required: true, message: '请输入名称' }]} />
           <Form.Input field="scopes" label="权限范围" placeholder="activation:read, finance:write" />
@@ -404,7 +404,7 @@ export function ApiKeysPage() {
         </Form>
       </Card>
 
-      <Card title="当前密钥" style={{ width: '100%' }} loading={loading}>
+      <Card title="当前密钥" data-testid="api-keys-current-keys-card" style={{ width: '100%' }} loading={loading}>
         {items.length === 0 ? (
           <Empty description="暂无 API Key，先创建第一个凭证完成接入。">
             <Space>
@@ -504,7 +504,11 @@ export function ApiKeysPage() {
         )}
       </Card>
 
-      <Card title="编辑 API Key 白名单" style={{ width: '100%', borderRadius: 20, display: editingWhitelistID !== null ? 'block' : 'none' }}>
+      <Card
+        title="编辑 API Key 白名单"
+        data-testid="api-keys-whitelist-editor-card"
+        style={{ width: '100%', borderRadius: 20, display: editingWhitelistID !== null ? 'block' : 'none' }}
+      >
         <Space vertical align="start" style={{ width: '100%' }} spacing={16}>
           <Typography.Paragraph style={{ margin: 0, color: '#475569' }}>
             请输入合法的 IP 或 CIDR，使用英文逗号分隔。留空表示移除白名单限制。
