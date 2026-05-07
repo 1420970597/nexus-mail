@@ -156,7 +156,7 @@ function renderSupplierSettlementsPage() {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="supplier-settlements-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>供给事件回调工作台</h1>
             </section>
           )}
         />
@@ -164,7 +164,7 @@ function renderSupplierSettlementsPage() {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="supplier-settlements-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -236,8 +236,8 @@ describe('SupplierSettlementsPage', () => {
     expect(missionScope.getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
     expect(missionScope.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(bridge).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
-    expect(within(bridge).getByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
-    expect(within(bridge).getByText(`API 文档 · ${DOCS_ROUTE}`)).toBeInTheDocument()
+    expect(within(bridge).getByText(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
+    expect(within(bridge).getByText(`API 文档与接入控制台 · ${DOCS_ROUTE}`)).toBeInTheDocument()
   })
 
   it('shows real supplier settlement records, reports, and disputes from loaded payloads', async () => {
@@ -309,8 +309,8 @@ describe('SupplierSettlementsPage', () => {
 
     const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
     expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`Webhook 设置 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
-    expect(within(bridge).queryByText(`API 文档 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档与接入控制台 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
     expect(screen.getByTestId('supplier-settlements-shared-console-fallback')).toBeInTheDocument()
 
     await user.click(screen.getByTestId('supplier-settlements-shared-console-fallback-button'))
