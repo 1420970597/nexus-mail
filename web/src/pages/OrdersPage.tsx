@@ -216,7 +216,7 @@ export function OrdersPage() {
                       ) : null}
                       {canOpenApiKeys ? (
                         <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
-                          查看 API 接入准备
+                          打开 API Keys
                         </Button>
                       ) : null}
                       {fallbackRoute !== '/orders' ? (
