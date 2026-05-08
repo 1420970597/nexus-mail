@@ -229,10 +229,18 @@ export function SupplierDomainsPage() {
   })
 
   const visibleBridgeLinks = [
-    ...(canOpenApiKeys ? [{ label: `API Keys · ${API_KEYS_ROUTE}`, summary: '继续核对密钥分发与白名单联动。', path: API_KEYS_ROUTE, icon: <IconSafe /> }] : []),
-    ...(canOpenWebhooks ? [{ label: `Webhook 设置 · ${WEBHOOKS_ROUTE}`, summary: '在同一共享控制台中继续回调联调与投递验证。', path: WEBHOOKS_ROUTE, icon: <IconBolt /> }] : []),
-    ...(canOpenDocs ? [{ label: `API 文档 · ${DOCS_ROUTE}`, summary: '返回文档页确认真实对外接入规则与示例。', path: DOCS_ROUTE, icon: <IconServer /> }] : []),
-    ...(canOpenSettlements ? [{ label: `供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}`, summary: '域名供给稳定后，再回到结算页观察财务与争议反馈。', path: SUPPLIER_SETTLEMENTS_ROUTE, icon: <IconActivity /> }] : []),
+    ...(canOpenApiKeys
+      ? [{ label: '开发者 API 接入工作台', button: '打开 API Keys', summary: '继续核对密钥分发与白名单联动。', path: API_KEYS_ROUTE, icon: <IconSafe /> }]
+      : []),
+    ...(canOpenWebhooks
+      ? [{ label: '供给事件回调工作台', button: '继续配置 Webhook', summary: '在同一共享控制台中继续回调联调与投递验证。', path: WEBHOOKS_ROUTE, icon: <IconBolt /> }]
+      : []),
+    ...(canOpenDocs
+      ? [{ label: 'API 文档与接入控制台', button: '查看 API 文档', summary: '返回文档页确认真实对外接入规则与示例。', path: DOCS_ROUTE, icon: <IconServer /> }]
+      : []),
+    ...(canOpenSettlements
+      ? [{ label: '供应商资金与争议指挥台', button: '打开供应商结算', summary: '域名供给稳定后，再回到结算页观察财务与争议反馈。', path: SUPPLIER_SETTLEMENTS_ROUTE, icon: <IconActivity /> }]
+      : []),
   ]
 
   return (
@@ -481,10 +489,10 @@ export function SupplierDomainsPage() {
                         <Button
                           theme="borderless"
                           type="primary"
-                          aria-label={`打开 ${item.label}`}
+                          aria-label={item.button}
                           icon={<IconArrowRight />}
                           onClick={() => navigate(item.path)}>
-                          打开{item.label}
+                          {item.button}
                         </Button>
                       </Space>
                     </Card>

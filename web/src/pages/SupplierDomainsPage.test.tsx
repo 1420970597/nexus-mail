@@ -88,7 +88,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="supplier-domains-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>供给事件回调工作台</h1>
             </section>
           )}
         />
@@ -96,7 +96,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="supplier-domains-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -186,9 +186,10 @@ describe('SupplierDomainsPage', () => {
     await expectMetricCard('supplier-domains-metric-regions', '覆盖区域', '4', '去重后的 region 数量。')
 
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
-    expect(within(bridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).toBeInTheDocument()
-    expect(within(bridge).getByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).toBeInTheDocument()
-    expect(within(bridge).getByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: '打开供应商结算' })).toBeInTheDocument()
 
     const regionMetrics = screen.getByTestId('supplier-domains-region-metrics')
     expect(within(regionMetrics).getByText('hk · 1')).toBeInTheDocument()
@@ -231,14 +232,28 @@ describe('SupplierDomainsPage', () => {
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
-    await user.click(within(bridge).getByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` }))
+    await user.click(within(bridge).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('supplier-domains-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: `打开 供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}` }))
+    await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: '继续配置 Webhook' }))
+    expect(await screen.findByTestId('supplier-domains-route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderSupplierDomainsPage()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: '查看 API 文档' }))
+    expect(await screen.findByTestId('supplier-domains-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderSupplierDomainsPage()
+    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: '打开供应商结算' }))
     expect(await screen.findByTestId('supplier-domains-route-stub-settlements')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
   })
@@ -265,10 +280,10 @@ describe('SupplierDomainsPage', () => {
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
-    expect(within(bridge).queryByRole('button', { name: `打开 API Keys · ${API_KEYS_ROUTE}` })).not.toBeInTheDocument()
-    expect(within(bridge).queryByRole('button', { name: `打开 Webhook 设置 · ${WEBHOOKS_ROUTE}` })).not.toBeInTheDocument()
-    expect(within(bridge).queryByRole('button', { name: `打开 API 文档 · ${DOCS_ROUTE}` })).not.toBeInTheDocument()
-    expect(within(bridge).queryByRole('button', { name: `打开 供应商结算 · ${SUPPLIER_SETTLEMENTS_ROUTE}` })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
 
     const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
