@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { APIKeyAuditEntry, APIKeyRecord, createAPIKey, getAPIKeyAudit, getAPIKeys, revokeAPIKey, updateAPIKeyWhitelist } from '../services/apiKeys'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute, resolveRouteTitle } from '../utils/consoleNavigation'
 
 const PLAINTEXT_VISIBILITY_MS = 5 * 60 * 1000
 
@@ -144,6 +144,7 @@ export function ApiKeysPage() {
     [activeKeys],
   )
   const latestUsed = useMemo(() => latestUsedAt(items), [items])
+  const webhookRouteTitle = useMemo(() => resolveRouteTitle(WEBHOOKS_ROUTE, user?.role), [user?.role])
 
   const handleCreate = async () => {
     try {
@@ -296,7 +297,7 @@ export function ApiKeysPage() {
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
-                API Keys → Webhook → 文档
+                API Keys → {webhookRouteTitle} → API 文档与接入控制台
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
                 保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到推荐工作台继续真实业务主链路。

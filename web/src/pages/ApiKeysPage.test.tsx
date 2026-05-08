@@ -5,7 +5,7 @@ import { Modal } from '@douyinfe/semi-ui'
 import { ApiKeysPage } from './ApiKeysPage'
 import * as apiKeyService from '../services/apiKeys'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE, resolveRouteTitle } from '../utils/consoleNavigation'
 
 vi.mock('../services/apiKeys', () => ({
   getAPIKeys: vi.fn(),
@@ -75,7 +75,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="route-stub-webhooks">
-              <h1>开发者 Webhook 接入工作台</h1>
+              <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role)}</h1>
             </section>
           )}
         />
@@ -201,6 +201,33 @@ describe('ApiKeysPage', () => {
     expect(heroScope.getByText('共享控制台 · 供应商扩展')).toBeInTheDocument()
     expect(heroScope.getByText(/优先设置固定出口 IP 白名单/)).toBeInTheDocument()
     expect(heroScope.getByText(/按供货能力拆分不同 scopes/)).toBeInTheDocument()
+  })
+
+  it('uses role-aware webhook route identity inside the shared integration bridge for supplier and admin users', async () => {
+    const user = userEvent.setup()
+
+    seedRole('supplier')
+    let view = renderApiKeysPage()
+    const firstKeysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(firstKeysCard).findByText('默认密钥')
+    const supplierBridge = within(screen.getByTestId('api-keys-shared-console-bridge'))
+    expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → 供给事件回调工作台 → API 文档与接入控制台')
+    expect(screen.getByTestId('api-keys-shared-console-bridge')).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
+    await user.click(supplierBridge.getByRole('button', { name: /继续配置 Webhook/ }))
+    const supplierWebhookStub = await screen.findByTestId('route-stub-webhooks')
+    expect(within(supplierWebhookStub).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    seedRole('admin')
+    view = renderApiKeysPage()
+    const secondKeysCard = await screen.findByTestId('api-keys-current-keys-card')
+    await within(secondKeysCard).findByText('默认密钥')
+    const adminBridge = within(screen.getByTestId('api-keys-shared-console-bridge'))
+    expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → Webhook 运维与回调观测 → API 文档与接入控制台')
+    expect(screen.getByTestId('api-keys-shared-console-bridge')).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
+    await user.click(adminBridge.getByRole('button', { name: /继续配置 Webhook/ }))
+    const adminWebhookStub = await screen.findByTestId('route-stub-webhooks')
+    expect(within(adminWebhookStub).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
   it('loads and creates api key with trimmed scopes and whitelist', async () => {
@@ -367,9 +394,8 @@ describe('ApiKeysPage', () => {
     expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
     expect(auditScope.getByText('create')).toBeInTheDocument()
 
-    const bridgeHeading = screen.getByRole('heading', { name: 'API Keys → Webhook → 文档' })
-    expect(bridgeHeading).toBeInTheDocument()
     const bridgeScope = within(screen.getByTestId('api-keys-shared-console-bridge'))
+    expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
     expect(bridgeScope.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
@@ -387,7 +413,7 @@ describe('ApiKeysPage', () => {
     await within(firstKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
@@ -456,7 +482,7 @@ describe('ApiKeysPage', () => {
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
   })
 
   it('shows canonical webhook/docs CTAs in the empty-state action area', async () => {
@@ -474,7 +500,7 @@ describe('ApiKeysPage', () => {
 
     await user.click(emptyScope.getByRole('button', { name: '继续配置 Webhook' }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
   })
 
   it('shows shared-console fallback when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {
