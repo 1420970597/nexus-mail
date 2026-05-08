@@ -200,10 +200,10 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(within(sharedConsoleReturn).getByText('回到推荐工作台继续主链路')).toBeInTheDocument()
-    expect(within(sharedConsoleReturn).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('回到共享工作台继续主链路')).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
 
-    await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
@@ -223,7 +223,7 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(within(sharedConsoleReturn).getByText('回到推荐工作台继续角色扩展链路')).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('回到共享工作台继续角色扩展链路')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
@@ -246,7 +246,7 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(within(sharedConsoleReturn).getByText('回到推荐工作台继续角色扩展链路')).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('回到共享工作台继续角色扩展链路')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))

@@ -161,9 +161,9 @@ export function ProfilePage() {
     if (user?.role === 'user') {
       if (!canOpenProjects && fallbackRoute !== PROFILE_ROUTE) {
         return {
-          title: '回到推荐工作台继续主链路',
-          description: '当服务端暂未暴露项目市场时，普通用户仍可从账号中枢回到推荐工作台继续查看预算、订单或接入入口。',
-          buttonText: '返回推荐工作台',
+          title: '回到共享工作台继续主链路',
+          description: '当服务端暂未暴露项目市场时，普通用户仍可从账号中枢回到共享工作台继续查看预算、订单或接入入口。',
+          buttonText: '返回共享工作台',
           path: fallbackRoute,
         }
       }
@@ -181,8 +181,8 @@ export function ProfilePage() {
 
     if (fallbackRoute !== PROFILE_ROUTE) {
       return {
-        title: '回到推荐工作台继续角色扩展链路',
-        description: '当设置中心入口暂未暴露时，仍可返回当前角色的推荐工作台，继续同一控制台中的风控、供给或接入任务。',
+        title: '回到共享工作台继续角色扩展链路',
+        description: '当设置中心入口暂未暴露时，仍可返回当前角色的共享工作台，继续同一控制台中的风控、供给或接入任务。',
         buttonText: '返回共享工作台',
         path: fallbackRoute,
       }
