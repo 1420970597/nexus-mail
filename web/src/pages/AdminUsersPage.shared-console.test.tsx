@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
 import * as financeService from '../services/finance'
 import { useAuthStore } from '../store/authStore'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE, DASHBOARD_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE, DASHBOARD_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, resolveRouteTitle } from '../utils/consoleNavigation'
 
 vi.mock('../services/finance', async () => {
   const actual = await vi.importActual<typeof import('../services/finance')>('../services/finance')
@@ -43,7 +43,7 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
         />
         <Route
           path={WEBHOOKS_ROUTE}
-          element={<section data-testid="admin-users-route-stub-webhooks"><h1>开发者 Webhook 接入工作台</h1></section>}
+          element={<section data-testid="admin-users-route-stub-webhooks"><h1>{resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}</h1></section>}
         />
         <Route
           path={DOCS_ROUTE}
@@ -138,9 +138,12 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(bridgeCard).toBeInTheDocument()
     expect(within(bridgeCard).getByText('即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。')).toBeInTheDocument()
     const bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
-    expect(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
-    expect(within(bridgeLinks).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
-    expect(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByText(resolveRouteTitle(API_KEYS_ROUTE, 'admin'))).toBeInTheDocument()
+    expect(within(bridgeLinks).getByText(resolveRouteTitle(WEBHOOKS_ROUTE, 'admin'))).toBeInTheDocument()
+    expect(within(bridgeLinks).getByText(resolveRouteTitle(DOCS_ROUTE, 'admin'))).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
   })
 
   it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations', async () => {
@@ -149,7 +152,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
 
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     let bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
-    await user.click(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ }))
+    await user.click(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) }))
     let apiKeysRouteStub = await screen.findByTestId('admin-users-route-stub-api-keys')
     expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
@@ -157,15 +160,15 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     view = renderAdminUsersPage()
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
-    await user.click(within(bridgeLinks).getByRole('button', { name: /继续配置 Webhook/ }))
+    await user.click(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) }))
     const webhooksRouteStub = await screen.findByTestId('admin-users-route-stub-webhooks')
-    expect(within(webhooksRouteStub).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(webhooksRouteStub).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
 
     view.unmount()
     renderAdminUsersPage()
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
-    await user.click(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ }))
+    await user.click(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) }))
     const docsRouteStub = await screen.findByTestId('admin-users-route-stub-docs')
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
@@ -245,9 +248,9 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     const bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
-    expect(within(bridgeLinks).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
-    expect(within(bridgeLinks).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
-    expect(within(bridgeLinks).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-users-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
 

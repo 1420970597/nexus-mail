@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminAdjustWallet, getAdminWalletUsers, getAdminDisputes, resolveAdminDispute, settleSupplierPending, OrderDispute, WalletOverview } from '../services/finance'
 import { useAuthStore } from '../store/authStore'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute } from '../utils/consoleNavigation'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE, hasMenuPath, resolvePreferredConsoleRoute, resolveRouteTitle } from '../utils/consoleNavigation'
 
 function disputeStatusColor(status: string) {
   switch (status) {
@@ -57,6 +57,14 @@ interface AdminActionLane {
   button: string
   path: string
   tag: string
+}
+
+interface AdminSharedConsoleLink {
+  key: string
+  title: string
+  button: string
+  path: string
+  icon: JSX.Element
 }
 
 export function buildDisputeResolutionPayload(values: {
@@ -244,13 +252,37 @@ export function AdminUsersPage() {
     [actionLanes, canOpenApiKeys, canOpenAudit, canOpenRisk],
   )
 
-  const visibleSharedConsoleLinks = useMemo(
+  const visibleSharedConsoleLinks = useMemo<AdminSharedConsoleLink[]>(
     () => [
-      ...(canOpenApiKeys ? [{ key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE, icon: <IconSafe /> }] : []),
-      ...(canOpenWebhooks ? [{ key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE, icon: <IconBolt /> }] : []),
-      ...(canOpenDocs ? [{ key: 'docs', label: 'API 文档', path: DOCS_ROUTE, icon: <IconShield /> }] : []),
+      ...(canOpenApiKeys
+        ? [{
+            key: 'api-keys',
+            title: resolveRouteTitle(API_KEYS_ROUTE, user?.role),
+            button: `打开 ${resolveRouteTitle(API_KEYS_ROUTE, user?.role)}`,
+            path: API_KEYS_ROUTE,
+            icon: <IconSafe />,
+          }]
+        : []),
+      ...(canOpenWebhooks
+        ? [{
+            key: 'webhooks',
+            title: resolveRouteTitle(WEBHOOKS_ROUTE, user?.role),
+            button: `打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)}`,
+            path: WEBHOOKS_ROUTE,
+            icon: <IconBolt />,
+          }]
+        : []),
+      ...(canOpenDocs
+        ? [{
+            key: 'docs',
+            title: resolveRouteTitle(DOCS_ROUTE, user?.role),
+            button: `打开 ${resolveRouteTitle(DOCS_ROUTE, user?.role)}`,
+            path: DOCS_ROUTE,
+            icon: <IconShield />,
+          }]
+        : []),
     ],
-    [canOpenApiKeys, canOpenDocs, canOpenWebhooks],
+    [canOpenApiKeys, canOpenDocs, canOpenWebhooks, user?.role],
   )
 
   const shouldShowFallback = useMemo(
@@ -357,19 +389,24 @@ export function AdminUsersPage() {
               </Typography.Paragraph>
               <Space wrap data-testid="admin-users-shared-console-links">
                 {visibleSharedConsoleLinks.map((item) => (
-                  <Button
+                  <Card
                     key={item.key}
-                    type="tertiary"
-                    theme="borderless"
-                    icon={item.icon}
-                    onClick={() => navigate(item.path)}
+                    style={{
+                      minWidth: 220,
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                      border: '1px solid rgba(148,163,184,0.14)',
+                    }}
+                    bodyStyle={{ padding: 16 }}
                   >
-                    {item.key === 'api-keys'
-                      ? '打开 API Keys'
-                      : item.key === 'webhooks'
-                        ? '继续配置 Webhook'
-                        : '查看 API 文档'}
-                  </Button>
+                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                      <Tag color="blue" prefixIcon={item.icon}>{item.key}</Tag>
+                      <Typography.Title heading={6} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                      <Button type="tertiary" theme="borderless" icon={item.icon} onClick={() => navigate(item.path)}>
+                        {item.button}
+                      </Button>
+                    </Space>
+                  </Card>
                 ))}
               </Space>
               {shouldShowFallback ? (

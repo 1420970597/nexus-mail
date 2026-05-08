@@ -13,6 +13,7 @@ import {
   DOCS_ROUTE,
   hasMenuPath,
   resolvePreferredConsoleRoute,
+  resolveRouteTitle,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
 
@@ -47,6 +48,13 @@ interface ActionLane {
   button: string
   path: string
   tag: string
+}
+
+interface SharedConsoleLink {
+  key: string
+  title: string
+  button: string
+  path: string
 }
 
 export function AdminSuppliersPage() {
@@ -157,13 +165,34 @@ export function AdminSuppliersPage() {
       : []),
   ], [canOpenAdminUsers, canOpenAudit, canOpenRisk])
 
-  const sharedConsoleLinks = useMemo(
+  const sharedConsoleLinks = useMemo<SharedConsoleLink[]>(
     () => [
-      ...(canOpenApiKeys ? [{ key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE }] : []),
-      ...(canOpenWebhooks ? [{ key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE }] : []),
-      ...(canOpenDocs ? [{ key: 'docs', label: 'API 文档', path: DOCS_ROUTE }] : []),
+      ...(canOpenApiKeys
+        ? [{
+            key: 'api-keys',
+            title: resolveRouteTitle(API_KEYS_ROUTE, user?.role),
+            button: `打开 ${resolveRouteTitle(API_KEYS_ROUTE, user?.role)}`,
+            path: API_KEYS_ROUTE,
+          }]
+        : []),
+      ...(canOpenWebhooks
+        ? [{
+            key: 'webhooks',
+            title: resolveRouteTitle(WEBHOOKS_ROUTE, user?.role),
+            button: `打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)}`,
+            path: WEBHOOKS_ROUTE,
+          }]
+        : []),
+      ...(canOpenDocs
+        ? [{
+            key: 'docs',
+            title: resolveRouteTitle(DOCS_ROUTE, user?.role),
+            button: `打开 ${resolveRouteTitle(DOCS_ROUTE, user?.role)}`,
+            path: DOCS_ROUTE,
+          }]
+        : []),
     ],
-    [canOpenApiKeys, canOpenDocs, canOpenWebhooks],
+    [canOpenApiKeys, canOpenDocs, canOpenWebhooks, user?.role],
   )
 
   return (
@@ -265,19 +294,29 @@ export function AdminSuppliersPage() {
               </Typography.Paragraph>
               <Space wrap data-testid="admin-suppliers-shared-console-links">
                 {sharedConsoleLinks.map((item) => (
-                  <Button
+                  <Card
                     key={item.key}
-                    type="tertiary"
-                    theme="borderless"
-                    icon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}
-                    onClick={() => navigate(item.path)}
+                    style={{
+                      minWidth: 220,
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                      border: '1px solid rgba(148,163,184,0.14)',
+                    }}
+                    bodyStyle={{ padding: 16 }}
                   >
-                    {item.key === 'api-keys'
-                      ? '打开 API Keys'
-                      : item.key === 'webhooks'
-                        ? '继续配置 Webhook'
-                        : '查看 API 文档'}
-                  </Button>
+                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                      <Tag color="blue" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>{item.key}</Tag>
+                      <Typography.Title heading={6} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                      <Button
+                        type="tertiary"
+                        theme="borderless"
+                        icon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}
+                        onClick={() => navigate(item.path)}
+                      >
+                        {item.button}
+                      </Button>
+                    </Space>
+                  </Card>
                 ))}
               </Space>
               {shouldShowFallback ? (
