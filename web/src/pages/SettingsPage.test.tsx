@@ -6,12 +6,16 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { SettingsPage } from './SettingsPage'
 import { useAuthStore } from '../store/authStore'
 import { userFirstRunStorageKeyForUser } from './DashboardPage'
-import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE, resolveRouteTitle } from '../utils/consoleNavigation'
 
 function getButtonByLabel(scope: ReturnType<typeof within>, label: string) {
   const button = scope.getByRole('button', { name: new RegExp(label) })
   expect(button).toBeInTheDocument()
   return button
+}
+
+function webhookRouteTitleForCurrentRole() {
+  return resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role)
 }
 
 function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
@@ -70,7 +74,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="settings-route-stub-webhooks">
-              <h1>开发者 Webhook 接入工作台</h1>
+              <h1>{webhookRouteTitleForCurrentRole()}</h1>
             </section>
           )}
         />
@@ -190,12 +194,45 @@ describe('SettingsPage', () => {
     expect(within(missionCards).queryByRole('button', { name: /打开 Webhook 设置/ })).not.toBeInTheDocument()
     expect(within(missionCards).queryByRole('button', { name: /打开 API 文档/ })).not.toBeInTheDocument()
 
+    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    expect(within(shortcutLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('button', { name: '管理 API Keys' })).not.toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+
     await user.click(within(missionCards).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('settings-route-stub-docs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
+  it('navigates from the regular-user shortcut lane into the canonical api keys workspace', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 22, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'profile', label: '个人资料', path: PROFILE_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
+    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    await user.click(within(shortcutLane).getByRole('button', { name: '打开 API Keys' }))
+    expect(await screen.findByTestId('settings-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+  })
+
   it('hides the user first-run checklist for supplier users while keeping supplier/shared shortcuts scoped to the runtime shortcut lane', async () => {
+    const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -217,9 +254,50 @@ describe('SettingsPage', () => {
     expect(screen.getByText('控制台运行快捷入口')).toBeInTheDocument()
 
     const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    expect(within(shortcutLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(shortcutLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(shortcutLane).getByRole('button', { name: '查看供应商资源' })).toBeInTheDocument()
     expect(within(shortcutLane).getByRole('button', { name: '前往供应商结算' })).toBeInTheDocument()
-    expect(within(shortcutLane).getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('button', { name: '管理 API Keys' })).not.toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
     expect(within(shortcutLane).queryByRole('button', { name: '打开项目市场' })).not.toBeInTheDocument()
+
+    await user.click(within(shortcutLane).getByRole('button', { name: '继续配置 Webhook' }))
+    expect(await screen.findByTestId('settings-route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+  })
+
+  it('keeps only one admin webhook shortcut and aligns it to the canonical role-aware shared-console identity', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 13, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'profile', label: '个人资料', path: PROFILE_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
+    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    expect(within(shortcutLane).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    expect(within(shortcutLane).getAllByRole('button', { name: '继续配置 Webhook' })).toHaveLength(1)
+    expect(within(shortcutLane).queryByRole('heading', { name: 'Webhook 回调工作台' })).not.toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('heading', { name: 'Webhook 观测' })).not.toBeInTheDocument()
+    expect(within(shortcutLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+
+    await user.click(within(shortcutLane).getByRole('button', { name: '继续配置 Webhook' }))
+    expect(await screen.findByTestId('settings-route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 })

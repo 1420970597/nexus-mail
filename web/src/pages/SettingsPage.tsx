@@ -82,7 +82,7 @@ const onboardingChecklist = [
   },
 ]
 
-const sharedMissionCards: SettingsMissionCard[] = [
+const sharedMissionCards = (role?: 'user' | 'supplier' | 'admin'): SettingsMissionCard[] => [
   {
     key: 'api-keys',
     title: '开发者 API 接入工作台',
@@ -93,8 +93,13 @@ const sharedMissionCards: SettingsMissionCard[] = [
   },
   {
     key: 'webhooks',
-    title: '开发者 Webhook 接入工作台',
-    description: '保持在同一套共享壳内继续维护 Webhook endpoint、失败重试与 delivery 观测，不拆独立联调后台。',
+    title: webhookShortcutTitle(role),
+    description:
+      role === 'admin'
+        ? '通过管理员共享入口继续查看回调 endpoint、投递记录与失败重试状态，避免在设置中心退回低信号菜单短标题。'
+        : role === 'supplier'
+          ? '保持供给侧事件回调、测试投递与 delivery 状态仍位于同一套共享控制台，不拆独立联调后台。'
+          : '保持在同一套共享壳内继续维护 Webhook endpoint、失败重试与 delivery 观测，不拆独立联调后台。',
     button: '继续配置 Webhook',
     path: WEBHOOKS_ROUTE,
     tag: 'Webhooks',
@@ -109,7 +114,19 @@ const sharedMissionCards: SettingsMissionCard[] = [
   },
 ]
 
+function webhookShortcutTitle(role?: string) {
+  switch (role) {
+    case 'supplier':
+      return '供给事件回调工作台'
+    case 'admin':
+      return 'Webhook 运维与回调观测'
+    default:
+      return '开发者 Webhook 接入工作台'
+  }
+}
+
 const settingsPillars: SettingsPillar[] = [
+
   {
     key: 'dark-console',
     label: '深色共享工作台',
@@ -167,9 +184,9 @@ export function SettingsPage() {
         : []),
       ...(menuHasPath(menu, API_KEYS_ROUTE)
         ? [{
-            title: 'API 接入入口',
+            title: '开发者 API 接入工作台',
             description: '快速跳转 API Keys 完成 token、白名单与回调前置准备，再从顶栏与侧边栏进入 API 文档。',
-            button: '管理 API Keys',
+            button: '打开 API Keys',
             path: API_KEYS_ROUTE,
             tag: '集成入口',
             accent: 'rgba(16,185,129,0.18)',
@@ -178,11 +195,16 @@ export function SettingsPage() {
         : []),
       ...(menuHasPath(menu, WEBHOOKS_ROUTE)
         ? [{
-            title: 'Webhook 回调工作台',
-            description: '在共享控制台中直接维护 endpoint、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。',
-            button: '打开 Webhook 设置',
+            title: webhookShortcutTitle(user?.role),
+            description:
+              user?.role === 'admin'
+                ? '通过管理员共享入口查看回调 endpoint、投递记录与失败重试状态，避免跨后台切换。'
+                : user?.role === 'supplier'
+                  ? '在共享控制台中直接维护供给侧事件回调、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。'
+                  : '在共享控制台中直接维护 endpoint、测试投递与 delivery 状态，保持与 API Keys、文档同层级联动。',
+            button: '继续配置 Webhook',
             path: WEBHOOKS_ROUTE,
-            tag: '共享入口',
+            tag: user?.role === 'admin' ? '管理员入口' : user?.role === 'supplier' ? '供应商入口' : '共享入口',
             accent: 'rgba(14,165,233,0.18)',
             icon: <IconBolt />,
           }]
@@ -212,17 +234,6 @@ export function SettingsPage() {
                 tag: '管理员',
                 accent: 'rgba(249,115,22,0.18)',
                 icon: <IconBolt />,
-              }]
-            : []),
-          ...(menuHasPath(menu, WEBHOOKS_ROUTE)
-            ? [{
-                title: 'Webhook 观测',
-                description: '通过管理员共享入口查看回调 endpoint、投递记录与失败重试状态，避免跨后台切换。',
-                button: '打开 Webhook 设置',
-                path: WEBHOOKS_ROUTE,
-                tag: '管理员',
-                accent: 'rgba(14,165,233,0.18)',
-                icon: <IconServer />,
               }]
             : []),
           ...common,
@@ -282,7 +293,7 @@ export function SettingsPage() {
     }
   }, [menu, user?.role])
 
-  const missionCards = useMemo(() => sharedMissionCards.filter((item) => menuHasPath(menu, item.path)), [menu])
+  const missionCards = useMemo(() => sharedMissionCards(user?.role).filter((item) => menuHasPath(menu, item.path)), [menu, user?.role])
 
   const capabilitySignals = useMemo(
     () => [
