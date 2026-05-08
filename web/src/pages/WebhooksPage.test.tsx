@@ -230,7 +230,7 @@ describe('WebhooksPage', () => {
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '先配置 API Keys' }))
+    await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('webhooks-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
@@ -239,6 +239,7 @@ describe('WebhooksPage', () => {
     view = renderWebhooksPage()
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
+    expect(within(integrationRegion).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByTestId('webhooks-route-stub-docs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
@@ -252,8 +253,9 @@ describe('WebhooksPage', () => {
     const loopScope = within(integrationLoop)
     expect(loopScope.getByRole('heading', { name: '1. 创建首个 endpoint' })).toBeInTheDocument()
     expect(loopScope.getByRole('heading', { name: '2. 验证 test delivery' })).toBeInTheDocument()
-    expect(loopScope.getByRole('button', { name: '先配置 API Keys' })).toBeInTheDocument()
+    expect(loopScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(loopScope.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 
@@ -280,6 +282,7 @@ describe('WebhooksPage', () => {
     )
 
     const emptyActions = await screen.findByTestId('webhooks-empty-state-actions')
+    expect(within(emptyActions).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     const fallbackButton = within(emptyActions).getByRole('button', { name: '返回推荐工作台' })

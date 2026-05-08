@@ -454,7 +454,7 @@ export function WebhooksPage() {
             <Space>
               {canOpenApiKeys ? (
                 <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
-                  先配置 API Keys
+                  打开 API Keys
                 </Button>
               ) : null}
               {canOpenDocs ? (
