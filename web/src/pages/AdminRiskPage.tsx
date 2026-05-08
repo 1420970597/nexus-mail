@@ -299,11 +299,23 @@ export function AdminRiskPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。
               </Typography.Paragraph>
-              {visibleSharedConsoleLinks.map((item) => (
-                <Tag key={item.key} color="grey" prefixIcon={item.icon}>
-                  {item.label} · {item.path}
-                </Tag>
-              ))}
+              <Space wrap data-testid="admin-risk-shared-console-links">
+                {visibleSharedConsoleLinks.map((item) => (
+                  <Button
+                    key={item.key}
+                    type="tertiary"
+                    theme="borderless"
+                    icon={item.icon}
+                    onClick={() => navigate(item.path)}
+                  >
+                    {item.key === 'api-keys'
+                      ? '打开 API Keys'
+                      : item.key === 'audit'
+                        ? '继续查看审计'
+                        : '查看 API 文档'}
+                  </Button>
+                ))}
+              </Space>
               {!canOpenAudit && !canOpenApiKeys && !canOpenDocs && shouldShowFallbackCta ? (
                 <Card
                   data-testid="admin-risk-shared-console-fallback"

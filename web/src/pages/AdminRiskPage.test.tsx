@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminRiskPage } from './AdminRiskPage'
 import { useAuthStore } from '../store/authStore'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE } from '../utils/consoleNavigation'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE } from '../utils/consoleNavigation'
 
 const mockedGetAdminRisk = vi.fn()
 const mockedGetAdminRiskRules = vi.fn()
@@ -32,7 +32,11 @@ function renderAdminRiskPage(initialEntry = ADMIN_RISK_ROUTE) {
         />
         <Route
           path={API_KEYS_ROUTE}
-          element={<section data-testid="admin-risk-route-stub-api-keys"><h1>API Keys</h1></section>}
+          element={<section data-testid="admin-risk-route-stub-api-keys"><h1>开发者 API 接入工作台</h1></section>}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={<section data-testid="admin-risk-route-stub-docs"><h1>API 文档与接入控制台</h1></section>}
         />
         <Route
           path="/"
@@ -91,7 +95,7 @@ describe('AdminRiskPage', () => {
     mockedUpdateAdminRiskRules.mockImplementation(async (items) => ({ items }))
   })
 
-  it('renders risk mission control shell with shared-console guidance and runtime metrics', async () => {
+  it('renders risk mission control shell with shared-console guidance and CTA bridge contracts', async () => {
     renderAdminRiskPage()
 
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
@@ -110,9 +114,11 @@ describe('AdminRiskPage', () => {
     expect(within(missionFlow).getByText('管理员主任务流')).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-risk-shared-console-bridge')
-    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(within(bridge).getByText('审计日志 · /admin/audit')).toBeInTheDocument()
-    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
+    const bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
+    expect(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: /继续查看审计/ })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(bridge).getByText('调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。')).toBeInTheDocument()
 
     const highRiskMetric = screen.getByTestId('admin-risk-high-risk-metric')
     expect(within(highRiskMetric).getByText('高风险')).toBeInTheDocument()
@@ -122,6 +128,34 @@ describe('AdminRiskPage', () => {
 
     const actionsCard = screen.getByTestId('admin-risk-actions-card')
     expect(within(actionsCard).getByText('处置建议')).toBeInTheDocument()
+  })
+
+  it('navigates from the shared-console bridge to api keys, audit, and docs destinations', async () => {
+    const user = userEvent.setup()
+    let view = renderAdminRiskPage()
+
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+
+    let bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
+    await user.click(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ }))
+    let apiKeysRouteStub = await screen.findByTestId('admin-risk-route-stub-api-keys')
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderAdminRiskPage()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
+    await user.click(within(bridgeLinks).getByRole('button', { name: /继续查看审计/ }))
+    const auditRouteStub = await screen.findByTestId('admin-risk-route-stub-audit')
+    expect(within(auditRouteStub).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderAdminRiskPage()
+    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
+    await user.click(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ }))
+    const docsRouteStub = await screen.findByTestId('admin-risk-route-stub-docs')
+    expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to audit, finance, and api key pages', async () => {
@@ -149,7 +183,7 @@ describe('AdminRiskPage', () => {
     const finalMissionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
     const apiKeysRouteStub = await screen.findByTestId('admin-risk-route-stub-api-keys')
-    expect(within(apiKeysRouteStub).getByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
@@ -171,10 +205,10 @@ describe('AdminRiskPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    const bridge = screen.getByTestId('admin-risk-shared-console-bridge')
-    expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
-    expect(within(bridge).queryByText('审计日志 · /admin/audit')).not.toBeInTheDocument()
-    expect(within(bridge).queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    const bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
+    expect(within(bridgeLinks).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: /继续查看审计/ })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-risk-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
     expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
