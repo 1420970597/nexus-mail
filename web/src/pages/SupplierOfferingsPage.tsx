@@ -106,19 +106,28 @@ const missionSteps = [
 
 const consolePillars = [
   {
-    key: 'single-shell',
-    label: '单一登录后控制台',
-    summary: '供货规则、供应商资源、结算与接入配置继续共用同一套深色共享控制台，不拆第二套后台。',
+    key: 'api',
+    label: '开发者 API 接入工作台',
+    summary: '先在同一套共享控制台里生成 API Keys，再回到供货规则与资源页保持单壳联动。',
+    icon: <IconSafe />,
+    button: '打开 API Keys',
+    path: API_KEYS_ROUTE,
   },
   {
-    key: 'supply-routing',
-    label: '供给编排优先',
-    summary: '优先把项目、域名、来源类型、成功率与优先级串成一条供给路径，再进入结算与风控复盘。',
+    key: 'webhooks',
+    label: '供给事件回调工作台',
+    summary: 'Webhook 回调入口继续位于共享控制台内，用于供给联调与事件回放，不拆独立后台。',
+    icon: <IconBolt />,
+    button: '继续配置 Webhook',
+    path: WEBHOOKS_ROUTE,
   },
   {
-    key: 'role-aware',
-    label: '角色扩展但不伪造升级',
-    summary: '供应商能力来自服务端授予的角色扩展；当前页面只强调共享控制台中的供给侧职责，不制造额外后台或本地升级假象。',
+    key: 'docs',
+    label: 'API 文档与接入控制台',
+    summary: '接口契约、联调说明与供货页保持同一壳内对照，减少供应商多处跳转成本。',
+    icon: <IconPriceTag />,
+    button: '查看 API 文档',
+    path: DOCS_ROUTE,
   },
 ] as const
 
@@ -370,7 +379,12 @@ export function SupplierOfferingsPage() {
             </Typography.Paragraph>
           </div>
           <Space wrap spacing={16} style={{ width: '100%' }}>
-            {consolePillars.map((pillar) => (
+            {consolePillars.filter((pillar) => {
+              if (pillar.path === API_KEYS_ROUTE) return canOpenApiKeys
+              if (pillar.path === WEBHOOKS_ROUTE) return canOpenWebhooks
+              if (pillar.path === DOCS_ROUTE) return canOpenDocs
+              return true
+            }).map((pillar) => (
               <Card
                 data-testid={`supplier-offerings-console-pillar-${pillar.key}`}
                 key={pillar.key}
@@ -383,9 +397,12 @@ export function SupplierOfferingsPage() {
                 }}
                 bodyStyle={{ padding: 18 }}
               >
-                <Space vertical align="start" spacing={10}>
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                   <Typography.Text strong style={{ color: '#f8fafc' }}>{pillar.label}</Typography.Text>
                   <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>{pillar.summary}</Typography.Text>
+                  <Button icon={pillar.icon} onClick={() => navigate(pillar.path)}>
+                    {pillar.button}
+                  </Button>
                 </Space>
               </Card>
             ))}
