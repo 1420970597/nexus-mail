@@ -114,7 +114,7 @@ export function LoginPage() {
           <Col xs={24} lg={14}>
             <Space vertical spacing={20} align="start" style={{ color: '#e2e8f0', width: '100%' }}>
               <Tagline />
-              <div>
+              <div data-testid="login-entry-summary">
                 <Typography.Title heading={1} style={{ color: '#f7f8f8', marginBottom: 10, fontSize: 40, lineHeight: 1.05, letterSpacing: '-0.96px', maxWidth: 560 }}>
                   统一登录后控制台
                 </Typography.Title>

@@ -199,7 +199,9 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    expect(screen.getByText('继续前往开发者 API 接入工作台：文档与密钥配置仍留在同一控制台')).toBeInTheDocument()
+    const heroCard = screen.getByTestId('projects-shared-console-hero')
+    expect(within(heroCard).getByText(/继续前往开发者 API 接入工作台：文档与密钥配置仍留在同一控制台/)).toBeInTheDocument()
+    expect(within(heroCard).getByText('采购路径信号')).toBeInTheDocument()
   })
 
   it('hides the docs continuation CTA from the procurement hero when the server menu does not expose docs access', async () => {
