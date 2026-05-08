@@ -265,9 +265,19 @@ export function AdminSuppliersPage() {
               </Typography.Paragraph>
               <Space wrap data-testid="admin-suppliers-shared-console-links">
                 {sharedConsoleLinks.map((item) => (
-                  <Tag key={item.key} color="grey" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>
-                    {item.label} · {item.path}
-                  </Tag>
+                  <Button
+                    key={item.key}
+                    type="tertiary"
+                    theme="borderless"
+                    icon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}
+                    onClick={() => navigate(item.path)}
+                  >
+                    {item.key === 'api-keys'
+                      ? '打开 API Keys'
+                      : item.key === 'webhooks'
+                        ? '继续配置 Webhook'
+                        : '查看 API 文档'}
+                  </Button>
                 ))}
               </Space>
               {shouldShowFallback ? (

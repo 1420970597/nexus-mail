@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom'
-import { render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -71,7 +71,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="admin-suppliers-route-stub-webhooks">
-              <h1>Webhook 设置</h1>
+              <h1>Webhook 运维与回调观测</h1>
             </section>
           )}
         />
@@ -79,7 +79,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
           path={DOCS_ROUTE}
           element={(
             <section data-testid="admin-suppliers-route-stub-docs">
-              <h1>API 文档</h1>
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -180,6 +180,7 @@ describe('AdminSuppliersPage', () => {
   })
 
   it('renders the supplier mission-control heading, scoped overview signals, and shared-console links from overview data', async () => {
+    const user = userEvent.setup()
     renderAdminSuppliersPage()
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
@@ -213,10 +214,27 @@ describe('AdminSuppliersPage', () => {
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
     const sharedLinks = screen.getByTestId('admin-suppliers-shared-console-links')
-    expect(within(sharedLinks).getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(within(sharedLinks).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
-    expect(within(sharedLinks).getByText('API 文档 · /docs')).toBeInTheDocument()
+    expect(within(sharedLinks).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(sharedLinks).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(sharedLinks).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     expect(within(bridge).getByText('即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。')).toBeInTheDocument()
+
+    const bridgeLoop = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    await user.click(within(bridgeLoop).getByRole('button', { name: /继续配置 Webhook/ }))
+    const webhookRouteStub = await screen.findByTestId('admin-suppliers-route-stub-webhooks')
+    expect(within(webhookRouteStub).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+
+    cleanup()
+    renderAdminSuppliersPage()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
+    const rerenderedBridgeLoop = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    await user.click(within(rerenderedBridgeLoop).getByRole('button', { name: /查看 API 文档/ }))
+    const docsRouteStub = await screen.findByTestId('admin-suppliers-route-stub-docs')
+    expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+
+    cleanup()
+    renderAdminSuppliersPage()
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
 
     expect(screen.getByText('高待结算供应商')).toBeInTheDocument()
     expect(screen.getByText('58.00%')).toBeInTheDocument()
@@ -251,9 +269,9 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
-    expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
-    expect(within(bridge).queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
-    expect(within(bridge).queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
 
     const fallbackButton = within(bridge).getByRole('button', { name: '返回推荐工作台' })
     await user.click(fallbackButton)
@@ -282,9 +300,9 @@ describe('AdminSuppliersPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
-    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
-    expect(within(bridge).queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
   })
 })
