@@ -355,13 +355,23 @@ export function AdminUsersPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。
               </Typography.Paragraph>
-              <div data-testid="admin-users-shared-console-links">
+              <Space wrap data-testid="admin-users-shared-console-links">
                 {visibleSharedConsoleLinks.map((item) => (
-                  <Tag key={item.key} color="grey" prefixIcon={item.icon}>
-                    {item.label} · {item.path}
-                  </Tag>
+                  <Button
+                    key={item.key}
+                    type="tertiary"
+                    theme="borderless"
+                    icon={item.icon}
+                    onClick={() => navigate(item.path)}
+                  >
+                    {item.key === 'api-keys'
+                      ? '打开 API Keys'
+                      : item.key === 'webhooks'
+                        ? '继续配置 Webhook'
+                        : '查看 API 文档'}
+                  </Button>
                 ))}
-              </div>
+              </Space>
               {shouldShowFallback ? (
                 <Card
                   data-testid="admin-users-shared-console-fallback"

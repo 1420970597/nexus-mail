@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
 import * as financeService from '../services/finance'
 import { useAuthStore } from '../store/authStore'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE, DASHBOARD_ROUTE } from '../utils/consoleNavigation'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, API_KEYS_ROUTE, ADMIN_USERS_ROUTE, DASHBOARD_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/finance', async () => {
   const actual = await vi.importActual<typeof import('../services/finance')>('../services/finance')
@@ -39,7 +39,15 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
         />
         <Route
           path={API_KEYS_ROUTE}
-          element={<section data-testid="admin-users-route-stub-api-keys"><h1>API Keys</h1></section>}
+          element={<section data-testid="admin-users-route-stub-api-keys"><h1>开发者 API 接入工作台</h1></section>}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={<section data-testid="admin-users-route-stub-webhooks"><h1>开发者 Webhook 接入工作台</h1></section>}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={<section data-testid="admin-users-route-stub-docs"><h1>API 文档与接入控制台</h1></section>}
         />
         <Route
           path={DASHBOARD_ROUTE}
@@ -102,7 +110,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders admin finance mission-control shell with scoped metrics and shared-console bridge contracts', async () => {
+  it('renders admin finance mission-control shell with scoped metrics and shared-console bridge CTA contracts', async () => {
     renderAdminUsersPage()
 
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
@@ -130,9 +138,36 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(bridgeCard).toBeInTheDocument()
     expect(within(bridgeCard).getByText('即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。')).toBeInTheDocument()
     const bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
-    expect(within(bridgeLinks).getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(within(bridgeLinks).getByText('Webhook 设置 · /webhooks')).toBeInTheDocument()
-    expect(within(bridgeLinks).getByText('API 文档 · /docs')).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+  })
+
+  it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations', async () => {
+    const user = userEvent.setup()
+    let view = renderAdminUsersPage()
+
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    let bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
+    await user.click(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ }))
+    let apiKeysRouteStub = await screen.findByTestId('admin-users-route-stub-api-keys')
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderAdminUsersPage()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
+    await user.click(within(bridgeLinks).getByRole('button', { name: /继续配置 Webhook/ }))
+    const webhooksRouteStub = await screen.findByTestId('admin-users-route-stub-webhooks')
+    expect(within(webhooksRouteStub).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    renderAdminUsersPage()
+    expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
+    await user.click(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ }))
+    const docsRouteStub = await screen.findByTestId('admin-users-route-stub-docs')
+    expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('navigates from mission-control actions to risk, audit, and api key pages via the admin mission-flow region', async () => {
@@ -159,7 +194,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     const integrationMissionFlow = screen.getByTestId('admin-users-mission-flow')
     await user.click(within(integrationMissionFlow).getByRole('button', { name: '打开 API Keys' }))
     const apiKeysRouteStub = await screen.findByTestId('admin-users-route-stub-api-keys')
-    expect(within(apiKeysRouteStub).getByRole('heading', { name: 'API Keys' })).toBeInTheDocument()
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('submits wallet adjustment, settlement and dispute resolution flows', async () => {
@@ -209,10 +244,10 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    const bridgeCard = screen.getByTestId('admin-users-shared-console-bridge')
-    expect(within(bridgeCard).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
-    expect(within(bridgeCard).queryByText('Webhook 设置 · /webhooks')).not.toBeInTheDocument()
-    expect(within(bridgeCard).queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    const bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
+    expect(within(bridgeLinks).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
+    expect(within(bridgeLinks).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-users-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
 
