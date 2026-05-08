@@ -232,12 +232,36 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
-    expect(missionScope.getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
-    expect(missionScope.getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
-    expect(missionScope.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
-    expect(within(bridge).getByText(`API Keys · ${API_KEYS_ROUTE}`)).toBeInTheDocument()
-    expect(within(bridge).getByText(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)).toBeInTheDocument()
-    expect(within(bridge).getByText(`API 文档与接入控制台 · ${DOCS_ROUTE}`)).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+  })
+
+  it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations', async () => {
+    const user = userEvent.setup()
+    let view = renderSupplierSettlementsPage()
+
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    let bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    await user.click(within(bridge).getByRole('button', { name: /打开 API Keys/ }))
+    let apiKeysRouteStub = await screen.findByTestId('supplier-settlements-route-stub-api-keys')
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderSupplierSettlementsPage()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    await user.click(within(bridge).getByRole('button', { name: /继续配置 Webhook/ }))
+    const webhooksRouteStub = await screen.findByTestId('supplier-settlements-route-stub-webhooks')
+    expect(within(webhooksRouteStub).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    renderSupplierSettlementsPage()
+    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    await user.click(within(bridge).getByRole('button', { name: /查看 API 文档/ }))
+    const docsRouteStub = await screen.findByTestId('supplier-settlements-route-stub-docs')
+    expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('shows real supplier settlement records, reports, and disputes from loaded payloads', async () => {
@@ -361,8 +385,7 @@ describe('SupplierSettlementsPage', () => {
     const sharedConsoleFallback = screen.getByTestId('supplier-settlements-shared-console-fallback')
 
     expect(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ })).toBeInTheDocument()
-    expect(within(sharedConsoleFallback).getByText('返回推荐工作台')).toBeInTheDocument()
-    expect(within(sharedConsoleFallback).queryByRole('button', { name: /返回推荐工作台/ })).not.toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getByTestId('supplier-settlements-shared-console-fallback-button')).toBeInTheDocument()
 
     await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
     expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()

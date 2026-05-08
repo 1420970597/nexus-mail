@@ -365,9 +365,16 @@ export function SupplierSettlementsPage() {
                 }}
                 bodyStyle={{ padding: 18 }}
               >
-                <Space vertical align="start" spacing={10}>
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                   <Typography.Text strong style={{ color: '#f8fafc' }}>{pillar.label}</Typography.Text>
                   <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>{pillar.summary}</Typography.Text>
+                  <Button icon={pillar.icon} onClick={pillar.action}>
+                    {pillar.key === 'api'
+                      ? '打开 API Keys'
+                      : pillar.key === 'webhooks'
+                        ? '继续配置 Webhook'
+                        : '查看 API 文档'}
+                  </Button>
                 </Space>
               </Card>
             ))}
@@ -384,25 +391,16 @@ export function SupplierSettlementsPage() {
                 bodyStyle={{ padding: 18 }}
                 data-testid="supplier-settlements-shared-console-fallback"
               >
-                <Space vertical align="start" spacing={10}>
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                   <Typography.Text strong style={{ color: '#f8fafc' }}>返回推荐工作台</Typography.Text>
                   <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
                     共享接入入口暂未由服务端暴露时，先回到推荐工作台继续真实业务主链路，不在当前页泄露未授权集成入口。
                   </Typography.Text>
+                  <Button data-testid="supplier-settlements-shared-console-fallback-button" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+                    返回推荐工作台
+                  </Button>
                 </Space>
               </Card>
-            ) : null}
-          </Space>
-          <Space wrap spacing={12}>
-            {visibleConsolePillars.map((pillar) => (
-              <Button key={pillar.key} icon={pillar.icon} onClick={pillar.action}>
-                {pillar.label}
-              </Button>
-            ))}
-            {shouldShowConsoleFallback ? (
-              <Button data-testid="supplier-settlements-shared-console-fallback-button" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
-                返回推荐工作台
-              </Button>
             ) : null}
           </Space>
         </Space>
