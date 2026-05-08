@@ -327,6 +327,7 @@ export function ProfilePage() {
         </Col>
         <Col xs={24} xl={9}>
           <Card
+            data-testid="profile-role-expansion-card"
             title={<span style={{ color: '#f8fafc' }}>角色扩展说明</span>}
             style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
@@ -340,6 +341,25 @@ export function ProfilePage() {
                     ? '当前账号已被服务端授予供应商角色；供给链路仍然挂载在同一套共享控制台内，不切换独立后台。'
                     : '当前账号默认以用户身份进入共享控制台；如后续被服务端授予供应商或管理员角色，菜单会继续在同一壳内扩展。'}
               </Typography.Paragraph>
+              <Card
+                data-testid="profile-capability-matrix"
+                style={{
+                  width: '100%',
+                  borderRadius: 18,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                  border: '1px solid rgba(94,106,210,0.24)',
+                }}
+                bodyStyle={{ padding: 16 }}
+              >
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Space wrap>
+                    <Tag color="cyan" prefixIcon={<IconSafe />}>统一身份入口</Tag>
+                    <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+                    <Tag color="green" prefixIcon={<IconArticle />}>角色菜单扩展</Tag>
+                  </Space>
+                </Space>
+              </Card>
               <Space wrap>
                 <Tag color="cyan" prefixIcon={<IconSafe />}>最小权限</Tag>
                 <Tag color="blue" prefixIcon={<IconBolt />}>Webhook / API</Tag>

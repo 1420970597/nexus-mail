@@ -92,7 +92,7 @@ describe('ProfilePage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('scopes the user-facing shared-console bridge navigation to the capability region', async () => {
+  it('scopes the user-facing shared-console bridge navigation to the capability region and keeps the account shell aligned with the dark single-console mission control', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -120,9 +120,22 @@ describe('ProfilePage', () => {
     expect(within(roleFocusCard).getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
 
     const capabilityRegion = screen.getByTestId('profile-capability-bridge')
+    expect(within(capabilityRegion).getByText('控制台桥接能力')).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '打开 API 文档' })).toBeInTheDocument()
+
+    const capabilityMatrix = screen.getByTestId('profile-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一身份入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
+
+    const roleExpansionCard = screen.getByTestId('profile-role-expansion-card')
+    expect(within(roleExpansionCard).getByText('深色共享账号中枢')).toBeInTheDocument()
+    expect(within(roleExpansionCard).getByText('最小权限')).toBeInTheDocument()
+    expect(within(roleExpansionCard).getByText('Webhook / API')).toBeInTheDocument()
+    expect(within(roleExpansionCard).getByText('单一文档入口')).toBeInTheDocument()
 
     await user.click(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
