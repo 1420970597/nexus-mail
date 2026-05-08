@@ -40,16 +40,22 @@ const readinessRows = [
 
 const integrationRunway = [
   {
+    step: 'STEP 01',
     title: '创建 Key',
-    description: '生成首个 API Key。',
+    eyebrow: '最小权限起步',
+    description: '生成首个最小权限 API Key。',
   },
   {
+    step: 'STEP 02',
     title: '配置 Webhook',
-    description: '补齐回调地址并发起一次联调。',
+    eyebrow: '真实联调校验',
+    description: '先确认回调地址，再补投递验证。',
   },
   {
+    step: 'STEP 03',
     title: '对照文档',
-    description: '回到文档核对请求契约。',
+    eyebrow: '文档核对',
+    description: '回到同一控制台核对请求契约。',
   },
 ]
 
@@ -210,14 +216,31 @@ export function LoginPage() {
                             height: '100%',
                             background: 'rgba(255,255,255,0.02)',
                             border: '1px solid rgba(255,255,255,0.05)',
+                            boxShadow: 'rgba(0,0,0,0.18) 0px 0px 0px 1px inset',
                           }}
                         >
-                          <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.14px' }}>
-                            {item.title}
-                          </Typography.Title>
-                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, fontSize: 12, lineHeight: 1.6 }}>
-                            {item.description}
-                          </Typography.Paragraph>
+                          <Space vertical spacing={6} align="start" style={{ width: '100%' }}>
+                            <Typography.Text
+                              style={{
+                                color: 'rgba(138,143,152,0.92)',
+                                fontSize: 10,
+                                fontWeight: 600,
+                                letterSpacing: '0.16em',
+                                textTransform: 'uppercase',
+                              }}
+                            >
+                              {item.step}
+                            </Typography.Text>
+                            <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 0, letterSpacing: '-0.14px' }}>
+                              {item.title}
+                            </Typography.Title>
+                            <Typography.Text style={{ color: '#d0d6e0', fontSize: 12, fontWeight: 600, letterSpacing: '-0.08px' }}>
+                              {item.eyebrow}
+                            </Typography.Text>
+                            <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, fontSize: 12, lineHeight: 1.6 }}>
+                              {item.description}
+                            </Typography.Paragraph>
+                          </Space>
                         </Card>
                       </Col>
                     ))}

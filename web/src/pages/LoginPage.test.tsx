@@ -85,7 +85,7 @@ describe('LoginPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders a denser shared-console entry with a compact readiness summary and shortened registration journey', () => {
+  it('renders a denser shared-console entry with a compact readiness summary and product-style registration runway', () => {
     renderLoginPage()
 
     expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
@@ -124,9 +124,20 @@ describe('LoginPage', () => {
     const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('heading', { name: '首轮接入路径' })).toBeInTheDocument()
     expect(registerJourneyScope.getByText('注册后沿同一导航完成首个 Key、Webhook 与文档核对。')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('STEP 01')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('STEP 02')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('STEP 03')).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '创建 Key' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '配置 Webhook' })).toBeInTheDocument()
     expect(registerJourneyScope.getByRole('heading', { name: '对照文档' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('最小权限起步')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('生成首个最小权限 API Key。')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('先确认回调地址，再补投递验证。')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('文档核对')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('回到同一控制台核对请求契约。')).toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('生成首个 API Key。')).not.toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('补齐回调地址并发起一次联调。')).not.toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('回到文档核对请求契约。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByRole('heading', { name: '注册后进入同一套控制台' })).not.toBeInTheDocument()
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
   })
