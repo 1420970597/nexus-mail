@@ -380,8 +380,9 @@ describe('App', () => {
     await submitRegistration(user)
 
     const onboardingRegion = await expectDefaultUserFirstRunLane()
-    expect(within(onboardingRegion).queryByText('供应商主任务')).not.toBeInTheDocument()
-    expect(within(onboardingRegion).queryByText('管理员主任务')).not.toBeInTheDocument()
+    expect(within(onboardingRegion).getByTestId('dashboard-next-step-projects')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByTestId('dashboard-next-step-orders')).toBeInTheDocument()
+    expect(within(onboardingRegion).getByTestId('dashboard-next-step-api-keys')).toBeInTheDocument()
     expect(within(onboardingRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
   })
 
@@ -552,8 +553,8 @@ describe('App', () => {
     expect(within(firstLane).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
-    await waitFor(() => expect(screen.queryByRole('heading', { name: '欢迎进入共享控制台' })).not.toBeInTheDocument())
-    expect(screen.queryByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByTestId('dashboard-first-run-dismiss')).not.toBeInTheDocument())
+    expect(screen.getByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
     firstView.unmount()
 
     useAuthStore.setState({
@@ -601,8 +602,8 @@ describe('App', () => {
 
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
-    await waitFor(() => expect(screen.queryByRole('heading', { name: '欢迎进入共享控制台' })).not.toBeInTheDocument())
-    expect(screen.queryByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByTestId('dashboard-first-run-dismiss')).not.toBeInTheDocument())
+    expect(screen.getByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
   })
 
   it('does not show first-run onboarding guidance for supplier dashboard', async () => {
