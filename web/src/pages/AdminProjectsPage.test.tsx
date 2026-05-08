@@ -13,6 +13,7 @@ import {
   DASHBOARD_ROUTE,
   DOCS_ROUTE,
   WEBHOOKS_ROUTE,
+  resolveRouteTitle,
 } from '../utils/consoleNavigation'
 
 vi.mock('../services/activation', () => ({
@@ -76,7 +77,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
             path={WEBHOOKS_ROUTE}
             element={(
               <section data-testid="admin-pricing-route-stub-webhooks">
-                <h1>Webhook 设置</h1>
+                <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}</h1>
               </section>
             )}
           />
@@ -84,7 +85,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
             path={DOCS_ROUTE}
             element={(
               <section data-testid="admin-pricing-route-stub-docs">
-                <h1>API 文档</h1>
+                <h1>{resolveRouteTitle(DOCS_ROUTE, 'admin')}</h1>
               </section>
             )}
           />
@@ -146,7 +147,7 @@ describe('AdminProjectsPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders pricing heading, mission-flow CTAs, and capability-matrix surface inside the shared console shell', async () => {
+  it('renders pricing heading, mission-flow CTAs, shared-console bridge CTAs, and capability-matrix surface inside the shared console shell', async () => {
     renderAdminProjectsPage()
 
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
@@ -156,16 +157,28 @@ describe('AdminProjectsPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('admin-pricing-shared-console-bridge')
+    expect(within(bridgeCard).getByText('共享控制台接入桥')).toBeInTheDocument()
+    expect(bridgeCard).toHaveTextContent('单一登录后')
+    expect(bridgeCard).toHaveTextContent('不新增独立后台')
+    expect(within(bridgeCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(bridgeCard).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    expect(within(bridgeCard).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    expect(within(bridgeCard).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(bridgeCard).getByRole('button', { name: '打开 Webhooks' })).toBeInTheDocument()
+    expect(within(bridgeCard).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
     const capabilityMatrix = screen.getByTestId('admin-pricing-capability-matrix')
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('管理员扩展菜单仍挂在同一共享控制台，不做独立后台')).toBeInTheDocument()
+    expect(capabilityMatrix).toHaveTextContent('Webhook 运维与回调观测')
+    expect(capabilityMatrix).toHaveTextContent('API 文档与接入控制台')
     const projectEditorCard = screen.getByTestId('admin-pricing-project-editor-card')
     expect(within(projectEditorCard).getByText('编辑项目 · gmail')).toBeInTheDocument()
     const projectListCard = screen.getByTestId('admin-pricing-project-list-card')
     expect(within(projectListCard).getByText('Gmail 验证码')).toBeInTheDocument()
   })
 
-  it('navigates through risk, audit, and integration mission cards inside the shared console', async () => {
+  it('navigates through risk, audit, and integration mission cards plus shared-console bridge destinations', async () => {
     const user = userEvent.setup()
     let view = renderAdminProjectsPage()
 
@@ -189,6 +202,20 @@ describe('AdminProjectsPage', () => {
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('admin-pricing-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderAdminProjectsPage()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('admin-pricing-shared-console-bridge')).getByRole('button', { name: '打开 Webhooks' }))
+    expect(await screen.findByTestId('admin-pricing-route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderAdminProjectsPage()
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('admin-pricing-shared-console-bridge')).getByRole('button', { name: '查看 API 文档' }))
+    expect(await screen.findByTestId('admin-pricing-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
     view.unmount()
   })
 

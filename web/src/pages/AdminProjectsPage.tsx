@@ -12,6 +12,7 @@ import {
   DOCS_ROUTE,
   hasMenuPath,
   resolvePreferredConsoleRoute,
+  resolveRouteTitle,
   WEBHOOKS_ROUTE,
 } from '../utils/consoleNavigation'
 
@@ -145,9 +146,50 @@ export function AdminProjectsPage() {
       { key: '角色壳模式', value: '管理员扩展菜单仍挂在同一共享控制台，不做独立后台' },
       { key: '风控联动', value: canOpenRisk ? '已接入管理员风控中心' : '等待风控菜单权限' },
       { key: '审计联动', value: canOpenAudit ? '已接入管理员审计查询' : '等待审计菜单权限' },
-      { key: '接入入口', value: canOpenApiKeys && canOpenWebhooks && canOpenDocs ? 'API Keys / Webhooks / Docs 已与管理端同壳收敛' : '共享接入入口尚未全部可见' },
+      {
+        key: '接入入口',
+        value: canOpenApiKeys && canOpenWebhooks && canOpenDocs
+          ? `API Keys / ${resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)} / ${resolveRouteTitle(DOCS_ROUTE, user?.role)} 已与管理端同壳收敛`
+          : '共享接入入口尚未全部可见',
+      },
     ],
-    [canOpenApiKeys, canOpenAudit, canOpenDocs, canOpenRisk, canOpenWebhooks],
+    [canOpenApiKeys, canOpenAudit, canOpenDocs, canOpenRisk, canOpenWebhooks, user?.role],
+  )
+
+  const bridgeCards = useMemo<MissionCard[]>(
+    () => [
+      ...(canOpenApiKeys
+        ? [{
+            key: 'api-keys',
+            title: resolveRouteTitle(API_KEYS_ROUTE, user?.role),
+            description: '在共享控制台内继续核对访问凭证、限额与调用身份，保持管理员价格策略与开发者接入叙事同壳衔接。',
+            button: '打开 API Keys',
+            path: API_KEYS_ROUTE,
+            tag: 'API Keys',
+          }]
+        : []),
+      ...(canOpenWebhooks
+        ? [{
+            key: 'webhooks',
+            title: resolveRouteTitle(WEBHOOKS_ROUTE, user?.role),
+            description: '进入管理员侧回调运维视角，继续观察事件投递、失败重试与联调状态，不切换到独立后台。',
+            button: '打开 Webhooks',
+            path: WEBHOOKS_ROUTE,
+            tag: 'Webhooks',
+          }]
+        : []),
+      ...(canOpenDocs
+        ? [{
+            key: 'docs',
+            title: resolveRouteTitle(DOCS_ROUTE, user?.role),
+            description: '返回统一接入文档与控制台说明，确认项目价格调整后的对外接入表述仍与共享控制台一致。',
+            button: '查看 API 文档',
+            path: DOCS_ROUTE,
+            tag: 'Docs',
+          }]
+        : []),
+    ],
+    [canOpenApiKeys, canOpenDocs, canOpenWebhooks, user?.role],
   )
 
   const handleSelect = (project: ProjectItem) => {
@@ -282,6 +324,45 @@ export function AdminProjectsPage() {
           ]}
         />
       </Card>
+
+      {bridgeCards.length > 0 ? (
+        <Card
+          data-testid="admin-pricing-shared-console-bridge"
+          title={<span style={{ color: '#f8fafc' }}>共享控制台接入桥</span>}
+          style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,23,42,0.96) 0%, rgba(17,24,39,0.92) 100%)', border: '1px solid rgba(96,165,250,0.18)' }}
+          bodyStyle={{ padding: 20 }}
+        >
+          <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+            <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.78)' }}>
+              所有接入入口继续停留在当前单一登录后的共享控制台壳内，不新增独立后台。
+            </Typography.Paragraph>
+            <Space wrap style={{ width: '100%' }} spacing={16}>
+              {bridgeCards.map((item) => (
+                <Card
+                  key={item.key}
+                  style={{
+                    flex: '1 1 260px',
+                    minWidth: 260,
+                    borderRadius: 20,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(125,211,252,0.2)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                    <Tag color="blue">{item.tag}</Tag>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)' }}>{item.description}</Typography.Paragraph>
+                    <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                      {item.button}
+                    </Button>
+                  </Space>
+                </Card>
+              ))}
+            </Space>
+          </Space>
+        </Card>
+      ) : null}
 
       <Card title="项目列表" data-testid="admin-pricing-project-list-card" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
         <Table
