@@ -107,7 +107,7 @@ function roleCopy(role?: string) {
         badge: '用户视角',
         title: '开发者 Webhook 接入工作台',
         description: '创建账户级回调 endpoint，测试真实投递链路，并跟踪最近 50 条异步 delivery 状态。',
-        tips: ['签名密钥仅在创建瞬间展示一次，请立即复制保存', '先配置 API Keys 与文档，再补上回调消费端校验逻辑'],
+        tips: ['签名密钥仅在创建瞬间展示一次，请立即复制保存', '打开 API Keys 与文档，再补上回调消费端校验逻辑'],
       }
   }
 }
@@ -606,7 +606,7 @@ export function WebhooksPage() {
             <Space data-testid="webhooks-empty-state-actions">
               {canOpenApiKeys ? (
                 <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
-                  先配置 API Keys
+                  打开 API Keys
                 </Button>
               ) : null}
               {canOpenDocs ? (

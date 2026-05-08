@@ -143,6 +143,20 @@ describe('WebhooksPage', () => {
     expect(within(currentEndpointCard).getByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
   })
 
+  it('renders canonical user guidance copy without legacy API Keys wording', async () => {
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
+
+    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    expect(within(guidanceRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const roleTips = within(guidanceRegion).getByTestId('webhooks-role-tips')
+    expect(roleTips).toHaveTextContent('打开 API Keys 与文档，再补上回调消费端校验逻辑')
+    expect(roleTips).not.toHaveTextContent('先配置 API Keys 与文档，再补上回调消费端校验逻辑')
+  })
+
   it('renders role-specific guidance for supplier role', async () => {
     seedRole('supplier')
     render(
@@ -221,6 +235,21 @@ describe('WebhooksPage', () => {
 
     const currentEndpointsCard = await screen.findByTestId('webhooks-current-endpoints-card')
     expect(within(currentEndpointsCard).getByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
+  })
+
+  it('shows canonical API Keys CTA in the empty state when the shared route is available', async () => {
+    mockedGetWebhookEndpoints.mockResolvedValueOnce({ items: [] })
+
+    render(
+      <MemoryRouter>
+        <WebhooksPage />
+      </MemoryRouter>,
+    )
+
+    const emptyActions = await screen.findByTestId('webhooks-empty-state-actions')
+    expect(within(emptyActions).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
+    expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
   it('renders shared-console navigation actions for the first integration loop', async () => {
