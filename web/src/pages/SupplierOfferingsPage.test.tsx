@@ -192,6 +192,9 @@ describe('SupplierOfferingsPage', () => {
     expect(within(webhookPillar).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     const docsPillar = within(bridge).getByTestId('supplier-offerings-console-pillar-docs')
     expect(within(docsPillar).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`API 文档与接入控制台 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
 
     const offeringsTable = screen.getByTestId('supplier-offerings-table')
     expect(within(offeringsTable).getByText('discord')).toBeInTheDocument()

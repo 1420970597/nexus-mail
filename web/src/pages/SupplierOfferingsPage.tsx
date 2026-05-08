@@ -406,23 +406,6 @@ export function SupplierOfferingsPage() {
                 </Space>
               </Card>
             ))}
-          </Space>
-          <Space wrap spacing={12}>
-            {canOpenApiKeys ? (
-              <Button icon={<IconSafe />} onClick={() => navigate(API_KEYS_ROUTE)}>
-                API Keys · {API_KEYS_ROUTE}
-              </Button>
-            ) : null}
-            {canOpenWebhooks ? (
-              <Button icon={<IconBolt />} onClick={() => navigate(WEBHOOKS_ROUTE)}>
-                供给事件回调工作台 · {WEBHOOKS_ROUTE}
-              </Button>
-            ) : null}
-            {canOpenDocs ? (
-              <Button icon={<IconPriceTag />} onClick={() => navigate(DOCS_ROUTE)}>
-                API 文档与接入控制台 · {DOCS_ROUTE}
-              </Button>
-            ) : null}
             {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (
               <Card
                 data-testid="supplier-offerings-shared-console-fallback"
