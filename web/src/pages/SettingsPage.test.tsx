@@ -146,7 +146,7 @@ describe('SettingsPage', () => {
     settingsView.unmount()
   })
 
-  it('renders a dark shared-console control center with canonical navigation links for regular users', async () => {
+  it('renders a dark shared-console control center with canonical new-api mission cards for regular users', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -181,11 +181,16 @@ describe('SettingsPage', () => {
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     const missionCards = screen.getByTestId('settings-mission-cards')
-    expect(within(missionCards).getByText('先完成 API 密钥发放')).toBeInTheDocument()
-    expect(within(missionCards).getByRole('button', { name: /打开 API 文档/ })).toBeInTheDocument()
-    expect(within(missionCards).getByRole('button', { name: /打开 Webhook 设置/ })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(missionCards).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(missionCards).queryByRole('button', { name: /打开 Webhook 设置/ })).not.toBeInTheDocument()
+    expect(within(missionCards).queryByRole('button', { name: /打开 API 文档/ })).not.toBeInTheDocument()
 
-    await user.click(within(missionCards).getByRole('button', { name: /打开 API 文档/ }))
+    await user.click(within(missionCards).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('settings-route-stub-docs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
