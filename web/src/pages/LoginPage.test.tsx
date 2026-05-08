@@ -85,21 +85,26 @@ describe('LoginPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders a denser shared-console entry with a compact readiness summary and product-style registration runway', () => {
+  it('renders a denser shared-console entry with a compact signal strip and product-style registration runway', () => {
     renderLoginPage()
 
     expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
+    expect(screen.getByText('统一入口、共享控制台与接入链路收敛到同一登录面。')).toBeInTheDocument()
+    expect(screen.queryByText('只保留登录入口、共享控制台与接入路径这三个稳定承诺，减少登录前的解释成本。')).not.toBeInTheDocument()
 
     const readinessScope = within(screen.getByTestId('login-control-plane-readiness'))
-    expect(readinessScope.getByRole('heading', { name: '控制台入口摘要' })).toBeInTheDocument()
+    expect(readinessScope.getByRole('heading', { name: '控制台入口信号' })).toBeInTheDocument()
+    expect(readinessScope.getByText('先确认统一入口、共享壳与接入落点，再进入登录或注册。')).toBeInTheDocument()
     expect(readinessScope.getByText('统一入口')).toBeInTheDocument()
-    expect(readinessScope.getByText('登录与注册同入口')).toBeInTheDocument()
+    expect(readinessScope.getByText('登录 / 注册同入口')).toBeInTheDocument()
     expect(readinessScope.getByText('共享控制台')).toBeInTheDocument()
-    expect(readinessScope.getByText('登录后直达同一壳')).toBeInTheDocument()
+    expect(readinessScope.getByText('登录后进入同一壳')).toBeInTheDocument()
     expect(readinessScope.getByText('开发接入')).toBeInTheDocument()
     expect(readinessScope.getByText('Keys · Webhooks · Docs')).toBeInTheDocument()
     expect(screen.getByTestId('login-control-plane-readiness').querySelectorAll('[data-testid="login-readiness-item"]')).toHaveLength(3)
+    expect(readinessScope.queryByText('控制台入口摘要')).not.toBeInTheDocument()
+    expect(readinessScope.queryByText('登录前只保留统一入口、共享控制台与接入路径三条最小事实。')).not.toBeInTheDocument()
     expect(readinessScope.queryByText('角色菜单')).not.toBeInTheDocument()
     expect(readinessScope.queryByText('按服务端角色切换')).not.toBeInTheDocument()
     expect(screen.queryByTestId('login-role-workspaces')).not.toBeInTheDocument()
@@ -123,8 +128,10 @@ describe('LoginPage', () => {
     expect(within(authShell).getByTestId('login-auth-guidance-banner')).toBeInTheDocument()
 
     const registerJourneyScope = getRegisterJourneyScope()
-    expect(registerJourneyScope.getByRole('heading', { name: '首轮接入路径' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('注册后沿同一导航完成首个 Key、Webhook 与文档核对。')).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('heading', { name: '注册后第一轮动作' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('在同一控制台完成 Key、Webhook 与文档核对。')).toBeInTheDocument()
+    expect(registerJourneyScope.queryByRole('heading', { name: '首轮接入路径' })).not.toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('注册后沿同一导航完成首个 Key、Webhook 与文档核对。')).not.toBeInTheDocument()
     expect(registerJourneyScope.getByText('STEP 01')).toBeInTheDocument()
     expect(registerJourneyScope.getByText('STEP 02')).toBeInTheDocument()
     expect(registerJourneyScope.getByText('STEP 03')).toBeInTheDocument()

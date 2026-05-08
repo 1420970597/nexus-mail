@@ -23,12 +23,12 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
 const readinessRows = [
   {
     label: '统一入口',
-    value: '登录与注册同入口',
+    value: '登录 / 注册同入口',
     detail: '不拆独立注册站或额外后台登录页。',
   },
   {
     label: '共享控制台',
-    value: '登录后直达同一壳',
+    value: '登录后进入同一壳',
     detail: '角色差异留在控制台内按菜单与页面能力展开。',
   },
   {
@@ -119,7 +119,7 @@ export function LoginPage() {
                   统一登录后控制台
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.72)', fontSize: 15, lineHeight: 1.62, maxWidth: 500, marginBottom: 0 }}>
-                  只保留登录入口、共享控制台与接入路径这三个稳定承诺，减少登录前的解释成本。
+                  统一入口、共享控制台与接入链路收敛到同一登录面。
                 </Typography.Paragraph>
               </div>
               <Card
@@ -136,10 +136,10 @@ export function LoginPage() {
                 <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
                   <div>
                     <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
-                      控制台入口摘要
+                      控制台入口信号
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
-                      登录前只保留统一入口、共享控制台与接入路径三条最小事实。
+                      先确认统一入口、共享壳与接入落点，再进入登录或注册。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[10, 10]} style={{ width: '100%' }}>
@@ -201,10 +201,10 @@ export function LoginPage() {
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                   <div>
                     <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
-                      首轮接入路径
+                      注册后第一轮动作
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后沿同一导航完成首个 Key、Webhook 与文档核对。
+                      在同一控制台完成 Key、Webhook 与文档核对。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
