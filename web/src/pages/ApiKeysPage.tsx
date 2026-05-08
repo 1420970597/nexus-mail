@@ -278,7 +278,7 @@ export function ApiKeysPage() {
       <Banner
         type="info"
         fullMode={false}
-        description="新建后仅展示一次明文密钥，请立即复制保存；后续列表仅显示 key_preview。若需要程序化回调，请继续前往 Webhook 设置与 API 文档。"
+        description="新建后仅展示一次明文密钥，请立即复制保存；后续列表仅显示 key_preview。若需要程序化回调，请继续配置 Webhook并查看 API 文档。"
       />
 
       <Card
@@ -410,7 +410,7 @@ export function ApiKeysPage() {
             <Space>
               {canOpenWebhooks ? (
                 <Button type="primary" theme="solid" onClick={() => navigate(WEBHOOKS_ROUTE)}>
-                  前往 Webhook 设置
+                  继续配置 Webhook
                 </Button>
               ) : null}
               {canOpenDocs ? (

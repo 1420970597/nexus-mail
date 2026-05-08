@@ -373,6 +373,9 @@ describe('ApiKeysPage', () => {
     expect(bridgeScope.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: /前往 Webhook 设置/ })).not.toBeInTheDocument()
+    expect(screen.getByText(/若需要程序化回调，请继续配置 Webhook并查看 API 文档。/)).toBeInTheDocument()
+    expect(screen.queryByText(/若需要程序化回调，请继续前往 Webhook 设置与 API 文档。/)).not.toBeInTheDocument()
   })
 
   it('navigates to shared integration routes from the scoped bridge before and after key creation', async () => {
@@ -452,6 +455,24 @@ describe('ApiKeysPage', () => {
     await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
+    expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+  })
+
+  it('shows canonical webhook/docs CTAs in the empty-state action area', async () => {
+    mockedGetAPIKeys.mockResolvedValueOnce({ items: [] })
+    const user = userEvent.setup()
+
+    renderApiKeysPage()
+
+    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
+    const emptyScope = within(keysCard)
+    expect(emptyScope.getByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
+    expect(emptyScope.getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(emptyScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(emptyScope.queryByRole('button', { name: '前往 Webhook 设置' })).not.toBeInTheDocument()
+
+    await user.click(emptyScope.getByRole('button', { name: '继续配置 Webhook' }))
     expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
   })
