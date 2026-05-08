@@ -282,11 +282,23 @@ export function AdminAuditPage() {
             <Typography.Paragraph style={{ marginBottom: 0 }}>
               审计页不是独立后台：查询完高危事件后，仍然通过风控、API Keys 与 API 文档入口在同一套控制台中继续验证真实鉴权契约与修复结果。
             </Typography.Paragraph>
-            {visibleSharedConsoleLinks.map((item) => (
-              <Tag key={item.key} color="grey" prefixIcon={item.icon}>
-                {item.label} · {item.path}
-              </Tag>
-            ))}
+            <Space wrap data-testid="admin-audit-shared-console-links">
+              {visibleSharedConsoleLinks.map((item) => (
+                <Button
+                  key={item.key}
+                  type="tertiary"
+                  theme="borderless"
+                  icon={item.icon}
+                  onClick={() => navigate(item.path)}
+                >
+                  {item.key === 'api-keys'
+                    ? '打开 API Keys'
+                    : item.key === 'risk'
+                      ? '继续查看风控'
+                      : '查看 API 文档'}
+                </Button>
+              ))}
+            </Space>
             {!canOpenRisk && !canOpenApiKeys && !canOpenDocs && shouldShowFallbackCta ? (
               <Card
                 data-testid="admin-audit-shared-console-fallback"

@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminAuditPage } from './AdminAuditPage'
 import { useAuthStore } from '../store/authStore'
-import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE } from '../utils/consoleNavigation'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE } from '../utils/consoleNavigation'
 
 const mockedGetAdminAudit = vi.fn()
 
@@ -39,6 +39,14 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
           element={(
             <section data-testid="admin-audit-route-stub-api-keys">
               <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section data-testid="admin-audit-route-stub-docs">
+              <h1>API 文档与接入控制台</h1>
             </section>
           )}
         />
@@ -95,7 +103,7 @@ describe('AdminAuditPage', () => {
     })
   })
 
-  it('renders audit mission control shell with heading, action lanes, and shared bridge contracts', async () => {
+  it('renders audit mission control shell with heading, action lanes, and shared bridge CTA contracts', async () => {
     renderAdminAuditPage()
 
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
@@ -107,41 +115,41 @@ describe('AdminAuditPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
-    expect(within(bridge).getByText('API Keys · /api-keys')).toBeInTheDocument()
-    expect(within(bridge).getByText('风控中心 · /admin/risk')).toBeInTheDocument()
-    expect(within(bridge).getByText('API 文档 · /docs')).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /继续查看风控/ })).toBeInTheDocument()
+    expect(within(bridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
 
     const auditTable = screen.getByTestId('admin-audit-events-table-card')
     expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
     expect(within(auditTable).getByText('blocked by whitelist')).toBeInTheDocument()
   })
 
-  it('navigates from mission-control actions to risk, finance, and api keys', async () => {
+  it('navigates from the shared-console bridge to api keys, risk, and docs destinations', async () => {
     const user = userEvent.setup()
     let view = renderAdminAuditPage()
 
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
-    const missionFlow = screen.getByTestId('admin-audit-mission-flow')
-    await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
-    expect(await screen.findByTestId('admin-audit-route-stub-risk')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    await user.click(within(bridge).getByRole('button', { name: /打开 API Keys/ }))
+    expect(await screen.findByTestId('admin-audit-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
-    const refreshedMissionFlow = screen.getByTestId('admin-audit-mission-flow')
-    await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
-    expect(await screen.findByTestId('admin-audit-route-stub-users')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    const refreshedBridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    await user.click(within(refreshedBridge).getByRole('button', { name: /继续查看风控/ }))
+    expect(await screen.findByTestId('admin-audit-route-stub-risk')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
-    const finalMissionFlow = screen.getByTestId('admin-audit-mission-flow')
-    await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('admin-audit-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const docsBridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    await user.click(within(docsBridge).getByRole('button', { name: /查看 API 文档/ }))
+    expect(await screen.findByTestId('admin-audit-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
@@ -164,9 +172,9 @@ describe('AdminAuditPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
-    expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
-    expect(within(bridge).queryByText('风控中心 · /admin/risk')).not.toBeInTheDocument()
-    expect(within(bridge).queryByText('API 文档 · /docs')).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /继续查看风控/ })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-audit-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
     expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
