@@ -107,6 +107,7 @@ describe('LoginPage', () => {
 
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
+    expect(screen.getByText('登录后按角色展开工作区，无需切换后台。')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('name@example.com')).toHaveStyle({ color: 'rgb(247, 248, 248)' })
     expect(screen.getByPlaceholderText('请输入密码')).toHaveStyle({ color: 'rgb(247, 248, 248)' })
@@ -148,19 +149,21 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     const authShell = screen.getByTestId('login-auth-shell')
-    expect(within(within(authShell).getByTestId('login-auth-guidance-banner')).getByText(/已有账号可直接进入共享控制台/)).toBeInTheDocument()
+    expect(within(within(authShell).getByTestId('login-auth-guidance-banner')).getByText(/已有账号可直接进入共享控制台，继续同一套工作区。/)).toBeInTheDocument()
 
     const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
     await user.click(within(modeSwitch).getByRole('tab', { name: '注册' }))
 
     expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
+    expect(screen.getByText('注册后直接进入共享控制台，并在同一套导航中继续接入。')).toBeInTheDocument()
     const registerButton = within(modeSwitch).getByRole('tab', { name: '注册' })
     const loginButton = within(modeSwitch).getByRole('tab', { name: '登录' })
     expect(registerButton).toHaveAttribute('aria-selected', 'true')
     expect(loginButton).toHaveAttribute('aria-selected', 'false')
     const registerBanner = within(screen.getByTestId('login-auth-guidance-banner'))
-    expect(registerBanner.getByText(/注册成功后不会跳转到独立新手页/)).toBeInTheDocument()
-    expect(registerBanner.getByText(/项目市场 → 订单中心 → API Keys/)).toBeInTheDocument()
+    expect(registerBanner.getByText(/注册成功后直接进入共享控制台。/)).toBeInTheDocument()
+    expect(registerBanner.getByText(/你可以继续前往项目市场、订单中心与 API Keys。/)).toBeInTheDocument()
+    expect(registerBanner.queryByText(/注册成功后不会跳转到独立新手页/)).not.toBeInTheDocument()
     expect(registerBanner.queryByText(/已有账号可直接进入共享控制台/)).not.toBeInTheDocument()
   })
 

@@ -11,12 +11,12 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   login: {
     title: '登录并进入统一控制台',
     button: '登录并进入统一控制台',
-    helper: '使用统一控制台访问用户、供应商与管理员能力。',
+    helper: '登录后按角色展开工作区，无需切换后台。',
   },
   register: {
     title: '创建账号并进入统一控制台',
     button: '注册并进入统一控制台',
-    helper: '仅需邮箱与密码即可开通账户；注册成功后直接进入同一套控制台。',
+    helper: '注册后直接进入共享控制台，并在同一套导航中继续接入。',
   },
 }
 
@@ -427,7 +427,7 @@ export function LoginPage() {
                     type="info"
                     fullMode={false}
                     closeIcon={null}
-                    description="已有账号可直接进入共享控制台；若首次使用，可先注册，并在同一壳里按角色扩展工作区。"
+                    description="已有账号可直接进入共享控制台，继续同一套工作区。"
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.02)',
@@ -442,7 +442,7 @@ export function LoginPage() {
                     type="success"
                     fullMode={false}
                     closeIcon={null}
-                    description="注册成功后不会跳转到独立新手页，而是直接进入与登录一致的控制台布局，并先按“项目市场 → 订单中心 → API Keys”完成首轮引导。"
+                    description="注册成功后直接进入共享控制台。你可以继续前往项目市场、订单中心与 API Keys。"
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.02)',
