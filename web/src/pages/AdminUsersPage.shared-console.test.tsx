@@ -228,7 +228,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     await waitFor(() => expect(mockedResolveAdminDispute).toHaveBeenCalled())
   })
 
-  it('suppresses unavailable shared-console CTAs and falls back to dashboard when only the finance page remains', async () => {
+  it('suppresses unavailable shared-console CTAs and falls back to the shared console home when only the finance page remains', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -253,8 +253,10 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-users-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
+    expect(within(fallbackCard).getByRole('heading', { name: '回到共享工作台继续管理员主链路' })).toBeInTheDocument()
+    expect(within(fallbackCard).getByText('当风控、审计与共享接入入口暂未由服务端暴露时，先回到共享工作台完成当前管理员主链路，再等待后续菜单授权。')).toBeInTheDocument()
 
-    await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(fallbackCard).getByRole('button', { name: '返回共享工作台' }))
     const dashboardRouteStub = await screen.findByTestId('admin-users-route-stub-dashboard')
     expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

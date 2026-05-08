@@ -422,11 +422,11 @@ export function AdminUsersPage() {
                 >
                   <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                     <Tag color="cyan">Fallback</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到推荐工作台继续管理员主链路</Typography.Title>
+                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到共享工作台继续管理员主链路</Typography.Title>
                     <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
-                      当前菜单未暴露风控、审计或共享接入入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
+                      当风控、审计与共享接入入口暂未由服务端暴露时，先回到共享工作台完成当前管理员主链路，再等待后续菜单授权。
                     </Typography.Text>
-                    <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>返回推荐工作台</Button>
+                    <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>返回共享工作台</Button>
                   </Space>
                 </Card>
               ) : null}
