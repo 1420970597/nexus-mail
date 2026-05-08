@@ -371,9 +371,9 @@ describe('WebhooksPage', () => {
     expect(within(guidanceRegion).getByText('管理员视角')).toBeInTheDocument()
 
     const roleTips = within(guidanceRegion).getByTestId('webhooks-role-tips')
-    expect(within(roleTips).getByText(/failed \/ pending/i)).toBeInTheDocument()
-    expect(within(roleTips).getByText(/last_error/i)).toBeInTheDocument()
-    expect(within(roleTips).getByText(/测试投递返回 202/i)).toBeInTheDocument()
+    expect(roleTips).toHaveTextContent('failed / pending')
+    expect(roleTips).toHaveTextContent('last_error')
+    expect(roleTips).toHaveTextContent('测试投递返回 202')
 
     const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
     expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
