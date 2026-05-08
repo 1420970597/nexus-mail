@@ -230,10 +230,10 @@ function roleActions(menu: MenuItem[], role?: string): RoleAction[] {
     if (itemsByPath.has('/webhooks')) {
       actions.push({
         key: 'webhooks',
-        title: '共享接入入口',
-        description: '通过 API 文档与 Webhook 设置继续对外联调，兼顾产品运营与平台接入。',
+        title: 'Webhook 运维与回调观测',
+        description: '继续在同一套共享控制台中追踪回调投递、文档对照与运维联动，不再切换独立后台。',
         path: '/webhooks',
-        button: '打开 Webhook 工作台',
+        button: '继续配置 Webhook',
         icon: <IconArticle />,
         accent: 'rgba(14, 165, 233, 0.24)',
       })
@@ -303,14 +303,14 @@ function roleActions(menu: MenuItem[], role?: string): RoleAction[] {
     })
   }
   if (itemsByPath.has(API_KEYS_ROUTE)) {
-    const docsLabel = itemsByPath.has(DOCS_ROUTE) ? '文档' : '接口说明'
+    const docsLabel = itemsByPath.has(DOCS_ROUTE) ? 'API 文档' : '接口说明'
     const webhookLabel = itemsByPath.has(WEBHOOKS_ROUTE) ? 'Webhook' : '回调'
     actions.push({
       key: 'api-keys',
-      title: '集成与回调',
+      title: '开发者 API 接入工作台',
       description: `继续配置 API Keys、${webhookLabel} 与 ${docsLabel}，完成对外 API / Webhook 对接。`,
       path: API_KEYS_ROUTE,
-      button: '管理 API Keys',
+      button: '打开 API Keys',
       icon: <IconSetting />,
       accent: 'rgba(16, 185, 129, 0.24)',
     })
