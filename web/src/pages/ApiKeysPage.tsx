@@ -300,7 +300,7 @@ export function ApiKeysPage() {
                 API Keys → {webhookRouteTitle} → API 文档与接入控制台
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到推荐工作台继续真实业务主链路。
+                保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到共享工作台继续真实业务主链路。
               </Typography.Paragraph>
             </div>
             <Space wrap>
@@ -333,12 +333,12 @@ export function ApiKeysPage() {
                     border: '1px solid rgba(148,163,184,0.16)',
                   }}
                 >
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回推荐工作台</Typography.Text>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
                   <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
-                    当 Webhook、文档与项目入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的真实业务主链路。
+                    当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。
                   </Typography.Text>
                   <Button theme="solid" type="primary" icon={<IconServer />} onClick={() => navigate(fallbackRoute)}>
-                    返回推荐工作台
+                    返回共享工作台
                   </Button>
                 </Space>
               ) : null}
@@ -421,7 +421,7 @@ export function ApiKeysPage() {
               ) : null}
               {fallbackRoute !== API_KEYS_ROUTE ? (
                 <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
-                  返回推荐工作台
+                  返回共享工作台
                 </Button>
               ) : null}
             </Space>
