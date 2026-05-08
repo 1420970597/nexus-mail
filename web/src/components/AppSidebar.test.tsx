@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AppSidebar, SHARED_CONSOLE_MENU_LOADING_LABEL } from './AppSidebar'
+import { API_KEYS_ROUTE, WEBHOOKS_ROUTE, resolveRouteTitle } from '../utils/consoleNavigation'
 import { useAuthStore } from '../store/authStore'
 
 function renderSidebar(ui: React.ReactNode, initialEntries: string[] = ['/']) {
@@ -22,14 +23,15 @@ describe('AppSidebar', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [], bootstrapStatus: 'idle' })
   })
 
-  it('shows supplier domain, webhook and settlement menu for supplier role', async () => {
+  it('shows canonical shared-shell titles for shared routes instead of stale server labels', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',
       user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' },
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
         { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
         { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
       ],
@@ -39,14 +41,14 @@ describe('AppSidebar', () => {
     await renderSidebarAndWait(<AppSidebar />)
 
     const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
-    expect(within(sharedGroup).getByText('基础工作台')).toBeInTheDocument()
-    expect(within(sharedGroup).getByText('Webhook 设置')).toBeInTheDocument()
-    expect(within(sharedGroup).queryByText('风控中心')).not.toBeInTheDocument()
+    expect(within(sharedGroup).getByRole('menuitem', { name: new RegExp(resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier')) })).toBeInTheDocument()
+    expect(within(sharedGroup).getByRole('menuitem', { name: new RegExp(resolveRouteTitle(API_KEYS_ROUTE, 'supplier')) })).toBeInTheDocument()
+    expect(within(sharedGroup).queryByText('Webhook 设置')).not.toBeInTheDocument()
+    expect(within(sharedGroup).queryByText(/^API Keys$/)).not.toBeInTheDocument()
 
     const supplierGroup = screen.getByTestId('app-sidebar-supplier-group')
-    expect(within(supplierGroup).getByText('供应商扩展')).toBeInTheDocument()
-    expect(within(supplierGroup).getByText('域名管理')).toBeInTheDocument()
-    expect(within(supplierGroup).getByText('供应商结算')).toBeInTheDocument()
+    expect(within(supplierGroup).getByText(resolveRouteTitle('/supplier/domains', 'supplier'))).toBeInTheDocument()
+    expect(within(supplierGroup).getByText(resolveRouteTitle('/supplier/settlements', 'supplier'))).toBeInTheDocument()
 
     const roleSummary = screen.getByTestId('app-sidebar-role-summary')
     expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
@@ -55,7 +57,7 @@ describe('AppSidebar', () => {
     expect(screen.getByText('单一登录 · 按角色切换工作区')).toBeInTheDocument()
   })
 
-  it('shows admin risk control menu for admin role', async () => {
+  it('shows canonical shared-shell titles for admin shared routes', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',
@@ -63,7 +65,7 @@ describe('AppSidebar', () => {
       menu: [
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'balance', label: '余额中心', path: '/balance' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
       ],
@@ -77,8 +79,9 @@ describe('AppSidebar', () => {
     expect(within(adminGroup).getByText('审计日志')).toBeInTheDocument()
 
     const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
-    expect(within(sharedGroup).getByText('Webhook 设置')).toBeInTheDocument()
+    expect(within(sharedGroup).getByRole('menuitem', { name: new RegExp(resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')) })).toBeInTheDocument()
     expect(within(sharedGroup).getByText('余额中心')).toBeInTheDocument()
+    expect(within(sharedGroup).queryByText('Webhook 设置')).not.toBeInTheDocument()
 
     const roleSummary = screen.getByTestId('app-sidebar-role-summary')
     expect(within(roleSummary).getByText('管理员')).toBeInTheDocument()
@@ -103,7 +106,7 @@ describe('AppSidebar', () => {
     const supplierGroup = screen.getByTestId('app-sidebar-supplier-group')
     const selectedItems = supplierGroup.querySelectorAll('.semi-navigation-item-selected')
     expect(selectedItems).toHaveLength(1)
-    expect(selectedItems[0]?.textContent).toContain('域名管理')
+    expect(selectedItems[0]?.textContent).toContain(resolveRouteTitle('/supplier/domains', 'supplier'))
   })
 
   it('navigates to the clicked menu item inside the shared sidebar', async () => {
@@ -145,7 +148,7 @@ describe('AppSidebar', () => {
     await screen.findByRole('heading', { name: 'Nexus-Mail' })
 
     const menu = screen.getByRole('menu')
-    await user.click(within(menu).getByRole('menuitem', { name: /Webhook 设置/ }))
+    await user.click(within(menu).getByRole('menuitem', { name: new RegExp(resolveRouteTitle(WEBHOOKS_ROUTE, 'user')) }))
     expect(await screen.findByTestId('app-sidebar-route-stub-webhooks')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
   })

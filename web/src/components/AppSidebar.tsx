@@ -1,7 +1,7 @@
 import { Nav, Space, Tag, Typography } from '@douyinfe/semi-ui'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { groupedConsolePaths, resolveRouteDefinition } from '../utils/consoleNavigation'
+import { groupedConsolePaths, resolveRouteDefinition, resolveRouteTitle } from '../utils/consoleNavigation'
 import { MenuItem, useAuthStore } from '../store/authStore'
 
 export const SHARED_CONSOLE_MENU_LOADING_LABEL = '正在同步服务端菜单权限...'
@@ -25,10 +25,10 @@ function groupedMenu(source: MenuItem[]) {
   return { userItems, supplierItems, adminItems }
 }
 
-function toNavItems(items: MenuItem[]) {
+function toNavItems(items: MenuItem[], role?: string) {
   return items.map((item) => ({
     itemKey: item.path,
-    text: item.label,
+    text: resolveRouteTitle(item.path, role),
     icon: resolveRouteDefinition(item.path)?.icon,
   }))
 }
@@ -87,6 +87,7 @@ export function AppSidebar() {
               description="所有角色共享的采购、订单与集成入口"
               selectedPath={location.pathname}
               items={userItems}
+              role={user?.role}
               navigate={navigate}
             />
             {supplierItems.length > 0 ? (
@@ -96,6 +97,7 @@ export function AppSidebar() {
                 description="域名池、资源供给、供货规则与结算闭环"
                 selectedPath={location.pathname}
                 items={supplierItems}
+                role={user?.role}
                 navigate={navigate}
               />
             ) : null}
@@ -106,6 +108,7 @@ export function AppSidebar() {
                 description="用户运营、供应商经营、风控审计与 Webhook"
                 selectedPath={location.pathname}
                 items={adminItems}
+                role={user?.role}
                 navigate={navigate}
               />
             ) : null}
@@ -144,6 +147,7 @@ function SidebarGroup({
   description,
   items,
   selectedPath,
+  role,
   navigate,
 }: {
   testId?: string
@@ -151,6 +155,7 @@ function SidebarGroup({
   description: string
   items: MenuItem[]
   selectedPath: string
+  role?: string
   navigate: (path: string) => void
 }) {
   if (items.length === 0) {
@@ -177,7 +182,7 @@ function SidebarGroup({
       <Nav
         selectedKeys={[selectedPath]}
         style={{ maxWidth: '100%', flex: 1, background: 'transparent' }}
-        items={toNavItems(items)}
+        items={toNavItems(items, role)}
         onSelect={(data) => navigate(String(data.itemKey))}
         footer={{ collapseButton: false }}
       />

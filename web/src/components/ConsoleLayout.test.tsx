@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { ConsoleLayout } from '../layouts/ConsoleLayout'
+import { API_KEYS_ROUTE, WEBHOOKS_ROUTE, resolveRouteTitle } from '../utils/consoleNavigation'
 import { useAuthStore } from '../store/authStore'
 
 function renderLayout(initialPath: string) {
@@ -24,7 +25,7 @@ function renderLayout(initialPath: string) {
 }
 
 describe('ConsoleLayout', () => {
-  it('renders shared route title, keeps the current page out of quick actions, and exposes a main landmark', () => {
+  it('renders canonical quick-action titles for shared routes and keeps the current page out of quick actions', () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -35,7 +36,7 @@ describe('ConsoleLayout', () => {
         { key: 'admin-users', label: '用户管理', path: '/admin/users' },
         { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
         { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
       ],
       bootstrapStatus: 'ready',
     })
@@ -53,9 +54,10 @@ describe('ConsoleLayout', () => {
     expect(within(quickActions).getByRole('button', { name: /审计日志/ })).toBeInTheDocument()
     expect(within(quickActions).queryByRole('button', { name: /风控中心/ })).not.toBeInTheDocument()
     expect(within(quickActions).queryByRole('button', { name: /API Keys/ })).not.toBeInTheDocument()
+    expect(within(quickActions).queryByRole('button', { name: resolveRouteTitle(API_KEYS_ROUTE, 'admin') })).not.toBeInTheDocument()
   })
 
-  it('renders quick actions in shared route schema order and navigates through canonical route stubs', async () => {
+  it('renders quick actions in shared route schema order with canonical titles and navigates to the API keys route stub', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -65,9 +67,8 @@ describe('ConsoleLayout', () => {
         { key: 'dashboard', label: '仪表盘', path: '/' },
         { key: 'projects', label: '项目市场', path: '/projects' },
         { key: 'orders', label: '订单中心', path: '/orders' },
-        { key: 'balance', label: '余额中心', path: '/balance' },
-        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
-        { key: 'docs', label: 'API 文档', path: '/docs' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
       ],
       bootstrapStatus: 'ready',
     })
@@ -92,18 +93,18 @@ describe('ConsoleLayout', () => {
             }
           />
           <Route
-            path="/balance"
+            path="/api-keys"
             element={
-              <section data-testid="console-layout-route-stub-balance">
-                <h1>余额中心</h1>
+              <section data-testid="console-layout-route-stub-api-keys">
+                <h1>开发者 API 接入工作台</h1>
               </section>
             }
           />
           <Route
-            path="/docs"
+            path="/webhooks"
             element={
-              <section data-testid="console-layout-route-stub-docs">
-                <h1>API 文档与接入控制台</h1>
+              <section data-testid="console-layout-route-stub-webhooks">
+                <h1>开发者 Webhook 接入工作台</h1>
               </section>
             }
           />
@@ -114,15 +115,21 @@ describe('ConsoleLayout', () => {
     const quickActions = screen.getByTestId('console-layout-quick-actions')
     const orderedQuickActionIds = [
       'console-layout-quick-action-projects',
-      'console-layout-quick-action-balance',
-      'console-layout-quick-action-docs',
+      'console-layout-quick-action-api-keys',
+      'console-layout-quick-action-webhooks',
     ]
     expect(
       orderedQuickActionIds.map((testId) => within(quickActions).getByTestId(testId).textContent?.trim()),
-    ).toEqual(['项目市场', '余额中心', 'API 文档'])
+    ).toEqual([
+      '项目市场',
+      resolveRouteTitle(API_KEYS_ROUTE, 'user'),
+      resolveRouteTitle(WEBHOOKS_ROUTE, 'user'),
+    ])
+    expect(within(quickActions).queryByRole('button', { name: /^API Keys$/ })).not.toBeInTheDocument()
+    expect(within(quickActions).queryByRole('button', { name: /Webhook 设置/ })).not.toBeInTheDocument()
 
-    await user.click(within(quickActions).getByTestId('console-layout-quick-action-projects'))
-    expect(await screen.findByTestId('console-layout-route-stub-projects')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    await user.click(within(quickActions).getByTestId('console-layout-quick-action-api-keys'))
+    expect(await screen.findByTestId('console-layout-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: resolveRouteTitle(API_KEYS_ROUTE, 'user') })).toBeInTheDocument()
   })
 })

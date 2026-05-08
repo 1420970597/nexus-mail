@@ -75,7 +75,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
           }
           return {
             path: menuItem.path,
-            label: menuItem.label,
+            label: resolveRouteTitle(menuItem.path, user?.role),
             icon: route.icon,
           }
         })
