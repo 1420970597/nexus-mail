@@ -63,11 +63,11 @@ const firstRunMissionCards: FirstRunMissionCard[] = [
   },
   {
     key: 'integration',
-    title: '继续准备 API 接入',
+    title: '开发者 API 接入工作台',
     description: '在同一套深色工作台里继续进入 API Keys、Webhook 与 API 文档，完成自动化联调。',
     tag: '统一接入',
     path: sharedFirstRunRoutes.apiKeys,
-    button: '管理 API Keys',
+    button: '打开 API Keys',
   },
   {
     key: 'roles',
@@ -96,10 +96,10 @@ const firstRunSteps: FirstRunStep[] = [
   },
   {
     key: 'integrate',
-    title: '完成 API 接入准备',
+    title: '开发者 API 接入工作台',
     description: '继续进入 API Keys、Webhook 与 API 文档，完成自动化接入与回调联调准备。',
     path: sharedFirstRunRoutes.apiKeys,
-    action: '管理 API Keys',
+    action: '打开 API Keys',
   },
 ]
 
@@ -148,10 +148,10 @@ function recommendedNextSteps(menu: MenuItem[]): RecommendedNextStep[] {
         : 'API Keys'
     steps.push({
       key: 'api-keys',
-      title: '最后完成 API 接入',
+      title: '开发者 API 接入工作台',
       description: `继续进入 ${integrationDest}，完成程序化调用、回调联调与真实接口验证准备。`,
       path: API_KEYS_ROUTE,
-      button: '管理 API Keys',
+      button: '打开 API Keys',
       tag: 'Integration',
     })
   }

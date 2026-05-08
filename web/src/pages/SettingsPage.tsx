@@ -75,10 +75,10 @@ const onboardingChecklist = [
     button: '查看订单中心',
   },
   {
-    title: '3. 完成 API 接入准备',
+    title: '3. 开发者 API 接入工作台',
     description: '继续进入 API Keys、Webhook 与 API 文档，完成程序化接入联调。',
     path: sharedFirstRunRoutes.apiKeys,
-    button: '管理 API Keys',
+    button: '打开 API Keys',
   },
 ]
 

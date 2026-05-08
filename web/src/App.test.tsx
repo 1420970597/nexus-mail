@@ -345,7 +345,8 @@ describe('App', () => {
     const scoped = within(onboardingRegion)
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
-    expect(scoped.getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(scoped.getByTestId('dashboard-next-step-api-keys')).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(scoped.queryByRole('button', { name: '前往域名管理' })).not.toBeInTheDocument()
     expect(scoped.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     return onboardingRegion
@@ -381,7 +382,7 @@ describe('App', () => {
     const onboardingRegion = await expectDefaultUserFirstRunLane()
     expect(within(onboardingRegion).queryByText('供应商主任务')).not.toBeInTheDocument()
     expect(within(onboardingRegion).queryByText('管理员主任务')).not.toBeInTheDocument()
-    expect(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    expect(within(onboardingRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
   })
 
   it('uses the shared API keys route constant for register onboarding entrypoints', async () => {
@@ -412,7 +413,7 @@ describe('App', () => {
     await openRegisterMode(user)
     await submitRegistration(user)
     const onboardingRegion = await expectDefaultUserFirstRunLane()
-    await user.click(within(onboardingRegion).getByRole('button', { name: /管理 API Keys/ }))
+    await user.click(within(onboardingRegion).getByRole('button', { name: '打开 API Keys' }))
 
     const apiKeysHeroCard = await screen.findByTestId('api-keys-hero-card')
     expect(within(apiKeysHeroCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
@@ -439,7 +440,7 @@ describe('App', () => {
 
     const reopenedOnboarding = await expectDefaultUserFirstRunLane()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
-    expect(within(reopenedOnboarding).getByRole('button', { name: /管理 API Keys/ })).toBeInTheDocument()
+    expect(within(reopenedOnboarding).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
   })
 
   it('shows a shared-console bootstrap shell while waiting for server menu instead of rendering fallback privileged navigation from client role state', () => {
@@ -594,8 +595,8 @@ describe('App', () => {
     expect(onboardingScope.getByRole('button', { name: '查看余额中心' })).toBeInTheDocument()
     expect(onboardingScope.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     expect(onboardingScope.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
-    expect(onboardingScope.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
-    expect(within(onboardingScope.getByTestId('dashboard-next-step-api-keys')).getByRole('heading', { name: '最后完成 API 接入' })).toBeInTheDocument()
+    expect(onboardingScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(onboardingScope.getByTestId('dashboard-next-step-api-keys')).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(onboardingScope.getByTestId('dashboard-next-step-api-keys')).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))

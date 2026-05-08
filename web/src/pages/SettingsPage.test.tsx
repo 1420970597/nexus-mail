@@ -127,7 +127,8 @@ describe('SettingsPage', () => {
     const checklistScope = within(checklistCard)
     expect(checklistScope.getByRole('button', { name: '打开项目市场' })).toBeInTheDocument()
     expect(checklistScope.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
-    expect(checklistScope.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+    expect(checklistScope.getByText('3. 开发者 API 接入工作台')).toBeInTheDocument()
+    expect(checklistScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
 
     await user.click(checklistScope.getByRole('button', { name: '打开项目市场' }))
     expect(await screen.findByTestId('settings-route-stub-projects')).toBeInTheDocument()
@@ -137,7 +138,8 @@ describe('SettingsPage', () => {
     const checklistCardAgain = await screen.findByTestId('settings-user-first-run-checklist')
     const checklistScopeAgain = within(checklistCardAgain)
     expect(checklistScopeAgain.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
-    expect(checklistScopeAgain.getByRole('button', { name: '管理 API Keys' })).toBeInTheDocument()
+    expect(checklistScopeAgain.getByText('3. 开发者 API 接入工作台')).toBeInTheDocument()
+    expect(checklistScopeAgain.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
 
     await user.click(getButtonByLabel(checklistScopeAgain, '重新打开首轮引导'))
 
