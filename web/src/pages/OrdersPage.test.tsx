@@ -197,6 +197,8 @@ describe('OrdersPage', () => {
     expect(guidanceScope.getByRole('heading', { name: 'READY 后完成订单' })).toBeInTheDocument()
     expect(guidanceScope.getByRole('heading', { name: '异常时看结果面板' })).toBeInTheDocument()
     expect(guidanceScope.getByRole('heading', { name: '订单为空时的下一步' })).toBeInTheDocument()
+    expect(guidanceScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(guidanceScope.queryByRole('button', { name: '管理 API Keys' })).not.toBeInTheDocument()
 
     const continuationLane = screen.getByTestId('orders-continuation-lane')
     expect(within(continuationLane).getByRole('heading', { name: '订单结果 → API 接入 → 再次采购' })).toBeInTheDocument()

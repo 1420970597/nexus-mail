@@ -284,6 +284,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(integrationCard).toBeInTheDocument()
     expect(within(integrationCard).getByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(within(integrationCard).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(integrationCard).queryByText('集成与回调')).not.toBeInTheDocument()
     expect(scoped.getByTestId('dashboard-next-step-action-api-keys')).toBeInTheDocument()
     expect(scoped.queryByTestId('dashboard-next-step-webhooks')).not.toBeInTheDocument()
     expect(scoped.queryByTestId('dashboard-next-step-docs')).not.toBeInTheDocument()

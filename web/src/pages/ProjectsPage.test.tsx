@@ -199,7 +199,7 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    expect(screen.getByText('继续 API 接入准备：文档与密钥配置仍留在同一控制台')).toBeInTheDocument()
+    expect(screen.getByText('继续前往开发者 API 接入工作台：文档与密钥配置仍留在同一控制台')).toBeInTheDocument()
   })
 
   it('hides the docs continuation CTA from the procurement hero when the server menu does not expose docs access', async () => {
@@ -236,7 +236,7 @@ describe('ProjectsPage', () => {
     const lane = screen.getByTestId('projects-first-run-lane')
     const scoped = within(lane)
     expect(scoped.getByText('采购 → 履约 → 接入')).toBeInTheDocument()
-    expect(scoped.getByText('先确认真实库存与价格，再创建第一笔订单。订单结果与 API 接入准备都继续留在同一控制台。')).toBeInTheDocument()
+    expect(scoped.getByText('先确认真实库存与价格，再创建第一笔订单。订单结果与开发者 API 接入工作台都继续留在同一控制台。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
   })
 

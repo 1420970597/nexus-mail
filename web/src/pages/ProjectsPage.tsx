@@ -111,13 +111,13 @@ export function ProjectsPage() {
           <div>
             <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>项目市场</Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
-              让注册后的首轮采购、订单回流与 API 接入准备都保持在同一套深色共享控制台里继续完成。
+              让注册后的首轮采购、订单回流与开发者 API 接入工作台都保持在同一套深色共享控制台里继续完成。
             </Typography.Paragraph>
           </div>
           <Space wrap>
             <Tag color="grey" prefixIcon={<IconBriefStroked />}>单一登录后控制台 · 用户采购工作台</Tag>
             <Tag color="grey" prefixIcon={<IconServer />}>库存与来源来自真实 `/projects/inventory` 返回</Tag>
-            {canOpenDocs ? <Tag color="blue">继续 API 接入准备：文档与密钥配置仍留在同一控制台</Tag> : null}
+            {canOpenDocs ? <Tag color="blue">继续前往开发者 API 接入工作台：文档与密钥配置仍留在同一控制台</Tag> : null}
             <Tag color="grey" prefixIcon={<IconHistogram />}>采购路径信号</Tag>
           </Space>
         </Space>
@@ -141,7 +141,7 @@ export function ProjectsPage() {
                 采购 → 履约 → 接入
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                先确认真实库存与价格，再创建第一笔订单。订单结果与 API 接入准备都继续留在同一控制台。
+                先确认真实库存与价格，再创建第一笔订单。订单结果与开发者 API 接入工作台都继续留在同一控制台。
               </Typography.Paragraph>
             </div>
             <Space wrap>

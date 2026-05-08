@@ -303,10 +303,10 @@ export function BalancePage() {
                   <Button theme="light" icon={<IconActivity />} onClick={() => navigate(ORDERS_ROUTE)}>查看订单中心</Button>
                 ) : null}
                 {canOpenWebhooks ? (
-                  <Button theme="light" icon={<IconSetting />} data-testid="balance-open-webhooks" onClick={() => navigate(WEBHOOKS_ROUTE)}>打开 Webhook 设置</Button>
+                  <Button theme="light" icon={<IconSetting />} data-testid="balance-open-webhooks" onClick={() => navigate(WEBHOOKS_ROUTE)}>继续配置 Webhook</Button>
                 ) : null}
                 {canOpenDocs ? (
-                  <Button theme="light" icon={<IconSafe />} data-testid="balance-open-docs" onClick={() => navigate(DOCS_ROUTE)}>打开 API 文档</Button>
+                  <Button theme="light" icon={<IconSafe />} data-testid="balance-open-docs" onClick={() => navigate(DOCS_ROUTE)}>查看 API 文档</Button>
                 ) : null}
               </Space>
             </Space>

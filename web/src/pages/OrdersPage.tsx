@@ -310,7 +310,7 @@ export function OrdersPage() {
                     ) : null}
                     {canOpenApiKeys ? (
                       <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
-                        管理 API Keys
+                        打开 API Keys
                       </Button>
                     ) : null}
                   </Space>

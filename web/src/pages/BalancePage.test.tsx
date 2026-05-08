@@ -213,6 +213,7 @@ describe('BalancePage', () => {
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     const secondCapabilityActions = await screen.findByTestId('balance-capability-actions')
+    expect(within(secondCapabilityActions).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
     expect(await screen.findByTestId('balance-route-stub-webhooks')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
@@ -222,6 +223,7 @@ describe('BalancePage', () => {
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     const thirdCapabilityActions = await screen.findByTestId('balance-capability-actions')
+    expect(within(thirdCapabilityActions).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
     expect(await screen.findByTestId('balance-route-stub-docs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
@@ -253,8 +255,8 @@ describe('BalancePage', () => {
     expect(within(missionCards).queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
     expect(within(missionCards).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     const capabilityActions = screen.getByTestId('balance-capability-actions')
-    expect(within(capabilityActions).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
-    expect(within(capabilityActions).queryByRole('button', { name: '打开 API 文档' })).not.toBeInTheDocument()
+    expect(within(capabilityActions).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
+    expect(within(capabilityActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     const fallback = screen.getByTestId('balance-shared-console-fallback')
     expect(within(fallback).getByText('共享控制台回退')).toBeInTheDocument()
     expect(within(fallback).getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
