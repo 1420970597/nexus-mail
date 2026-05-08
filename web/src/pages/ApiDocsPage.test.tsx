@@ -62,7 +62,7 @@ describe('ApiDocsPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders a shared-console docs workspace with a semantic Chinese page heading, bridge and loop CTAs for regular users, and navigates to API keys', async () => {
+  it('renders a shared-console docs workspace with canonical bridge and loop CTAs for regular users, and navigates to API keys', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -84,19 +84,26 @@ describe('ApiDocsPage', () => {
 
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(within(bridgeLane).getByRole('heading', { name: '文档 → 真实业务 → 接入回放' })).toBeInTheDocument()
-    expect(within(bridgeLane).getByText('将文档中的资金、争议与余额相关接口重新映射到共享控制台的余额任务总览，避免接入与售后割裂。')).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '查看项目市场基线' })).toBeInTheDocument()
-    expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
-    expect(within(bridgeLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
     expect(within(loopLane).getByRole('heading', { name: '文档与接入工作台继续保持单壳闭环' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(loopLane).queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
+    expect(within(loopLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
-    await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
+    await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
   })
 
@@ -117,9 +124,9 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByLabelText('Tag: 管理员扩展 · API 契约')).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
-    expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
-    expect(within(bridgeLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
   })
 
   it('renders a shared-console bridge lane that links docs back to marketplace, api keys, webhook, and finance workbenches', async () => {
@@ -142,13 +149,13 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     const scoped = within(bridgeLane)
-    expect(scoped.getByRole('heading', { name: '回到项目市场校验真实业务输入' })).toBeInTheDocument()
-    expect(scoped.getByRole('heading', { name: '收敛最小权限 API Key' })).toBeInTheDocument()
-    expect(scoped.getByRole('heading', { name: '完成 Webhook 回调联调' })).toBeInTheDocument()
-    expect(scoped.getByRole('heading', { name: '返回资金工作台核对预算与售后' })).toBeInTheDocument()
+    expect(scoped.getByRole('heading', { name: '项目市场基线' })).toBeInTheDocument()
+    expect(scoped.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(scoped.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(scoped.getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '查看项目市场基线' })).toBeInTheDocument()
-    expect(scoped.getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
-    expect(scoped.getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '打开余额中心' })).toBeInTheDocument()
 
     await user.click(scoped.getByRole('button', { name: '查看项目市场基线' }))
@@ -158,7 +165,7 @@ describe('ApiDocsPage', () => {
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const secondBridgeLane = screen.getByTestId('docs-shared-console-bridge')
-    await user.click(within(secondBridgeLane).getByRole('button', { name: '打开 API Keys 工作台' }))
+    await user.click(within(secondBridgeLane).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
     expect(screen.getByText('开发者 API 接入工作台')).toBeInTheDocument()
 
@@ -166,7 +173,7 @@ describe('ApiDocsPage', () => {
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const thirdBridgeLane = screen.getByTestId('docs-shared-console-bridge')
-    await user.click(within(thirdBridgeLane).getByRole('button', { name: '打开 Webhook 设置' }))
+    await user.click(within(thirdBridgeLane).getByRole('button', { name: '继续配置 Webhook' }))
     expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
 
     view.unmount()
@@ -195,8 +202,8 @@ describe('ApiDocsPage', () => {
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(within(bridgeLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
-    expect(within(bridgeLane).queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
-    expect(within(bridgeLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开余额中心' })).not.toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
@@ -227,20 +234,20 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
 
     let loopLane = screen.getByTestId('docs-shared-console-loop')
-    expect(within(loopLane).getByRole('heading', { name: '先回到 API Keys 收口最小权限' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('heading', { name: '随后校验 Webhook delivery' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('heading', { name: '最后回到业务主链路复放' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
-    await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys 工作台' }))
+    await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
     loopLane = screen.getByTestId('docs-shared-console-loop')
-    await user.click(within(loopLane).getByRole('button', { name: '打开 Webhook 设置' }))
+    await user.click(within(loopLane).getByRole('button', { name: '继续配置 Webhook' }))
     expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 

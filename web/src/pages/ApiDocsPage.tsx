@@ -33,74 +33,89 @@ interface SharedConsoleBridgeCard {
 
 const DOCS_LOOP_FALLBACK_PATH = '__fallback__'
 
-const sharedConsoleBridgeCards: SharedConsoleBridgeCard[] = [
-  {
-    key: 'projects',
-    title: '回到项目市场校验真实业务输入',
-    description: '先确认项目、库存与价格，再带着真实采购语境回来看接入契约，避免把文档孤立成只读页。',
-    button: '查看项目市场基线',
-    path: PROJECTS_ROUTE,
-    tag: 'Marketplace',
-    accent: 'rgba(14, 165, 233, 0.24)',
-  },
-  {
-    key: 'api-keys',
-    title: '收敛最小权限 API Key',
-    description: '继续在同一控制台发放最小权限 Key、核对白名单与限流语义，再进入真实回放。',
-    button: '打开 API Keys 工作台',
-    path: API_KEYS_ROUTE,
-    tag: 'Credentials',
-    accent: 'rgba(94, 106, 210, 0.28)',
-  },
-  {
-    key: 'webhooks',
-    title: '完成 Webhook 回调联调',
-    description: '保持 API Keys → Webhooks → Docs 的顺序，先确认回调 payload、签名与 delivery 状态，再继续业务页验证。',
-    button: '打开 Webhook 设置',
-    path: WEBHOOKS_ROUTE,
-    tag: 'Callbacks',
-    accent: 'rgba(16, 185, 129, 0.24)',
-  },
-  {
-    key: 'balance',
-    title: '返回资金工作台核对预算与售后',
-    description: '将文档中的资金、争议与余额相关接口重新映射到共享控制台的余额任务总览，避免接入与售后割裂。',
-    button: '打开余额中心',
-    path: BALANCE_ROUTE,
-    tag: 'Finance',
-    accent: 'rgba(249, 115, 22, 0.24)',
-  },
-]
+function webhookConsoleTitle(role?: string) {
+  switch (role) {
+    case 'admin':
+      return 'Webhook 运维与回调观测'
+    case 'supplier':
+      return '供给事件回调工作台'
+    default:
+      return '开发者 Webhook 接入工作台'
+  }
+}
 
-const sharedConsoleLoopCards: SharedConsoleBridgeCard[] = [
-  {
-    key: 'api-keys',
-    title: '先回到 API Keys 收口最小权限',
-    description: '发放最小 scopes Key、确认白名单与限流语义后，再继续阅读文档与真实业务回放，避免接入链路断层。',
-    button: '打开 API Keys 工作台',
-    path: API_KEYS_ROUTE,
-    tag: 'Credentials',
-    accent: 'rgba(94, 106, 210, 0.28)',
-  },
-  {
-    key: 'webhooks',
-    title: '随后校验 Webhook delivery',
-    description: '使用 test delivery 和最近投递记录确认回调 payload、签名与失败重试链路，再回到文档核对消费端实现。',
-    button: '打开 Webhook 设置',
-    path: WEBHOOKS_ROUTE,
-    tag: 'Callbacks',
-    accent: 'rgba(16, 185, 129, 0.24)',
-  },
-  {
-    key: 'fallback',
-    title: '最后回到业务主链路复放',
-    description: '把文档中的接口字段重新映射回项目市场、余额中心与订单履约路径，确认文档与真实工作台仍然一致。',
-    button: '返回推荐工作台',
-    path: DOCS_LOOP_FALLBACK_PATH,
-    tag: 'Runtime',
-    accent: 'rgba(14, 165, 233, 0.24)',
-  },
-]
+function docsSharedConsoleBridgeCards(role?: string): SharedConsoleBridgeCard[] {
+  return [
+    {
+      key: 'projects',
+      title: '项目市场基线',
+      description: '先确认项目、库存与价格，再带着真实采购语境回来看接入契约，避免把文档孤立成只读页。',
+      button: '查看项目市场基线',
+      path: PROJECTS_ROUTE,
+      tag: 'Marketplace',
+      accent: 'rgba(14, 165, 233, 0.24)',
+    },
+    {
+      key: 'api-keys',
+      title: '开发者 API 接入工作台',
+      description: '继续在同一控制台发放最小权限 Key、核对白名单与限流语义，再进入真实回放。',
+      button: '打开 API Keys',
+      path: API_KEYS_ROUTE,
+      tag: 'Credentials',
+      accent: 'rgba(94, 106, 210, 0.28)',
+    },
+    {
+      key: 'webhooks',
+      title: webhookConsoleTitle(role),
+      description: '保持 API Keys → Webhooks → Docs 的顺序，先确认回调 payload、签名与 delivery 状态，再继续业务页验证。',
+      button: '继续配置 Webhook',
+      path: WEBHOOKS_ROUTE,
+      tag: 'Callbacks',
+      accent: 'rgba(16, 185, 129, 0.24)',
+    },
+    {
+      key: 'balance',
+      title: '余额中心',
+      description: '将文档中的资金、争议与余额相关接口重新映射到共享控制台的余额任务总览，避免接入与售后割裂。',
+      button: '打开余额中心',
+      path: BALANCE_ROUTE,
+      tag: 'Finance',
+      accent: 'rgba(249, 115, 22, 0.24)',
+    },
+  ]
+}
+
+function docsSharedConsoleLoopCards(role?: string): SharedConsoleBridgeCard[] {
+  return [
+    {
+      key: 'api-keys',
+      title: '开发者 API 接入工作台',
+      description: '发放最小 scopes Key、确认白名单与限流语义后，再继续阅读文档与真实业务回放，避免接入链路断层。',
+      button: '打开 API Keys',
+      path: API_KEYS_ROUTE,
+      tag: 'Credentials',
+      accent: 'rgba(94, 106, 210, 0.28)',
+    },
+    {
+      key: 'webhooks',
+      title: webhookConsoleTitle(role),
+      description: '使用 test delivery 和最近投递记录确认回调 payload、签名与失败重试链路，再回到文档核对消费端实现。',
+      button: '继续配置 Webhook',
+      path: WEBHOOKS_ROUTE,
+      tag: 'Callbacks',
+      accent: 'rgba(16, 185, 129, 0.24)',
+    },
+    {
+      key: 'fallback',
+      title: '返回推荐工作台',
+      description: '把文档中的接口字段重新映射回项目市场、余额中心与订单履约路径，确认文档与真实工作台仍然一致。',
+      button: '返回推荐工作台',
+      path: DOCS_LOOP_FALLBACK_PATH,
+      tag: 'Runtime',
+      accent: 'rgba(14, 165, 233, 0.24)',
+    },
+  ]
+}
 
 function roleCopy(role?: string) {
   switch (role) {
@@ -218,7 +233,7 @@ export function ApiDocsPage() {
   const surfaces = useMemo(() => surfaceItems(menu, user?.role), [menu, user?.role])
   const bridgeCards = useMemo(
     () =>
-      sharedConsoleBridgeCards.filter((card) => {
+      docsSharedConsoleBridgeCards(user?.role).filter((card) => {
         switch (card.path) {
           case PROJECTS_ROUTE:
             return canOpenProjects
@@ -232,11 +247,11 @@ export function ApiDocsPage() {
             return false
         }
       }),
-    [canOpenApiKeys, canOpenBalance, canOpenProjects, canOpenWebhooks],
+    [canOpenApiKeys, canOpenBalance, canOpenProjects, canOpenWebhooks, user?.role],
   )
   const loopCards = useMemo(
     () =>
-      sharedConsoleLoopCards.filter((card) => {
+      docsSharedConsoleLoopCards(user?.role).filter((card) => {
         switch (card.path) {
           case API_KEYS_ROUTE:
             return canOpenApiKeys
@@ -248,7 +263,7 @@ export function ApiDocsPage() {
             return false
         }
       }),
-    [canOpenApiKeys, canOpenWebhooks, fallbackRoute],
+    [canOpenApiKeys, canOpenWebhooks, fallbackRoute, user?.role],
   )
 
   return (
