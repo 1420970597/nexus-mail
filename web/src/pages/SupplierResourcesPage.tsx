@@ -449,9 +449,9 @@ export function SupplierResourcesPage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card style={sectionCardStyle()} bodyStyle={{ padding: 20 }}>
+          <Card style={sectionCardStyle()} bodyStyle={{ padding: 20 }} data-testid="supplier-resources-shared-console-bridge">
             <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-              <div data-testid="supplier-resources-shared-console-bridge" style={{ width: '100%' }}>
+              <div style={{ width: '100%' }}>
                 <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
                   共享控制台联动
                 </Typography.Title>
@@ -459,82 +459,95 @@ export function SupplierResourcesPage() {
                   资源侧页面继续和 API Keys、Webhook 与 Docs 处于同一套共享控制台中，避免把供应商接入路径拆成独立后台。
                 </Typography.Paragraph>
               </div>
-              {consolePillars.map((item) => (
-                <Card
-                  key={item.key}
-                  style={{
-                    width: '100%',
-                    borderRadius: 18,
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 8 }}>
-                    {item.label}
-                  </Typography.Title>
-                  <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.72)' }}>
-                    {item.summary}
-                  </Typography.Paragraph>
-                </Card>
-              ))}
-              <Space wrap>
-                {canOpenApiKeys ? (
-                  <Button
-                    data-testid="supplier-resources-bridge-api-keys"
-                    icon={<IconSafe />}
-                    onClick={() => navigate(API_KEYS_ROUTE)}
-                  >
-                    API Keys · {API_KEYS_ROUTE}
-                  </Button>
-                ) : null}
-                {canOpenWebhooks ? (
-                  <Button
-                    data-testid="supplier-resources-bridge-webhooks"
-                    icon={<IconBolt />}
-                    onClick={() => navigate(WEBHOOKS_ROUTE)}
-                  >
-                    供给事件回调工作台 · {WEBHOOKS_ROUTE}
-                  </Button>
-                ) : null}
-                {canOpenDocs ? (
-                  <Button
-                    data-testid="supplier-resources-bridge-docs"
-                    icon={<IconPriceTag />}
-                    onClick={() => navigate(DOCS_ROUTE)}
-                  >
-                    API 文档与接入控制台 · {DOCS_ROUTE}
-                  </Button>
-                ) : null}
-              {shouldShowSharedConsoleFallback ? (
-                <Card
-                  data-testid="supplier-resources-shared-console-fallback"
-                  style={{
-                    width: '100%',
-                    borderRadius: 18,
-                    background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
-                    border: '1px solid rgba(148,163,184,0.28)',
-                  }}
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f7f8f8' }}>
-                      返回推荐工作台
-                    </Typography.Text>
-                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
-                      当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。
-                    </Typography.Paragraph>
-                    <Button
-                      data-testid="supplier-resources-shared-console-fallback-button"
-                      theme="solid"
-                      type="primary"
-                      icon={<IconArrowRight />}
-                      onClick={() => navigate(fallbackRoute)}
+              <Space wrap spacing={16} style={{ width: '100%' }}>
+                {[
+                  canOpenApiKeys
+                    ? {
+                        key: 'api',
+                        label: '开发者 API 接入工作台',
+                        summary: '先在同一共享控制台里核对 API Keys，再回到资源页继续完成供给准备。',
+                        button: '打开 API Keys',
+                        icon: <IconSafe />,
+                        action: () => navigate(API_KEYS_ROUTE),
+                      }
+                    : null,
+                  canOpenWebhooks
+                    ? {
+                        key: 'webhooks',
+                        label: '供给事件回调工作台',
+                        summary: 'Webhook 回调链路继续留在单壳控制台内，便于资源准备后直接联调。',
+                        button: '继续配置 Webhook',
+                        icon: <IconBolt />,
+                        action: () => navigate(WEBHOOKS_ROUTE),
+                      }
+                    : null,
+                  canOpenDocs
+                    ? {
+                        key: 'docs',
+                        label: 'API 文档与接入控制台',
+                        summary: '接口契约与资源页保持同壳对照，减少供应商在多个入口之间切换。',
+                        button: '查看 API 文档',
+                        icon: <IconPriceTag />,
+                        action: () => navigate(DOCS_ROUTE),
+                      }
+                    : null,
+                ]
+                  .filter((item): item is { key: string; label: string; summary: string; button: string; icon: JSX.Element; action: () => void } => Boolean(item))
+                  .map((item) => (
+                    <Card
+                      key={item.key}
+                      style={{
+                        flex: '1 1 240px',
+                        minWidth: 240,
+                        borderRadius: 18,
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                      bodyStyle={{ padding: 16 }}
                     >
-                      返回推荐工作台
-                    </Button>
-                  </Space>
-                </Card>
+                      <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                        <Typography.Title heading={6} style={{ color: '#f7f8f8', marginBottom: 0 }}>
+                          {item.label}
+                        </Typography.Title>
+                        <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.72)' }}>
+                          {item.summary}
+                        </Typography.Paragraph>
+                        <Button icon={item.icon} onClick={item.action}>
+                          {item.button}
+                        </Button>
+                      </Space>
+                    </Card>
+                  ))}
+                {shouldShowSharedConsoleFallback ? (
+                  <Card
+                    data-testid="supplier-resources-shared-console-fallback"
+                    style={{
+                      flex: '1 1 240px',
+                      minWidth: 240,
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                      border: '1px solid rgba(148,163,184,0.28)',
+                    }}
+                    bodyStyle={{ padding: 16 }}
+                  >
+                    <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                      <Typography.Text strong style={{ color: '#f7f8f8' }}>
+                        返回推荐工作台
+                      </Typography.Text>
+                      <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
+                        当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。
+                      </Typography.Paragraph>
+                      <Button
+                        data-testid="supplier-resources-shared-console-fallback-button"
+                        theme="solid"
+                        type="primary"
+                        icon={<IconArrowRight />}
+                        onClick={() => navigate(fallbackRoute)}
+                      >
+                        返回推荐工作台
+                      </Button>
+                    </Space>
+                  </Card>
                 ) : null}
               </Space>
               <Space wrap>
