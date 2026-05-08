@@ -12,6 +12,7 @@ import {
   WEBHOOKS_ROUTE,
   hasMenuPath,
   resolvePreferredConsoleRoute,
+  resolveRouteTitle,
 } from '../utils/consoleNavigation'
 
 interface FocusAction {
@@ -70,6 +71,7 @@ export function ProfilePage() {
   const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const webhooksTitle = resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const canOpenSettings = hasMenuPath(menu, SETTINGS_ROUTE)
   const canOpenSupplierDomains = hasMenuPath(menu, '/supplier/domains')
@@ -136,7 +138,7 @@ export function ProfilePage() {
       },
       {
         key: 'webhooks',
-        title: '开发者 Webhook 接入工作台',
+        title: webhooksTitle,
         description: '直接进入 Webhook 页面查看 endpoint、测试投递与失败重试状态，并保持接入链路留在同一壳内。',
         buttonText: '继续配置 Webhook',
         path: WEBHOOKS_ROUTE,
@@ -151,7 +153,7 @@ export function ProfilePage() {
         visible: canOpenDocs,
       },
     ],
-    [canOpenApiKeys, canOpenDocs, canOpenProjects, canOpenWebhooks],
+    [canOpenApiKeys, canOpenDocs, canOpenProjects, canOpenWebhooks, webhooksTitle],
   )
 
   const visibleCapabilityCards = capabilityCards.filter((item) => item.visible)

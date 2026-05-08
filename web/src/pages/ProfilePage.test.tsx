@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProfilePage } from './ProfilePage'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE, resolveRouteTitle } from '../utils/consoleNavigation'
 
 function renderProfilePage(initialEntry = PROFILE_ROUTE) {
   return render(
@@ -38,7 +38,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
           path={WEBHOOKS_ROUTE}
           element={(
             <section data-testid="webhooks-route-stub">
-              <h1>开发者 Webhook 接入工作台</h1>
+              <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role)}</h1>
             </section>
           )}
         />
@@ -264,6 +264,58 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     expect(screen.queryByTestId('profile-shared-console-return')).not.toBeInTheDocument()
+  })
+
+  it('scopes the supplier shared-console webhook bridge copy to the supplier role title', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 13, email: 'supplier@nexus-mail.local', role: 'supplier' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'profile', label: '个人资料', path: PROFILE_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    renderProfilePage()
+
+    const capabilityRegion = await screen.findByTestId('profile-capability-bridge')
+    expect(within(capabilityRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier') })).toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'user') })).not.toBeInTheDocument()
+
+    await user.click(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' }))
+    const webhooksRouteStub = await screen.findByTestId('webhooks-route-stub')
+    expect(within(webhooksRouteStub).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier') })).toBeInTheDocument()
+  })
+
+  it('scopes the admin shared-console webhook bridge copy to the admin role title', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 14, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'profile', label: '个人资料', path: PROFILE_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    renderProfilePage()
+
+    const capabilityRegion = await screen.findByTestId('profile-capability-bridge')
+    expect(within(capabilityRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'user') })).not.toBeInTheDocument()
+
+    await user.click(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' }))
+    const webhooksRouteStub = await screen.findByTestId('webhooks-route-stub')
+    expect(within(webhooksRouteStub).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
   })
 
   it('keeps the admin return card isolated from user-only focus copy when settings is available', async () => {
