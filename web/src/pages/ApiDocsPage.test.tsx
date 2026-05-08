@@ -82,6 +82,15 @@ describe('ApiDocsPage', () => {
     expect(screen.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
+    const capabilityMatrixScope = within(screen.getByTestId('docs-capability-matrix'))
+    expect(capabilityMatrixScope.getByText('API 文档与接入控制台')).toBeInTheDocument()
+    expect(capabilityMatrixScope.getByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(capabilityMatrixScope.getByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('API Keys')).not.toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('Webhook 设置')).not.toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('最小权限 API Key')).not.toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('真实回调验证')).not.toBeInTheDocument()
+
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(within(bridgeLane).getByRole('heading', { name: '文档 → 真实业务 → 接入回放' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
@@ -118,6 +127,7 @@ describe('ApiDocsPage', () => {
       user: { id: 32, email: 'admin@nexus-mail.local', role: 'admin' },
       menu: [
         { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
         { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
       ],
     })
@@ -126,11 +136,21 @@ describe('ApiDocsPage', () => {
 
     expect(screen.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
     expect(await screen.findByLabelText('Tag: 管理员扩展 · API 契约')).toBeInTheDocument()
-    const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
+
+    const capabilityMatrixScope = within(screen.getByTestId('docs-capability-matrix'))
+    expect(capabilityMatrixScope.getByText('API 文档与接入控制台')).toBeInTheDocument()
+    expect(capabilityMatrixScope.getByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(capabilityMatrixScope.getByText('Webhook 运维与回调观测')).toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('API Keys')).not.toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('Webhook 设置')).not.toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('最小权限 API Key')).not.toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('真实回调验证')).not.toBeInTheDocument()
+
+    const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
     expect(within(bridgeLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
-    expect(within(bridgeLane).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
   })
 
   it('renders a shared-console bridge lane that links docs back to marketplace, api keys, webhook, and finance workbenches', async () => {

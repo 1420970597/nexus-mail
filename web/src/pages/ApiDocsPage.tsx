@@ -205,9 +205,21 @@ const docsFlowSteps: DocsFlowStep[] = [
 
 function surfaceItems(menu: Array<{ path: string }>, role?: string) {
   const baseItems = [
-    { label: 'OpenAPI 3 / Redoc', route: '/openapi/index.html', summary: '嵌入式 Redoc' },
-    { label: 'API Keys', route: API_KEYS_ROUTE, summary: '最小权限 API Key' },
-    { label: 'Webhook 设置', route: WEBHOOKS_ROUTE, summary: '真实回调验证' },
+    {
+      label: 'OpenAPI 3 / Redoc',
+      route: '/openapi/index.html',
+      summary: 'API 文档与接入控制台',
+    },
+    {
+      label: '最小 scopes Key / 白名单 / 限流语义',
+      route: API_KEYS_ROUTE,
+      summary: '开发者 API 接入工作台',
+    },
+    {
+      label: 'payload / 签名 / delivery 观测',
+      route: WEBHOOKS_ROUTE,
+      summary: webhookConsoleTitle(role),
+    },
   ]
 
   const items = role === 'admin'
@@ -366,7 +378,7 @@ export function ApiDocsPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+          <Card data-testid="docs-capability-matrix" title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
               {surfaces.map((item) => (
                 <Card
