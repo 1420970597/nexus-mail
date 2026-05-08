@@ -78,6 +78,16 @@ export function LoginPage() {
     const password = String(values.password || '')
     const confirmPassword = String(values.confirm_password || '')
 
+    if (mode === 'register' && !email.includes('@')) {
+      setError('请输入有效邮箱')
+      return
+    }
+
+    if (mode === 'register' && password.length < 8) {
+      setError('密码长度至少为 8 位')
+      return
+    }
+
     if (mode === 'register' && password !== confirmPassword) {
       setError('两次输入的密码不一致')
       return

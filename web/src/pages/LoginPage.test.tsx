@@ -212,6 +212,58 @@ describe('LoginPage', () => {
     expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 
+  it('blocks registration when email is invalid before calling the API', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'invalid-email')
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
+    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
+
+    expect(await screen.findByText('请输入有效邮箱')).toBeInTheDocument()
+    expect(mockedRegister).not.toHaveBeenCalled()
+  })
+
+  it('blocks registration when password is shorter than 8 characters before calling the API', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'short7!')
+    await user.type(screen.getByPlaceholderText('再次输入密码'), 'short7!')
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
+
+    expect(await screen.findByText('密码长度至少为 8 位')).toBeInTheDocument()
+    expect(mockedRegister).not.toHaveBeenCalled()
+  })
+
+  it('accepts registration when password is exactly 8 characters long', async () => {
+    const user = userEvent.setup()
+    const exactBoundaryPassword = 'Abc12!@#'
+
+    mockedRegister.mockResolvedValueOnce({
+      token: 'register-token-8',
+      refresh_token: 'register-refresh-8',
+      user: { id: 18, email: 'boundary@example.com', role: 'user' },
+    })
+
+    renderLoginPage()
+
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'boundary@example.com')
+    await user.type(screen.getByPlaceholderText('至少 8 位密码'), exactBoundaryPassword)
+    await user.type(screen.getByPlaceholderText('再次输入密码'), exactBoundaryPassword)
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
+
+    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('boundary@example.com', exactBoundaryPassword))
+    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+  })
+
   it('blocks registration when confirmation password does not match', async () => {
     const user = userEvent.setup()
 
