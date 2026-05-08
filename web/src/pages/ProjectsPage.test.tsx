@@ -191,7 +191,7 @@ describe('ProjectsPage', () => {
     expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
   })
 
-  it('shows an integration CTA in the hero so newly registered users can continue API onboarding from the market view', async () => {
+  it('shows a scoped shared-console docs bridge signal in the hero so newly registered users can continue API onboarding from the market view', async () => {
     render(
       <MemoryRouter>
         <ProjectsPage />
@@ -200,7 +200,7 @@ describe('ProjectsPage', () => {
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('projects-shared-console-hero')
-    expect(within(heroCard).getByText(/继续前往开发者 API 接入工作台：文档与密钥配置仍留在同一控制台/)).toBeInTheDocument()
+    expect(heroCard).toHaveTextContent('继续前往开发者 API 接入工作台：文档与密钥配置仍留在同一控制台')
     expect(within(heroCard).getByText('采购路径信号')).toBeInTheDocument()
   })
 
