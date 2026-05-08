@@ -177,9 +177,27 @@ export function SupplierSettlementsPage() {
   ]
 
   const consolePillars = [
-    { key: 'api', label: 'API Keys · /api-keys', summary: '同一登录态下继续校验密钥分发，不拆第二个供应商后台。', action: () => navigate(API_KEYS_ROUTE), icon: <IconSafe /> },
-    { key: 'webhooks', label: '供给事件回调工作台 · /webhooks', summary: '结算与争议反馈后的外部回调链路仍在共享控制台统一维护。', action: () => navigate(WEBHOOKS_ROUTE), icon: <IconBolt /> },
-    { key: 'docs', label: 'API 文档与接入控制台 · /docs', summary: '供给与财务动作完成后，继续回到文档验证真实对外接入规则。', action: () => navigate(DOCS_ROUTE), icon: <IconPriceTag /> },
+    {
+      key: 'api',
+      label: '开发者 API 接入工作台',
+      summary: '同一登录态下继续校验密钥分发，不拆第二个供应商后台。',
+      action: () => navigate(API_KEYS_ROUTE),
+      icon: <IconSafe />,
+    },
+    {
+      key: 'webhooks',
+      label: '供给事件回调工作台',
+      summary: '结算与争议反馈后的外部回调链路仍在共享控制台统一维护。',
+      action: () => navigate(WEBHOOKS_ROUTE),
+      icon: <IconBolt />,
+    },
+    {
+      key: 'docs',
+      label: 'API 文档与接入控制台',
+      summary: '供给与财务动作完成后，继续回到文档验证真实对外接入规则。',
+      action: () => navigate(DOCS_ROUTE),
+      icon: <IconPriceTag />,
+    },
   ]
 
   const visibleMissionSteps = missionSteps.filter((step) => hasMenuPath(menu, step.path))

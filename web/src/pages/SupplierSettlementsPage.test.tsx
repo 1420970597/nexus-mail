@@ -232,9 +232,15 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    expect(bridge).toHaveTextContent('开发者 API 接入工作台')
+    expect(bridge).toHaveTextContent('供给事件回调工作台')
+    expect(bridge).toHaveTextContent('API 文档与接入控制台')
     expect(within(bridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(bridge).not.toHaveTextContent(`API Keys · ${API_KEYS_ROUTE}`)
+    expect(bridge).not.toHaveTextContent(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)
+    expect(bridge).not.toHaveTextContent(`API 文档与接入控制台 · ${DOCS_ROUTE}`)
   })
 
   it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations', async () => {
