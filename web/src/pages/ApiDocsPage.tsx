@@ -378,8 +378,22 @@ export function ApiDocsPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card data-testid="docs-capability-matrix" title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+          <Card
+            data-testid="docs-capability-matrix"
+            title="共享控制台能力矩阵"
+            style={{
+              width: '100%',
+              borderRadius: 24,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: 'rgba(0,0,0,0.24) 0px 16px 40px',
+            }}
+            bodyStyle={{ padding: 20 }}
+          >
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.7)', lineHeight: 1.65 }}>
+                文档、密钥与回调仍在同一套深色控制台内完成核对与联调。
+              </Typography.Paragraph>
               {surfaces.map((item) => (
                 <Card
                   key={item.label}

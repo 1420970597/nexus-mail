@@ -62,7 +62,7 @@ describe('ApiDocsPage', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders a shared-console docs workspace with canonical bridge and loop CTAs for regular users, and navigates to API keys', async () => {
+  it('renders a dark shared-console capability matrix with canonical docs, API Keys, and Webhook surfaces for regular users, and navigates to API keys', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -82,10 +82,14 @@ describe('ApiDocsPage', () => {
     expect(screen.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
-    const capabilityMatrixScope = within(screen.getByTestId('docs-capability-matrix'))
+    const capabilityMatrix = screen.getByTestId('docs-capability-matrix')
+    const capabilityMatrixScope = within(capabilityMatrix)
+    expect(capabilityMatrixScope.getByText('共享控制台能力矩阵')).toBeInTheDocument()
+    expect(capabilityMatrixScope.getByText('文档、密钥与回调仍在同一套深色控制台内完成核对与联调。')).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('API 文档与接入控制台')).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('开发者 Webhook 接入工作台')).toBeInTheDocument()
+    expect(capabilityMatrixScope.queryByText('控制台能力矩阵')).not.toBeInTheDocument()
     expect(capabilityMatrixScope.queryByText('API Keys')).not.toBeInTheDocument()
     expect(capabilityMatrixScope.queryByText('Webhook 设置')).not.toBeInTheDocument()
     expect(capabilityMatrixScope.queryByText('最小权限 API Key')).not.toBeInTheDocument()
