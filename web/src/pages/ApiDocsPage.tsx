@@ -414,14 +414,14 @@ export function ApiDocsPage() {
       >
         <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
           <div data-testid="docs-shared-console-bridge" style={{ width: '100%' }}>
-            <Tag color="cyan" shape="circle">共享控制台桥接路径</Tag>
+            <Tag color="cyan" shape="circle">共享控制台联调桥</Tag>
             <Space align="start" style={{ width: '100%', justifyContent: 'space-between', marginTop: 14 }} wrap>
             <div>
               <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
-                文档 → 真实业务 → 接入回放
+                文档、业务与回调共用一套控制台
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                文档页不只承载 Redoc；它还负责把项目市场、余额中心、API Keys 与 Webhook 的真实工作台重新串回单一登录后控制台。
+                从 Redoc 继续推进联调时，直接回到项目市场、余额中心、API Keys 与 Webhook 的共享工作台，不再把文档页当作独立终点。
               </Typography.Paragraph>
             </div>
             <Space wrap>

@@ -92,7 +92,8 @@ describe('ApiDocsPage', () => {
     expect(capabilityMatrixScope.queryByText('真实回调验证')).not.toBeInTheDocument()
 
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
-    expect(within(bridgeLane).getByRole('heading', { name: '文档 → 真实业务 → 接入回放' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByText('共享控制台联调桥')).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('heading', { name: '文档、业务与回调共用一套控制台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('heading', { name: '最小权限 API Key' })).not.toBeInTheDocument()
