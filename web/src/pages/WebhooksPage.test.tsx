@@ -252,6 +252,18 @@ describe('WebhooksPage', () => {
     expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
+  it('renders a Linear-style capability matrix beside the shared integration bridge', async () => {
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const capabilityMatrix = screen.getByTestId('webhooks-capability-matrix')
+    const matrixScope = within(capabilityMatrix)
+    expect(matrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(matrixScope.getByText('统一回调入口')).toBeInTheDocument()
+    expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
+    expect(matrixScope.getByText('角色菜单扩展')).toBeInTheDocument()
+  })
+
   it('renders shared-console navigation actions for the first integration loop', async () => {
     const user = userEvent.setup()
 

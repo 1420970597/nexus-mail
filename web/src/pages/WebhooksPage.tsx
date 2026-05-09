@@ -429,11 +429,30 @@ export function WebhooksPage() {
           }}
           bodyStyle={{ padding: 20 }}
         >
-          <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+          <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
             <Tag color="green">注册后首轮回调联调建议</Tag>
             <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
               在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。
             </Typography.Paragraph>
+            <Card
+              data-testid="webhooks-capability-matrix"
+              style={{
+                width: '100%',
+                borderRadius: 18,
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                border: '1px solid rgba(94,106,210,0.24)',
+              }}
+              bodyStyle={{ padding: 16 }}
+            >
+              <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                <Space wrap>
+                  <Tag color="cyan" prefixIcon={<IconServer />}>统一回调入口</Tag>
+                  <Tag color="blue" prefixIcon={<IconArticle />}>共享接入桥接</Tag>
+                  <Tag color="green" prefixIcon={<IconSafe />}>角色菜单扩展</Tag>
+                </Space>
+              </Space>
+            </Card>
             <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
               {firstHourTimeline.map((item) => (
                 <Card
