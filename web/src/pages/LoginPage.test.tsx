@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
@@ -221,9 +221,9 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: 'Password123!' } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: 'Password123!' } })
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
@@ -241,9 +241,9 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'invalid-email')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'invalid-email' } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: 'Password123!' } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: 'Password123!' } })
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     expect(await screen.findByText('请输入有效邮箱')).toBeInTheDocument()
@@ -256,9 +256,9 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'short7!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'short7!')
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: 'short7!' } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: 'short7!' } })
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     expect(await screen.findByText('密码长度至少为 8 位')).toBeInTheDocument()
@@ -278,9 +278,9 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'boundary@example.com')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), exactBoundaryPassword)
-    await user.type(screen.getByPlaceholderText('再次输入密码'), exactBoundaryPassword)
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'boundary@example.com' } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: exactBoundaryPassword } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: exactBoundaryPassword } })
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('boundary@example.com', exactBoundaryPassword))
@@ -293,9 +293,9 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    await user.type(screen.getByPlaceholderText('name@example.com'), 'new@example.com')
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123?')
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: 'Password123!' } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: 'Password123?' } })
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     expect(await screen.findByText('两次输入的密码不一致')).toBeInTheDocument()

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
@@ -291,9 +291,9 @@ describe('App', () => {
   }
 
   async function submitRegistration(user: ReturnType<typeof userEvent.setup>, email = 'new@example.com') {
-    await user.type(screen.getByPlaceholderText('name@example.com'), email)
-    await user.type(screen.getByPlaceholderText('至少 8 位密码'), 'Password123!')
-    await user.type(screen.getByPlaceholderText('再次输入密码'), 'Password123!')
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: email } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: 'Password123!' } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: 'Password123!' } })
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith(email, 'Password123!'))
   }
