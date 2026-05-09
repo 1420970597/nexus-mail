@@ -57,7 +57,7 @@ const firstRunMissionCards: FirstRunMissionCard[] = [
     key: 'procurement',
     title: '先完成基础采购路径',
     description: '从项目市场确认真实库存与价格，再进入订单中心完成首次下单与结果追踪。',
-    tag: '共享控制台',
+    tag: '基础采购',
     path: sharedFirstRunRoutes.projects,
     button: '前往项目市场开始采购',
   },
@@ -486,7 +486,7 @@ export function DashboardPage() {
               <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
                   <Space vertical align="start" spacing={8}>
-                    <Tag color="cyan" shape="circle">First Run Mission</Tag>
+                    <Tag color="cyan" shape="circle">首次使用指引</Tag>
                     <div>
                       <Typography.Title heading={3} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
                         欢迎进入共享控制台

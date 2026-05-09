@@ -207,6 +207,8 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(within(heroCard).getByText('共享控制台入口')).toBeInTheDocument()
     const firstRunScope = within(screen.getByTestId('dashboard-first-run-mission-card-procurement'))
     expect(firstRunScope.getByRole('heading', { name: '先完成基础采购路径' })).toBeInTheDocument()
+    expect(screen.getByText('首次使用指引')).toBeInTheDocument()
+    expect(firstRunScope.getByText('基础采购')).toBeInTheDocument()
     expect(firstRunScope.queryByText('Shared Console')).not.toBeInTheDocument()
     expect(firstRunScope.queryByText('Integration')).not.toBeInTheDocument()
     expect(firstRunScope.queryByText('Role-aware')).not.toBeInTheDocument()
