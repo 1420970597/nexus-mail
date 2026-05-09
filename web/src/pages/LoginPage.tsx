@@ -11,7 +11,7 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   login: {
     title: '登录并进入统一控制台',
     button: '登录并进入统一控制台',
-    helper: '登录后按角色展开工作区，无需切换后台。',
+    helper: '登录后按角色展开工作区，继续同一套导航。',
   },
   register: {
     title: '创建账号并进入统一控制台',
@@ -132,7 +132,7 @@ export function LoginPage() {
                   统一登录后控制台
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.72)', fontSize: 15, lineHeight: 1.62, maxWidth: 500, marginBottom: 0 }}>
-                  统一入口、共享控制台与接入链路收敛到同一登录面。
+                  统一入口、共享控制台、接入链路，在同一登录面完成切换。
                 </Typography.Paragraph>
               </div>
               <Card
@@ -217,7 +217,7 @@ export function LoginPage() {
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后进入共享控制台，按 API Keys → Webhook → Docs 完成首轮接入。
+                      注册后进入共享控制台，沿同一导航完成首轮接入闭环。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>

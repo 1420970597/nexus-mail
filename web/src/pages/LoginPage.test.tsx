@@ -92,9 +92,8 @@ describe('LoginPage', () => {
     expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
     const entrySummary = within(screen.getByTestId('login-entry-summary'))
     expect(entrySummary.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
-    expect(screen.getByTestId('login-entry-summary')).toHaveTextContent('统一入口')
-    expect(screen.getByTestId('login-entry-summary')).toHaveTextContent('共享控制台')
-    expect(screen.getByTestId('login-entry-summary')).toHaveTextContent('接入链路')
+    expect(entrySummary.getByText('统一入口、共享控制台、接入链路，在同一登录面完成切换。')).toBeInTheDocument()
+    expect(entrySummary.queryByText('统一入口、共享控制台与接入链路收敛到同一登录面。')).not.toBeInTheDocument()
     expect(screen.queryByText('只保留登录入口、共享控制台与接入路径这三个稳定承诺，减少登录前的解释成本。')).not.toBeInTheDocument()
 
     const readinessScope = within(screen.getByTestId('login-control-plane-readiness'))
@@ -116,7 +115,8 @@ describe('LoginPage', () => {
 
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
-    expect(screen.getByText('登录后按角色展开工作区，无需切换后台。')).toBeInTheDocument()
+    expect(screen.getByText('登录后按角色展开工作区，继续同一套导航。')).toBeInTheDocument()
+    expect(screen.queryByText('登录后按角色展开工作区，无需切换后台。')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('name@example.com')).toHaveStyle({ color: 'rgb(247, 248, 248)' })
     expect(screen.getByPlaceholderText('请输入密码')).toHaveStyle({ color: 'rgb(247, 248, 248)' })
@@ -133,8 +133,8 @@ describe('LoginPage', () => {
 
     const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('heading', { name: '首轮接入路径' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('注册后进入共享控制台，按 API Keys → Webhook → Docs 完成首轮接入。')).toBeInTheDocument()
-    expect(registerJourneyScope.queryByText('注册后进入共享控制台，并沿同一导航完成首个接入闭环。')).not.toBeInTheDocument()
+    expect(registerJourneyScope.getByText('注册后进入共享控制台，沿同一导航完成首轮接入闭环。')).toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('注册后进入共享控制台，按 API Keys → Webhook → Docs 完成首轮接入。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('注册后沿同一导航完成首个 Key、Webhook 与文档核对。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByRole('heading', { name: '注册后第一轮动作' })).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('在同一控制台完成 Key、Webhook 与文档核对。')).not.toBeInTheDocument()
