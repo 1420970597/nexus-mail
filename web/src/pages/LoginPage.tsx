@@ -16,7 +16,7 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   register: {
     title: '创建账号并进入统一控制台',
     button: '注册并进入统一控制台',
-    helper: '注册后直接进入共享控制台，并在同一套导航中继续接入。',
+    helper: '注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。',
   },
 }
 
@@ -293,7 +293,7 @@ export function LoginPage() {
             >
               <Space vertical spacing={16} align="start" style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                  <div>
+                  <div data-testid="login-auth-copy-block">
                     <Typography.Text
                       style={{
                         display: 'inline-flex',
@@ -456,7 +456,7 @@ export function LoginPage() {
                     type="success"
                     fullMode={false}
                     closeIcon={null}
-                    description="注册成功后直接进入共享控制台。你可以继续前往项目市场、订单中心与 API Keys。"
+                    description="注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。"
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.02)',

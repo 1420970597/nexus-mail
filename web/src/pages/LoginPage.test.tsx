@@ -188,8 +188,10 @@ describe('LoginPage', () => {
 
     expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
     const registerBanner = within(screen.getByTestId('login-auth-guidance-banner'))
-    expect(registerBanner.getByText(/注册成功后直接进入共享控制台。/)).toBeInTheDocument()
-    expect(registerBanner.getByText(/你可以继续前往项目市场、订单中心与 API Keys。/)).toBeInTheDocument()
+    expect(registerBanner.getByText(/注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。/)).toBeInTheDocument()
+    expect(within(screen.getByTestId('login-auth-copy-block')).getByText('注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。')).toBeInTheDocument()
+    expect(registerBanner.queryByText(/注册成功后直接进入共享控制台。/)).not.toBeInTheDocument()
+    expect(registerBanner.queryByText(/你可以继续前往项目市场、订单中心与 API Keys。/)).not.toBeInTheDocument()
     const modeSwitchScope = within(modeSwitch)
     const registerButton = modeSwitchScope.getByRole('tab', { name: '注册' })
     const loginButton = within(modeSwitch).getByRole('tab', { name: '登录' })
