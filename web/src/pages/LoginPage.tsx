@@ -41,21 +41,21 @@ const readinessRows = [
 const integrationRunway = [
   {
     step: 'STEP 01',
-    title: '创建 Key',
+    title: 'API Keys 起步',
     eyebrow: '最小权限起步',
     description: '生成首个最小权限 API Key。',
   },
   {
     step: 'STEP 02',
-    title: '配置 Webhook',
-    eyebrow: '真实联调校验',
-    description: '先确认回调地址，再补投递验证。',
+    title: 'Webhook 联调',
+    eyebrow: '真实回调验证',
+    description: '确认回调地址并发起一次真实联调。',
   },
   {
     step: 'STEP 03',
-    title: '对照文档',
-    eyebrow: '文档核对',
-    description: '回到同一控制台核对请求契约。',
+    title: '文档核对',
+    eyebrow: '契约核对',
+    description: '查看 API 文档并核对请求契约。',
   },
 ]
 
@@ -211,10 +211,10 @@ export function LoginPage() {
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                   <div>
                     <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
-                      注册后第一轮动作
+                      首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      在同一控制台完成 Key、Webhook 与文档核对。
+                      注册后沿同一导航完成首个 Key、Webhook 与文档核对。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
