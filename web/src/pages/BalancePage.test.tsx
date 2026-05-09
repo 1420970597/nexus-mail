@@ -173,6 +173,10 @@ describe('BalancePage', () => {
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('角色差异仍共用单壳')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('资金观察与售后同层')).toBeInTheDocument()
+    expect(capabilityMatrix).toHaveStyle({
+      background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+    })
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
 
     const disputesCard = screen.getByTestId('balance-session-disputes-card')
     expect(within(disputesCard).getByText('本次会话新提交的争议')).toBeInTheDocument()

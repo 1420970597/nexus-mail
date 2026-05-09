@@ -90,7 +90,7 @@ const consolePillars: ConsolePillar[] = [
   },
   {
     key: 'integration-bridge',
-    label: '财务到接入的桥接',
+    label: '共享接入桥接',
     summary: '余额确认后可以直接回到 API Keys、Webhook 与 API 文档，不切换到独立接入后台。',
   },
 ]
@@ -286,16 +286,31 @@ export function BalancePage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card title="控制台能力矩阵" data-testid="balance-capability-matrix" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+          <Card
+            title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
+            data-testid="balance-capability-matrix"
+            style={{
+              width: '100%',
+              borderRadius: 24,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            bodyStyle={{ padding: 20 }}
+          >
             <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
               {consolePillars.map((item) => (
                 <Card
                   key={item.key}
-                  style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.96) 0%, rgba(241,245,249,0.92) 100%)', border: '1px solid rgba(148,163,184,0.16)' }}
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(148,163,184,0.16)',
+                  }}
                   bodyStyle={{ padding: 16 }}
                 >
-                  <Typography.Title heading={6} style={{ marginTop: 0 }}>{item.label}</Typography.Title>
-                  <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>{item.summary}</Typography.Paragraph>
+                  <Typography.Title heading={6} style={{ marginTop: 0, color: '#f8fafc' }}>{item.label}</Typography.Title>
+                  <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.72)' }}>{item.summary}</Typography.Paragraph>
                 </Card>
               ))}
               <Space wrap data-testid="balance-capability-actions">
