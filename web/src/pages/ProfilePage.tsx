@@ -111,7 +111,7 @@ export function ProfilePage() {
           action: { label: '进入项目市场', path: actionPath, buttonText: '前往项目市场' },
           focuses: [
             { title: '采购与订单串联', description: '从项目市场发起下单后，立即回到订单中心查看邮箱分配、提取结果与最终结算状态。' },
-            { title: '集成准备', description: '通过 API Key、白名单与文档入口快速完成程序化接入，并对接真实回调能力。' },
+            { title: '集成准备', description: '通过 API Key、白名单与文档核对快速完成程序化接入，并对接真实回调能力。' },
           ],
         }
       }

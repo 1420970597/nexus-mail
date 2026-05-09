@@ -121,6 +121,8 @@ describe('ProfilePage', () => {
     expect(roleFocusCard).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(roleFocusCard).getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
     expect(within(roleFocusCard).getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
+    expect(within(roleFocusCard).getByText('通过 API Key、白名单与文档核对快速完成程序化接入，并对接真实回调能力。')).toBeInTheDocument()
+    expect(within(roleFocusCard).queryByText('通过 API Key、白名单与文档入口快速完成程序化接入，并对接真实回调能力。')).not.toBeInTheDocument()
     expect(within(roleFocusCard).getByText('当前推荐：进入项目市场，继续共享控制台主链路。')).toBeInTheDocument()
     expect(within(roleFocusCard).queryByText('当前推荐动作：进入项目市场。保持单一登录后控制台，不额外拆分独立后台。')).not.toBeInTheDocument()
 
