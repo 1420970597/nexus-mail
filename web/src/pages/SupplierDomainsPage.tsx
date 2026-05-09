@@ -465,7 +465,7 @@ export function SupplierDomainsPage() {
               <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                 <div>
                   <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
-                    共享控制台联动
+                    共享接入桥接
                   </Typography.Title>
                   <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
                     域名池准备完成后，继续在同一登录态中验证接入密钥、Webhook 与文档，不拆第二套供应商后台。

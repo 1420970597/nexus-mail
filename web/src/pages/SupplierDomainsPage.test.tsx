@@ -186,6 +186,8 @@ describe('SupplierDomainsPage', () => {
     await expectMetricCard('supplier-domains-metric-regions', '覆盖区域', '4', '去重后的 region 数量。')
 
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
+    expect(screen.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '共享控制台联动' })).not.toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
