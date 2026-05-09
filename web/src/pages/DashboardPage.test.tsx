@@ -370,11 +370,29 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scopedSurface.getAllByRole('button', { name: '打开该工作台' })).toHaveLength(3)
     expect(scopedSurface.queryByTestId('dashboard-next-step-balance')).not.toBeInTheDocument()
 
+    const completionRateCard = await screen.findByTestId('dashboard-order-completion-rate-card')
+    expect(within(completionRateCard).getByText('60.00%')).toBeInTheDocument()
+
+    const disputeCard = screen.getByTestId('dashboard-dispute-rate-card')
+    expect(within(disputeCard).getByText('20.00%')).toBeInTheDocument()
+
+    const revenueCard = screen.getByTestId('dashboard-finished-revenue-card')
+    expect(within(revenueCard).getByText('¥8888.00')).toBeInTheDocument()
+
+    const topSupplierCard = screen.getByTestId('dashboard-top-supplier-card')
+    expect(within(topSupplierCard).getByText('supplier-top@nexus-mail.local')).toBeInTheDocument()
+    expect(within(topSupplierCard).getByText('完成率：72.73%')).toBeInTheDocument()
+
+    const supplierRankTable = screen.getByTestId('dashboard-supplier-settlement-rank-card')
+    expect(within(supplierRankTable).getByText('supplier-top@nexus-mail.local')).toBeInTheDocument()
+    expect(within(supplierRankTable).getByText('72.73%')).toBeInTheDocument()
+
     const adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
     const scopedAdminOps = within(adminOpsSummary)
     expect(scopedAdminOps.getByText('项目：7/9 启用')).toBeInTheDocument()
     expect(scopedAdminOps.getByText('完成订单：18')).toBeInTheDocument()
     expect(scopedAdminOps.getByText('白名单拦截：4')).toBeInTheDocument()
+    expect(scopedAdminOps.getByText('鉴权拒绝总数：13')).toBeInTheDocument()
     expect(scopedAdminOps.getByRole('button', { name: '前往供应商管理查看详情' })).toBeInTheDocument()
     expect(scopedAdminOps.getByRole('button', { name: '前往风控中心' })).toBeInTheDocument()
     expect(scopedAdminOps.getByRole('button', { name: '前往审计日志' })).toBeInTheDocument()
