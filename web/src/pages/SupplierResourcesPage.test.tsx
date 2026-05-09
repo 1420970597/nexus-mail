@@ -209,6 +209,26 @@ describe('SupplierResourcesPage', () => {
     expect(within(mailboxesTable).getByText('agent-001@mail.nexus.test')).toBeInTheDocument()
   })
 
+  it('renders the resource preparation workbench with dark shared-console setup stages', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
+
+    const setupWorkbench = screen.getByTestId('supplier-resources-setup-workbench')
+    const setupScope = within(setupWorkbench)
+    expect(setupScope.getByRole('heading', { name: '资源准备工作台' })).toBeInTheDocument()
+    expect(setupScope.getByText('保持域名、账号与邮箱池录入留在同一套供应商共享控制台中，再继续供货规则与结算链路。')).toBeInTheDocument()
+    expect(setupScope.getByText('STEP 01')).toBeInTheDocument()
+    expect(setupScope.getByRole('heading', { name: '域名池录入' })).toBeInTheDocument()
+    expect(setupScope.getByText('STEP 02')).toBeInTheDocument()
+    expect(setupScope.getByRole('heading', { name: '第三方账号接入' })).toBeInTheDocument()
+    expect(setupScope.getByText('STEP 03')).toBeInTheDocument()
+    expect(setupScope.getByRole('heading', { name: '邮箱池映射' })).toBeInTheDocument()
+    expect(setupScope.queryByText('新增域名池')).not.toBeInTheDocument()
+    expect(setupScope.queryByText('新增第三方邮箱账号')).not.toBeInTheDocument()
+    expect(setupScope.queryByText('新增邮箱池 / 别名池')).not.toBeInTheDocument()
+  })
+
   it('renders the three resource save actions for supplier workflows', async () => {
     renderPage()
 
@@ -379,8 +399,10 @@ describe('SupplierResourcesPage', () => {
   it('renders Chinese runtime labels for account and mailbox forms plus the localized accounts column title', async () => {
     renderPage()
 
-    const accountCard = await screen.findByText('新增第三方邮箱账号')
-    expect(accountCard).toBeInTheDocument()
+    await screen.findByRole('heading', { name: '供应商资源' })
+    const setupWorkbench = screen.getByTestId('supplier-resources-setup-workbench')
+    expect(within(setupWorkbench).getByRole('heading', { name: '第三方账号接入' })).toBeInTheDocument()
+    expect(within(setupWorkbench).getByRole('heading', { name: '邮箱池映射' })).toBeInTheDocument()
 
     expect(screen.getByLabelText('服务商')).toBeInTheDocument()
     expect(screen.getByLabelText('刷新令牌')).toBeInTheDocument()

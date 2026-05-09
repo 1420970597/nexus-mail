@@ -175,6 +175,43 @@ function MissionFlowCard({
   )
 }
 
+function ResourceSetupCard({
+  tag,
+  title,
+  description,
+  accent,
+  children,
+}: {
+  tag: string
+  title: string
+  description: string
+  accent: string
+  children: JSX.Element | JSX.Element[]
+}) {
+  return (
+    <Card
+      style={{
+        height: '100%',
+        borderRadius: 22,
+        background: `linear-gradient(180deg, ${accent} 0%, rgba(15,23,42,0.48) 100%)`,
+        border: '1px solid rgba(148,163,184,0.16)',
+      }}
+      bodyStyle={{ padding: 20 }}
+    >
+      <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+        <Tag color="grey">{tag}</Tag>
+        <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+          {title}
+        </Typography.Title>
+        <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.74)' }}>
+          {description}
+        </Typography.Paragraph>
+        {children}
+      </Space>
+    </Card>
+  )
+}
+
 const consolePillars = [
   {
     key: 'single-shell',
@@ -560,70 +597,101 @@ export function SupplierResourcesPage() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} style={{ width: '100%' }}>
-        <Col xs={24} xl={8}>
-          <Card title="新增域名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
-            <Typography.Paragraph style={{ color: '#475569' }}>
-              先补齐可售域名与区域信息，再回到供货规则页完成库存策略。
-            </Typography.Paragraph>
-            <Form form={domainForm} layout="horizontal" labelPosition="top" initValues={{ region: 'global', status: 'active', catch_all: true }}>
-              <Form.Input field="name" label="域名" placeholder="mail.nexus.example" rules={[{ required: true, message: '请输入域名' }]} />
-              <Form.Input field="region" label="区域" placeholder="global / hk / us" />
-              <Form.Input field="status" label="状态" placeholder="active / inactive" />
-              <Form.Slot label="Catch-All">
-                <Form.Checkbox field="catch_all">启用 Catch-All</Form.Checkbox>
-              </Form.Slot>
-              <Button theme="solid" type="primary" loading={domainSubmitting} onClick={() => void submitDomain()}>
-                保存域名
-              </Button>
-            </Form>
-            <Typography.Text style={{ color: '#94a3b8', fontSize: 12 }}>
-              当前默认会保持 Catch-All 开启与 active 状态；如需调整，可在后续运营流中再细化。
-            </Typography.Text>
-          </Card>
-        </Col>
-        <Col xs={24} xl={8}>
-          <Card title="新增第三方邮箱账号" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
-            <Typography.Paragraph style={{ color: '#475569' }}>
-              录入公网邮箱或桥接账号，确保后续邮箱池与供货规则能引用真实可用账号。
-            </Typography.Paragraph>
-            <Form form={accountForm} layout="horizontal" labelPosition="top" initValues={{ source_type: 'public_mailbox_account', auth_mode: 'oauth2', protocol_mode: 'imap_pull', status: 'active' }}>
-              <Form.Input field="provider" label="服务商" rules={[{ required: true, message: '请输入服务商' }]} placeholder="outlook / gmail / qq / proton" />
-              <Form.Input field="identifier" label="账号标识" rules={[{ required: true, message: '请输入邮箱或账号标识' }]} placeholder="supplier@example.com" />
-              <Form.Input field="source_type" label="来源类型" />
-              <Form.Input field="auth_mode" label="认证方式" />
-              <Form.Input field="protocol_mode" label="协议模式" />
-              <Form.Input field="host" label="主机" placeholder="imap.gmail.com / 127.0.0.1" />
-              <Form.InputNumber field="port" label="端口" placeholder="993 / 995 / 1143" style={{ width: '100%' }} />
-              <Form.Input field="refresh_token" label="刷新令牌" placeholder="OAuth2 必填，授权码/App Password 可留空" />
-              <Form.Input field="credential_secret" label="凭证密文" placeholder="App Password / 授权码 / Bridge 密码" />
-              <Form.Input field="secret_ref" label="密钥引用" placeholder="env://NEXUS_QQ_AUTH_CODE" />
-              <Form.Input field="bridge_endpoint" label="桥接端点" placeholder="127.0.0.1:1143" />
-              <Form.Input field="bridge_label" label="桥接标识" placeholder="proton-bridge" />
-              <Form.Input field="status" label="状态" />
-              <Button theme="solid" type="primary" loading={accountSubmitting} onClick={() => void submitAccount()}>
-                保存账号
-              </Button>
-            </Form>
-          </Card>
-        </Col>
-        <Col xs={24} xl={8}>
-          <Card title="新增邮箱池 / 别名池" style={{ width: '100%', borderRadius: 24 }} loading={loading}>
-            <Typography.Paragraph style={{ color: '#475569' }}>
-              把域名池或账号池映射成真实可售邮箱记录，为项目库存和供给路由做准备。
-            </Typography.Paragraph>
-            <Form form={mailboxForm} layout="horizontal" labelPosition="top" initValues={{ source_type: 'self_hosted_domain', status: 'available' }}>
-              <Form.Input field="project_key" label="项目键" rules={[{ required: true, message: '请输入项目键' }]} placeholder="openai" />
-              <Form.Input field="domain_id" label="域名 ID" placeholder="可选，与 account_id 至少填一项" />
-              <Form.Input field="account_id" label="账号 ID" placeholder="可选，与 domain_id 至少填一项" />
-              <Form.Input field="local_part" label="本地前缀" placeholder="agent-001" />
-              <Form.Input field="address" label="完整地址" placeholder="可直接录完整邮箱" />
-              <Form.Input field="source_type" label="来源类型" />
-              <Form.Input field="status" label="状态" />
-              <Button theme="solid" type="primary" loading={mailboxSubmitting} onClick={() => void submitMailbox()}>
-                保存邮箱
-              </Button>
-            </Form>
+      <Row gutter={[16, 16]} style={{ width: '100%' }} data-testid="supplier-resources-setup-workbench">
+        <Col xs={24}>
+          <Card
+            style={{
+              width: '100%',
+              borderRadius: 28,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: 'rgba(0,0,0,0.26) 0px 20px 48px',
+            }}
+            bodyStyle={{ padding: 24 }}
+          >
+            <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+              <div>
+                <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
+                  资源准备工作台
+                </Typography.Title>
+                <Typography.Paragraph style={{ margin: '8px 0 0', color: 'rgba(208,214,224,0.74)', maxWidth: 760 }}>
+                  保持域名、账号与邮箱池录入留在同一套供应商共享控制台中，再继续供货规则与结算链路。
+                </Typography.Paragraph>
+              </div>
+              <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                <Col xs={24} xl={8}>
+                  <ResourceSetupCard
+                    tag="STEP 01"
+                    title="域名池录入"
+                    description="先补齐可售域名与区域信息，再回到供货规则页完成库存策略。"
+                    accent="rgba(94,106,210,0.18)"
+                  >
+                      <Form form={domainForm} layout="horizontal" labelPosition="top" initValues={{ region: 'global', status: 'active', catch_all: true }}>
+                        <Form.Input field="name" label="域名" placeholder="mail.nexus.example" rules={[{ required: true, message: '请输入域名' }]} />
+                        <Form.Input field="region" label="区域" placeholder="global / hk / us" />
+                        <Form.Input field="status" label="状态" placeholder="active / inactive" />
+                        <Form.Slot label="Catch-All">
+                          <Form.Checkbox field="catch_all">启用 Catch-All</Form.Checkbox>
+                        </Form.Slot>
+                        <Button theme="solid" type="primary" loading={domainSubmitting} onClick={() => void submitDomain()}>
+                          保存域名
+                        </Button>
+                      </Form>
+                      <Typography.Text style={{ color: '#94a3b8', fontSize: 12 }}>
+                        当前默认会保持 Catch-All 开启与 active 状态；如需调整，可在后续运营流中再细化。
+                      </Typography.Text>
+                  </ResourceSetupCard>
+                </Col>
+                <Col xs={24} xl={8}>
+                  <ResourceSetupCard
+                    tag="STEP 02"
+                    title="第三方账号接入"
+                    description="录入公网邮箱或桥接账号，确保后续邮箱池与供货规则能引用真实可用账号。"
+                    accent="rgba(16,185,129,0.16)"
+                  >
+                      <Form form={accountForm} layout="horizontal" labelPosition="top" initValues={{ source_type: 'public_mailbox_account', auth_mode: 'oauth2', protocol_mode: 'imap_pull', status: 'active' }}>
+                        <Form.Input field="provider" label="服务商" rules={[{ required: true, message: '请输入服务商' }]} placeholder="outlook / gmail / qq / proton" />
+                        <Form.Input field="identifier" label="账号标识" rules={[{ required: true, message: '请输入邮箱或账号标识' }]} placeholder="supplier@example.com" />
+                        <Form.Input field="source_type" label="来源类型" />
+                        <Form.Input field="auth_mode" label="认证方式" />
+                        <Form.Input field="protocol_mode" label="协议模式" />
+                        <Form.Input field="host" label="主机" placeholder="imap.gmail.com / 127.0.0.1" />
+                        <Form.InputNumber field="port" label="端口" placeholder="993 / 995 / 1143" style={{ width: '100%' }} />
+                        <Form.Input field="refresh_token" label="刷新令牌" placeholder="OAuth2 必填，授权码/App Password 可留空" />
+                        <Form.Input field="credential_secret" label="凭证密文" placeholder="App Password / 授权码 / Bridge 密码" />
+                        <Form.Input field="secret_ref" label="密钥引用" placeholder="env://NEXUS_QQ_AUTH_CODE" />
+                        <Form.Input field="bridge_endpoint" label="桥接端点" placeholder="127.0.0.1:1143" />
+                        <Form.Input field="bridge_label" label="桥接标识" placeholder="proton-bridge" />
+                        <Form.Input field="status" label="状态" />
+                        <Button theme="solid" type="primary" loading={accountSubmitting} onClick={() => void submitAccount()}>
+                          保存账号
+                        </Button>
+                      </Form>
+                  </ResourceSetupCard>
+                </Col>
+                <Col xs={24} xl={8}>
+                  <ResourceSetupCard
+                    tag="STEP 03"
+                    title="邮箱池映射"
+                    description="把域名池或账号池映射成真实可售邮箱记录，为项目库存和供给路由做准备。"
+                    accent="rgba(56,189,248,0.16)"
+                  >
+                      <Form form={mailboxForm} layout="horizontal" labelPosition="top" initValues={{ source_type: 'self_hosted_domain', status: 'available' }}>
+                        <Form.Input field="project_key" label="项目键" rules={[{ required: true, message: '请输入项目键' }]} placeholder="openai" />
+                        <Form.Input field="domain_id" label="域名 ID" placeholder="可选，与 account_id 至少填一项" />
+                        <Form.Input field="account_id" label="账号 ID" placeholder="可选，与 domain_id 至少填一项" />
+                        <Form.Input field="local_part" label="本地前缀" placeholder="agent-001" />
+                        <Form.Input field="address" label="完整地址" placeholder="可直接录完整邮箱" />
+                        <Form.Input field="source_type" label="来源类型" />
+                        <Form.Input field="status" label="状态" />
+                        <Button theme="solid" type="primary" loading={mailboxSubmitting} onClick={() => void submitMailbox()}>
+                          保存邮箱
+                        </Button>
+                      </Form>
+                  </ResourceSetupCard>
+                </Col>
+              </Row>
+            </Space>
           </Card>
         </Col>
       </Row>
