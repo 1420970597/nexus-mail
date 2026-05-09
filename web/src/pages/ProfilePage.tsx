@@ -264,7 +264,17 @@ export function ProfilePage() {
           </Card>
         </Col>
         <Col xs={24} xl={14}>
-          <Card data-testid="profile-role-focus-card" title={profileScene.title} style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 24 }}>
+          <Card
+            data-testid="profile-role-focus-card"
+            title={<span style={{ color: '#f8fafc' }}>{profileScene.title}</span>}
+            style={{
+              width: '100%',
+              borderRadius: 24,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            bodyStyle={{ padding: 24 }}
+          >
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
               {profileScene.focuses.map((item) => (
                 <Card
@@ -272,20 +282,20 @@ export function ProfilePage() {
                   style={{
                     width: '100%',
                     borderRadius: 18,
-                    background: 'linear-gradient(180deg, rgba(248,250,252,0.96) 0%, rgba(241,245,249,0.92) 100%)',
-                    border: '1px solid rgba(148,163,184,0.16)',
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(94,106,210,0.24)',
                   }}
                   bodyStyle={{ padding: 18 }}
                 >
-                  <Typography.Title heading={5} style={{ marginTop: 0 }}>{item.title}</Typography.Title>
-                  <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>{item.description}</Typography.Paragraph>
+                  <Typography.Title heading={5} style={{ marginTop: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                  <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.72)' }}>{item.description}</Typography.Paragraph>
                 </Card>
               ))}
               <Banner
                 type="info"
                 fullMode={false}
                 description={`当前推荐动作：${profileScene.action.label}。保持单一登录后控制台，不额外拆分独立后台。`}
-                style={{ width: '100%' }}
+                style={{ width: '100%', background: 'rgba(15, 23, 42, 0.54)', border: '1px solid rgba(148,163,184,0.16)' }}
               />
             </Space>
           </Card>

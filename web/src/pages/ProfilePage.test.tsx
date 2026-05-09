@@ -92,7 +92,7 @@ describe('ProfilePage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('scopes the user-facing shared-console bridge navigation to the capability region and keeps the account shell aligned with the dark single-console mission control', async () => {
+  it('keeps the account shell aligned with a dark single-console mission control and scopes shared bridge navigation to the capability region', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -114,12 +114,16 @@ describe('ProfilePage', () => {
     expect(await screen.findByRole('heading', { name: '个人资料' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('profile-hero-card')
     expect(within(heroCard).getByText('个人资料中枢')).toBeInTheDocument()
+    expect(within(heroCard).getByText('账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。')).toBeInTheDocument()
     const roleFocusCard = screen.getByTestId('profile-role-focus-card')
-    expect(within(roleFocusCard).getByRole('heading', { name: '用户接入焦点' })).toBeInTheDocument()
+    expect(within(roleFocusCard).getByText('用户接入焦点')).toBeInTheDocument()
+    expect(roleFocusCard).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(roleFocusCard).getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
     expect(within(roleFocusCard).getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
+    expect(within(roleFocusCard).getByText('当前推荐动作：进入项目市场。保持单一登录后控制台，不额外拆分独立后台。')).toBeInTheDocument()
 
     const capabilityRegion = screen.getByTestId('profile-capability-bridge')
+    expect(capabilityRegion).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(capabilityRegion).getByText('控制台桥接能力')).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
@@ -176,7 +180,7 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(screen.getByRole('heading', { name: '供应商运营焦点' })).toBeInTheDocument()
+    expect(screen.getByText('供应商运营焦点')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
@@ -335,7 +339,7 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(screen.getByRole('heading', { name: '管理员运营焦点' })).toBeInTheDocument()
+    expect(screen.getByText('管理员运营焦点')).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 

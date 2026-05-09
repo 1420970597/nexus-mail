@@ -148,9 +148,9 @@ function shortcutCardStyle(accent: string) {
   return {
     height: '100%',
     borderRadius: 20,
-    background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.94) 100%)',
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
     border: `1px solid ${accent}`,
-    boxShadow: '0 16px 36px rgba(15, 23, 42, 0.06)',
+    boxShadow: 'rgba(0,0,0,0.2) 0px 0px 0px 1px',
   }
 }
 
@@ -476,8 +476,8 @@ export function SettingsPage() {
         <Col xs={24} xl={16}>
           <Card
             data-testid="settings-shortcut-cards"
-            title="控制台运行快捷入口"
-            style={{ width: '100%', borderRadius: 24 }}
+            title={<span style={{ color: '#f8fafc' }}>控制台运行快捷入口</span>}
+            style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
           >
             <Row gutter={[16, 16]}>
@@ -486,11 +486,11 @@ export function SettingsPage() {
                   <Card style={shortcutCardStyle(item.accent)} bodyStyle={{ padding: 18 }}>
                     <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                       <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                        <Typography.Title heading={5} style={{ margin: 0 }}>{item.title}</Typography.Title>
+                        <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
                         <Tag color="cyan">{item.tag}</Tag>
                       </Space>
                       <Tag color="grey" prefixIcon={item.icon}>{item.button}</Tag>
-                      <Typography.Paragraph style={{ margin: 0, color: '#475569', minHeight: 72 }}>{item.description}</Typography.Paragraph>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>{item.description}</Typography.Paragraph>
                       <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
                         {item.button}
                       </Button>

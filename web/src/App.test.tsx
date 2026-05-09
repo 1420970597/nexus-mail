@@ -384,7 +384,7 @@ describe('App', () => {
     setSession('user')
 
     const dashboardView = renderApp(['/'])
-    const onboardingRegion = await expectDefaultUserFirstRunLane()
+    await expectDefaultUserFirstRunLane()
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
 

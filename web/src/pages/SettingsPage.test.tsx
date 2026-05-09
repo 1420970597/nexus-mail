@@ -152,7 +152,7 @@ describe('SettingsPage', () => {
     settingsView.unmount()
   })
 
-  it('renders a dark shared-console control center with canonical new-api mission cards for regular users', async () => {
+  it('renders a darker shared-console settings workspace with runtime-scoped mission cards for regular users', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -175,8 +175,9 @@ describe('SettingsPage', () => {
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
     const heroCard = screen.getByTestId('settings-hero-card')
     expect(within(heroCard).getByText('设置中枢')).toBeInTheDocument()
+    expect(within(heroCard).getByText('接入与账户设置不再停留在浅色占位页，而是收敛为与仪表盘一致的深色共享控制台工作台。')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台运行快捷入口' })).toBeInTheDocument()
+    expect(screen.getByText('控制台运行快捷入口')).toBeInTheDocument()
 
     const capabilityMatrix = screen.getByTestId('settings-capability-matrix')
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
@@ -187,9 +188,11 @@ describe('SettingsPage', () => {
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     const missionCards = screen.getByTestId('settings-mission-cards')
+    expect(missionCards).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(missionCards).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(missionCards).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(within(missionCards).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    expect(within(missionCards).getByText('从设置中心直接进入 API Keys，继续完成 token 发放、白名单准备与基础接入校验，保持接入链路留在同一控制台。')).toBeInTheDocument()
     expect(within(missionCards).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(missionCards).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(within(missionCards).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
