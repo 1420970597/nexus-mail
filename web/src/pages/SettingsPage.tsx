@@ -297,10 +297,9 @@ export function SettingsPage() {
 
   const capabilitySignals = useMemo(
     () => [
-      { key: '账号入口', value: menuHasPath(menu, PROFILE_ROUTE) ? '已连接到个人资料与角色核对' : '等待角色入口' },
-      { key: '集成入口', value: menuHasPath(menu, API_KEYS_ROUTE) ? 'API Keys / 白名单入口已启用' : '等待 API 接入能力' },
-      { key: '回调入口', value: menuHasPath(menu, WEBHOOKS_ROUTE) ? 'Webhook 工作台已在共享控制台内可用' : '等待 Webhook 能力' },
-      { key: '文档入口', value: menuHasPath(menu, DOCS_ROUTE) ? 'API 文档已并入共享导航' : '等待文档入口' },
+      { key: '统一身份入口', value: menuHasPath(menu, PROFILE_ROUTE) ? '个人资料与角色核对已纳入单一登录后控制台' : '等待统一身份入口开放' },
+      { key: '共享接入桥接', value: menuHasPath(menu, API_KEYS_ROUTE) ? 'API Keys / Webhook / 文档链路继续停留在共享壳内' : '等待共享接入桥接能力' },
+      { key: '角色菜单扩展', value: menuHasPath(menu, WEBHOOKS_ROUTE) ? '角色菜单已可扩展到 Webhook 工作台等共享能力' : '等待角色菜单扩展能力' },
     ],
     [menu],
   )

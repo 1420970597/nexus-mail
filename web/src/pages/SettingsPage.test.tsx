@@ -181,9 +181,12 @@ describe('SettingsPage', () => {
 
     const capabilityMatrix = screen.getByTestId('settings-capability-matrix')
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('账号入口')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('集成入口')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('文档入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一身份入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('账号入口')).not.toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('集成入口')).not.toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('文档入口')).not.toBeInTheDocument()
 
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
