@@ -113,6 +113,8 @@ describe('AdminAuditPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '打开资金工作台' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(missionFlow).toHaveTextContent('用 API Keys 与 API 文档与接入控制台继续检查鉴权契约、作用域设计和真实接口重放结果，而不是另开一套后台。')
+    expect(missionFlow).not.toHaveTextContent('用 API Keys 与文档入口继续检查鉴权契约、作用域设计和真实接口重放结果，而不是另开一套后台。')
 
     const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
     expect(bridge).toHaveTextContent('审计页不是独立后台：查询完高危事件后，仍然通过风控中心、开发者 API 接入工作台与 API 文档与接入控制台在同一套控制台中继续验证真实鉴权契约与修复结果。')

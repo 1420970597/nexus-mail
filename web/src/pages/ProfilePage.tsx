@@ -375,7 +375,7 @@ export function ProfilePage() {
               <Space wrap>
                 <Tag color="cyan" prefixIcon={<IconSafe />}>最小权限</Tag>
                 <Tag color="blue" prefixIcon={<IconBolt />}>Webhook / API</Tag>
-                <Tag color="green" prefixIcon={<IconArticle />}>单一文档入口</Tag>
+                <Tag color="green" prefixIcon={<IconArticle />}>文档核对</Tag>
               </Space>
               {sharedConsoleReturnCard ? (
                 <Card

@@ -137,7 +137,7 @@ export function AdminAuditPage() {
     {
       key: 'integration',
       title: '最后回到接入验证',
-      description: '用 API Keys 与文档入口继续检查鉴权契约、作用域设计和真实接口重放结果，而不是另开一套后台。',
+      description: '用 API Keys 与 API 文档与接入控制台继续检查鉴权契约、作用域设计和真实接口重放结果，而不是另开一套后台。',
       button: '打开 API Keys',
       path: API_KEYS_ROUTE,
       tag: 'Integration',

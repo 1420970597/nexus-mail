@@ -146,7 +146,8 @@ describe('ProfilePage', () => {
     expect(within(roleExpansionCard).queryByText('深色共享账号中枢')).not.toBeInTheDocument()
     expect(within(roleExpansionCard).getByText('最小权限')).toBeInTheDocument()
     expect(within(roleExpansionCard).getByText('Webhook / API')).toBeInTheDocument()
-    expect(within(roleExpansionCard).getByText('单一文档入口')).toBeInTheDocument()
+    expect(within(roleExpansionCard).getByText('文档核对')).toBeInTheDocument()
+    expect(within(roleExpansionCard).queryByText('单一文档入口')).not.toBeInTheDocument()
 
     await user.click(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()

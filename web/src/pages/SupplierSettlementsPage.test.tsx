@@ -232,6 +232,8 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    expect(screen.getByText('供应商财务动作完成后，继续与共享接入能力、回调配置和文档核对处于同一控制台中，避免把财务体验拆成孤岛页面。')).toBeInTheDocument()
+    expect(screen.queryByText('供应商财务动作完成后，继续与共享接入能力、回调配置和文档入口处于同一控制台中，避免把财务体验拆成孤岛页面。')).not.toBeInTheDocument()
     expect(bridge).toHaveTextContent('开发者 API 接入工作台')
     expect(bridge).toHaveTextContent('供给事件回调工作台')
     expect(bridge).toHaveTextContent('API 文档与接入控制台')

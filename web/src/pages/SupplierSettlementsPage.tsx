@@ -367,7 +367,7 @@ export function SupplierSettlementsPage() {
               共享接入桥接
             </Typography.Title>
             <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
-              供应商财务动作完成后，继续与共享接入能力、回调配置和文档入口处于同一控制台中，避免把财务体验拆成孤岛页面。
+              供应商财务动作完成后，继续与共享接入能力、回调配置和文档核对处于同一控制台中，避免把财务体验拆成孤岛页面。
             </Typography.Paragraph>
           </div>
           <Space wrap spacing={16} style={{ width: '100%' }} data-testid="supplier-settlements-shared-console-bridge">
