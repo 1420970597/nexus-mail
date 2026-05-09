@@ -56,8 +56,8 @@ const sessionItems = [
     value: '单一登录后控制台 / 角色扩展菜单',
   },
   {
-    key: '文档入口',
-    value: '/docs 与共享壳保持同域访问',
+    key: '共享接入桥接',
+    value: 'API Keys / Webhook / Docs 与共享壳保持同域访问',
   },
 ]
 

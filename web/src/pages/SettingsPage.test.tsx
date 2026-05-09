@@ -190,6 +190,8 @@ describe('SettingsPage', () => {
 
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
+    expect(within(sessionCard).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(sessionCard).queryByText('文档入口')).not.toBeInTheDocument()
     const missionCards = screen.getByTestId('settings-mission-cards')
     expect(missionCards).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(missionCards).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
