@@ -179,7 +179,7 @@ describe('SupplierResourcesPage', () => {
     expect(within(missionFlow).getByRole('heading', { name: '继续收敛供货规则' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('heading', { name: '最后观察结算与争议' })).toBeInTheDocument()
     const sharedConsoleBridge = screen.getByTestId('supplier-resources-shared-console-bridge')
-    expect(within(sharedConsoleBridge).getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
+    expect(within(sharedConsoleBridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(sharedConsoleBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(sharedConsoleBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(within(sharedConsoleBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()

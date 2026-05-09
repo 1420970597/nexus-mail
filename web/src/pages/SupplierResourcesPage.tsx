@@ -453,7 +453,7 @@ export function SupplierResourcesPage() {
             <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
               <div style={{ width: '100%' }}>
                 <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
-                  共享控制台联动
+                  共享接入桥接
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', marginTop: 8, marginBottom: 0 }}>
                   资源侧页面继续和 API Keys、Webhook 与 Docs 处于同一套共享控制台中，避免把供应商接入路径拆成独立后台。

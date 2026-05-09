@@ -230,7 +230,7 @@ describe('SupplierSettlementsPage', () => {
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
     const missionScope = within(missionFlow)
     expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
     expect(bridge).toHaveTextContent('开发者 API 接入工作台')
     expect(bridge).toHaveTextContent('供给事件回调工作台')
