@@ -44,21 +44,21 @@ const integrationRunway = [
     step: 'STEP 01',
     title: 'API Keys 起步',
     eyebrow: '最小权限起步',
-    description: '生成首个最小权限 API Key。',
+    description: '生成首个最小权限密钥。',
   },
   {
     key: 'webhooks',
     step: 'STEP 02',
     title: 'Webhook 联调',
     eyebrow: '真实回调验证',
-    description: '确认回调地址并发起一次真实联调。',
+    description: '确认回调地址并发起真实联调。',
   },
   {
     key: 'docs',
     step: 'STEP 03',
     title: '文档核对',
     eyebrow: '契约核对',
-    description: '查看 API 文档并核对请求契约。',
+    description: '核对 API 文档与请求契约。',
   },
 ]
 
@@ -217,7 +217,7 @@ export function LoginPage() {
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后进入共享控制台，并沿同一导航完成首个接入闭环。
+                      注册后进入共享控制台，按 API Keys → Webhook → Docs 完成首轮接入。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>

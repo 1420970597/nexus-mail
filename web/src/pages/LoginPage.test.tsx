@@ -133,6 +133,8 @@ describe('LoginPage', () => {
 
     const registerJourneyScope = getRegisterJourneyScope()
     expect(registerJourneyScope.getByRole('heading', { name: '首轮接入路径' })).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('注册后进入共享控制台，按 API Keys → Webhook → Docs 完成首轮接入。')).toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('注册后进入共享控制台，并沿同一导航完成首个接入闭环。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('注册后沿同一导航完成首个 Key、Webhook 与文档核对。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByRole('heading', { name: '注册后第一轮动作' })).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('在同一控制台完成 Key、Webhook 与文档核对。')).not.toBeInTheDocument()
@@ -141,16 +143,22 @@ describe('LoginPage', () => {
     expect(within(apiKeysRunway).getByText('STEP 01')).toBeInTheDocument()
     expect(within(apiKeysRunway).getByRole('heading', { name: 'API Keys 起步' })).toBeInTheDocument()
     expect(within(apiKeysRunway).getByText('最小权限起步')).toBeInTheDocument()
+    expect(within(apiKeysRunway).getByText('生成首个最小权限密钥。')).toBeInTheDocument()
+    expect(within(apiKeysRunway).queryByText('生成首个最小权限 API Key。')).not.toBeInTheDocument()
 
     const webhooksRunway = registerJourneyScope.getByTestId('login-runway-card-webhooks')
     expect(within(webhooksRunway).getByText('STEP 02')).toBeInTheDocument()
     expect(within(webhooksRunway).getByRole('heading', { name: 'Webhook 联调' })).toBeInTheDocument()
     expect(within(webhooksRunway).getByText('真实回调验证')).toBeInTheDocument()
+    expect(within(webhooksRunway).getByText('确认回调地址并发起真实联调。')).toBeInTheDocument()
+    expect(within(webhooksRunway).queryByText('确认回调地址并发起一次真实联调。')).not.toBeInTheDocument()
 
     const docsRunway = registerJourneyScope.getByTestId('login-runway-card-docs')
     expect(within(docsRunway).getByText('STEP 03')).toBeInTheDocument()
     expect(within(docsRunway).getByRole('heading', { name: '文档核对' })).toBeInTheDocument()
     expect(within(docsRunway).getByText('契约核对')).toBeInTheDocument()
+    expect(within(docsRunway).getByText('核对 API 文档与请求契约。')).toBeInTheDocument()
+    expect(within(docsRunway).queryByText('查看 API 文档并核对请求契约。')).not.toBeInTheDocument()
 
     expect(registerJourneyScope.queryByRole('heading', { name: '创建 Key' })).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByRole('heading', { name: '配置 Webhook' })).not.toBeInTheDocument()
