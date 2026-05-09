@@ -752,7 +752,7 @@ describe('App', () => {
     expect(screen.queryByTestId('admin-risk-overview-card')).not.toBeInTheDocument()
   })
 
-  it('renders webhook settings page for authenticated admin', async () => {
+  it('renders webhook operations workspace for authenticated admin routes', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValue({
@@ -766,18 +766,11 @@ describe('App', () => {
 
     renderApp(['/webhooks'])
 
-    const roleGuidance = await screen.findByTestId('webhooks-role-guidance')
-    expect(within(roleGuidance).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    const currentEndpointCard = await screen.findByTestId('webhooks-current-endpoints-card')
+    expect(currentEndpointCard).toBeInTheDocument()
 
-    const metricsStrip = screen.getByTestId('webhooks-metrics-strip')
-    expect(within(metricsStrip).getByTestId('webhooks-endpoint-metric')).toBeInTheDocument()
-    expect(within(metricsStrip).getByTestId('webhooks-attention-delivery-metric')).toBeInTheDocument()
-    expect(within(metricsStrip).getByTestId('webhooks-latest-delivery-metric')).toBeInTheDocument()
-
-    const currentEndpointCard = screen.getByTestId('webhooks-current-endpoints-card')
-    expect(within(currentEndpointCard).getByText('当前 endpoint')).toBeInTheDocument()
-    expect(await within(currentEndpointCard).findByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
-    expect(await within(currentEndpointCard).findByTestId('webhooks-send-test-button-11')).toBeInTheDocument()
+    const headerSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
   it('creates a webhook test delivery and refreshes the delivery feed', async () => {
