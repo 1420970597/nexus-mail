@@ -40,18 +40,21 @@ const readinessRows = [
 
 const integrationRunway = [
   {
+    key: 'api-keys',
     step: 'STEP 01',
     title: 'API Keys 起步',
     eyebrow: '最小权限起步',
     description: '生成首个最小权限 API Key。',
   },
   {
+    key: 'webhooks',
     step: 'STEP 02',
     title: 'Webhook 联调',
     eyebrow: '真实回调验证',
     description: '确认回调地址并发起一次真实联调。',
   },
   {
+    key: 'docs',
     step: 'STEP 03',
     title: '文档核对',
     eyebrow: '契约核对',
@@ -209,18 +212,19 @@ export function LoginPage() {
                 }}
               >
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-                  <div>
+                  <div data-testid="login-register-journey-summary">
                     <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后沿同一导航完成首个 Key、Webhook 与文档核对。
+                      注册后进入共享控制台，并沿同一导航完成首个接入闭环。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
                     {integrationRunway.map((item) => (
                       <Col xs={24} md={8} key={item.title}>
                         <Card
+                          data-testid={`login-runway-card-${item.key}`}
                           bodyStyle={{ padding: 14 }}
                           style={{
                             height: '100%',
