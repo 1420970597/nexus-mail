@@ -416,6 +416,8 @@ describe('App', () => {
     expect(screen.getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
     expect(screen.getByTestId('auth-bootstrap-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '正在恢复共享控制台' })).toBeInTheDocument()
+    expect(screen.getByText('共享控制台引导')).toBeInTheDocument()
+    expect(screen.queryByText('shared-console bootstrap')).not.toBeInTheDocument()
     const dashboardMain = screen.getByRole('main', { name: '控制台主内容' })
     expect(within(dashboardMain).queryByText('用户管理')).not.toBeInTheDocument()
     expect(within(dashboardMain).queryByText('风控中心')).not.toBeInTheDocument()

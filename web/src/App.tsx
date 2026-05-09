@@ -88,7 +88,7 @@ function AuthBootstrapShell() {
               padding: '6px 12px',
             }}
           >
-            shared-console bootstrap
+            共享控制台引导
           </span>
           <h2 style={{ margin: 0, color: '#f7f8f8', fontSize: 24, lineHeight: 1.2 }}>正在恢复共享控制台</h2>
           <p style={{ margin: 0, color: 'rgba(208,214,224,0.78)', lineHeight: 1.7 }}>
