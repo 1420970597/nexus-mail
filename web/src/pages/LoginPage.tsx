@@ -44,14 +44,14 @@ const integrationRunway = [
     step: 'STEP 01',
     title: 'API Keys 起步',
     eyebrow: '最小权限起步',
-    description: '生成首个最小权限密钥。',
+    description: '生成首个最小权限密钥，作为接入起点。',
   },
   {
     key: 'webhooks',
     step: 'STEP 02',
     title: 'Webhook 联调',
     eyebrow: '真实回调验证',
-    description: '确认回调地址并发起真实联调。',
+    description: '确认回调地址，随后发起真实联调。',
   },
   {
     key: 'docs',
@@ -132,7 +132,7 @@ export function LoginPage() {
                   统一登录后控制台
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.72)', fontSize: 15, lineHeight: 1.62, maxWidth: 500, marginBottom: 0 }}>
-                  统一入口、共享控制台、接入链路，在同一登录面完成切换。
+                  统一入口、共享壳与接入路径，同一登录面完成切换。
                 </Typography.Paragraph>
               </div>
               <Card
@@ -217,7 +217,7 @@ export function LoginPage() {
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后进入共享控制台，沿同一导航完成首轮接入闭环。
+                      注册后进入共享控制台，按同一导航完成首轮接入。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
