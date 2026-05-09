@@ -372,7 +372,7 @@ export function SupplierOfferingsPage() {
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
             <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
-              共享控制台联动
+              共享接入桥接
             </Typography.Title>
             <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
               供货侧页面继续和共享接入能力、文档与结算页处于同一控制台中，避免把供应商体验拆成独立后台。

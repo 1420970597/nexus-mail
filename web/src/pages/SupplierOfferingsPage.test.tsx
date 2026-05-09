@@ -184,7 +184,7 @@ describe('SupplierOfferingsPage', () => {
     expect(within(missionFlow).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('supplier-offerings-shared-console-bridge')
-    expect(within(bridge).getByRole('heading', { name: '共享控制台联动' })).toBeInTheDocument()
+    expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     const apiPillar = within(bridge).getByTestId('supplier-offerings-console-pillar-api')
     expect(within(apiPillar).getByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(within(apiPillar).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
