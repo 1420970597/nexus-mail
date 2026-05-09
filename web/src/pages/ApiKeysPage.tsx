@@ -302,6 +302,26 @@ export function ApiKeysPage() {
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
                 保持共享控制台中的接入顺序：先发放最小权限密钥，再继续回调联调与文档核对；如果当前角色未暴露这些入口，则回到共享工作台继续真实业务主链路。
               </Typography.Paragraph>
+              <Card
+                data-testid="api-keys-capability-matrix"
+                style={{
+                  width: '100%',
+                  marginTop: 16,
+                  borderRadius: 18,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                  border: '1px solid rgba(94,106,210,0.24)',
+                }}
+                bodyStyle={{ padding: 16 }}
+              >
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Space wrap>
+                    <Tag color="cyan" prefixIcon={<IconSafe />}>统一凭证入口</Tag>
+                    <Tag color="blue" prefixIcon={<IconArticle />}>共享接入桥接</Tag>
+                    <Tag color="green" prefixIcon={<IconServer />}>角色菜单扩展</Tag>
+                  </Space>
+                </Space>
+              </Card>
             </div>
             <Space wrap>
               {canOpenProjects ? (

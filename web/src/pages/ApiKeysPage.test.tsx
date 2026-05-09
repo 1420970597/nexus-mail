@@ -385,7 +385,7 @@ describe('ApiKeysPage', () => {
     expect(within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')).toBeInTheDocument()
   })
 
-  it('renders audit trail and shared navigation bridge actions', async () => {
+  it('renders audit trail, shared navigation bridge actions, and the capability matrix contract', async () => {
     renderApiKeysPage()
 
     expect(await screen.findByRole('heading', { name: '创建 API Key' })).toBeInTheDocument()
@@ -402,6 +402,12 @@ describe('ApiKeysPage', () => {
     expect(bridgeScope.queryByRole('button', { name: /前往 Webhook 设置/ })).not.toBeInTheDocument()
     expect(screen.getByText(/若需要程序化回调，请继续配置 Webhook并查看 API 文档。/)).toBeInTheDocument()
     expect(screen.queryByText(/若需要程序化回调，请继续前往 Webhook 设置与 API 文档。/)).not.toBeInTheDocument()
+
+    const capabilityMatrix = screen.getByTestId('api-keys-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一凭证入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
   })
 
   it('navigates to shared integration routes from the scoped bridge before and after key creation', async () => {
