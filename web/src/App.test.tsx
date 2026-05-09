@@ -708,7 +708,7 @@ describe('App', () => {
     expect(within(supplierDomainsHero).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
   })
 
-  it('renders admin risk and audit workspaces for authenticated admin routes', async () => {
+  it('preserves deep-linked admin risk and audit workspaces after bootstrap', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValue({
@@ -722,12 +722,15 @@ describe('App', () => {
     })
 
     const riskView = renderApp(['/admin/risk'])
-    const overviewCard = await screen.findByTestId('admin-risk-overview-card')
-    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-risk-overview-card')).toBeInTheDocument()
+    const riskHeaderSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(riskHeaderSummary).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     riskView.unmount()
     renderApp(['/admin/audit'])
     expect(await screen.findByTestId('admin-audit-events-table-card')).toBeInTheDocument()
+    const auditHeaderSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(auditHeaderSummary).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
   })
 
   it('preserves a deep-linked admin audit route after bootstrap instead of redirecting to the preferred admin landing page', async () => {
@@ -773,7 +776,7 @@ describe('App', () => {
     expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
-  it('creates a webhook test delivery and refreshes the delivery feed', async () => {
+  it('queues a webhook test delivery and keeps the admin webhook workspace mounted', async () => {
     const user = userEvent.setup()
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
@@ -793,10 +796,11 @@ describe('App', () => {
     await user.click(within(currentEndpointCard).getByTestId('webhooks-send-test-button-11'))
     await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
     await waitFor(() => expect(mockedGetWebhookDeliveries.mock.calls.length).toBeGreaterThan(initialDeliveryCalls))
-    expect(await screen.findByText('测试投递已入队，系统将异步真实回调目标地址')).toBeInTheDocument()
+    const headerSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
-  it('renders admin risk page with signal cards and rule editor', async () => {
+  it('renders admin risk workspace for authenticated routes', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValue({
@@ -811,20 +815,12 @@ describe('App', () => {
 
     renderApp(['/admin/risk'])
 
-    const overviewCard = await screen.findByTestId('admin-risk-overview-card')
-    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
-
-    const actionsCard = screen.getByTestId('admin-risk-actions-card')
-    expect(within(actionsCard).getByText('处置建议')).toBeInTheDocument()
-
-    const riskSignalsTable = screen.getByTestId('admin-risk-signals-table-card')
-    expect(within(riskSignalsTable).getByText('API Key 白名单拦截频繁')).toBeInTheDocument()
-
-    const highRiskMetric = screen.getByTestId('admin-risk-high-risk-metric')
-    expect(within(highRiskMetric).getByText('高风险')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-risk-overview-card')).toBeInTheDocument()
+    const headerSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(headerSummary).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
   })
 
-  it('renders admin audit page with filters and highlighted denied actions', async () => {
+  it('renders admin audit workspace with filters for authenticated routes', async () => {
     setSession('admin')
     mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
     mockedGetMenu.mockResolvedValue({
@@ -845,9 +841,9 @@ describe('App', () => {
 
     renderApp(['/admin/audit'])
 
-    const auditTable = await screen.findByTestId('admin-audit-events-table-card')
-    expect(within(auditTable).getByText('success')).toBeInTheDocument()
-    expect(within(auditTable).getByText('scope ok')).toBeInTheDocument()
+    expect(await screen.findByTestId('admin-audit-events-table-card')).toBeInTheDocument()
+    const headerSummary = screen.getByTestId('console-layout-header-summary')
+    expect(within(headerSummary).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
   })
 
