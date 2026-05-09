@@ -274,16 +274,17 @@ describe('WebhooksPage', () => {
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('renders a shared integration loop card with scoped CTA contracts and no fallback when shared destinations are available', async () => {
+  it('renders a shared integration loop card with scoped CTA contracts and stable step anchors when shared destinations are available', async () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     const integrationLoop = screen.getByTestId('webhooks-first-integration-loop')
     const loopScope = within(integrationLoop)
-    expect(loopScope.getByRole('heading', { name: '1. 创建首个 endpoint' })).toBeInTheDocument()
-    expect(loopScope.getByRole('heading', { name: '2. 验证 test delivery' })).toBeInTheDocument()
-    expect(loopScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
-    expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(loopScope.getByTestId('webhooks-first-step-create-endpoint')).toBeInTheDocument()
+    expect(loopScope.getByTestId('webhooks-first-step-verify-test-delivery')).toBeInTheDocument()
+    expect(loopScope.getByTestId('webhooks-first-step-return-to-docs')).toBeInTheDocument()
+    expect(loopScope.getByTestId('webhooks-first-loop-action-api-keys')).toHaveTextContent('打开 API Keys')
+    expect(loopScope.getByTestId('webhooks-first-loop-action-docs')).toHaveTextContent('查看 API 文档')
     expect(loopScope.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })

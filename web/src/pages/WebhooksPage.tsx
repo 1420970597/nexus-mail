@@ -25,14 +25,17 @@ const WEBHOOK_EVENT_OPTIONS = [
 
 const firstHourTimeline = [
   {
+    key: 'create-endpoint',
     title: '1. 创建首个 endpoint',
     description: '使用公网 HTTPS 地址创建 endpoint，并立即复制 signing secret 到你的消费端配置。',
   },
   {
+    key: 'verify-test-delivery',
     title: '2. 验证 test delivery',
     description: '发送一次 webhook.test，确认 202 入队、异步回调成功或失败重试链路可观测。',
   },
   {
+    key: 'return-to-docs',
     title: '3. 回到 API 文档/消费端',
     description: '把 payload、签名校验与错误处理回写到自己的接入检查表，再继续真实 API 回放。',
   },
@@ -435,6 +438,7 @@ export function WebhooksPage() {
               {firstHourTimeline.map((item) => (
                 <Card
                   key={item.title}
+                  data-testid={`webhooks-first-step-${item.key}`}
                   bodyStyle={{ padding: 16 }}
                   style={{
                     width: '100%',
@@ -453,12 +457,12 @@ export function WebhooksPage() {
             </Space>
             <Space>
               {canOpenApiKeys ? (
-                <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
+                <Button data-testid="webhooks-first-loop-action-api-keys" type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
                   打开 API Keys
                 </Button>
               ) : null}
               {canOpenDocs ? (
-                <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                <Button data-testid="webhooks-first-loop-action-docs" theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
                   查看 API 文档
                 </Button>
               ) : null}
