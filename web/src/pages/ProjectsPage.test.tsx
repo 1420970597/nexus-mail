@@ -157,9 +157,12 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    const guidanceCard = await screen.findByTestId('projects-action-guidance-card')
-    const nextStepCard = within(guidanceCard).getByTestId('projects-guidance-next-step-card')
-    const fallbackCard = within(guidanceCard).getByTestId('projects-guidance-fallback-card')
+    const missionFlow = await screen.findByTestId('projects-mission-flow-card')
+    const missionScope = within(missionFlow)
+    expect(missionScope.getByRole('heading', { name: '采购任务流' })).toBeInTheDocument()
+    expect(missionScope.queryByText('采购动作提示')).not.toBeInTheDocument()
+    const nextStepCard = missionScope.getByTestId('projects-guidance-next-step-card')
+    const fallbackCard = missionScope.getByTestId('projects-guidance-fallback-card')
 
     expect(within(nextStepCard).getByRole('heading', { name: '下单后下一步' })).toBeInTheDocument()
     expect(within(nextStepCard).getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
@@ -185,7 +188,7 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('采购动作提示')).toBeInTheDocument()
+    expect(await screen.findByText('采购任务流')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '打开订单中心' }))
     expect(await screen.findByTestId('projects-route-stub-orders')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()

@@ -194,6 +194,8 @@ describe('OrdersPage', () => {
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
     const guidanceCard = screen.getByTestId('orders-fulfillment-guidance-card')
     const guidanceScope = within(guidanceCard)
+    expect(guidanceScope.getByRole('heading', { name: '履约任务流' })).toBeInTheDocument()
+    expect(guidanceScope.queryByText('履约说明')).not.toBeInTheDocument()
     expect(guidanceScope.getByRole('heading', { name: 'READY 后完成订单' })).toBeInTheDocument()
     expect(guidanceScope.getByRole('heading', { name: '异常时看结果面板' })).toBeInTheDocument()
     expect(guidanceScope.getByRole('heading', { name: '订单为空时的下一步' })).toBeInTheDocument()
