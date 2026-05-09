@@ -16,7 +16,7 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   register: {
     title: '创建账号并进入统一控制台',
     button: '注册并进入统一控制台',
-    helper: '注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。',
+    helper: '注册后直接进入共享控制台，沿同一导航前往项目市场、订单中心与 API Keys。',
   },
 }
 
@@ -44,21 +44,21 @@ const integrationRunway = [
     step: 'STEP 01',
     title: 'API Keys 起步',
     eyebrow: '最小权限起步',
-    description: '生成首个最小权限密钥，作为接入起点。',
+    description: '生成首个最小权限密钥。',
   },
   {
     key: 'webhooks',
     step: 'STEP 02',
     title: 'Webhook 联调',
     eyebrow: '真实回调验证',
-    description: '确认回调地址，随后发起真实联调。',
+    description: '确认回调地址并发起真实联调。',
   },
   {
     key: 'docs',
     step: 'STEP 03',
     title: '文档核对',
     eyebrow: '契约核对',
-    description: '核对 API 文档与请求契约。',
+    description: '查看 API 文档并核对请求契约。',
   },
 ]
 
@@ -132,7 +132,7 @@ export function LoginPage() {
                   统一登录后控制台
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.72)', fontSize: 15, lineHeight: 1.62, maxWidth: 500, marginBottom: 0 }}>
-                  统一入口、共享壳与接入路径，同一登录面完成切换。
+                  统一入口、共享壳与接入路径，在同一登录面完成切换。
                 </Typography.Paragraph>
               </div>
               <Card
@@ -217,7 +217,7 @@ export function LoginPage() {
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后进入共享控制台，按同一导航完成首轮接入。
+                      注册后进入共享控制台，沿同一导航完成首轮接入。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
@@ -456,7 +456,7 @@ export function LoginPage() {
                     type="success"
                     fullMode={false}
                     closeIcon={null}
-                    description="注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。"
+                    description="注册后直接进入共享控制台，沿同一导航前往项目市场、订单中心与 API Keys。"
                     style={{
                       width: '100%',
                       background: 'rgba(255,255,255,0.02)',
