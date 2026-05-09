@@ -92,8 +92,8 @@ describe('ApiDocsPage', () => {
     expect(capabilityMatrixScope.queryByText('真实回调验证')).not.toBeInTheDocument()
 
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
-    expect(within(bridgeLane).getByText('共享控制台联调桥')).toBeInTheDocument()
-    expect(within(bridgeLane).getByRole('heading', { name: '文档、业务与回调共用一套控制台' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByText('共享控制台接入桥')).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('heading', { name: '文档、接入与回调共用一套共享控制台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('heading', { name: '最小权限 API Key' })).not.toBeInTheDocument()
@@ -106,7 +106,7 @@ describe('ApiDocsPage', () => {
     expect(within(bridgeLane).queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
-    expect(within(loopLane).getByRole('heading', { name: '文档与接入工作台继续保持单壳闭环' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '文档核对后继续沿共享控制台接入链路推进' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(within(loopLane).queryByRole('heading', { name: '最小权限 API Key' })).not.toBeInTheDocument()

@@ -321,10 +321,10 @@ export function ApiDocsPage() {
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
-                文档与接入工作台继续保持单壳闭环
+                文档核对后继续沿共享控制台接入链路推进
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                当用户从 API 文档继续推进接入时，仍应回到 API Keys、Webhook 与共享工作台完成真实联调，而不是把文档页视为孤立终点。
+                读完 API 文档后，继续回到 API Keys、Webhook 与共享工作台推进真实联调，让文档始终服务同一套接入链路。
               </Typography.Paragraph>
             </div>
           </Space>
@@ -414,14 +414,14 @@ export function ApiDocsPage() {
       >
         <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
           <div data-testid="docs-shared-console-bridge" style={{ width: '100%' }}>
-            <Tag color="cyan" shape="circle">共享控制台联调桥</Tag>
+            <Tag color="cyan" shape="circle">共享控制台接入桥</Tag>
             <Space align="start" style={{ width: '100%', justifyContent: 'space-between', marginTop: 14 }} wrap>
             <div>
               <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
-                文档、业务与回调共用一套控制台
+                文档、接入与回调共用一套共享控制台
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                从 Redoc 继续推进联调时，直接回到项目市场、余额中心、API Keys 与 Webhook 的共享工作台，不再把文档页当作独立终点。
+                从 Redoc 继续联调时，直接回到项目市场、余额中心、API Keys 与 Webhook 的共享工作台，让文档、接入与业务回放继续收敛在同一套控制台。
               </Typography.Paragraph>
             </div>
             <Space wrap>
