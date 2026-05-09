@@ -137,7 +137,8 @@ describe('AdminUsersPage shared-console admin workbench', () => {
 
     const bridgeCard = screen.getByTestId('admin-users-shared-console-bridge')
     expect(bridgeCard).toBeInTheDocument()
-    expect(within(bridgeCard).getByText('即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。')).toBeInTheDocument()
+    expect(within(bridgeCard).getByText('即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与 API 文档与接入控制台继续验证平台对外接入链路。')).toBeInTheDocument()
+    expect(within(missionFlow).getByText('完成账务/争议处理后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证外部接入与回调链路，不拆分第二套后台。')).toBeInTheDocument()
     const bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
     expect(within(bridgeLinks).getByText(resolveRouteTitle(API_KEYS_ROUTE, 'admin'))).toBeInTheDocument()
     expect(within(bridgeLinks).getByText(resolveRouteTitle(WEBHOOKS_ROUTE, 'admin'))).toBeInTheDocument()

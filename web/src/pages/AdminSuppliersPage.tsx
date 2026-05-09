@@ -290,7 +290,7 @@ export function AdminSuppliersPage() {
           <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
             <Space vertical align="start" spacing={12} data-testid="admin-suppliers-shared-console-bridge">
               <Typography.Paragraph style={{ marginBottom: 0 }}>
-                即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。
+                即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。
               </Typography.Paragraph>
               <Space wrap data-testid="admin-suppliers-shared-console-links">
                 {sharedConsoleLinks.map((item) => (

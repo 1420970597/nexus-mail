@@ -222,7 +222,7 @@ describe('AdminSuppliersPage', () => {
     expect(within(sharedLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(sharedLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(sharedLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
-    expect(within(bridge).getByText('即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与文档入口验证对外接入链路。')).toBeInTheDocument()
+    expect(within(bridge).getByText('即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。')).toBeInTheDocument()
 
     const bridgeLoop = screen.getByTestId('admin-suppliers-shared-console-bridge')
     await user.click(within(bridgeLoop).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) }))

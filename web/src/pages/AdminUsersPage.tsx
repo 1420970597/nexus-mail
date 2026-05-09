@@ -235,7 +235,7 @@ export function AdminUsersPage() {
     {
       key: 'integration',
       title: '共享接入桥接',
-      description: '完成账务/争议处理后，仍通过 API Keys、Webhook 与文档入口验证外部接入与回调链路，不拆分第二套后台。',
+      description: '完成账务/争议处理后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证外部接入与回调链路，不拆分第二套后台。',
       button: '打开 API Keys',
       path: API_KEYS_ROUTE,
       tag: 'Integration',
@@ -385,7 +385,7 @@ export function AdminUsersPage() {
           <Card data-testid="admin-users-shared-console-bridge" title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
             <Space vertical align="start" spacing={12}>
               <Typography.Paragraph style={{ marginBottom: 0 }}>
-                即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与文档入口继续验证平台对外接入链路。
+                即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与 API 文档与接入控制台继续验证平台对外接入链路。
               </Typography.Paragraph>
               <Space wrap data-testid="admin-users-shared-console-links">
                 {visibleSharedConsoleLinks.map((item) => (
