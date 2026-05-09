@@ -146,9 +146,27 @@ export function AdminAuditPage() {
 
   const sharedConsoleLinks = useMemo(
     () => [
-      { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE, icon: <IconSafe /> },
-      { key: 'risk', label: '风控中心', path: ADMIN_RISK_ROUTE, icon: <IconAlertTriangle /> },
-      { key: 'docs', label: 'API 文档', path: DOCS_ROUTE, icon: <IconPulse /> },
+      {
+        key: 'api-keys',
+        label: '开发者 API 接入工作台',
+        button: '打开 API Keys',
+        path: API_KEYS_ROUTE,
+        icon: <IconSafe />,
+      },
+      {
+        key: 'risk',
+        label: '风控中心',
+        button: '继续查看风控',
+        path: ADMIN_RISK_ROUTE,
+        icon: <IconAlertTriangle />,
+      },
+      {
+        key: 'docs',
+        label: 'API 文档与接入控制台',
+        button: '查看 API 文档',
+        path: DOCS_ROUTE,
+        icon: <IconPulse />,
+      },
     ],
     [],
   )
@@ -280,7 +298,7 @@ export function AdminAuditPage() {
         <Card title="共享接入桥接" style={{ flex: '1 1 320px', borderRadius: 24 }}>
           <Space vertical align="start" spacing={12} data-testid="admin-audit-shared-console-bridge">
             <Typography.Paragraph style={{ marginBottom: 0 }}>
-              审计页不是独立后台：查询完高危事件后，仍然通过风控、API Keys 与 API 文档入口在同一套控制台中继续验证真实鉴权契约与修复结果。
+              审计页不是独立后台：查询完高危事件后，仍然通过风控中心、开发者 API 接入工作台与 API 文档与接入控制台在同一套控制台中继续验证真实鉴权契约与修复结果。
             </Typography.Paragraph>
             <Space wrap data-testid="admin-audit-shared-console-links">
               {visibleSharedConsoleLinks.map((item) => (
@@ -291,11 +309,7 @@ export function AdminAuditPage() {
                   icon={item.icon}
                   onClick={() => navigate(item.path)}
                 >
-                  {item.key === 'api-keys'
-                    ? '打开 API Keys'
-                    : item.key === 'risk'
-                      ? '继续查看风控'
-                      : '查看 API 文档'}
+                  {item.button}
                 </Button>
               ))}
             </Space>

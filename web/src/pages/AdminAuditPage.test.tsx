@@ -115,6 +115,8 @@ describe('AdminAuditPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    expect(bridge).toHaveTextContent('审计页不是独立后台：查询完高危事件后，仍然通过风控中心、开发者 API 接入工作台与 API 文档与接入控制台在同一套控制台中继续验证真实鉴权契约与修复结果。')
+    expect(bridge).not.toHaveTextContent('审计页不是独立后台：查询完高危事件后，仍然通过风控、API Keys 与 API 文档入口在同一套控制台中继续验证真实鉴权契约与修复结果。')
     expect(within(bridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: /继续查看风控/ })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
