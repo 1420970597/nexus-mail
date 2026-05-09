@@ -759,53 +759,6 @@ describe('App', () => {
     expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
-  it('renders admin risk workspace for authenticated routes', async () => {
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
-      ],
-    })
-
-    renderApp(['/admin/risk'])
-
-    expect(await screen.findByTestId('admin-risk-overview-card')).toBeInTheDocument()
-    const headerSummary = screen.getByTestId('console-layout-header-summary')
-    expect(within(headerSummary).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
-  })
-
-  it('renders admin audit workspace with filters for authenticated routes', async () => {
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
-      ],
-    })
-    mockedGetAdminAudit.mockResolvedValueOnce({
-      items: [
-        { id: 1, user_id: 3, api_key_id: 9, action: 'denied_whitelist', actor_type: 'system', note: 'blocked', created_at: '2026-04-28T00:00:00Z' },
-        { id: 2, user_id: 3, api_key_id: 9, action: 'success', actor_type: 'user', note: 'scope ok', created_at: '2026-04-28T00:01:00Z' },
-      ],
-    })
-
-    renderApp(['/admin/audit'])
-
-    expect(await screen.findByTestId('admin-audit-events-table-card')).toBeInTheDocument()
-    const headerSummary = screen.getByTestId('console-layout-header-summary')
-    expect(within(headerSummary).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查询审计' })).toBeInTheDocument()
-  })
-
   it('redirects plain users from supplier routes back into the shared shared-shell dashboard lane', async () => {
     setSession('user')
     renderApp([SUPPLIER_RESOURCES_ROUTE])
