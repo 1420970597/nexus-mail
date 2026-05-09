@@ -427,7 +427,7 @@ export function SupplierResourcesPage() {
                     <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                       <Tag color="cyan">Fallback</Tag>
                       <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
-                        返回推荐工作台继续供应商主链路
+                        返回共享工作台继续供应商主链路
                       </Typography.Title>
                       <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
                         当前菜单未暴露域名、供货或结算入口时，继续回到服务端授予的共享工作台完成下一步运营闭环。
@@ -439,7 +439,7 @@ export function SupplierResourcesPage() {
                         style={{ color: '#67e8f9', paddingLeft: 0 }}
                         onClick={() => navigate(fallbackRoute)}
                       >
-                        返回推荐工作台
+                        返回共享工作台
                       </Button>
                     </Space>
                   </Card>
@@ -532,10 +532,10 @@ export function SupplierResourcesPage() {
                   >
                     <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                       <Typography.Text strong style={{ color: '#f7f8f8' }}>
-                        返回推荐工作台
+                        返回共享工作台
                       </Typography.Text>
                       <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
-                        当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。
+                        当前共享接入入口暂未由服务端暴露时，先回到共享工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。
                       </Typography.Paragraph>
                       <Button
                         data-testid="supplier-resources-shared-console-fallback-button"
@@ -544,7 +544,7 @@ export function SupplierResourcesPage() {
                         icon={<IconArrowRight />}
                         onClick={() => navigate(fallbackRoute)}
                       >
-                        返回推荐工作台
+                        返回共享工作台
                       </Button>
                     </Space>
                   </Card>

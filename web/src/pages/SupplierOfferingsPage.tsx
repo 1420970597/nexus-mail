@@ -347,10 +347,10 @@ export function SupplierOfferingsPage() {
                 <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                   <Tag color="grey">Fallback</Tag>
                   <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
-                    返回推荐工作台
+                    返回共享工作台
                   </Typography.Title>
                   <Typography.Text style={{ color: 'rgba(226,232,240,0.78)' }}>
-                    当服务端暂未暴露资源、结算与接入入口时，先回到推荐工作台继续共享控制台中的供应商主链路。
+                    当服务端暂未暴露资源、结算与接入入口时，先回到共享工作台继续共享控制台中的供应商主链路。
                   </Typography.Text>
                   <Button
                     data-testid="supplier-offerings-mission-fallback-button"
@@ -359,7 +359,7 @@ export function SupplierOfferingsPage() {
                     icon={<IconArrowRight />}
                     onClick={() => navigate(fallbackRoute)}
                   >
-                    返回推荐工作台
+                    返回共享工作台
                   </Button>
                 </Space>
               </Card>
@@ -419,9 +419,9 @@ export function SupplierOfferingsPage() {
                 bodyStyle={{ padding: 18 }}
               >
                 <Space vertical align="start" spacing={10}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回推荐工作台</Typography.Text>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
                   <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
-                    当前接入入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的供应商主链路。
+                    当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。
                   </Typography.Text>
                   <Button
                     data-testid="supplier-offerings-shared-console-fallback-button"
@@ -430,7 +430,7 @@ export function SupplierOfferingsPage() {
                     icon={<IconArrowRight />}
                     onClick={() => navigate(fallbackRoute)}
                   >
-                    返回推荐工作台
+                    返回共享工作台
                   </Button>
                 </Space>
               </Card>

@@ -197,7 +197,7 @@ export function ProjectsPage() {
                     ) : null}
                     {fallbackRoute !== '/projects' ? (
                       <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
-                        返回推荐工作台
+                        返回共享工作台
                       </Button>
                     ) : null}
                   </Space>
@@ -258,7 +258,7 @@ export function ProjectsPage() {
                 </Typography.Paragraph>
                 {fallbackRoute !== '/projects' ? (
                   <Button theme="borderless" type="primary" style={{ marginTop: 12 }} onClick={() => navigate(fallbackRoute)}>
-                    返回推荐工作台
+                    返回共享工作台
                   </Button>
                 ) : null}
               </Card>

@@ -298,7 +298,7 @@ describe('ProjectsPage', () => {
 
     expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
     const emptyActions = await screen.findByTestId('projects-empty-state-actions')
-    await user.click(within(emptyActions).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(emptyActions).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('projects-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

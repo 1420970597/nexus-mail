@@ -351,7 +351,7 @@ describe('SupplierSettlementsPage', () => {
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
 
-    const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回推荐工作台/ })
+    const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回共享工作台/ })
     await user.click(fallbackButton)
     expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
@@ -390,10 +390,10 @@ describe('SupplierSettlementsPage', () => {
     const missionFallback = screen.getByTestId('supplier-settlements-mission-fallback')
     const sharedConsoleFallback = screen.getByTestId('supplier-settlements-shared-console-fallback')
 
-    expect(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ })).toBeInTheDocument()
+    expect(within(missionFallback).getByRole('button', { name: /返回共享工作台/ })).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByTestId('supplier-settlements-shared-console-fallback-button')).toBeInTheDocument()
 
-    await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
+    await user.click(within(missionFallback).getByRole('button', { name: /返回共享工作台/ }))
     expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

@@ -342,7 +342,7 @@ describe('OrdersPage', () => {
 
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     const emptyActions = screen.getByTestId('orders-empty-state-actions')
-    await user.click(within(emptyActions).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(emptyActions).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('orders-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

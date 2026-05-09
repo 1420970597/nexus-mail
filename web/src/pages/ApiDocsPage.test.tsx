@@ -102,7 +102,7 @@ describe('ApiDocsPage', () => {
     expect(within(bridgeLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
-    expect(within(bridgeLane).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
+    expect(within(bridgeLane).queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
     expect(within(loopLane).getByRole('heading', { name: '文档与接入工作台继续保持单壳闭环' })).toBeInTheDocument()
@@ -112,7 +112,7 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).queryByRole('heading', { name: '真实回调验证' })).not.toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(loopLane).queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
     expect(within(loopLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
@@ -224,18 +224,18 @@ describe('ApiDocsPage', () => {
 
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
-    expect(within(bridgeLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(bridgeLane).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开余额中心' })).not.toBeInTheDocument()
 
     const loopLane = screen.getByTestId('docs-shared-console-loop')
-    expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(loopLane).queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
     expect(within(loopLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
-    await user.click(within(loopLane).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(loopLane).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 
@@ -260,10 +260,10 @@ describe('ApiDocsPage', () => {
     let loopLane = screen.getByTestId('docs-shared-console-loop')
     expect(within(loopLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('heading', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
-    expect(within(loopLane).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(loopLane).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
 
@@ -279,7 +279,7 @@ describe('ApiDocsPage', () => {
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
     loopLane = screen.getByTestId('docs-shared-console-loop')
-    await user.click(within(loopLane).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(loopLane).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
   })
 })

@@ -313,13 +313,13 @@ export function AdminAuditPage() {
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                   <Tag color="cyan">Fallback</Tag>
                   <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
-                    回到推荐工作台继续管理员主链路
+                    回到共享工作台继续管理员主链路
                   </Typography.Title>
                   <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
                     当前菜单未暴露风控、接入或文档入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
                   </Typography.Text>
                   <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
-                    返回推荐工作台
+                    返回共享工作台
                   </Button>
                 </Space>
               </Card>

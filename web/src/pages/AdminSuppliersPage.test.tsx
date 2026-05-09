@@ -277,7 +277,7 @@ describe('AdminSuppliersPage', () => {
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
 
-    const fallbackButton = within(bridge).getByRole('button', { name: '返回推荐工作台' })
+    const fallbackButton = within(bridge).getByRole('button', { name: '返回共享工作台' })
     await user.click(fallbackButton)
     expect(await screen.findByTestId('admin-suppliers-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
@@ -291,8 +291,8 @@ describe('AdminSuppliersPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
     const fallbackCard = screen.getByTestId('admin-suppliers-shared-console-fallback')
-    expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
-    expect(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' })).toBeInTheDocument()
+    expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
+    expect(within(fallbackCard).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
   })
 
@@ -307,6 +307,6 @@ describe('AdminSuppliersPage', () => {
     expect(within(bridge).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
-    expect(within(bridge).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })
 })

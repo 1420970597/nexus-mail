@@ -302,7 +302,7 @@ describe('SupplierResourcesPage', () => {
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
     const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
     expect(sharedConsoleFallback).toBeInTheDocument()
-    expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到共享工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button'))
@@ -364,11 +364,11 @@ describe('SupplierResourcesPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     const missionFallback = screen.getByTestId('supplier-resources-mission-fallback')
-    expect(within(missionFallback).getByText('返回推荐工作台继续供应商主链路')).toBeInTheDocument()
-    expect(within(missionFallback).queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
+    expect(within(missionFallback).getByText('返回共享工作台继续供应商主链路')).toBeInTheDocument()
+    expect(within(missionFallback).queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
 
     const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
-    expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到推荐工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到共享工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button'))

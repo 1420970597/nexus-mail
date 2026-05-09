@@ -256,7 +256,7 @@ describe('SupplierOfferingsPage', () => {
 
     const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
     expect(fallback).toBeInTheDocument()
-    expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
+    expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
     expect(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button')).toBeInTheDocument()
     await user.click(screen.getByTestId('supplier-offerings-shared-console-fallback-button'))
     expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()
@@ -286,8 +286,8 @@ describe('SupplierOfferingsPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
 
     const fallbackCard = screen.getByTestId('supplier-offerings-mission-fallback')
-    expect(within(fallbackCard).getByRole('heading', { name: '返回推荐工作台' })).toBeInTheDocument()
-    expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到推荐工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
+    expect(within(fallbackCard).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到共享工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByTestId('supplier-offerings-mission-fallback-button'))
     expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()

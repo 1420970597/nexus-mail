@@ -272,7 +272,7 @@ describe('SupplierDomainsPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: /留在域名管理/ })).not.toBeInTheDocument()
 
     const missionFallback = screen.getByTestId('supplier-domains-mission-fallback')
-    await user.click(within(missionFallback).getByRole('button', { name: /返回推荐工作台/ }))
+    await user.click(within(missionFallback).getByRole('button', { name: /返回共享工作台/ }))
     expect(await screen.findByTestId('supplier-domains-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
 
@@ -286,7 +286,7 @@ describe('SupplierDomainsPage', () => {
     expect(within(bridge).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
 
     const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
-    await user.click(within(fallback).getByRole('button', { name: /返回推荐工作台/ }))
+    await user.click(within(fallback).getByRole('button', { name: /返回共享工作台/ }))
     expect(await screen.findByTestId('supplier-domains-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

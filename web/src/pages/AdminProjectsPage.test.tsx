@@ -279,7 +279,7 @@ describe('AdminProjectsPage', () => {
     expect(within(mainContent).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(mainContent).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
 
-    const fallbackButton = screen.getByTestId('admin-pricing-fallback-button')
+    const fallbackButton = screen.getByRole('button', { name: '返回共享工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)

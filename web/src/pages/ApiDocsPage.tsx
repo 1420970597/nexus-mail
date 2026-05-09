@@ -107,9 +107,9 @@ function docsSharedConsoleLoopCards(role?: string): SharedConsoleBridgeCard[] {
     },
     {
       key: 'fallback',
-      title: '返回推荐工作台',
+      title: '返回共享工作台',
       description: '把文档中的接口字段重新映射回项目市场、余额中心与订单履约路径，确认文档与真实工作台仍然一致。',
-      button: '返回推荐工作台',
+      button: '返回共享工作台',
       path: DOCS_LOOP_FALLBACK_PATH,
       tag: 'Runtime',
       accent: 'rgba(14, 165, 233, 0.24)',
@@ -324,7 +324,7 @@ export function ApiDocsPage() {
                 文档与接入工作台继续保持单壳闭环
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                当用户从 API 文档继续推进接入时，仍应回到 API Keys、Webhook 与推荐工作台完成真实联调，而不是把文档页视为孤立终点。
+                当用户从 API 文档继续推进接入时，仍应回到 API Keys、Webhook 与共享工作台完成真实联调，而不是把文档页视为孤立终点。
               </Typography.Paragraph>
             </div>
           </Space>
@@ -426,8 +426,8 @@ export function ApiDocsPage() {
             </div>
             <Space wrap>
               {bridgeCards.length === 0 && fallbackRoute !== DOCS_ROUTE ? (
-                <Button aria-label="返回推荐工作台" theme="solid" type="primary" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
-                  返回推荐工作台
+                <Button aria-label="返回共享工作台" theme="solid" type="primary" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+                  返回共享工作台
                 </Button>
               ) : null}
             </Space>

@@ -421,7 +421,7 @@ export function AdminProjectsPage() {
           <Tag color="blue" prefixIcon={<IconArticle />}>若需验证接入叙事，可继续进入 API Keys / Webhooks / Docs，保持管理端与共享接入路径统一</Tag>
           {fallbackRoute !== ADMIN_PRICING_ROUTE ? (
             <Button data-testid="admin-pricing-fallback-button" theme="borderless" type="primary" onClick={() => navigate(fallbackRoute)}>
-              返回推荐工作台
+              返回共享工作台
             </Button>
           ) : null}
         </Space>

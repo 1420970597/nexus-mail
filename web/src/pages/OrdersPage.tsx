@@ -221,7 +221,7 @@ export function OrdersPage() {
                       ) : null}
                       {fallbackRoute !== '/orders' ? (
                         <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
-                          返回推荐工作台
+                          返回共享工作台
                         </Button>
                       ) : null}
                     </Space>

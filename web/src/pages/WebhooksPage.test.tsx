@@ -285,7 +285,7 @@ describe('WebhooksPage', () => {
     expect(loopScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
-    expect(loopScope.queryByRole('button', { name: '返回推荐工作台' })).not.toBeInTheDocument()
+    expect(loopScope.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })
 
   it('suppresses unavailable shared integration CTAs when the server menu hides them and falls back to the recommended workspace', async () => {
@@ -314,7 +314,7 @@ describe('WebhooksPage', () => {
     expect(within(emptyActions).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
-    const fallbackButton = within(emptyActions).getByRole('button', { name: '返回推荐工作台' })
+    const fallbackButton = within(emptyActions).getByRole('button', { name: '返回共享工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)

@@ -348,7 +348,7 @@ export function SupplierDomainsPage() {
             {shouldShowMissionFallback ? (
               <div data-testid="supplier-domains-mission-fallback">
                 <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
-                  返回推荐工作台
+                  返回共享工作台
                 </Button>
               </div>
             ) : null}
@@ -500,7 +500,7 @@ export function SupplierDomainsPage() {
                   {shouldShowBridgeFallback ? (
                     <div data-testid="supplier-domains-shared-console-fallback">
                       <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute || DASHBOARD_ROUTE)}>
-                        返回推荐工作台
+                        返回共享工作台
                       </Button>
                     </div>
                   ) : null}

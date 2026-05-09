@@ -275,10 +275,10 @@ export function BalancePage() {
                   <Tag color="blue">共享控制台回退</Tag>
                   <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>当前资金页已是唯一可见业务工作台</Typography.Title>
                   <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.76)', maxWidth: 720 }}>
-                    当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到推荐工作台继续查看当前角色仍可访问的主链路。
+                    当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到共享工作台继续查看当前角色仍可访问的主链路。
                   </Typography.Paragraph>
                   <Button theme="solid" type="primary" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
-                    返回推荐工作台
+                    返回共享工作台
                   </Button>
                 </Space>
               </Card>

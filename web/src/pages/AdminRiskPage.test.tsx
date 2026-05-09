@@ -211,9 +211,9 @@ describe('AdminRiskPage', () => {
     expect(within(bridgeLinks).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-risk-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
-    expect(within(fallbackCard).getByText('回到推荐工作台继续管理员主链路')).toBeInTheDocument()
+    expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
 
-    await user.click(within(fallbackCard).getByRole('button', { name: '返回推荐工作台' }))
+    await user.click(within(fallbackCard).getByRole('button', { name: '返回共享工作台' }))
     const dashboardRouteStub = await screen.findByTestId('admin-risk-route-stub-dashboard')
     expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

@@ -260,6 +260,8 @@ describe('BalancePage', () => {
     const fallback = screen.getByTestId('balance-shared-console-fallback')
     expect(within(fallback).getByText('共享控制台回退')).toBeInTheDocument()
     expect(within(fallback).getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
+    expect(within(fallback).getByText('当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到共享工作台继续查看当前角色仍可访问的主链路。')).toBeInTheDocument()
+    expect(within(fallback).getByRole('button', { name: /返回共享工作台/ })).toBeInTheDocument()
   })
 
   it('hides the fallback when balance page is already the only visible workspace', async () => {
