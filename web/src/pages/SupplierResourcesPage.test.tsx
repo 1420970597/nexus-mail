@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
@@ -406,49 +406,52 @@ describe('SupplierResourcesPage', () => {
   })
 
   it('submits supplier domain, account, and mailbox actions then reloads overview data', async () => {
-    const user = userEvent.setup()
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
-    await user.type(screen.getByPlaceholderText('mail.nexus.example'), 'us-mail.nexus.test')
-    await user.clear(screen.getByPlaceholderText('global / hk / us'))
-    await user.type(screen.getByPlaceholderText('global / hk / us'), 'us')
-    await user.click(screen.getByRole('button', { name: '保存域名' }))
+    fireEvent.change(screen.getByPlaceholderText('mail.nexus.example'), { target: { value: 'us-mail.nexus.test' } })
+    fireEvent.change(screen.getByPlaceholderText('global / hk / us'), { target: { value: 'us' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存域名' }))
 
-    expect(mockedCreateSupplierDomain).toHaveBeenCalledWith({
-      name: 'us-mail.nexus.test',
-      region: 'us',
-      catch_all: true,
-      status: 'active',
-    })
+    await waitFor(() =>
+      expect(mockedCreateSupplierDomain).toHaveBeenCalledWith({
+        name: 'us-mail.nexus.test',
+        region: 'us',
+        catch_all: true,
+        status: 'active',
+      }),
+    )
 
-    await user.clear(screen.getByPlaceholderText('outlook / gmail / qq / proton'))
-    await user.type(screen.getByPlaceholderText('outlook / gmail / qq / proton'), 'outlook')
-    await user.type(screen.getByPlaceholderText('supplier@example.com'), 'ops@example.com')
-    await user.click(screen.getByRole('button', { name: '保存账号' }))
+    fireEvent.change(screen.getByPlaceholderText('outlook / gmail / qq / proton'), { target: { value: 'outlook' } })
+    fireEvent.change(screen.getByPlaceholderText('supplier@example.com'), { target: { value: 'ops@example.com' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存账号' }))
 
-    expect(mockedCreateSupplierAccount).toHaveBeenCalledWith(expect.objectContaining({
-      provider: 'outlook',
-      identifier: 'ops@example.com',
-      source_type: 'public_mailbox_account',
-      auth_mode: 'oauth2',
-      protocol_mode: 'imap_pull',
-      status: 'active',
-    }))
+    await waitFor(() =>
+      expect(mockedCreateSupplierAccount).toHaveBeenCalledWith(expect.objectContaining({
+        provider: 'outlook',
+        identifier: 'ops@example.com',
+        source_type: 'public_mailbox_account',
+        auth_mode: 'oauth2',
+        protocol_mode: 'imap_pull',
+        status: 'active',
+      })),
+    )
 
-    await user.type(screen.getByPlaceholderText('openai'), 'discord')
-    await user.type(screen.getByPlaceholderText('可选，与 account_id 至少填一项'), '1')
-    await user.type(screen.getByPlaceholderText('agent-001'), 'agent-002')
-    await user.click(screen.getByRole('button', { name: '保存邮箱' }))
+    fireEvent.change(screen.getByPlaceholderText('openai'), { target: { value: 'discord' } })
+    fireEvent.change(screen.getByPlaceholderText('可选，与 account_id 至少填一项'), { target: { value: '1' } })
+    fireEvent.change(screen.getByPlaceholderText('agent-001'), { target: { value: 'agent-002' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存邮箱' }))
 
-    expect(mockedCreateSupplierMailbox).toHaveBeenCalledWith(expect.objectContaining({
-      project_key: 'discord',
-      domain_id: 1,
-      local_part: 'agent-002',
-      source_type: 'self_hosted_domain',
-      status: 'available',
-    }))
+    await waitFor(() =>
+      expect(mockedCreateSupplierMailbox).toHaveBeenCalledWith(expect.objectContaining({
+        project_key: 'discord',
+        domain_id: 1,
+        local_part: 'agent-002',
+        source_type: 'self_hosted_domain',
+        status: 'available',
+      })),
+    )
     expect(mockedGetSupplierResourcesOverview).toHaveBeenCalledTimes(4)
   })
 })

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage } from './AdminUsersPage'
@@ -201,30 +201,28 @@ describe('AdminUsersPage shared-console admin workbench', () => {
   })
 
   it('submits wallet adjustment, settlement and dispute resolution flows', async () => {
-    const user = userEvent.setup()
-
     renderAdminUsersPage()
 
     expect(await screen.findByText('用户管理')).toBeInTheDocument()
 
     const adjustmentCard = screen.getByTestId('admin-users-adjustment-card')
-    await user.type(within(adjustmentCard).getByLabelText('用户 ID'), '10')
-    await user.type(within(adjustmentCard).getByLabelText('金额（分）'), '500')
-    await user.type(within(adjustmentCard).getByLabelText('原因'), 'manual bonus')
-    await user.type(within(adjustmentCard).getByPlaceholderText('请输入：确认调账'), '确认调账')
-    await user.click(within(adjustmentCard).getByRole('button', { name: '执行调账' }))
+    fireEvent.change(within(adjustmentCard).getByLabelText('用户 ID'), { target: { value: '10' } })
+    fireEvent.change(within(adjustmentCard).getByLabelText('金额（分）'), { target: { value: '500' } })
+    fireEvent.change(within(adjustmentCard).getByLabelText('原因'), { target: { value: 'manual bonus' } })
+    fireEvent.change(within(adjustmentCard).getByPlaceholderText('请输入：确认调账'), { target: { value: '确认调账' } })
+    fireEvent.click(within(adjustmentCard).getByRole('button', { name: '执行调账' }))
     await waitFor(() => expect(mockedAdminAdjustWallet).toHaveBeenCalledWith(10, 500, 'manual bonus', '确认调账'))
 
     const settlementCard = screen.getByTestId('admin-users-settlement-card')
-    await user.type(within(settlementCard).getByLabelText('供应商用户 ID'), '22')
-    await user.type(within(settlementCard).getByPlaceholderText('例如：月度结算'), 'monthly payout')
-    await user.type(within(settlementCard).getByPlaceholderText('请输入：确认结算'), '确认结算')
-    await user.click(within(settlementCard).getByRole('button', { name: '确认结算' }))
+    fireEvent.change(within(settlementCard).getByLabelText('供应商用户 ID'), { target: { value: '22' } })
+    fireEvent.change(within(settlementCard).getByPlaceholderText('例如：月度结算'), { target: { value: 'monthly payout' } })
+    fireEvent.change(within(settlementCard).getByPlaceholderText('请输入：确认结算'), { target: { value: '确认结算' } })
+    fireEvent.click(within(settlementCard).getByRole('button', { name: '确认结算' }))
     await waitFor(() => expect(mockedSettleSupplierPending).toHaveBeenCalledWith(22, 'monthly payout', '确认结算'))
 
     const disputeCard = screen.getByTestId('admin-users-dispute-resolution-card')
-    await user.type(within(disputeCard).getByLabelText('争议单 ID'), '8')
-    await user.click(within(disputeCard).getByRole('button', { name: '处理争议单' }))
+    fireEvent.change(within(disputeCard).getByLabelText('争议单 ID'), { target: { value: '8' } })
+    fireEvent.click(within(disputeCard).getByRole('button', { name: '处理争议单' }))
     await waitFor(() => expect(mockedResolveAdminDispute).toHaveBeenCalled())
   })
 
