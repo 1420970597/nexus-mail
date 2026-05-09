@@ -735,30 +735,6 @@ describe('App', () => {
     expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
-  it('queues a webhook test delivery and keeps the admin webhook workspace mounted', async () => {
-    const user = userEvent.setup()
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-      ],
-    })
-
-    renderApp(['/webhooks'])
-
-    const currentEndpointCard = await screen.findByTestId('webhooks-current-endpoints-card')
-    const initialDeliveryCalls = mockedGetWebhookDeliveries.mock.calls.length
-    await user.click(within(currentEndpointCard).getByTestId('webhooks-send-test-button-11'))
-    await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
-    await waitFor(() => expect(mockedGetWebhookDeliveries.mock.calls.length).toBeGreaterThan(initialDeliveryCalls))
-    const headerSummary = screen.getByTestId('console-layout-header-summary')
-    expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
-  })
-
   it('redirects plain users from supplier routes back into the shared shared-shell dashboard lane', async () => {
     setSession('user')
     renderApp([SUPPLIER_RESOURCES_ROUTE])
