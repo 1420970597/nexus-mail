@@ -128,7 +128,8 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(disputesMetric).getByText(/当前退款敞口/)).toBeInTheDocument()
 
     const consoleMetric = screen.getByTestId('admin-users-metric-console')
-    expect(within(consoleMetric).getByText('共享控制台联动')).toBeInTheDocument()
+    expect(within(consoleMetric).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(consoleMetric).queryByText('共享控制台联动')).not.toBeInTheDocument()
     expect(within(consoleMetric).getByText('高危动作、风控与接入留在同一后台闭环')).toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-users-mission-flow')

@@ -208,7 +208,7 @@ export function AdminUsersPage() {
     },
     {
       key: 'console',
-      title: '共享控制台联动',
+      title: '共享接入桥接',
       value: '账务 / 风控 / 审计',
       helper: '高危动作、风控与接入留在同一后台闭环',
       color: 'red',

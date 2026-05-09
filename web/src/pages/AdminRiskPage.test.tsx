@@ -108,7 +108,8 @@ describe('AdminRiskPage', () => {
     expect(within(missionSignals).getByText('高风险信号')).toBeInTheDocument()
     expect(within(missionSignals).getByText('观察中信号')).toBeInTheDocument()
     expect(within(missionSignals).getByText('生效规则')).toBeInTheDocument()
-    expect(within(missionSignals).getByText('共享控制台联动')).toBeInTheDocument()
+    expect(within(missionSignals).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(missionSignals).queryByText('共享控制台联动')).not.toBeInTheDocument()
 
     const missionFlow = screen.getByTestId('admin-risk-mission-flow')
     expect(within(missionFlow).getByText('管理员主任务流')).toBeInTheDocument()

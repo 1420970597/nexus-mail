@@ -125,7 +125,7 @@ export function AdminSuppliersPage() {
     },
     {
       key: 'console',
-      title: '共享控制台联动',
+      title: '共享接入桥接',
       value: '结算 / 风控 / 审计',
       helper: '供应商运营动作保持在同一控制台闭环',
       color: 'green',

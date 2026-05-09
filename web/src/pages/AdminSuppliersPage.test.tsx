@@ -204,7 +204,8 @@ describe('AdminSuppliersPage', () => {
     expect(within(disputeMetric).getByText('1 个开放争议待处理')).toBeInTheDocument()
 
     const consoleMetric = screen.getByTestId('admin-suppliers-metric-console')
-    expect(within(consoleMetric).getByText('共享控制台联动')).toBeInTheDocument()
+    expect(within(consoleMetric).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(consoleMetric).queryByText('共享控制台联动')).not.toBeInTheDocument()
     expect(within(consoleMetric).getByText('结算 / 风控 / 审计')).toBeInTheDocument()
     expect(within(consoleMetric).getByText('供应商运营动作保持在同一控制台闭环')).toBeInTheDocument()
 

@@ -126,7 +126,7 @@ export function AdminRiskPage() {
     },
     {
       key: 'console',
-      title: '共享控制台联动',
+      title: '共享接入桥接',
       value: '风控 / 审计 / 账务',
       helper: '风控处置、审计回放与高危运营动作继续留在同一后台闭环',
       color: 'cyan',
