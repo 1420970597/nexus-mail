@@ -210,7 +210,7 @@ export function ProfilePage() {
             <div>
               <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>个人资料</Typography.Title>
               <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 820 }}>
-                账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。
+                统一账号、会话与下一步入口都留在同一深色共享控制台。
               </Typography.Paragraph>
             </div>
             <Space spacing={8} wrap>
@@ -294,7 +294,7 @@ export function ProfilePage() {
               <Banner
                 type="info"
                 fullMode={false}
-                description={`当前推荐动作：${profileScene.action.label}。保持单一登录后控制台，不额外拆分独立后台。`}
+                description={`当前推荐：${profileScene.action.label}，继续共享控制台主链路。`}
                 style={{ width: '100%', background: 'rgba(15, 23, 42, 0.54)', border: '1px solid rgba(148,163,184,0.16)' }}
               />
             </Space>
@@ -305,7 +305,7 @@ export function ProfilePage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
           <Card
-            title={<span style={{ color: '#f8fafc' }}>控制台桥接能力</span>}
+            title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
             data-testid="profile-capability-bridge"
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
@@ -345,7 +345,7 @@ export function ProfilePage() {
             bodyStyle={{ padding: 20 }}
           >
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-              <Tag color="grey" prefixIcon={<IconServer />}>{user?.role === 'admin' ? '管理员角色扩展' : user?.role === 'supplier' ? '供应商角色扩展' : '深色共享账号中枢'}</Tag>
+              <Tag color="grey" prefixIcon={<IconServer />}>{user?.role === 'admin' ? '管理员角色扩展' : user?.role === 'supplier' ? '供应商角色扩展' : '共享账号中枢'}</Tag>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.78)' }}>
                 {user?.role === 'admin'
                   ? '当前账号已被服务端授予管理员角色；高危运营、风控与审计动作继续在同一套共享控制台内完成。'
