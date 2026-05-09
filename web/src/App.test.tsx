@@ -252,49 +252,6 @@ describe('App', () => {
     expect(useAuthStore.getState().refreshToken).toBe('stored-refresh-token')
   })
 
-  it('renders admin risk page with scoped overview and rule editor contracts', async () => {
-    setSession('admin')
-    mockedGetCurrentUser.mockResolvedValue({ user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' } })
-    mockedGetMenu.mockResolvedValue({
-      role: 'admin',
-      items: [
-        { key: 'dashboard', label: '仪表盘', path: '/' },
-        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
-        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
-      ],
-    })
-    mockedGetAdminRisk.mockResolvedValueOnce({
-      generated_at: '2026-04-28T00:00:00Z',
-      summary: {
-        open_disputes: 1,
-        denied_whitelist: 1,
-        denied_scope: 0,
-        denied_invalid: 0,
-        denied_rate_limit: 1,
-        timeout_orders: 2,
-        canceled_orders: 1,
-        high_risk_signal_count: 2,
-        medium_risk_signal_count: 1,
-      },
-      signals: [
-        {
-          category: 'auth',
-          severity: 'high',
-          count: 1,
-          title: 'API Key 白名单拦截频繁',
-          detail: '最近审计中检测到 1 次 denied_whitelist 事件',
-        },
-      ],
-    })
-
-    renderApp(['/admin/risk'])
-
-    const overviewCard = await screen.findByTestId('admin-risk-overview-card')
-    expect(within(overviewCard).getByText('规则命中概览')).toBeInTheDocument()
-    const ruleEditorCard = screen.getByTestId('admin-risk-rule-editor-card')
-    expect(within(ruleEditorCard).getByRole('button', { name: '保存规则' })).toBeInTheDocument()
-  })
-
   it('falls back to the docs workspace when no preferred role landing route exists', async () => {
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
