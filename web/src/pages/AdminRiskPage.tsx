@@ -297,7 +297,7 @@ export function AdminRiskPage() {
           <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
             <Space vertical align="start" spacing={12} data-testid="admin-risk-shared-console-bridge">
               <Typography.Paragraph style={{ marginBottom: 0 }}>
-                调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。
+                规则调整后，继续用 API Keys、审计日志与 API 文档复核限流、白名单与契约是否同步生效。
               </Typography.Paragraph>
               <Space wrap data-testid="admin-risk-shared-console-links">
                 {visibleSharedConsoleLinks.map((item) => (

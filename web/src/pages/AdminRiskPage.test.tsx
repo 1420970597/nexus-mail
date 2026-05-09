@@ -119,7 +119,8 @@ describe('AdminRiskPage', () => {
     expect(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(bridgeLinks).getByRole('button', { name: /继续查看审计/ })).toBeInTheDocument()
     expect(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
-    expect(within(bridge).getByText('调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。')).toBeInTheDocument()
+    expect(within(bridge).getByText('规则调整后，继续用 API Keys、审计日志与 API 文档复核限流、白名单与契约是否同步生效。')).toBeInTheDocument()
+    expect(within(bridge).queryByText('调整规则或确认风险后，仍然需要通过同一控制台中的 API Keys、审计日志与 API 文档复盘限流、白名单、作用域和真实接口契约是否一致生效。')).not.toBeInTheDocument()
 
     const highRiskMetric = screen.getByTestId('admin-risk-high-risk-metric')
     expect(within(highRiskMetric).getByText('高风险')).toBeInTheDocument()
