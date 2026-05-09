@@ -408,14 +408,12 @@ describe('SupplierSettlementsPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
 
     const costProfileForm = screen.getByTestId('supplier-settlements-cost-profile-form')
+    await user.clear(within(costProfileForm).getByLabelText('项目键'))
     await user.type(within(costProfileForm).getByLabelText('项目键'), 'telegram')
     await user.clear(within(costProfileForm).getByRole('spinbutton', { name: '成功成本（分）' }))
     await user.type(within(costProfileForm).getByRole('spinbutton', { name: '成功成本（分）' }), '180')
     await user.clear(within(costProfileForm).getByRole('spinbutton', { name: '超时成本（分）' }))
     await user.type(within(costProfileForm).getByRole('spinbutton', { name: '超时成本（分）' }), '40')
-    await user.type(within(costProfileForm).getByLabelText('币种'), 'USD')
-    await user.click(within(costProfileForm).getByLabelText('状态'))
-    await user.click(await screen.findByText('active'))
     await user.click(within(costProfileForm).getByRole('button', { name: '保存成本模型' }))
 
     await waitFor(() => expect(mockedSaveSupplierCostProfile).toHaveBeenCalledWith({
@@ -430,6 +428,7 @@ describe('SupplierSettlementsPage', () => {
     const disputeForm = screen.getByTestId('supplier-settlements-dispute-form')
     await user.clear(within(disputeForm).getByRole('spinbutton', { name: '订单 ID' }))
     await user.type(within(disputeForm).getByRole('spinbutton', { name: '订单 ID' }), '9912')
+    await user.clear(within(disputeForm).getByLabelText('争议原因'))
     await user.type(within(disputeForm).getByLabelText('争议原因'), '回执超时')
     await user.click(within(disputeForm).getByRole('button', { name: '提交争议' }))
 

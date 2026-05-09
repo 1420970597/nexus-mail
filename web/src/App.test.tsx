@@ -212,6 +212,7 @@ describe('App', () => {
   afterEach(() => {
     vi.clearAllMocks()
     window.localStorage.clear()
+    window.sessionStorage.clear()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 

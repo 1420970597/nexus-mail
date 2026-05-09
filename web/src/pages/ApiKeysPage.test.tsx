@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { Modal } from '@douyinfe/semi-ui'
@@ -241,9 +241,13 @@ describe('ApiKeysPage', () => {
     const keysCard = await screen.findByTestId('api-keys-current-keys-card')
     await within(keysCard).findByText('默认密钥')
     const createCard = screen.getByTestId('api-keys-create-card')
-    await user.type(screen.getByLabelText('名称'), '新密钥')
-    await user.type(screen.getByLabelText('权限范围'), ' finance:write , , activation:read ')
-    await user.type(screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24'), ' 10.0.0.0/24, ,127.0.0.1 ')
+    const nameInput = screen.getByLabelText('名称')
+    const scopesInput = screen.getByLabelText('权限范围')
+    const whitelistInput = screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24')
+
+    fireEvent.change(nameInput, { target: { value: '新密钥' } })
+    fireEvent.change(scopesInput, { target: { value: ' finance:write , , activation:read ' } })
+    fireEvent.change(whitelistInput, { target: { value: ' 10.0.0.0/24, ,127.0.0.1 ' } })
     await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
 
     await waitFor(() =>
