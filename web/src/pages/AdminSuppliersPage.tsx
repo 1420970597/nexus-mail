@@ -194,6 +194,7 @@ export function AdminSuppliersPage() {
     ],
     [canOpenApiKeys, canOpenDocs, canOpenWebhooks, user?.role],
   )
+  const canShowConsoleBridge = sharedConsoleLinks.length > 0
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -292,6 +293,27 @@ export function AdminSuppliersPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。
               </Typography.Paragraph>
+              {canShowConsoleBridge ? (
+                <Card
+                  data-testid="admin-suppliers-capability-matrix"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(94,106,210,0.24)',
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                    <Space wrap>
+                      <Tag color="cyan" prefixIcon={<IconBriefcase />}>统一运营入口</Tag>
+                      <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+                      <Tag color="green" prefixIcon={<IconShield />}>管理员菜单扩展</Tag>
+                    </Space>
+                  </Space>
+                </Card>
+              ) : null}
               <Space wrap data-testid="admin-suppliers-shared-console-links">
                 {sharedConsoleLinks.map((item) => (
                   <Card

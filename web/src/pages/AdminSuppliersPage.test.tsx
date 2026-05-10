@@ -215,6 +215,11 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
 
     const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const capabilityMatrix = screen.getByTestId('admin-suppliers-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一运营入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('管理员菜单扩展')).toBeInTheDocument()
     const sharedLinks = screen.getByTestId('admin-suppliers-shared-console-links')
     expect(within(sharedLinks).getByText(resolveRouteTitle(API_KEYS_ROUTE, 'admin'))).toBeInTheDocument()
     expect(within(sharedLinks).getByText(resolveRouteTitle(WEBHOOKS_ROUTE, 'admin'))).toBeInTheDocument()
@@ -295,6 +300,15 @@ describe('AdminSuppliersPage', () => {
     expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
     expect(within(fallbackCard).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
+  })
+
+  it('hides the capability matrix when no shared-console bridge route remains visible', async () => {
+    seedAdminMenu([DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE])
+
+    renderAdminSuppliersPage()
+
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
+    expect(screen.queryByTestId('admin-suppliers-capability-matrix')).not.toBeInTheDocument()
   })
 
   it('keeps bridge links only for the pages exposed by the admin menu', async () => {
