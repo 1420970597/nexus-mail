@@ -280,6 +280,87 @@ describe('OrdersPage', () => {
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
   })
 
+  it('renders a shared-console capability matrix and bridge actions for the fulfillment slice', async () => {
+    const user = userEvent.setup()
+
+    const renderWithRoutes = () => render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route
+            path={PROJECTS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-projects-bridge">
+                <h1>项目市场</h1>
+              </section>
+            }
+          />
+          <Route
+            path={API_KEYS_ROUTE}
+            element={
+              <section data-testid="orders-route-stub-api-keys-bridge">
+                <h1>开发者 API 接入工作台</h1>
+              </section>
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    let view = renderWithRoutes()
+
+    expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    const bridge = screen.getByTestId('orders-shared-console-bridge')
+    expect(bridge).toHaveTextContent('订单中心 → 开发者 API 接入工作台 → 项目市场')
+    expect(bridge).toHaveTextContent('履约页不是独立后台：确认邮箱、结果与终态后，继续回到开发者 API 接入工作台校验自动化调用，或返回项目市场继续下一轮采购。')
+
+    const matrix = screen.getByTestId('orders-capability-matrix')
+    const matrixScope = within(matrix)
+    expect(matrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(matrixScope.getByText('统一履约入口')).toBeInTheDocument()
+    expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
+    expect(matrixScope.getByText('采购回放路径')).toBeInTheDocument()
+
+    await user.click(within(bridge).getByRole('button', { name: '打开 API Keys' }))
+    expect(await screen.findByTestId('orders-route-stub-api-keys-bridge')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderWithRoutes()
+
+    expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('orders-shared-console-bridge')).getByRole('button', { name: '回到项目市场' }))
+    expect(await screen.findByTestId('orders-route-stub-projects-bridge')).toBeInTheDocument()
+
+    view.unmount()
+  })
+
+  it('hides fulfillment bridge destinations that are not exposed by the server menu', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+      ],
+    })
+
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    const bridge = screen.getByTestId('orders-shared-console-bridge')
+    expect(bridge).toHaveTextContent('订单中心')
+    expect(bridge).toHaveTextContent('履约页不是独立后台：确认邮箱、结果与终态后，继续沿当前账号已开放的共享控制台路径推进下一步动作。')
+    expect(bridge).not.toHaveTextContent('开发者 API 接入工作台')
+    expect(bridge).not.toHaveTextContent('项目市场')
+    expect(within(bridge).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '回到项目市场' })).not.toBeInTheDocument()
+  })
+
   it('navigates from the continuation lane back to the procurement market inside the shared console', async () => {
     const user = userEvent.setup()
 
@@ -308,7 +389,8 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /回到项目市场/ }))
+    const lane = screen.getByTestId('orders-continuation-lane')
+    await user.click(within(lane).getByRole('button', { name: /回到项目市场/ }))
     expect(await screen.findByTestId('orders-route-stub-projects-lane')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
   })

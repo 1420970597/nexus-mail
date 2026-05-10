@@ -117,6 +117,18 @@ export function OrdersPage() {
   const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
+  const bridgeSteps = [
+    '订单中心',
+    ...(canOpenApiKeys ? ['开发者 API 接入工作台'] : []),
+    ...(canOpenProjects ? ['项目市场'] : []),
+  ]
+  const bridgeDescription = canOpenApiKeys && canOpenProjects
+    ? '履约页不是独立后台：确认邮箱、结果与终态后，继续回到开发者 API 接入工作台校验自动化调用，或返回项目市场继续下一轮采购。'
+    : canOpenApiKeys
+      ? '履约页不是独立后台：确认邮箱、结果与终态后，继续回到开发者 API 接入工作台校验自动化调用。'
+      : canOpenProjects
+        ? '履约页不是独立后台：确认邮箱、结果与终态后，可返回项目市场继续下一轮采购。'
+        : '履约页不是独立后台：确认邮箱、结果与终态后，继续沿当前账号已开放的共享控制台路径推进下一步动作。'
 
   return (
     <>
@@ -278,6 +290,43 @@ export function OrdersPage() {
             </Card>
           </Col>
           <Col xs={24} xl={7}>
+            <Card
+              data-testid="orders-shared-console-bridge"
+              title="共享接入桥接"
+              style={{ width: '100%', borderRadius: 24, marginBottom: 16 }}
+              bodyStyle={{ padding: 20 }}
+            >
+              <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
+                  {bridgeDescription}
+                </Typography.Paragraph>
+                <Tag color="blue">{bridgeSteps.join(' → ')}</Tag>
+                <Space wrap>
+                  {canOpenApiKeys ? (
+                    <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
+                      打开 API Keys
+                    </Button>
+                  ) : null}
+                  {canOpenProjects ? (
+                    <Button theme="borderless" type="primary" onClick={() => navigate(PROJECTS_ROUTE)}>
+                      回到项目市场
+                    </Button>
+                  ) : null}
+                </Space>
+              </Space>
+            </Card>
+            <Card
+              data-testid="orders-capability-matrix"
+              title="控制台能力矩阵"
+              style={{ width: '100%', borderRadius: 24, marginBottom: 16 }}
+              bodyStyle={{ padding: 20 }}
+            >
+              <Space wrap>
+                <Tag color="cyan" prefixIcon={<IconActivity />}>统一履约入口</Tag>
+                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                <Tag color="green" prefixIcon={<IconArrowRight />}>采购回放路径</Tag>
+              </Space>
+            </Card>
             <Card
               title="履约任务流"
               data-testid="orders-fulfillment-guidance-card"

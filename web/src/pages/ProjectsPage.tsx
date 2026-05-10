@@ -77,6 +77,21 @@ export function ProjectsPage() {
   const canOpenOrders = hasMenuPath(menu, ORDERS_ROUTE)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const bridgeSteps = [
+    '项目市场',
+    ...(canOpenOrders ? ['订单中心'] : []),
+    ...(canOpenApiKeys ? ['开发者 API 接入工作台'] : []),
+    ...(canOpenDocs ? ['API 文档与接入控制台'] : []),
+  ]
+  const bridgeDescription = canOpenOrders && canOpenApiKeys && canOpenDocs
+    ? '项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约，再进入开发者 API 接入工作台与 API 文档完成自动化接入闭环。'
+    : canOpenOrders && canOpenApiKeys
+      ? '项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约，再进入开发者 API 接入工作台完成自动化接入闭环。'
+      : canOpenOrders
+        ? '项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约。'
+        : canOpenApiKeys
+          ? '项目采购页不是孤立列表：确认库存后，可继续前往开发者 API 接入工作台完成自动化接入闭环。'
+          : '项目采购页不是孤立列表：确认库存后，可继续沿当前账号已开放的共享控制台路径推进下一步动作。'
 
   const handleCreate = async (record: InventoryItem) => {
     setCreatingKey(`${record.project_key}-${record.domain_id}`)
@@ -232,6 +247,48 @@ export function ProjectsPage() {
           </Card>
         </Col>
         <Col xs={24} xl={7}>
+          <Card
+            data-testid="projects-shared-console-bridge"
+            title="共享接入桥接"
+            style={{ width: '100%', borderRadius: 24, marginBottom: 16 }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              <Typography.Paragraph style={{ marginBottom: 0, color: '#475569' }}>
+                {bridgeDescription}
+              </Typography.Paragraph>
+              <Tag color="blue">{bridgeSteps.join(' → ')}</Tag>
+              <Space wrap>
+                {canOpenOrders ? (
+                  <Button type="primary" theme="solid" onClick={() => navigate(ORDERS_ROUTE)}>
+                    打开订单中心
+                  </Button>
+                ) : null}
+                {canOpenApiKeys ? (
+                  <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
+                    打开 API Keys
+                  </Button>
+                ) : null}
+                {canOpenDocs ? (
+                  <Button theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                    查看 API 文档
+                  </Button>
+                ) : null}
+              </Space>
+            </Space>
+          </Card>
+          <Card
+            data-testid="projects-capability-matrix"
+            title="控制台能力矩阵"
+            style={{ width: '100%', borderRadius: 24, marginBottom: 16 }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Space wrap>
+              <Tag color="cyan" prefixIcon={<IconBriefStroked />}>统一采购入口</Tag>
+              <Tag color="blue" prefixIcon={<IconBolt />}>共享履约桥接</Tag>
+              <Tag color="green" prefixIcon={<IconSafe />}>开发接入延伸</Tag>
+            </Space>
+          </Card>
           <Card title="采购任务流" data-testid="projects-mission-flow-card" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
               <Card data-testid="projects-guidance-procurement-card" style={{ width: '100%', borderRadius: 18, background: 'linear-gradient(180deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.94) 100%)', border: '1px solid rgba(148,163,184,0.16)' }} bodyStyle={{ padding: 18 }}>

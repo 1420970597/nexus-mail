@@ -189,7 +189,8 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('采购任务流')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: '打开订单中心' }))
+    const missionFlow = screen.getByTestId('projects-mission-flow-card')
+    await user.click(within(missionFlow).getByRole('button', { name: '打开订单中心' }))
     expect(await screen.findByTestId('projects-route-stub-orders')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
   })
@@ -245,6 +246,104 @@ describe('ProjectsPage', () => {
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
   })
 
+  it('renders a shared-console capability matrix and bridge actions for the procurement slice', async () => {
+    const user = userEvent.setup()
+
+    const renderWithRoutes = () => render(
+      <MemoryRouter initialEntries={['/projects']}>
+        <Routes>
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route
+            path="/orders"
+            element={
+              <section data-testid="projects-route-stub-orders-bridge">
+                <h1>订单中心</h1>
+              </section>
+            }
+          />
+          <Route
+            path="/api-keys"
+            element={
+              <section data-testid="projects-route-stub-api-keys-bridge">
+                <h1>开发者 API 接入工作台</h1>
+              </section>
+            }
+          />
+          <Route
+            path="/docs"
+            element={
+              <section data-testid="projects-route-stub-docs-bridge">
+                <h1>API 文档与接入控制台</h1>
+              </section>
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    let view = renderWithRoutes()
+
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const bridge = screen.getByTestId('projects-shared-console-bridge')
+    expect(bridge).toHaveTextContent('项目市场 → 订单中心 → 开发者 API 接入工作台 → API 文档与接入控制台')
+    expect(bridge).toHaveTextContent('项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约，再进入开发者 API 接入工作台与 API 文档完成自动化接入闭环。')
+
+    const matrix = screen.getByTestId('projects-capability-matrix')
+    const matrixScope = within(matrix)
+    expect(matrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(matrixScope.getByText('统一采购入口')).toBeInTheDocument()
+    expect(matrixScope.getByText('共享履约桥接')).toBeInTheDocument()
+    expect(matrixScope.getByText('开发接入延伸')).toBeInTheDocument()
+
+    await user.click(within(bridge).getByRole('button', { name: '打开订单中心' }))
+    expect(await screen.findByTestId('projects-route-stub-orders-bridge')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderWithRoutes()
+
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('projects-shared-console-bridge')).getByRole('button', { name: '打开 API Keys' }))
+    expect(await screen.findByTestId('projects-route-stub-api-keys-bridge')).toBeInTheDocument()
+
+    view.unmount()
+    view = renderWithRoutes()
+
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    await user.click(within(screen.getByTestId('projects-shared-console-bridge')).getByRole('button', { name: '查看 API 文档' }))
+    expect(await screen.findByTestId('projects-route-stub-docs-bridge')).toBeInTheDocument()
+
+    view.unmount()
+  })
+
+  it('hides procurement bridge destinations that are not exposed by the server menu', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+      ],
+    })
+
+    render(
+      <MemoryRouter>
+        <ProjectsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const bridge = screen.getByTestId('projects-shared-console-bridge')
+    expect(bridge).toHaveTextContent('项目市场')
+    expect(bridge).toHaveTextContent('项目采购页不是孤立列表：确认库存后，可继续沿当前账号已开放的共享控制台路径推进下一步动作。')
+    expect(bridge).not.toHaveTextContent('订单中心')
+    expect(bridge).not.toHaveTextContent('开发者 API 接入工作台')
+    expect(bridge).not.toHaveTextContent('API 文档与接入控制台')
+    expect(within(bridge).queryByRole('button', { name: '打开订单中心' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(within(bridge).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+  })
+
   it('navigates from the procurement lane into the api keys workspace inside the shared console', async () => {
     const user = userEvent.setup()
 
@@ -265,7 +364,8 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('注册后首轮采购路径')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /打开 API Keys/ }))
+    const lane = screen.getByTestId('projects-first-run-lane')
+    await user.click(within(lane).getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByTestId('projects-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
