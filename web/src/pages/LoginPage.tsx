@@ -62,6 +62,30 @@ const integrationRunway = [
   },
 ]
 
+const roleWorkspaceRows = [
+  {
+    key: 'shared',
+    title: '共享路由常驻同一壳',
+    routes: '项目市场 · 订单中心 · API Keys',
+    detail: '基础采购、履约追踪与程序化接入保持在同一套登录后控制台里。',
+    accent: 'rgba(14, 165, 233, 0.22)',
+  },
+  {
+    key: 'expanded',
+    title: '额外工作区按服务端角色展开',
+    routes: '域名池 · 资源 · 供货规则 · 结算',
+    detail: '只有在服务端授予对应角色后，相关菜单才会继续出现在同一壳内。',
+    accent: 'rgba(16, 185, 129, 0.22)',
+  },
+  {
+    key: 'ops',
+    title: '运营治理仍留在共享控制台',
+    routes: '风控中心 · 审计日志 · 运营协同',
+    detail: '风险治理、审计复核与供给协同继续复用单一登录后的控制台骨架。',
+    accent: 'rgba(94,106,210,0.24)',
+  },
+]
+
 export function LoginPage() {
   const navigate = useNavigate()
   const { setSession } = useAuthStore()
@@ -190,6 +214,72 @@ export function LoginPage() {
                             }}
                           >
                             {item.value}
+                          </Typography.Text>
+                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.6)', margin: '7px 0 0', fontSize: 12, lineHeight: 1.58 }}>
+                            {item.detail}
+                          </Typography.Paragraph>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </Space>
+              </Card>
+              <Card
+                data-testid="login-role-workspaces"
+                bodyStyle={{ padding: 16 }}
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: 'rgba(0,0,0,0.22) 0px 14px 36px',
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
+                  <div>
+                    <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
+                      角色工作区如何在同一壳内展开
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
+                      先用同一入口登录；额外工作区只会在服务端授予对应角色后出现在同一套控制台菜单里。
+                    </Typography.Paragraph>
+                  </div>
+                  <Row gutter={[10, 10]} style={{ width: '100%' }}>
+                    {roleWorkspaceRows.map((item) => (
+                      <Col xs={24} key={item.key}>
+                        <div
+                          data-testid="login-role-workspace-card"
+                          style={{
+                            minHeight: 0,
+                            borderRadius: 14,
+                            padding: '12px 14px',
+                            background: 'rgba(255,255,255,0.02)',
+                            border: `1px solid ${item.accent}`,
+                            boxShadow: 'rgba(0,0,0,0.18) 0px 0px 0px 1px inset',
+                          }}
+                        >
+                          <Typography.Text
+                            style={{
+                              display: 'block',
+                              color: 'rgba(138,143,152,0.96)',
+                              fontSize: 11,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.09em',
+                            }}
+                          >
+                            {item.title}
+                          </Typography.Text>
+                          <Typography.Text
+                            style={{
+                              display: 'block',
+                              color: '#f7f8f8',
+                              fontSize: 14,
+                              fontWeight: 600,
+                              lineHeight: 1.5,
+                              marginTop: 8,
+                            }}
+                          >
+                            {item.routes}
                           </Typography.Text>
                           <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.6)', margin: '7px 0 0', fontSize: 12, lineHeight: 1.58 }}>
                             {item.detail}

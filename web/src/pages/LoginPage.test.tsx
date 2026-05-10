@@ -19,6 +19,24 @@ vi.mock('../services/auth', async () => {
 const mockedLogin = vi.mocked(authService.login)
 const mockedRegister = vi.mocked(authService.register)
 
+const expectedRoleWorkspaces = [
+  {
+    title: '共享路由常驻同一壳',
+    routes: '项目市场 · 订单中心 · API Keys',
+    detailKeyword: '登录后控制台',
+  },
+  {
+    title: '额外工作区按服务端角色展开',
+    routes: '域名池 · 资源 · 供货规则 · 结算',
+    detailKeyword: '服务端授予对应角色后',
+  },
+  {
+    title: '运营治理仍留在共享控制台',
+    routes: '风控中心 · 审计日志 · 运营协同',
+    detailKeyword: '控制台骨架',
+  },
+]
+
 function renderLoginPage(initialEntry = '/login') {
   return render(
     <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -110,8 +128,20 @@ describe('LoginPage', () => {
     expect(readinessScope.queryByText('登录前只保留统一入口、共享控制台与接入路径三条最小事实。')).not.toBeInTheDocument()
     expect(readinessScope.queryByText('角色菜单')).not.toBeInTheDocument()
     expect(readinessScope.queryByText('按服务端角色切换')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('login-role-workspaces')).not.toBeInTheDocument()
     expect(screen.queryByText('开发环境快捷账号')).not.toBeInTheDocument()
+
+    const roleWorkspaceScope = within(screen.getByTestId('login-role-workspaces'))
+    expect(roleWorkspaceScope.getByRole('heading', { name: '角色工作区如何在同一壳内展开' })).toBeInTheDocument()
+    expect(roleWorkspaceScope.getByText('先用同一入口登录；额外工作区只会在服务端授予对应角色后出现在同一套控制台菜单里。')).toBeInTheDocument()
+    expect(roleWorkspaceScope.queryByText('登录前不展示任何角色差异。')).not.toBeInTheDocument()
+    const roleWorkspaceCards = within(screen.getByTestId('login-role-workspaces')).getAllByTestId('login-role-workspace-card')
+    expect(roleWorkspaceCards).toHaveLength(3)
+    expectedRoleWorkspaces.forEach((workspace, index) => {
+      const card = within(roleWorkspaceCards[index])
+      expect(card.getByText(workspace.title)).toBeInTheDocument()
+      expect(card.getByText(workspace.routes)).toBeInTheDocument()
+      expect(card.getByText(new RegExp(workspace.detailKeyword))).toBeInTheDocument()
+    })
 
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
