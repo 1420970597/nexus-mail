@@ -176,9 +176,12 @@ describe('SupplierDomainsPage', () => {
 
     const capabilityMatrix = screen.getByTestId('supplier-domains-capability-matrix')
     expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('单一供应商工作台')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('域名 readiness 优先')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('角色扩展但不伪造升级')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一供给入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('服务端菜单扩展')).toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('单一供应商工作台')).not.toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('域名 readiness 优先')).not.toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('角色扩展但不伪造升级')).not.toBeInTheDocument()
 
     await expectMetricCard('supplier-domains-metric-total', '域名总数', '4', '当前供应商域名池记录。')
     await expectMetricCard('supplier-domains-metric-active', 'Active 域名', '2', '可继续参与供货编排的域名数量。')

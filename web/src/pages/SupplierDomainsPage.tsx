@@ -126,19 +126,19 @@ const missionSteps = [
 
 const consolePillars = [
   {
-    key: 'single-shell',
-    label: '单一供应商工作台',
-    summary: '域名管理、资源录入、供货规则与结算复盘继续共用同一套深色共享控制台，不拆第二个供应商后台。',
+    key: 'shared-entry',
+    label: '统一供给入口',
+    summary: '域名池、资源录入、供货规则与结算复盘继续共用同一套深色共享控制台，不拆第二个供应商后台。',
   },
   {
-    key: 'domain-readiness',
-    label: '域名 readiness 优先',
-    summary: '先明确 active / inactive、Catch-All 与 region 覆盖，再把问题后移给邮箱池、项目规则或财务页面。',
+    key: 'shared-bridge',
+    label: '共享接入桥接',
+    summary: '域名 readiness 确认后，继续在同一登录态里联动 API Keys、Webhook 与文档核对，不把接入链路拆出单壳控制台。',
   },
   {
-    key: 'role-aware',
-    label: '角色扩展但不伪造升级',
-    summary: '供应商能力来自服务端授予的角色扩展；当前页面只聚焦共享控制台中的域名运营，不制造额外后台或本地升级假象。',
+    key: 'server-menu',
+    label: '服务端菜单扩展',
+    summary: '供应商能力仍以服务端授予的菜单为准；当前页面只显式收口已开放的域名运营与共享接入路径，不伪造额外升级。',
   },
 ] as const
 
