@@ -188,6 +188,15 @@ describe('SettingsPage', () => {
     expect(within(capabilityMatrix).queryByText('集成入口')).not.toBeInTheDocument()
     expect(within(capabilityMatrix).queryByText('文档入口')).not.toBeInTheDocument()
 
+    const sharedBridge = screen.getByTestId('settings-shared-console-bridge')
+    expect(within(sharedBridge).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('heading', { name: '当前已开放的接入入口' })).toBeInTheDocument()
+    expect(within(sharedBridge).getByText('从设置中心直接进入当前账号已开放的接入入口，继续在同一登录后的共享控制台内完成接入核对。')).toBeInTheDocument()
+    expect(within(sharedBridge).queryByText('从设置中心直接进入当前账号已开放的 API Keys、Webhook 与文档入口，继续在同一登录后的共享控制台内完成接入核对。')).not.toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     expect(within(sessionCard).getByText('共享接入桥接')).toBeInTheDocument()
@@ -215,6 +224,23 @@ describe('SettingsPage', () => {
     await user.click(within(missionCards).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('settings-route-stub-docs')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+  })
+
+  it('hides the shared bridge when the current account has no integration mission cards exposed by the server menu', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 23, email: 'limited@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
+    expect(screen.queryByTestId('settings-shared-console-bridge')).not.toBeInTheDocument()
   })
 
   it('navigates from the regular-user shortcut lane into the canonical api keys workspace', async () => {

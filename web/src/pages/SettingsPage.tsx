@@ -400,14 +400,40 @@ export function SettingsPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card
-            data-testid="settings-capability-matrix"
-            title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
-            style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
-            bodyStyle={{ padding: 20 }}
-          >
-            <Descriptions data={capabilitySignals} align="left" />
-          </Card>
+          <Space vertical spacing={16} style={{ width: '100%' }}>
+            <Card
+              data-testid="settings-capability-matrix"
+              title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
+              style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+              bodyStyle={{ padding: 20 }}
+            >
+              <Descriptions data={capabilitySignals} align="left" />
+            </Card>
+            {missionCards.length > 0 ? (
+              <Card
+                data-testid="settings-shared-console-bridge"
+                title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
+                style={{ borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+                bodyStyle={{ padding: 20 }}
+              >
+                <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                    当前已开放的接入入口
+                  </Typography.Title>
+                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', lineHeight: 1.7 }}>
+                    从设置中心直接进入当前账号已开放的接入入口，继续在同一登录后的共享控制台内完成接入核对。
+                  </Typography.Paragraph>
+                  <Space wrap>
+                    {missionCards.map((item) => (
+                      <Button key={`bridge-${item.key}`} type="primary" theme="solid" icon={<IconArrowRight />} onClick={() => navigate(item.path)}>
+                        {item.button}
+                      </Button>
+                    ))}
+                  </Space>
+                </Space>
+              </Card>
+            ) : null}
+          </Space>
         </Col>
       </Row>
 
