@@ -41,11 +41,53 @@ interface FinanceMissionCard {
   accent: string
 }
 
+interface ConsoleCapabilitySignal {
+  key: string
+  label: string
+  icon: JSX.Element
+}
+
 interface ConsolePillar {
   key: string
   label: string
   summary: string
 }
+
+const consoleCapabilitySignals: ConsoleCapabilitySignal[] = [
+  {
+    key: 'wallet-entry',
+    label: '统一资金入口',
+    icon: <IconPulse />,
+  },
+  {
+    key: 'shared-bridge',
+    label: '共享接入桥接',
+    icon: <IconSafe />,
+  },
+  {
+    key: 'role-expansion',
+    label: '角色菜单扩展',
+    icon: <IconShield />,
+  },
+]
+
+const consolePillars: ConsolePillar[] = [
+  {
+    key: 'wallet-observability',
+    label: '统一资金入口',
+    summary: '余额、流水、冻结金额与争议入口继续留在同一套深色共享控制台中，先完成预算与售后确认，再决定后续动作。',
+  },
+  {
+    key: 'role-aware-flow',
+    label: '角色菜单扩展',
+    summary: '普通用户、供应商与管理员继续共用单一登录后控制台，仅通过服务端返回菜单区分后续结算、审计与售后链路。',
+  },
+  {
+    key: 'integration-bridge',
+    label: '共享接入桥接',
+    summary: '余额确认后可以直接回到 API Keys、Webhook 与 API 文档，不切换到独立接入后台。',
+  },
+]
 
 const missionCards: FinanceMissionCard[] = [
   {
@@ -74,24 +116,6 @@ const missionCards: FinanceMissionCard[] = [
     path: API_KEYS_ROUTE,
     tag: 'Integration',
     accent: 'rgba(16,185,129,0.18)',
-  },
-]
-
-const consolePillars: ConsolePillar[] = [
-  {
-    key: 'wallet-observability',
-    label: '资金观察与售后同层',
-    summary: '余额、流水、冻结金额与争议入口不再分散到额外后台，直接收敛在共享控制台深色壳内。',
-  },
-  {
-    key: 'role-aware-flow',
-    label: '角色差异仍共用单壳',
-    summary: '普通用户看采购与争议闭环，供应商/管理员通过同一套菜单继续处理结算、审计与售后链路。',
-  },
-  {
-    key: 'integration-bridge',
-    label: '共享接入桥接',
-    summary: '余额确认后可以直接回到 API Keys、Webhook 与 API 文档，不切换到独立接入后台。',
   },
 ]
 
@@ -298,6 +322,13 @@ export function BalancePage() {
             bodyStyle={{ padding: 20 }}
           >
             <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+              <Space wrap data-testid="balance-capability-signals">
+                {consoleCapabilitySignals.map((item) => (
+                  <Tag key={item.key} color={item.key === 'wallet-entry' ? 'cyan' : item.key === 'shared-bridge' ? 'blue' : 'green'} prefixIcon={item.icon}>
+                    {item.label}
+                  </Tag>
+                ))}
+              </Space>
               {consolePillars.map((item) => (
                 <Card
                   key={item.key}
@@ -313,9 +344,27 @@ export function BalancePage() {
                   <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.72)' }}>{item.summary}</Typography.Paragraph>
                 </Card>
               ))}
+            </Space>
+          </Card>
+          <Card
+            data-testid="balance-shared-console-bridge"
+            title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
+            style={{
+              width: '100%',
+              marginTop: 16,
+              borderRadius: 24,
+              background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            bodyStyle={{ padding: 20 }}
+          >
+            <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+              <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)' }}>
+                余额确认后继续前往 API Keys、Webhook 与 API 文档；采购、履约、售后与程序化接入保持在同一套深色共享控制台中串联。
+              </Typography.Paragraph>
               <Space wrap data-testid="balance-capability-actions">
-                {canOpenOrders ? (
-                  <Button theme="light" icon={<IconActivity />} onClick={() => navigate(ORDERS_ROUTE)}>查看订单中心</Button>
+                {canOpenApiKeys ? (
+                  <Button theme="light" icon={<IconArrowRight />} data-testid="balance-open-api-keys" onClick={() => navigate(API_KEYS_ROUTE)}>打开 API Keys</Button>
                 ) : null}
                 {canOpenWebhooks ? (
                   <Button theme="light" icon={<IconSetting />} data-testid="balance-open-webhooks" onClick={() => navigate(WEBHOOKS_ROUTE)}>继续配置 Webhook</Button>

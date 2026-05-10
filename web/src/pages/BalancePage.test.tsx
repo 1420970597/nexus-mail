@@ -171,16 +171,27 @@ describe('BalancePage', () => {
 
     const capabilityMatrix = screen.getByTestId('balance-capability-matrix')
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('角色差异仍共用单壳')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('资金观察与售后同层')).toBeInTheDocument()
+    const capabilitySignals = within(capabilityMatrix).getByTestId('balance-capability-signals')
+    expect(within(capabilitySignals).getByText('统一资金入口')).toBeInTheDocument()
+    expect(within(capabilitySignals).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilitySignals).getByText('角色菜单扩展')).toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('角色差异仍共用单壳')).not.toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('资金观察与售后同层')).not.toBeInTheDocument()
     expect(capabilityMatrix).toHaveStyle({
       background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
     })
-    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+
+    const capabilityBridge = screen.getByTestId('balance-shared-console-bridge')
+    expect(within(capabilityBridge).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityBridge).getByText('余额确认后继续前往 API Keys、Webhook 与 API 文档；采购、履约、售后与程序化接入保持在同一套深色共享控制台中串联。')).toBeInTheDocument()
+    expect(within(capabilityBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(capabilityBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(capabilityBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
 
     const disputesCard = screen.getByTestId('balance-session-disputes-card')
     expect(within(disputesCard).getByText('本次会话新提交的争议')).toBeInTheDocument()
   })
+
 
   it('navigates through the balance mission cards and shared-console bridge CTAs', async () => {
     const user = userEvent.setup()
@@ -208,7 +219,8 @@ describe('BalancePage', () => {
     view = renderBalancePage()
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    await user.click(await screen.findByTestId('balance-open-api-keys'))
+    const firstCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
+    await user.click(within(firstCapabilityBridge).getByTestId('balance-open-api-keys'))
     expect(await screen.findByTestId('balance-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
@@ -216,7 +228,8 @@ describe('BalancePage', () => {
     view = renderBalancePage()
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    const secondCapabilityActions = await screen.findByTestId('balance-capability-actions')
+    const secondCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
+    const secondCapabilityActions = within(secondCapabilityBridge).getByTestId('balance-capability-actions')
     expect(within(secondCapabilityActions).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
     expect(await screen.findByTestId('balance-route-stub-webhooks')).toBeInTheDocument()
@@ -226,7 +239,8 @@ describe('BalancePage', () => {
     view = renderBalancePage()
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    const thirdCapabilityActions = await screen.findByTestId('balance-capability-actions')
+    const thirdCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
+    const thirdCapabilityActions = within(thirdCapabilityBridge).getByTestId('balance-capability-actions')
     expect(within(thirdCapabilityActions).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
     expect(await screen.findByTestId('balance-route-stub-docs')).toBeInTheDocument()
@@ -259,6 +273,7 @@ describe('BalancePage', () => {
     expect(within(missionCards).queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
     expect(within(missionCards).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     const capabilityActions = screen.getByTestId('balance-capability-actions')
+    expect(within(capabilityActions).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(within(capabilityActions).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
     expect(within(capabilityActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     const fallback = screen.getByTestId('balance-shared-console-fallback')
