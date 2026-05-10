@@ -158,9 +158,10 @@ describe('AdminProjectsPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     const bridgeCard = screen.getByTestId('admin-pricing-shared-console-bridge')
-    expect(within(bridgeCard).getByText('共享控制台接入桥')).toBeInTheDocument()
+    expect(within(bridgeCard).getByText('共享接入桥接')).toBeInTheDocument()
     expect(bridgeCard).toHaveTextContent('单一登录后')
     expect(bridgeCard).toHaveTextContent('不新增独立后台')
+    expect(bridgeCard).not.toHaveTextContent('共享控制台接入桥')
     expect(within(bridgeCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeCard).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(within(bridgeCard).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
@@ -169,9 +170,11 @@ describe('AdminProjectsPage', () => {
     expect(within(bridgeCard).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
     const capabilityMatrix = screen.getByTestId('admin-pricing-capability-matrix')
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('管理员扩展菜单仍挂在同一共享控制台，不做独立后台')).toBeInTheDocument()
-    expect(capabilityMatrix).toHaveTextContent('Webhook 运维与回调观测')
-    expect(capabilityMatrix).toHaveTextContent('API 文档与接入控制台')
+    expect(within(capabilityMatrix).getByRole('gridcell', { name: '统一运营入口' })).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByRole('gridcell', { name: '共享接入桥接' })).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByRole('gridcell', { name: '管理员菜单扩展' })).toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('角色壳模式')).not.toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('接入入口')).not.toBeInTheDocument()
     const projectEditorCard = screen.getByTestId('admin-pricing-project-editor-card')
     expect(within(projectEditorCard).getByText('编辑项目 · gmail')).toBeInTheDocument()
     const projectListCard = screen.getByTestId('admin-pricing-project-list-card')
@@ -279,11 +282,38 @@ describe('AdminProjectsPage', () => {
     expect(within(mainContent).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(mainContent).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
 
+    const capabilityMatrix = screen.getByTestId('admin-pricing-capability-matrix')
+    expect(within(capabilityMatrix).getByText('等待共享接入桥接能力')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('等待管理员菜单扩展能力')).toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('API Keys / Webhooks / Docs 与管理员价格策略保持同壳联动')).not.toBeInTheDocument()
+
     const fallbackButton = screen.getByRole('button', { name: '返回共享工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
     expect(await screen.findByTestId('admin-pricing-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+  })
+
+  it('keeps the capability matrix honest when only API Keys bridge and risk menu remain visible', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 3, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
+        { key: 'admin-pricing', label: '价格策略', path: ADMIN_PRICING_ROUTE },
+        { key: 'admin-risk', label: '风控中心', path: ADMIN_RISK_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      ],
+    })
+
+    renderAdminProjectsPage()
+
+    expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
+    const capabilityMatrix = screen.getByTestId('admin-pricing-capability-matrix')
+    expect(within(capabilityMatrix).getByText('API Keys 已与管理员价格策略保持同壳联动，其余接入入口等待菜单开放')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('等待管理员菜单扩展能力')).toBeInTheDocument()
+    expect(within(capabilityMatrix).queryByText('API Keys / Webhooks / Docs 与管理员价格策略保持同壳联动')).not.toBeInTheDocument()
   })
 })

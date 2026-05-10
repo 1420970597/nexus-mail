@@ -141,21 +141,6 @@ export function AdminProjectsPage() {
     [canOpenApiKeys, canOpenAudit, canOpenRisk],
   )
 
-  const capabilitySignals = useMemo<CapabilitySignal[]>(
-    () => [
-      { key: '角色壳模式', value: '管理员扩展菜单仍挂在同一共享控制台，不做独立后台' },
-      { key: '风控联动', value: canOpenRisk ? '已接入管理员风控中心' : '等待风控菜单权限' },
-      { key: '审计联动', value: canOpenAudit ? '已接入管理员审计查询' : '等待审计菜单权限' },
-      {
-        key: '接入入口',
-        value: canOpenApiKeys && canOpenWebhooks && canOpenDocs
-          ? `API Keys / ${resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)} / ${resolveRouteTitle(DOCS_ROUTE, user?.role)} 已与管理端同壳收敛`
-          : '共享接入入口尚未全部可见',
-      },
-    ],
-    [canOpenApiKeys, canOpenAudit, canOpenDocs, canOpenRisk, canOpenWebhooks, user?.role],
-  )
-
   const bridgeCards = useMemo<MissionCard[]>(
     () => [
       ...(canOpenApiKeys
@@ -190,6 +175,28 @@ export function AdminProjectsPage() {
         : []),
     ],
     [canOpenApiKeys, canOpenDocs, canOpenWebhooks, user?.role],
+  )
+
+  const canShowConsoleBridge = bridgeCards.length > 0
+  const hasFullConsoleBridge = canOpenApiKeys && canOpenWebhooks && canOpenDocs
+  const sharedBridgeSummary = bridgeCards.length > 0
+    ? bridgeCards.map((item) => item.tag).join(' / ')
+    : ''
+
+  const capabilitySignals = useMemo<CapabilitySignal[]>(
+    () => [
+      { key: '统一运营入口', value: '价格策略、报价映射与共享控制台运营链路继续留在同一登录后工作台' },
+      {
+        key: '共享接入桥接',
+        value: hasFullConsoleBridge
+          ? 'API Keys / Webhooks / Docs 与管理员价格策略保持同壳联动'
+          : canShowConsoleBridge
+            ? `${sharedBridgeSummary} 已与管理员价格策略保持同壳联动，其余接入入口等待菜单开放`
+            : '等待共享接入桥接能力',
+      },
+      { key: '管理员菜单扩展', value: canOpenRisk && canOpenAudit ? '风控与审计菜单已接入管理员扩展工作区' : '等待管理员菜单扩展能力' },
+    ],
+    [canOpenAudit, canOpenRisk, canShowConsoleBridge, hasFullConsoleBridge, sharedBridgeSummary],
   )
 
   const handleSelect = (project: ProjectItem) => {
@@ -314,21 +321,28 @@ export function AdminProjectsPage() {
       ) : null}
 
       <Card data-testid="admin-pricing-capability-matrix" title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
-        <Table
-          pagination={false}
-          rowKey="key"
-          dataSource={capabilitySignals}
-          columns={[
-            { title: '能力维度', dataIndex: 'key', key: 'key' },
-            { title: '当前状态', dataIndex: 'value', key: 'value' },
-          ]}
-        />
+        <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+          <Space wrap>
+            <Tag color="cyan" prefixIcon={<IconServer />}>统一运营入口</Tag>
+            <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+            <Tag color="green" prefixIcon={<IconActivity />}>管理员菜单扩展</Tag>
+          </Space>
+          <Table
+            pagination={false}
+            rowKey="key"
+            dataSource={capabilitySignals}
+            columns={[
+              { title: '能力维度', dataIndex: 'key', key: 'key' },
+              { title: '当前状态', dataIndex: 'value', key: 'value' },
+            ]}
+          />
+        </Space>
       </Card>
 
       {bridgeCards.length > 0 ? (
         <Card
           data-testid="admin-pricing-shared-console-bridge"
-          title={<span style={{ color: '#f8fafc' }}>共享控制台接入桥</span>}
+          title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
           style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,23,42,0.96) 0%, rgba(17,24,39,0.92) 100%)', border: '1px solid rgba(96,165,250,0.18)' }}
           bodyStyle={{ padding: 20 }}
         >
