@@ -192,6 +192,7 @@ export function AdminRiskPage() {
     }),
     [canOpenApiKeys, canOpenAudit, canOpenDocs, sharedConsoleLinks],
   )
+  const canShowConsoleBridge = visibleSharedConsoleLinks.length > 0
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -299,6 +300,27 @@ export function AdminRiskPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 规则调整后，继续用 API Keys、审计日志与 API 文档复核限流、白名单与契约是否同步生效。
               </Typography.Paragraph>
+              {canShowConsoleBridge ? (
+                <Card
+                  data-testid="admin-risk-capability-matrix"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(94,106,210,0.24)',
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                    <Space wrap>
+                      <Tag color="cyan" prefixIcon={<IconShield />}>统一风控入口</Tag>
+                      <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+                      <Tag color="green" prefixIcon={<IconActivity />}>管理员菜单扩展</Tag>
+                    </Space>
+                  </Space>
+                </Card>
+              ) : null}
               <Space wrap data-testid="admin-risk-shared-console-links">
                 {visibleSharedConsoleLinks.map((item) => (
                   <Button
@@ -316,7 +338,7 @@ export function AdminRiskPage() {
                   </Button>
                 ))}
               </Space>
-              {!canOpenAudit && !canOpenApiKeys && !canOpenDocs && shouldShowFallbackCta ? (
+              {!canShowConsoleBridge && shouldShowFallbackCta ? (
                 <Card
                   data-testid="admin-risk-shared-console-fallback"
                   style={{

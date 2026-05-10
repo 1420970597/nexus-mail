@@ -116,6 +116,11 @@ describe('AdminRiskPage', () => {
 
     const bridge = screen.getByTestId('admin-risk-shared-console-bridge')
     const bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
+    const capabilityMatrix = screen.getByTestId('admin-risk-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一风控入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('管理员菜单扩展')).toBeInTheDocument()
     expect(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(bridgeLinks).getByRole('button', { name: /继续查看审计/ })).toBeInTheDocument()
     expect(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
