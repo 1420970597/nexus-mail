@@ -228,6 +228,41 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(within(scoped.getByTestId('dashboard-next-step-api-keys')).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
   })
 
+  it('renders a dashboard capability matrix and bridge actions inside the shared console shell', async () => {
+    renderDashboard()
+
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const capabilityMatrix = screen.getByTestId('dashboard-capability-matrix')
+    const matrixScope = within(capabilityMatrix)
+    expect(matrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
+    expect(matrixScope.getByText('统一身份入口')).toBeInTheDocument()
+    expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
+    expect(matrixScope.getByText('角色菜单扩展')).toBeInTheDocument()
+    expect(matrixScope.getByText('个人资料与角色核对继续留在单一登录后控制台')).toBeInTheDocument()
+    expect(matrixScope.getByText('API Keys、Webhook 与文档链路继续停留在共享壳内')).toBeInTheDocument()
+    expect(matrixScope.getByText('服务端菜单开放更多角色工作台时，无需切换独立后台')).toBeInTheDocument()
+
+    const bridgeCard = screen.getByTestId('dashboard-shared-console-bridge')
+    const bridgeScope = within(bridgeCard)
+    expect(bridgeScope.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    expect(bridgeScope.getByText('从总览直接继续 API Keys、Webhook 与文档核对；具体入口仍以后端返回的共享菜单为准，保持采购、履约与接入在同一套深色控制台里串联。')).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: '前往 开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+  })
+
+  it('suppresses unavailable bridge actions when the server menu does not expose those shared routes', async () => {
+    seedUserMenu([DASHBOARD_ROUTE, API_KEYS_ROUTE])
+
+    renderDashboard()
+
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const bridgeScope = within(screen.getByTestId('dashboard-shared-console-bridge'))
+    expect(bridgeScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: /Webhook/ })).not.toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+  })
+
   it('navigates from the dashboard journey lane into balance, projects, orders, and api keys within the same console', async () => {
     const user = userEvent.setup()
 

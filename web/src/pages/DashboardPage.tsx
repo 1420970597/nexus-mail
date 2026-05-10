@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAdminOverview, getDashboardOverview, AdminOverviewResponse, DashboardOverviewResponse } from '../services/auth'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, BALANCE_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, BALANCE_ROUTE, DOCS_ROUTE, hasMenuPath, ORDERS_ROUTE, PROJECTS_ROUTE, resolveRouteTitle, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 export function userFirstRunStorageKeyForUser(userId?: number | null) {
   return `nexus-mail-user-first-run-dismissed:${userId ?? 'guest'}`
@@ -435,6 +435,10 @@ export function DashboardPage() {
   const nextSteps = useMemo(() => recommendedNextSteps(menu), [menu])
   const missionSteps = useMemo(() => roleMissionSteps(user?.role), [user?.role])
   const roleSurfaceItems = useMemo(() => roleSurface(menu, user?.role), [menu, user?.role])
+  const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
+  const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
+  const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
+  const webhookBridgeLabel = resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)
 
   const dismissUserFirstRun = () => {
     if (typeof window !== 'undefined') {
@@ -678,35 +682,106 @@ export function DashboardPage() {
           </Card>
         </Col>
         <Col xs={24} xl={10}>
-          <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-role-surface-map" bodyStyle={{ padding: 22 }}>
-            <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-              <div>
-                <Tag color="cyan">共享壳中的角色菜单映射</Tag>
-                <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
-                  当前菜单与页面能力以服务端返回的角色权限与菜单结果为准，以下跳转全部对应现有真实路由。
-                </Typography.Paragraph>
-              </div>
-              {roleSurfaceItems.map((item) => (
+          <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+            <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-capability-matrix" bodyStyle={{ padding: 22 }}>
+              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                <div>
+                  <Tag color="cyan">共享壳能力总览</Tag>
+                  <Typography.Title heading={5} style={{ margin: '12px 0 0', color: '#f7f8f8' }}>
+                    控制台能力矩阵
+                  </Typography.Title>
+                  <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
+                    统一身份、共享接入与角色扩展继续遵循服务端菜单真值，保持所有动作停留在同一套深色控制台中。
+                  </Typography.Paragraph>
+                </div>
                 <Card
-                  key={item.key}
-                  data-testid={`dashboard-role-surface-${item.key}`}
                   bodyStyle={{ padding: 16 }}
                   style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
                   <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                    <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                      <Typography.Text strong style={{ color: '#f7f8f8' }}>{item.label}</Typography.Text>
-                      <Tag color="grey">{item.route}</Tag>
-                    </Space>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>{item.summary}</Typography.Paragraph>
-                    <Button theme="borderless" type="primary" onClick={() => navigate(item.route)}>
-                      打开该工作台
-                    </Button>
+                    <Typography.Text strong style={{ color: '#f7f8f8' }}>统一身份入口</Typography.Text>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                      个人资料与角色核对继续留在单一登录后控制台
+                    </Typography.Paragraph>
                   </Space>
                 </Card>
-              ))}
-            </Space>
-          </Card>
+                <Card
+                  bodyStyle={{ padding: 16 }}
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f7f8f8' }}>共享接入桥接</Typography.Text>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                      API Keys、Webhook 与文档链路继续停留在共享壳内
+                    </Typography.Paragraph>
+                  </Space>
+                </Card>
+                <Card
+                  bodyStyle={{ padding: 16 }}
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f7f8f8' }}>角色菜单扩展</Typography.Text>
+                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                      服务端菜单开放更多角色工作台时，无需切换独立后台
+                    </Typography.Paragraph>
+                  </Space>
+                </Card>
+              </Space>
+            </Card>
+            <Card
+              title="共享接入桥接"
+              data-testid="dashboard-shared-console-bridge"
+              style={metricCardStyle('rgba(94,106,210,0.24)')}
+              bodyStyle={{ padding: 22 }}
+            >
+              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                  从总览直接继续 API Keys、Webhook 与文档核对；具体入口仍以后端返回的共享菜单为准，保持采购、履约与接入在同一套深色控制台里串联。
+                </Typography.Paragraph>
+                <Space wrap>
+                  {canOpenApiKeys ? (
+                    <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
+                      打开 API Keys
+                    </Button>
+                  ) : null}
+                  {canOpenWebhooks ? (
+                    <Button onClick={() => navigate(WEBHOOKS_ROUTE)}>前往 {webhookBridgeLabel}</Button>
+                  ) : null}
+                  {canOpenDocs ? <Button onClick={() => navigate(DOCS_ROUTE)}>查看 API 文档</Button> : null}
+                </Space>
+              </Space>
+            </Card>
+            <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-role-surface-map" bodyStyle={{ padding: 22 }}>
+              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                <div>
+                  <Tag color="cyan">共享壳中的角色菜单映射</Tag>
+                  <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
+                    当前菜单与页面能力以服务端返回的角色权限与菜单结果为准，以下跳转全部对应现有真实路由。
+                  </Typography.Paragraph>
+                </div>
+                {roleSurfaceItems.map((item) => (
+                  <Card
+                    key={item.key}
+                    data-testid={`dashboard-role-surface-${item.key}`}
+                    bodyStyle={{ padding: 16 }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                      <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                        <Typography.Text strong style={{ color: '#f7f8f8' }}>{item.label}</Typography.Text>
+                        <Tag color="grey">{item.route}</Tag>
+                      </Space>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>{item.summary}</Typography.Paragraph>
+                      <Button theme="borderless" type="primary" onClick={() => navigate(item.route)}>
+                        打开该工作台
+                      </Button>
+                    </Space>
+                  </Card>
+                ))}
+              </Space>
+            </Card>
+          </Space>
         </Col>
       </Row>
 
