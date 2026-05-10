@@ -370,6 +370,25 @@ export function SupplierSettlementsPage() {
               供应商财务动作完成后，继续与共享接入能力、回调配置和文档核对处于同一控制台中，避免把财务体验拆成孤岛页面。
             </Typography.Paragraph>
           </div>
+          <Card
+            data-testid="supplier-settlements-capability-matrix"
+            style={{
+              width: '100%',
+              borderRadius: 18,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            bodyStyle={{ padding: 18 }}
+          >
+            <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+              <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+              <Space wrap>
+                <Tag color="cyan" prefixIcon={<IconActivity />}>统一结算入口</Tag>
+                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
+              </Space>
+            </Space>
+          </Card>
           <Space wrap spacing={16} style={{ width: '100%' }} data-testid="supplier-settlements-shared-console-bridge">
             {visibleConsolePillars.map((pillar) => (
               <Card
