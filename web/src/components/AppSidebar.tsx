@@ -1,7 +1,7 @@
 import { Nav, Space, Tag, Typography } from '@douyinfe/semi-ui'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { groupedConsolePaths, resolveRouteDefinition, resolveRouteTitle } from '../utils/consoleNavigation'
+import { groupedConsolePaths, hasMenuPath, resolveRouteDefinition, resolveRouteTitle } from '../utils/consoleNavigation'
 import { MenuItem, useAuthStore } from '../store/authStore'
 
 export const SHARED_CONSOLE_MENU_LOADING_LABEL = '正在同步服务端菜单权限...'
@@ -25,6 +25,19 @@ function groupedMenu(source: MenuItem[]) {
   return { userItems, supplierItems, adminItems }
 }
 
+function integrationBridgeStatus(source: MenuItem[]) {
+  const hasApiKeys = hasMenuPath(source, '/api-keys')
+  const hasWebhooks = hasMenuPath(source, '/webhooks')
+  const hasDocs = hasMenuPath(source, '/docs')
+  if (hasApiKeys && hasWebhooks && hasDocs) {
+    return '已连通'
+  }
+  if (hasApiKeys || hasWebhooks || hasDocs) {
+    return '部分开放'
+  }
+  return '待开放'
+}
+
 function toNavItems(items: MenuItem[], role?: string) {
   return items.map((item) => ({
     itemKey: item.path,
@@ -41,6 +54,14 @@ export function AppSidebar() {
   const menuReady = menu.length > 0
   const { userItems, supplierItems, adminItems } = useMemo(() => groupedMenu(menu), [menu])
   const meta = roleMeta(user?.role)
+  const topologyItems = useMemo(
+    () => [
+      { key: 'shared', label: '共享菜单', value: String(userItems.length) },
+      { key: 'role', label: '角色工作区', value: String(supplierItems.length + adminItems.length) },
+      { key: 'bridge', label: '接入桥接', value: integrationBridgeStatus(menu) },
+    ],
+    [adminItems.length, menu, supplierItems.length, userItems.length],
+  )
 
   return (
     <div style={{ height: '100%', color: '#fff', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
@@ -74,6 +95,43 @@ export function AppSidebar() {
             >
               {meta.description}
             </Typography.Paragraph>
+          </div>
+          <div
+            data-testid="app-sidebar-workspace-topology"
+            style={{
+              width: '100%',
+              borderRadius: 16,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              padding: '14px 14px 12px',
+            }}
+          >
+            <Typography.Text style={{ color: '#f7f8f8', fontWeight: 600, fontSize: 12, letterSpacing: '0.01em' }}>
+              控制台拓扑
+            </Typography.Text>
+            <div
+              style={{
+                marginTop: 10,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 8,
+              }}
+            >
+              {topologyItems.map((item) => (
+                <div
+                  key={item.key}
+                  style={{
+                    borderRadius: 12,
+                    background: 'rgba(8,9,10,0.64)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    padding: '10px 10px 9px',
+                  }}
+                >
+                  <div style={{ color: 'rgba(138,143,152,0.92)', fontSize: 11, lineHeight: 1.4 }}>{item.label}</div>
+                  <div style={{ color: '#f7f8f8', fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>{`${item.label} ${item.value}`}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </Space>
       </div>

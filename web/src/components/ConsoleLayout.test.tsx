@@ -46,6 +46,10 @@ describe('ConsoleLayout', () => {
     const headerSummary = screen.getByTestId('console-layout-header-summary')
     expect(within(headerSummary).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     expect(within(headerSummary).getByLabelText('Tag: 单一登录后控制台')).toBeInTheDocument()
+    const workspaceTopology = screen.getByTestId('console-layout-workspace-topology')
+    expect(within(workspaceTopology).getByText('共享路由 3')).toBeInTheDocument()
+    expect(within(workspaceTopology).getByText('角色工作区 3')).toBeInTheDocument()
+    expect(within(workspaceTopology).getByText('接入桥接 部分开放')).toBeInTheDocument()
     const mainContent = screen.getByRole('main', { name: '控制台主内容' })
     expect(mainContent).toBeInTheDocument()
 

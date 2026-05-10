@@ -3,7 +3,7 @@ import { IconBell, IconHistogram } from '@douyinfe/semi-icons'
 import { ReactNode, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AppSidebar } from '../components/AppSidebar'
-import { resolveRouteDefinition, resolveRouteTitle, visibleQuickActionPaths } from '../utils/consoleNavigation'
+import { groupedConsolePaths, resolveRouteDefinition, resolveRouteTitle, visibleQuickActionPaths } from '../utils/consoleNavigation'
 import { useAuthStore } from '../store/authStore'
 
 const { Sider, Content, Header } = Layout
@@ -82,6 +82,17 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
         .filter((item): item is { path: string; label: string; icon: JSX.Element } => Boolean(item)),
     [location.pathname, menu, user?.role],
   )
+  const workspaceTopology = useMemo(() => {
+    const groups = groupedConsolePaths()
+    const sharedCount = menu.filter((item) => groups.shared.includes(item.path)).length
+    const roleCount = menu.filter((item) => groups.supplier.includes(item.path) || groups.admin.includes(item.path)).length
+    const integrationCount = menu.filter((item) => ['/api-keys', '/webhooks', '/docs'].includes(item.path)).length
+    return [
+      { key: 'shared', label: '共享路由', value: String(sharedCount) },
+      { key: 'role', label: '角色工作区', value: String(roleCount) },
+      { key: 'bridge', label: '接入桥接', value: integrationCount === 3 ? '已连通' : integrationCount > 0 ? '部分开放' : '待展开' },
+    ]
+  }, [menu])
 
   return (
     <Layout
@@ -144,6 +155,30 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
               <Typography.Text style={{ color: 'rgba(208,214,224,0.74)', fontSize: 13, lineHeight: 1.6 }}>
                 {roleIntro(user?.role)}
               </Typography.Text>
+            </div>
+            <div
+              data-testid="console-layout-workspace-topology"
+              style={{
+                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 10,
+              }}
+            >
+              {workspaceTopology.map((item) => (
+                <div
+                  key={item.key}
+                  style={{
+                    borderRadius: 14,
+                    background: 'rgba(255,255,255,0.035)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '10px 12px',
+                  }}
+                >
+                  <div style={{ color: 'rgba(138,143,152,0.96)', fontSize: 11, lineHeight: 1.4 }}>{item.label}</div>
+                  <div style={{ color: '#f7f8f8', fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>{`${item.label} ${item.value}`}</div>
+                </div>
+              ))}
             </div>
           </Space>
           <Space

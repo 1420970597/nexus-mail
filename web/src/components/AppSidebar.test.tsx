@@ -55,6 +55,12 @@ describe('AppSidebar', () => {
     expect(within(roleSummary).getByText('供应商')).toBeInTheDocument()
     expect(within(roleSummary).getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
     expect(screen.getByText('单一登录 · 按角色切换工作区')).toBeInTheDocument()
+
+    const topologyCard = screen.getByTestId('app-sidebar-workspace-topology')
+    expect(within(topologyCard).getByText('控制台拓扑')).toBeInTheDocument()
+    expect(topologyCard).toHaveTextContent('共享菜单 3')
+    expect(topologyCard).toHaveTextContent('角色工作区 2')
+    expect(topologyCard).toHaveTextContent('接入桥接 部分开放')
   })
 
   it('shows canonical shared-shell titles for admin shared routes', async () => {
