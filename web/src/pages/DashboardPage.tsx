@@ -114,7 +114,7 @@ function recommendedNextSteps(menu: MenuItem[]): RecommendedNextStep[] {
       description: '先去余额中心确认可用余额、冻结金额与最近流水，再决定是否立即采购或补款。',
       path: BALANCE_ROUTE,
       button: '查看余额中心',
-      tag: 'Budget',
+      tag: '资金准备',
     })
   }
 
@@ -125,7 +125,7 @@ function recommendedNextSteps(menu: MenuItem[]): RecommendedNextStep[] {
       description: '对照真实库存、成功率与价格，决定第一笔订单应该从哪个项目与域名池开始。',
       path: PROJECTS_ROUTE,
       button: '前往项目市场',
-      tag: 'Procurement',
+      tag: '项目采购',
     })
   }
 
@@ -136,7 +136,7 @@ function recommendedNextSteps(menu: MenuItem[]): RecommendedNextStep[] {
       description: '在订单中心跟踪邮箱分配、提取结果与 READY / FINISHED 终态，保持履约反馈留在同一壳内。',
       path: ORDERS_ROUTE,
       button: '查看订单中心',
-      tag: 'Fulfillment',
+      tag: '订单履约',
     })
   }
 
@@ -152,7 +152,7 @@ function recommendedNextSteps(menu: MenuItem[]): RecommendedNextStep[] {
       description: `继续进入 ${integrationDest}，完成程序化调用、回调联调与真实接口验证准备。`,
       path: API_KEYS_ROUTE,
       button: '打开 API Keys',
-      tag: 'Integration',
+      tag: '共享接入',
     })
   }
 

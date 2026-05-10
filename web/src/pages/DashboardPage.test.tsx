@@ -199,7 +199,7 @@ describe('DashboardPage shared-console journey hub', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders a cross-console journey lane for budget, procurement, fulfillment, and integration', async () => {
+  it('renders a localized cross-console journey lane for budget, procurement, fulfillment, and integration', async () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
@@ -216,6 +216,14 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(screen.getByText('角色扩展')).toBeInTheDocument()
     const lane = screen.getByTestId('dashboard-next-steps-lane')
     const scoped = within(lane)
+    expect(scoped.getByText('资金准备')).toBeInTheDocument()
+    expect(scoped.getByText('项目采购')).toBeInTheDocument()
+    expect(scoped.getByText('订单履约')).toBeInTheDocument()
+    expect(scoped.getByText('共享接入')).toBeInTheDocument()
+    expect(scoped.queryByText('Budget')).not.toBeInTheDocument()
+    expect(scoped.queryByText('Procurement')).not.toBeInTheDocument()
+    expect(scoped.queryByText('Fulfillment')).not.toBeInTheDocument()
+    expect(scoped.queryByText('Integration')).not.toBeInTheDocument()
     expect(scoped.getByTestId('dashboard-next-step-balance')).toBeInTheDocument()
     expect(scoped.getByTestId('dashboard-next-step-projects')).toBeInTheDocument()
     expect(scoped.getByTestId('dashboard-next-step-orders')).toBeInTheDocument()
