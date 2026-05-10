@@ -496,6 +496,25 @@ export function SupplierResourcesPage() {
                   资源侧页面继续和 API Keys、Webhook 与 Docs 处于同一套共享控制台中，避免把供应商接入路径拆成独立后台。
                 </Typography.Paragraph>
               </div>
+              <Card
+                data-testid="supplier-resources-capability-matrix"
+                style={{
+                  width: '100%',
+                  borderRadius: 18,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+                bodyStyle={{ padding: 16 }}
+              >
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Space wrap>
+                    <Tag color="cyan" prefixIcon={<IconServer />}>统一资源入口</Tag>
+                    <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                    <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
+                  </Space>
+                </Space>
+              </Card>
               <Space wrap spacing={16} style={{ width: '100%' }}>
                 {[
                   canOpenApiKeys
