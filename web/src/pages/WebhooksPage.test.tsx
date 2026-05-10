@@ -53,6 +53,14 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
             </section>
           )}
         />
+        <Route
+          path="/"
+          element={(
+            <section data-testid="webhooks-route-stub-home">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -252,16 +260,158 @@ describe('WebhooksPage', () => {
     expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
-  it('renders a Linear-style capability matrix beside the shared integration bridge', async () => {
+  it('renders a dedicated shared-console bridge with capability matrix and scoped CTA contracts', async () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    const bridgeScope = within(bridgeCard)
+    expect(bridgeCard).toHaveTextContent('共享接入桥接')
+    expect(bridgeScope.getByRole('heading', { name: 'Webhook → 开发者 API 接入工作台 → API 文档与接入控制台' })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
+
     const capabilityMatrix = screen.getByTestId('webhooks-capability-matrix')
     const matrixScope = within(capabilityMatrix)
     expect(matrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(matrixScope.getByText('统一回调入口')).toBeInTheDocument()
     expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
     expect(matrixScope.getByText('角色菜单扩展')).toBeInTheDocument()
+  })
+
+  it('keeps the shared-console bridge honest when only API Keys remain visible in menu', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      ],
+    })
+
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    const bridgeScope = within(bridgeCard)
+    expect(bridgeScope.getByRole('heading', { name: 'Webhook → 开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(bridgeCard).toHaveTextContent('当前账号暂未暴露 API 文档入口')
+    expect(bridgeScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+  })
+
+  it('keeps the shared-console bridge honest when only docs remain visible in menu', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    const bridgeScope = within(bridgeCard)
+    expect(bridgeScope.getByRole('heading', { name: 'Webhook → API 文档与接入控制台' })).toBeInTheDocument()
+    expect(bridgeCard).toHaveTextContent('当前账号暂未暴露 API Keys')
+    expect(bridgeScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+  })
+
+  it('shows a bridge fallback when neither API Keys nor docs are exposed by menu truth but another shared route exists', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+      ],
+    })
+
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    const bridgeScope = within(bridgeCard)
+    expect(bridgeScope.getByRole('heading', { name: 'Webhook → 返回共享工作台' })).toBeInTheDocument()
+    expect(bridgeCard).toHaveTextContent('当前菜单未暴露 API Keys 与 API 文档入口时，先回到服务端授予的共享工作台继续真实业务主链路。')
+    expect(bridgeScope.getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+  })
+
+  it('navigates from the bridge fallback to the preferred shared-console route', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+      ],
+    })
+
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    await user.click(within(bridgeCard).getByRole('button', { name: '返回共享工作台' }))
+    expect(await screen.findByTestId('webhooks-route-stub-home')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+  })
+
+  it('keeps the bridge copy honest when webhooks is the only shared route still visible', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+      ],
+    })
+
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    const bridgeScope = within(bridgeCard)
+    expect(bridgeScope.getByRole('heading', { name: 'Webhook 接入仍停留在当前工作台' })).toBeInTheDocument()
+    expect(bridgeCard).toHaveTextContent('当前账号仍停留在 Webhook 工作台中继续观察回调状态，等待服务端后续开放更多共享接入入口。')
+    expect(bridgeScope.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+  })
+
+  it('navigates from the docs-only bridge state via the remaining scoped CTA', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 1, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    renderWebhooksPage()
+
+    expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
+    await user.click(within(bridgeCard).getByRole('button', { name: '查看 API 文档' }))
+    expect(await screen.findByTestId('webhooks-route-stub-docs')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('renders shared-console navigation actions for the first integration loop', async () => {
@@ -271,7 +421,8 @@ describe('WebhooksPage', () => {
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '打开 API Keys' }))
+    const bridgeRegion = screen.getByTestId('webhooks-shared-console-bridge')
+    await user.click(within(bridgeRegion).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('webhooks-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
