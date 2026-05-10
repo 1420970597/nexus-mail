@@ -96,7 +96,8 @@ describe('ApiDocsPage', () => {
     expect(capabilityMatrixScope.queryByText('真实回调验证')).not.toBeInTheDocument()
 
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
-    expect(within(bridgeLane).getByText('共享控制台接入桥')).toBeInTheDocument()
+    expect(within(bridgeLane).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(bridgeLane).queryByText('共享控制台接入桥')).not.toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '文档、接入与回调共用一套共享控制台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
@@ -229,6 +230,8 @@ describe('ApiDocsPage', () => {
 
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const bridgeLane = screen.getByTestId('docs-shared-console-bridge')
+    expect(within(bridgeLane).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(bridgeLane).queryByText('共享控制台接入桥')).not.toBeInTheDocument()
     expect(within(bridgeLane).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '查看项目市场基线' })).not.toBeInTheDocument()
     expect(within(bridgeLane).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()

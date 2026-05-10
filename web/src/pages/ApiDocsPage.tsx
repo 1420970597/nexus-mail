@@ -428,7 +428,7 @@ export function ApiDocsPage() {
       >
         <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
           <div data-testid="docs-shared-console-bridge" style={{ width: '100%' }}>
-            <Tag color="cyan" shape="circle">共享控制台接入桥</Tag>
+            <Tag color="cyan" shape="circle">共享接入桥接</Tag>
             <Space align="start" style={{ width: '100%', justifyContent: 'space-between', marginTop: 14 }} wrap>
             <div>
               <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
