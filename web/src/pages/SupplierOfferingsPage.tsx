@@ -378,6 +378,25 @@ export function SupplierOfferingsPage() {
               供货侧页面继续和共享接入能力、文档与结算页处于同一控制台中，避免把供应商体验拆成独立后台。
             </Typography.Paragraph>
           </div>
+          <Card
+            data-testid="supplier-offerings-capability-matrix"
+            style={{
+              width: '100%',
+              borderRadius: 18,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(94,106,210,0.24)',
+            }}
+            bodyStyle={{ padding: 16 }}
+          >
+            <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+              <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+              <Space wrap>
+                <Tag color="cyan" prefixIcon={<IconServer />}>统一供给入口</Tag>
+                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
+              </Space>
+            </Space>
+          </Card>
           <Space wrap spacing={16} style={{ width: '100%' }}>
             {consolePillars.filter((pillar) => {
               if (pillar.path === API_KEYS_ROUTE) return canOpenApiKeys

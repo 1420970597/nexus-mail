@@ -185,6 +185,11 @@ describe('SupplierOfferingsPage', () => {
 
     const bridge = screen.getByTestId('supplier-offerings-shared-console-bridge')
     expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    const capabilityMatrix = screen.getByTestId('supplier-offerings-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一供给入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('服务端菜单扩展')).toBeInTheDocument()
     const apiPillar = within(bridge).getByTestId('supplier-offerings-console-pillar-api')
     expect(within(apiPillar).getByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(within(apiPillar).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
