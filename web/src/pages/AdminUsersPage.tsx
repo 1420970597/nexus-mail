@@ -285,10 +285,7 @@ export function AdminUsersPage() {
     [canOpenApiKeys, canOpenDocs, canOpenWebhooks, user?.role],
   )
 
-  const shouldShowFallback = useMemo(
-    () => fallbackRoute !== ADMIN_USERS_ROUTE && !canOpenRisk && !canOpenAudit && !canOpenApiKeys && !canOpenWebhooks && !canOpenDocs,
-    [fallbackRoute, canOpenApiKeys, canOpenAudit, canOpenDocs, canOpenRisk, canOpenWebhooks],
-  )
+  const canShowConsoleBridge = visibleSharedConsoleLinks.length > 0
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
@@ -387,6 +384,27 @@ export function AdminUsersPage() {
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与 API 文档与接入控制台继续验证平台对外接入链路。
               </Typography.Paragraph>
+              {canShowConsoleBridge ? (
+                <Card
+                  data-testid="admin-users-capability-matrix"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(94,106,210,0.24)',
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                    <Space wrap>
+                      <Tag color="cyan" prefixIcon={<IconUser />}>统一运营入口</Tag>
+                      <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+                      <Tag color="green" prefixIcon={<IconShield />}>管理员菜单扩展</Tag>
+                    </Space>
+                  </Space>
+                </Card>
+              ) : null}
               <Space wrap data-testid="admin-users-shared-console-links">
                 {visibleSharedConsoleLinks.map((item) => (
                   <Card
@@ -409,7 +427,7 @@ export function AdminUsersPage() {
                   </Card>
                 ))}
               </Space>
-              {shouldShowFallback ? (
+              {!canShowConsoleBridge && fallbackRoute !== ADMIN_USERS_ROUTE ? (
                 <Card
                   data-testid="admin-users-shared-console-fallback"
                   style={{

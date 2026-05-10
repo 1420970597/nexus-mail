@@ -132,6 +132,12 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(consoleMetric).queryByText('共享控制台联动')).not.toBeInTheDocument()
     expect(within(consoleMetric).getByText('高危动作、风控与接入留在同一后台闭环')).toBeInTheDocument()
 
+    const capabilityMatrix = screen.getByTestId('admin-users-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一运营入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('管理员菜单扩展')).toBeInTheDocument()
+
     const missionFlow = screen.getByTestId('admin-users-mission-flow')
     expect(within(missionFlow).getByRole('heading', { name: '管理员主任务流' })).toBeInTheDocument()
 
@@ -251,6 +257,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     expect(within(bridgeLinks).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('admin-users-capability-matrix')).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-users-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
     expect(within(fallbackCard).getByRole('heading', { name: '回到共享工作台继续管理员主链路' })).toBeInTheDocument()

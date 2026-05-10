@@ -175,7 +175,6 @@ export function AdminAuditPage() {
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const fallbackRoute = useMemo(() => resolvePreferredConsoleRoute(menu, user?.role), [menu, user?.role])
-  const shouldShowFallbackCta = fallbackRoute !== ADMIN_AUDIT_ROUTE
   const visibleActionLanes = useMemo(
     () => actionLanes.filter((item) => {
       if (item.path === ADMIN_RISK_ROUTE) return canOpenRisk
@@ -194,6 +193,8 @@ export function AdminAuditPage() {
     }),
     [canOpenApiKeys, canOpenDocs, canOpenRisk, sharedConsoleLinks],
   )
+  const canShowConsoleBridge = visibleSharedConsoleLinks.length > 0
+  const shouldShowFallbackCta = fallbackRoute !== ADMIN_AUDIT_ROUTE
 
   const handleQuery = async () => {
     const values = await form.validate()
@@ -300,6 +301,27 @@ export function AdminAuditPage() {
             <Typography.Paragraph style={{ marginBottom: 0 }}>
               审计页不是独立后台：查询完高危事件后，仍然通过风控中心、开发者 API 接入工作台与 API 文档与接入控制台在同一套控制台中继续验证真实鉴权契约与修复结果。
             </Typography.Paragraph>
+            {canShowConsoleBridge ? (
+              <Card
+                data-testid="admin-audit-capability-matrix"
+                style={{
+                  width: '100%',
+                  borderRadius: 18,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                  border: '1px solid rgba(94,106,210,0.24)',
+                }}
+                bodyStyle={{ padding: 16 }}
+              >
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Space wrap>
+                    <Tag color="cyan" prefixIcon={<IconShield />}>统一审计入口</Tag>
+                    <Tag color="blue" prefixIcon={<IconPulse />}>共享接入桥接</Tag>
+                    <Tag color="green" prefixIcon={<IconAlertTriangle />}>管理员菜单扩展</Tag>
+                  </Space>
+                </Space>
+              </Card>
+            ) : null}
             <Space wrap data-testid="admin-audit-shared-console-links">
               {visibleSharedConsoleLinks.map((item) => (
                 <Button
@@ -313,7 +335,7 @@ export function AdminAuditPage() {
                 </Button>
               ))}
             </Space>
-            {!canOpenRisk && !canOpenApiKeys && !canOpenDocs && shouldShowFallbackCta ? (
+            {!canShowConsoleBridge && shouldShowFallbackCta ? (
               <Card
                 data-testid="admin-audit-shared-console-fallback"
                 style={{

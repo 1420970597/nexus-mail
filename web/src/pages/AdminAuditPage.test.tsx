@@ -123,6 +123,12 @@ describe('AdminAuditPage', () => {
     expect(within(bridge).getByRole('button', { name: /继续查看风控/ })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
 
+    const capabilityMatrix = screen.getByTestId('admin-audit-capability-matrix')
+    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('统一审计入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('管理员菜单扩展')).toBeInTheDocument()
+
     const auditTable = screen.getByTestId('admin-audit-events-table-card')
     expect(within(auditTable).getByText('denied_whitelist')).toBeInTheDocument()
     expect(within(auditTable).getByText('blocked by whitelist')).toBeInTheDocument()
@@ -179,6 +185,7 @@ describe('AdminAuditPage', () => {
     expect(within(bridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /继续查看风控/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('admin-audit-capability-matrix')).not.toBeInTheDocument()
     const fallbackCard = screen.getByTestId('admin-audit-shared-console-fallback')
     expect(fallbackCard).toBeInTheDocument()
     expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
