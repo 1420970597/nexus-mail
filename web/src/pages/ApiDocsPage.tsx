@@ -380,7 +380,7 @@ export function ApiDocsPage() {
         <Col xs={24} xl={9}>
           <Card
             data-testid="docs-capability-matrix"
-            title="共享控制台能力矩阵"
+            title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
             style={{
               width: '100%',
               borderRadius: 24,
@@ -391,6 +391,11 @@ export function ApiDocsPage() {
             bodyStyle={{ padding: 20 }}
           >
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              <Space wrap>
+                <Tag color="cyan" prefixIcon={<IconArticle />}>统一文档入口</Tag>
+                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                <Tag color="green" prefixIcon={<IconServer />}>角色菜单扩展</Tag>
+              </Space>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.7)', lineHeight: 1.65 }}>
                 文档、密钥与回调仍在同一套深色控制台内完成核对与联调。
               </Typography.Paragraph>
