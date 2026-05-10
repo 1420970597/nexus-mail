@@ -84,14 +84,14 @@ export function ProjectsPage() {
     ...(canOpenDocs ? ['API 文档与接入控制台'] : []),
   ]
   const bridgeDescription = canOpenOrders && canOpenApiKeys && canOpenDocs
-    ? '项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约，再进入开发者 API 接入工作台与 API 文档完成自动化接入闭环。'
+    ? '项目采购、履约追踪与开发接入继续留在同一深色共享控制台，不拆第二套后台。'
     : canOpenOrders && canOpenApiKeys
-      ? '项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约，再进入开发者 API 接入工作台完成自动化接入闭环。'
+      ? '项目采购、履约追踪与开发接入继续留在同一深色共享控制台，当前先开放订单中心与 API Keys。'
       : canOpenOrders
-        ? '项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约。'
+        ? '项目采购与履约追踪继续留在同一深色共享控制台，当前先沿订单中心推进下一步。'
         : canOpenApiKeys
-          ? '项目采购页不是孤立列表：确认库存后，可继续前往开发者 API 接入工作台完成自动化接入闭环。'
-          : '项目采购页不是孤立列表：确认库存后，可继续沿当前账号已开放的共享控制台路径推进下一步动作。'
+          ? '项目采购与开发接入继续留在同一深色共享控制台，当前可直接前往 API Keys。'
+          : '项目采购继续留在当前深色共享控制台，等待服务端后续开放更多共享入口。'
 
   const handleCreate = async (record: InventoryItem) => {
     setCreatingKey(`${record.project_key}-${record.domain_id}`)
@@ -285,8 +285,8 @@ export function ProjectsPage() {
           >
             <Space wrap>
               <Tag color="cyan" prefixIcon={<IconBriefStroked />}>统一采购入口</Tag>
-              <Tag color="blue" prefixIcon={<IconBolt />}>共享履约桥接</Tag>
-              <Tag color="green" prefixIcon={<IconSafe />}>开发接入延伸</Tag>
+              <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+              <Tag color="green" prefixIcon={<IconSafe />}>单壳接入延伸</Tag>
             </Space>
           </Card>
           <Card title="采购任务流" data-testid="projects-mission-flow-card" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
