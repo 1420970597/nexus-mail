@@ -92,8 +92,8 @@ describe('LoginPage', () => {
     expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
     const entrySummary = within(screen.getByTestId('login-entry-summary'))
     expect(entrySummary.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
-    expect(entrySummary.getByText('统一入口、共享壳与接入路径，在同一登录面完成切换。')).toBeInTheDocument()
-    expect(entrySummary.queryByText('统一入口、共享壳与接入路径，同一登录面完成切换。')).not.toBeInTheDocument()
+    expect(entrySummary.getByText('统一入口、共享控制台与接入路径，在同一登录面完成切换。')).toBeInTheDocument()
+    expect(entrySummary.queryByText('统一入口、共享壳与接入路径，在同一登录面完成切换。')).not.toBeInTheDocument()
     expect(screen.queryByText('只保留登录入口、共享控制台与接入路径这三个稳定承诺，减少登录前的解释成本。')).not.toBeInTheDocument()
 
     const readinessScope = within(screen.getByTestId('login-control-plane-readiness'))

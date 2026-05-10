@@ -132,7 +132,7 @@ export function LoginPage() {
                   统一登录后控制台
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.72)', fontSize: 15, lineHeight: 1.62, maxWidth: 500, marginBottom: 0 }}>
-                  统一入口、共享壳与接入路径，在同一登录面完成切换。
+                  统一入口、共享控制台与接入路径，在同一登录面完成切换。
                 </Typography.Paragraph>
               </div>
               <Card
