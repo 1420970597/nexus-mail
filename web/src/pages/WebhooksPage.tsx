@@ -286,13 +286,13 @@ export function WebhooksPage() {
       return '在同一套控制台里先创建 endpoint、再发起 test delivery，并继续回到 API Keys 与 API 文档核对接入链路。'
     }
     if (canOpenApiKeys) {
-      return '在同一套控制台里先创建 endpoint、再发起 test delivery；当前账号暂未暴露 API 文档入口，先继续回到 API Keys 完成接入准备。'
+      return '在同一套控制台里先创建 endpoint、再发起 test delivery；当前账号暂未暴露 API 文档页（API 文档与接入控制台），先继续回到 API Keys 完成接入准备。'
     }
     if (canOpenDocs) {
       return '在同一套控制台里先创建 endpoint、再发起 test delivery；当前账号暂未暴露 API Keys，先继续回到 API 文档核对接入链路。'
     }
     if (hasBridgeFallbackRoute) {
-      return '当前菜单未暴露 API Keys 与 API 文档入口时，先回到服务端授予的共享工作台继续真实业务主链路。'
+      return '当前菜单未暴露 API Keys 与 API 文档页（API 文档与接入控制台）时，先回到服务端授予的共享工作台继续真实业务主链路。'
     }
     return '当前账号仍停留在 Webhook 工作台中继续观察回调状态，等待服务端后续开放更多共享接入入口。'
   }, [canOpenApiKeys, canOpenDocs, hasBridgeFallbackRoute])
