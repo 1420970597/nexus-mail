@@ -79,7 +79,18 @@ describe('ApiDocsPage', () => {
 
     renderApiDocsPage()
 
-    expect(screen.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const heroCard = screen.getByRole('region', { name: 'API 文档页入口概览' })
+    const heroScope = within(heroCard)
+    expect(heroCard).toHaveAttribute('role', 'region')
+    expect(heroCard).toHaveAttribute('aria-label', 'API 文档页入口概览')
+    expect(heroScope.getByText('共享控制台 · API 契约')).toBeInTheDocument()
+    expect(heroScope.getByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    expect(heroScope.getByText('公开文档、API Keys、Webhook 联调与真实订单回放保持在同一套深色共享控制台里，不再跳到独立后台或外置说明页。')).toBeInTheDocument()
+    expect(heroScope.getByText('注册后连续路径')).toBeInTheDocument()
+    expect(heroScope.getByText('统一接入路径')).toBeInTheDocument()
+    expect(heroScope.getByText('真实 API 回放仍在同一控制台继续完成')).toBeInTheDocument()
+    expect(heroScope.getByText('保持注册 → API Keys → Webhooks → Docs 的连续路径，再回到项目市场与订单中心验证真实业务链路。')).toBeInTheDocument()
+
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
     const capabilityMatrix = screen.getByTestId('docs-capability-matrix')

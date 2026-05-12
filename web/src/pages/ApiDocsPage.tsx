@@ -281,6 +281,8 @@ export function ApiDocsPage() {
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
+        role="region"
+        aria-label="API 文档页入口概览"
         style={{
           width: '100%',
           borderRadius: 24,
