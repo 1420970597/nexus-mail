@@ -143,6 +143,17 @@ describe('LoginPage', () => {
       expect(card.getByText(new RegExp(workspace.detailKeyword))).toBeInTheDocument()
     })
 
+    const capabilityMatrix = within(screen.getByTestId('login-capability-matrix'))
+    expect(capabilityMatrix.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(capabilityMatrix.getAllByTestId('login-capability-matrix-item')).toHaveLength(3)
+    expect(capabilityMatrix.getByText('统一登录入口')).toBeInTheDocument()
+    expect(capabilityMatrix.getByText('共享接入桥接')).toBeInTheDocument()
+    expect(capabilityMatrix.getByText('服务端菜单扩展')).toBeInTheDocument()
+    expect(capabilityMatrix.getByText('登录 / 注册同入口，避免拆出第二套身份站。')).toBeInTheDocument()
+    expect(capabilityMatrix.getByText('API Keys、Webhook 与文档核对继续留在同一控制台导航里。')).toBeInTheDocument()
+    expect(capabilityMatrix.getByText('供应商 / 管理员工作区只在授权后于同一壳内展开。')).toBeInTheDocument()
+    expect(capabilityMatrix.queryByText('多后台切换')).not.toBeInTheDocument()
+
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByText('登录后按角色展开工作区，继续同一套导航。')).toBeInTheDocument()

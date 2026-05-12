@@ -86,6 +86,27 @@ const roleWorkspaceRows = [
   },
 ]
 
+const capabilityMatrixRows = [
+  {
+    key: 'identity',
+    title: '统一登录入口',
+    detail: '登录 / 注册同入口，避免拆出第二套身份站。',
+    accent: 'rgba(56, 189, 248, 0.18)',
+  },
+  {
+    key: 'bridge',
+    title: '共享接入桥接',
+    detail: 'API Keys、Webhook 与文档核对继续留在同一控制台导航里。',
+    accent: 'rgba(96, 165, 250, 0.18)',
+  },
+  {
+    key: 'roles',
+    title: '服务端菜单扩展',
+    detail: '供应商 / 管理员工作区只在授权后于同一壳内展开。',
+    accent: 'rgba(34, 197, 94, 0.18)',
+  },
+]
+
 export function LoginPage() {
   const navigate = useNavigate()
   const { setSession } = useAuthStore()
@@ -282,6 +303,60 @@ export function LoginPage() {
                             {item.routes}
                           </Typography.Text>
                           <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.6)', margin: '7px 0 0', fontSize: 12, lineHeight: 1.58 }}>
+                            {item.detail}
+                          </Typography.Paragraph>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </Space>
+              </Card>
+              <Card
+                data-testid="login-capability-matrix"
+                bodyStyle={{ padding: 16 }}
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(180deg, rgba(15,16,17,0.9) 0%, rgba(19,20,24,0.94) 100%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: 'rgba(0,0,0,0.22) 0px 14px 36px',
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
+                  <div>
+                    <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
+                      控制台能力矩阵
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
+                      统一入口、接入桥接与角色扩展都留在同一登录后控制台中表达。
+                    </Typography.Paragraph>
+                  </div>
+                  <Row gutter={[10, 10]} style={{ width: '100%' }}>
+                    {capabilityMatrixRows.map((item) => (
+                      <Col xs={24} md={8} key={item.key}>
+                        <div
+                          data-testid="login-capability-matrix-item"
+                          style={{
+                            minHeight: '100%',
+                            borderRadius: 14,
+                            padding: '12px 14px',
+                            background: 'rgba(255,255,255,0.02)',
+                            border: `1px solid ${item.accent}`,
+                            boxShadow: 'rgba(0,0,0,0.18) 0px 0px 0px 1px inset',
+                          }}
+                        >
+                          <Typography.Text
+                            style={{
+                              display: 'block',
+                              color: '#f7f8f8',
+                              fontSize: 13,
+                              fontWeight: 600,
+                              lineHeight: 1.5,
+                            }}
+                          >
+                            {item.title}
+                          </Typography.Text>
+                          <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: '7px 0 0', fontSize: 12, lineHeight: 1.58 }}>
                             {item.detail}
                           </Typography.Paragraph>
                         </div>
