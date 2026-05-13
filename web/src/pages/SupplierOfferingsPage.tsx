@@ -368,41 +368,46 @@ export function SupplierOfferingsPage() {
         </Space>
       </Card>
 
-      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} data-testid="supplier-offerings-shared-console-bridge">
-        <section role="region" aria-labelledby="supplier-offerings-shared-console-bridge-heading">
-          <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-            <div>
-              <Typography.Title heading={4} id="supplier-offerings-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
-                共享接入桥接
+      <Card
+        style={sectionCardStyle()}
+        bodyStyle={{ padding: 24 }}
+        data-testid="supplier-offerings-shared-console-bridge"
+        role="region"
+        aria-labelledby="supplier-offerings-shared-console-bridge-heading"
+      >
+        <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+          <div>
+            <Typography.Title heading={4} id="supplier-offerings-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
+              共享接入桥接
+            </Typography.Title>
+            <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
+              供货侧页面继续和共享接入能力、文档与结算页处于同一控制台中，避免把供应商体验拆成独立后台。
+            </Typography.Paragraph>
+          </div>
+          <Card
+            data-testid="supplier-offerings-capability-matrix"
+            role="region"
+            aria-labelledby="supplier-offerings-capability-matrix-heading"
+            style={{
+              width: '100%',
+              borderRadius: 18,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(94,106,210,0.24)',
+            }}
+            bodyStyle={{ padding: 16 }}
+          >
+            <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+              <Typography.Title heading={6} id="supplier-offerings-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc', fontSize: 14, letterSpacing: '0.01em' }}>
+                控制台能力矩阵
               </Typography.Title>
-              <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
-                供货侧页面继续和共享接入能力、文档与结算页处于同一控制台中，避免把供应商体验拆成独立后台。
-              </Typography.Paragraph>
-            </div>
-            <Card
-              data-testid="supplier-offerings-capability-matrix"
-              style={{
-                width: '100%',
-                borderRadius: 18,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(94,106,210,0.24)',
-              }}
-              bodyStyle={{ padding: 16 }}
-            >
-              <section role="region" aria-labelledby="supplier-offerings-capability-matrix-heading">
-                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Title heading={6} id="supplier-offerings-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc', fontSize: 14, letterSpacing: '0.01em' }}>
-                    控制台能力矩阵
-                  </Typography.Title>
-                  <Space wrap>
-                    <Tag color="cyan" prefixIcon={<IconServer />}>统一供给入口</Tag>
-                    <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
-                    <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
-                  </Space>
-                </Space>
-              </section>
-            </Card>
-            <Space wrap spacing={16} style={{ width: '100%' }}>
+              <Space wrap>
+                <Tag color="cyan" prefixIcon={<IconServer />}>统一供给入口</Tag>
+                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
+              </Space>
+            </Space>
+          </Card>
+          <Space wrap spacing={16} style={{ width: '100%' }}>
               {consolePillars.filter((pillar) => {
                 if (pillar.path === API_KEYS_ROUTE) return canOpenApiKeys
                 if (pillar.path === WEBHOOKS_ROUTE) return canOpenWebhooks
@@ -460,8 +465,7 @@ export function SupplierOfferingsPage() {
                 </Card>
               ) : null}
             </Space>
-          </Space>
-        </section>
+        </Space>
       </Card>
 
       <Card title="新增 / 更新供货规则" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading}>

@@ -184,10 +184,15 @@ describe('SupplierOfferingsPage', () => {
     expect(within(missionFlow).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
 
     const bridgeCard = screen.getByTestId('supplier-offerings-shared-console-bridge')
-    const bridge = within(bridgeCard).getByRole('region', { name: '共享接入桥接' })
-    expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
-    const capabilityMatrix = within(bridge).getByRole('region', { name: '控制台能力矩阵' })
-    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
+    expect(bridgeCard).toHaveAttribute('role', 'region')
+    expect(bridgeCard).toHaveAttribute('aria-labelledby', 'supplier-offerings-shared-console-bridge-heading')
+    const bridge = within(bridgeCard).getByRole('heading', { name: '共享接入桥接' }).closest('[role="region"]') as HTMLElement
+    expect(bridge).toBe(bridgeCard)
+    const capabilityMatrixCard = screen.getByTestId('supplier-offerings-capability-matrix')
+    expect(capabilityMatrixCard).toHaveAttribute('role', 'region')
+    expect(capabilityMatrixCard).toHaveAttribute('aria-labelledby', 'supplier-offerings-capability-matrix-heading')
+    const capabilityMatrix = within(capabilityMatrixCard).getByRole('heading', { name: '控制台能力矩阵' }).closest('[role="region"]') as HTMLElement
+    expect(capabilityMatrix).toBe(capabilityMatrixCard)
     expect(within(capabilityMatrix).getByText('统一供给入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('服务端菜单扩展')).toBeInTheDocument()
