@@ -405,22 +405,28 @@ export function SettingsPage() {
               data-testid="settings-capability-matrix"
               role="region"
               aria-labelledby="settings-capability-matrix-heading"
-              title={<span id="settings-capability-matrix-heading" style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
               style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
               bodyStyle={{ padding: 20 }}
             >
-              <Descriptions data={capabilitySignals} align="left" />
+              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                <Typography.Title heading={5} id="settings-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                  控制台能力矩阵
+                </Typography.Title>
+                <Descriptions data={capabilitySignals} align="left" />
+              </Space>
             </Card>
             {missionCards.length > 0 ? (
               <Card
                 data-testid="settings-shared-console-bridge"
                 role="region"
                 aria-labelledby="settings-shared-console-bridge-heading"
-                title={<span id="settings-shared-console-bridge-heading" style={{ color: '#f8fafc' }}>共享接入桥接</span>}
                 style={{ borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
                 bodyStyle={{ padding: 20 }}
               >
                 <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                  <Typography.Title heading={5} id="settings-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                    共享接入桥接
+                  </Typography.Title>
                   <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
                     当前已开放的接入入口
                   </Typography.Title>

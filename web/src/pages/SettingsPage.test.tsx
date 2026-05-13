@@ -180,6 +180,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('控制台运行快捷入口')).toBeInTheDocument()
 
     const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一身份入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
@@ -188,6 +189,7 @@ describe('SettingsPage', () => {
     expect(within(capabilityMatrix).queryByText('文档入口')).not.toBeInTheDocument()
 
     const sharedBridge = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(within(sharedBridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(sharedBridge).getByRole('heading', { name: '当前已开放的接入入口' })).toBeInTheDocument()
     expect(within(sharedBridge).getByText('从设置中心直接进入当前账号已开放的接入入口，继续在同一登录后的共享控制台内完成接入核对。')).toBeInTheDocument()
     expect(within(sharedBridge).queryByText('从设置中心直接进入当前账号已开放的 API Keys、Webhook 与文档入口，继续在同一登录后的共享控制台内完成接入核对。')).not.toBeInTheDocument()
