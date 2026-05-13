@@ -93,9 +93,9 @@ describe('ApiDocsPage', () => {
 
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
-    const capabilityMatrix = screen.getByTestId('docs-capability-matrix')
-    const capabilityMatrixScope = within(capabilityMatrix)
-    expect(capabilityMatrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
+    const capabilityMatrixRegion = screen.getByRole('region', { name: '控制台能力矩阵' })
+    const capabilityMatrixScope = within(capabilityMatrixRegion)
+    expect(capabilityMatrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('统一文档入口')).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('共享接入桥接')).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('角色菜单扩展')).toBeInTheDocument()
@@ -158,8 +158,8 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByLabelText('Tag: 管理员扩展 · API 契约')).toBeInTheDocument()
     expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
 
-    const capabilityMatrixScope = within(screen.getByTestId('docs-capability-matrix'))
-    expect(capabilityMatrixScope.getByText('API 文档与接入控制台')).toBeInTheDocument()
+    const capabilityMatrixScope = within(screen.getByRole('region', { name: '控制台能力矩阵' }))
+    expect(capabilityMatrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(capabilityMatrixScope.getByText('Webhook 运维与回调观测')).toBeInTheDocument()
     expect(capabilityMatrixScope.queryByText('API Keys')).not.toBeInTheDocument()

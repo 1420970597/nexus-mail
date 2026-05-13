@@ -382,7 +382,6 @@ export function ApiDocsPage() {
         <Col xs={24} xl={9}>
           <Card
             data-testid="docs-capability-matrix"
-            title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
             style={{
               width: '100%',
               borderRadius: 24,
@@ -392,34 +391,39 @@ export function ApiDocsPage() {
             }}
             bodyStyle={{ padding: 20 }}
           >
-            <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-              <Space wrap>
-                <Tag color="cyan" prefixIcon={<IconArticle />}>统一文档入口</Tag>
-                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
-                <Tag color="green" prefixIcon={<IconServer />}>角色菜单扩展</Tag>
+            <section role="region" aria-labelledby="docs-capability-matrix-heading" style={{ width: '100%' }}>
+              <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                <Typography.Title id="docs-capability-matrix-heading" heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                  控制台能力矩阵
+                </Typography.Title>
+                <Space wrap>
+                  <Tag color="cyan" prefixIcon={<IconArticle />}>统一文档入口</Tag>
+                  <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                  <Tag color="green" prefixIcon={<IconServer />}>角色菜单扩展</Tag>
+                </Space>
+                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.7)', lineHeight: 1.65 }}>
+                  文档、密钥与回调仍在同一套深色控制台内完成核对与联调。
+                </Typography.Paragraph>
+                {surfaces.map((item) => (
+                  <Card
+                    key={item.label}
+                    style={{
+                      width: '100%',
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                    bodyStyle={{ padding: 16 }}
+                  >
+                    <Space vertical align="start" spacing={6} style={{ width: '100%' }}>
+                      <Typography.Text style={{ color: '#f7f8f8', fontWeight: 600 }}>{item.summary}</Typography.Text>
+                      <Typography.Text style={{ color: 'rgba(208,214,224,0.74)' }}>{item.label}</Typography.Text>
+                      <Tag color="grey">{item.route}</Tag>
+                    </Space>
+                  </Card>
+                ))}
               </Space>
-              <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.7)', lineHeight: 1.65 }}>
-                文档、密钥与回调仍在同一套深色控制台内完成核对与联调。
-              </Typography.Paragraph>
-              {surfaces.map((item) => (
-                <Card
-                  key={item.label}
-                  style={{
-                    width: '100%',
-                    borderRadius: 18,
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                  bodyStyle={{ padding: 16 }}
-                >
-                  <Space vertical align="start" spacing={6} style={{ width: '100%' }}>
-                    <Typography.Text style={{ color: '#f7f8f8', fontWeight: 600 }}>{item.summary}</Typography.Text>
-                    <Typography.Text style={{ color: 'rgba(208,214,224,0.74)' }}>{item.label}</Typography.Text>
-                    <Tag color="grey">{item.route}</Tag>
-                  </Space>
-                </Card>
-              ))}
-            </Space>
+            </section>
           </Card>
         </Col>
       </Row>
