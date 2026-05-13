@@ -398,8 +398,10 @@ describe('ApiKeysPage', () => {
     expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
     expect(auditScope.getByText('create')).toBeInTheDocument()
 
-    const bridgeScope = within(screen.getByTestId('api-keys-shared-console-bridge'))
-    expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    const bridgeScope = within(bridgeRegion)
+    expect(bridgeRegion).toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
+    expect(bridgeScope.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
@@ -407,8 +409,8 @@ describe('ApiKeysPage', () => {
     expect(screen.getByText(/若需要程序化回调，请继续配置 Webhook并查看 API 文档。/)).toBeInTheDocument()
     expect(screen.queryByText(/若需要程序化回调，请继续前往 Webhook 设置与 API 文档。/)).not.toBeInTheDocument()
 
-    const capabilityMatrix = screen.getByTestId('api-keys-capability-matrix')
-    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一凭证入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()

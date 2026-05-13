@@ -284,6 +284,8 @@ export function ApiKeysPage() {
 
       <Card
         data-testid="api-keys-shared-console-bridge"
+        role="region"
+        aria-labelledby="api-keys-shared-console-bridge-heading"
         style={{
           width: '100%',
           borderRadius: 22,
@@ -296,7 +298,14 @@ export function ApiKeysPage() {
           <Tag color="cyan" shape="circle">共享接入回退路径</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
-              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+              <Typography.Title
+                heading={4}
+                id="api-keys-shared-console-bridge-heading"
+                style={{ margin: '0 0 8px', color: '#f7f8f8' }}
+              >
+                共享接入桥接
+              </Typography.Title>
+              <Typography.Title heading={5} style={{ margin: '0 0 8px', color: 'rgba(226,232,240,0.92)' }}>
                 API Keys → {webhookRouteTitle} → API 文档与接入控制台
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
@@ -304,6 +313,8 @@ export function ApiKeysPage() {
               </Typography.Paragraph>
               <Card
                 data-testid="api-keys-capability-matrix"
+                role="region"
+                aria-labelledby="api-keys-capability-matrix-heading"
                 style={{
                   width: '100%',
                   marginTop: 16,
@@ -314,7 +325,9 @@ export function ApiKeysPage() {
                 bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Typography.Title heading={6} id="api-keys-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                    控制台能力矩阵
+                  </Typography.Title>
                   <Space wrap>
                     <Tag color="cyan" prefixIcon={<IconSafe />}>统一凭证入口</Tag>
                     <Tag color="blue" prefixIcon={<IconArticle />}>共享接入桥接</Tag>
