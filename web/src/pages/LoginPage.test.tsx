@@ -130,11 +130,12 @@ describe('LoginPage', () => {
     expect(readinessScope.queryByText('按服务端角色切换')).not.toBeInTheDocument()
     expect(screen.queryByText('开发环境快捷账号')).not.toBeInTheDocument()
 
-    const roleWorkspaceScope = within(screen.getByTestId('login-role-workspaces'))
+    const roleWorkspaceRegion = screen.getByRole('region', { name: '角色工作区如何在同一壳内展开' })
+    const roleWorkspaceScope = within(roleWorkspaceRegion)
     expect(roleWorkspaceScope.getByRole('heading', { name: '角色工作区如何在同一壳内展开' })).toBeInTheDocument()
     expect(roleWorkspaceScope.getByText('先用同一入口登录；额外工作区只会在服务端授予对应角色后出现在同一套控制台菜单里。')).toBeInTheDocument()
     expect(roleWorkspaceScope.queryByText('登录前不展示任何角色差异。')).not.toBeInTheDocument()
-    const roleWorkspaceCards = within(screen.getByTestId('login-role-workspaces')).getAllByTestId('login-role-workspace-card')
+    const roleWorkspaceCards = roleWorkspaceScope.getAllByTestId('login-role-workspace-card')
     expect(roleWorkspaceCards).toHaveLength(3)
     expectedRoleWorkspaces.forEach((workspace, index) => {
       const card = within(roleWorkspaceCards[index])
@@ -143,8 +144,9 @@ describe('LoginPage', () => {
       expect(card.getByText(new RegExp(workspace.detailKeyword))).toBeInTheDocument()
     })
 
-    const capabilityMatrix = within(screen.getByTestId('login-capability-matrix'))
-    expect(capabilityMatrix.getByText('控制台能力矩阵')).toBeInTheDocument()
+    const capabilityMatrixRegion = screen.getByRole('region', { name: '控制台能力矩阵' })
+    const capabilityMatrix = within(capabilityMatrixRegion)
+    expect(capabilityMatrix.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(capabilityMatrix.getAllByTestId('login-capability-matrix-item')).toHaveLength(3)
     expect(capabilityMatrix.getByText('统一登录入口')).toBeInTheDocument()
     expect(capabilityMatrix.getByText('共享接入桥接')).toBeInTheDocument()

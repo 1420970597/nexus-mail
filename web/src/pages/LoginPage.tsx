@@ -247,6 +247,8 @@ export function LoginPage() {
               </Card>
               <Card
                 data-testid="login-role-workspaces"
+                role="region"
+                aria-labelledby="login-role-workspaces-heading"
                 bodyStyle={{ padding: 16 }}
                 style={{
                   width: '100%',
@@ -258,7 +260,7 @@ export function LoginPage() {
               >
                 <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
                   <div>
-                    <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
+                    <Typography.Title heading={5} id="login-role-workspaces-heading" style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
                       角色工作区如何在同一壳内展开
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
@@ -313,6 +315,8 @@ export function LoginPage() {
               </Card>
               <Card
                 data-testid="login-capability-matrix"
+                role="region"
+                aria-labelledby="login-capability-matrix-heading"
                 bodyStyle={{ padding: 16 }}
                 style={{
                   width: '100%',
@@ -324,7 +328,7 @@ export function LoginPage() {
               >
                 <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
                   <div>
-                    <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
+                    <Typography.Title heading={5} id="login-capability-matrix-heading" style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
                       控制台能力矩阵
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
