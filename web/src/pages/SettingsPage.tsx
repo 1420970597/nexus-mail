@@ -403,7 +403,9 @@ export function SettingsPage() {
           <Space vertical spacing={16} style={{ width: '100%' }}>
             <Card
               data-testid="settings-capability-matrix"
-              title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
+              role="region"
+              aria-labelledby="settings-capability-matrix-heading"
+              title={<span id="settings-capability-matrix-heading" style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
               style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
               bodyStyle={{ padding: 20 }}
             >
@@ -412,7 +414,9 @@ export function SettingsPage() {
             {missionCards.length > 0 ? (
               <Card
                 data-testid="settings-shared-console-bridge"
-                title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
+                role="region"
+                aria-labelledby="settings-shared-console-bridge-heading"
+                title={<span id="settings-shared-console-bridge-heading" style={{ color: '#f8fafc' }}>共享接入桥接</span>}
                 style={{ borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
                 bodyStyle={{ padding: 20 }}
               >
