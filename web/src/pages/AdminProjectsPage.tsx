@@ -320,61 +320,70 @@ export function AdminProjectsPage() {
         </Card>
       ) : null}
 
-      <Card data-testid="admin-pricing-capability-matrix" title="控制台能力矩阵" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
-        <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-          <Space wrap>
-            <Tag color="cyan" prefixIcon={<IconServer />}>统一运营入口</Tag>
-            <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
-            <Tag color="green" prefixIcon={<IconActivity />}>管理员菜单扩展</Tag>
+      <Card data-testid="admin-pricing-capability-matrix" style={{ width: '100%', borderRadius: 24 }} bodyStyle={{ padding: 20 }}>
+        <section role="region" aria-labelledby="admin-pricing-capability-matrix-heading" style={{ width: '100%' }}>
+          <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+            <Typography.Title id="admin-pricing-capability-matrix-heading" heading={5} style={{ margin: 0, color: '#111827' }}>
+              控制台能力矩阵
+            </Typography.Title>
+            <Space wrap>
+              <Tag color="cyan" prefixIcon={<IconServer />}>统一运营入口</Tag>
+              <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+              <Tag color="green" prefixIcon={<IconActivity />}>管理员菜单扩展</Tag>
+            </Space>
+            <Table
+              pagination={false}
+              rowKey="key"
+              dataSource={capabilitySignals}
+              columns={[
+                { title: '能力维度', dataIndex: 'key', key: 'key' },
+                { title: '当前状态', dataIndex: 'value', key: 'value' },
+              ]}
+            />
           </Space>
-          <Table
-            pagination={false}
-            rowKey="key"
-            dataSource={capabilitySignals}
-            columns={[
-              { title: '能力维度', dataIndex: 'key', key: 'key' },
-              { title: '当前状态', dataIndex: 'value', key: 'value' },
-            ]}
-          />
-        </Space>
+        </section>
       </Card>
 
       {bridgeCards.length > 0 ? (
         <Card
           data-testid="admin-pricing-shared-console-bridge"
-          title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
           style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,23,42,0.96) 0%, rgba(17,24,39,0.92) 100%)', border: '1px solid rgba(96,165,250,0.18)' }}
           bodyStyle={{ padding: 20 }}
         >
-          <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-            <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.78)' }}>
-              所有接入入口继续停留在当前单一登录后的共享控制台壳内，不新增独立后台。
-            </Typography.Paragraph>
-            <Space wrap style={{ width: '100%' }} spacing={16}>
-              {bridgeCards.map((item) => (
-                <Card
-                  key={item.key}
-                  style={{
-                    flex: '1 1 260px',
-                    minWidth: 260,
-                    borderRadius: 20,
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                    border: '1px solid rgba(125,211,252,0.2)',
-                  }}
-                  bodyStyle={{ padding: 18 }}
-                >
-                  <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                    <Tag color="blue">{item.tag}</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)' }}>{item.description}</Typography.Paragraph>
-                    <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
-                      {item.button}
-                    </Button>
-                  </Space>
-                </Card>
-              ))}
+          <section role="region" aria-labelledby="admin-pricing-shared-console-bridge-heading" style={{ width: '100%' }}>
+            <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+              <Typography.Title id="admin-pricing-shared-console-bridge-heading" heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                共享接入桥接
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.78)' }}>
+                所有接入入口继续停留在当前单一登录后的共享控制台壳内，不新增独立后台。
+              </Typography.Paragraph>
+              <Space wrap style={{ width: '100%' }} spacing={16}>
+                {bridgeCards.map((item) => (
+                  <Card
+                    key={item.key}
+                    style={{
+                      flex: '1 1 260px',
+                      minWidth: 260,
+                      borderRadius: 20,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                      border: '1px solid rgba(125,211,252,0.2)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Tag color="blue">{item.tag}</Tag>
+                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)' }}>{item.description}</Typography.Paragraph>
+                      <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                        {item.button}
+                      </Button>
+                    </Space>
+                  </Card>
+                ))}
+              </Space>
             </Space>
-          </Space>
+          </section>
         </Card>
       ) : null}
 

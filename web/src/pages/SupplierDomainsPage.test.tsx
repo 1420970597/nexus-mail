@@ -174,7 +174,7 @@ describe('SupplierDomainsPage', () => {
     expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
 
-    const capabilityMatrix = screen.getByTestId('supplier-domains-capability-matrix')
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一供给入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
@@ -188,8 +188,8 @@ describe('SupplierDomainsPage', () => {
     await expectMetricCard('supplier-domains-metric-catch-all', 'Catch-All 已开启', '2', '支持泛收件的域名数量。')
     await expectMetricCard('supplier-domains-metric-regions', '覆盖区域', '4', '去重后的 region 数量。')
 
-    const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
-    expect(screen.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '共享控制台联动' })).not.toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()

@@ -357,36 +357,38 @@ export function SupplierDomainsPage() {
       </Card>
 
       <Card data-testid="supplier-domains-capability-matrix" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
-        <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <div>
-            <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
-              控制台能力矩阵
-            </Typography.Title>
-            <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
-              域名池准备完成后，继续在同一登录后的共享控制台中补齐资源映射、供货规则与接入联动。
-            </Typography.Paragraph>
-          </div>
-          <Space wrap spacing={16} style={{ width: '100%' }}>
-            {consolePillars.map((pillar) => (
-              <Card
-                key={pillar.key}
-                style={{
-                  flex: '1 1 260px',
-                  minWidth: 260,
-                  borderRadius: 20,
-                  background: 'rgba(15,23,42,0.48)',
-                  border: '1px solid rgba(148,163,184,0.16)',
-                }}
-                bodyStyle={{ padding: 18 }}
-              >
-                <Space vertical align="start" spacing={10}>
-                  <Tag color="grey">{pillar.label}</Tag>
-                  <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>{pillar.summary}</Typography.Text>
-                </Space>
-              </Card>
-            ))}
+        <section role="region" aria-labelledby="supplier-domains-capability-matrix-heading" style={{ width: '100%' }}>
+          <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+            <div>
+              <Typography.Title id="supplier-domains-capability-matrix-heading" heading={4} style={{ margin: 0, color: '#f8fafc' }}>
+                控制台能力矩阵
+              </Typography.Title>
+              <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
+                域名池准备完成后，继续在同一登录后的共享控制台中补齐资源映射、供货规则与接入联动。
+              </Typography.Paragraph>
+            </div>
+            <Space wrap spacing={16} style={{ width: '100%' }}>
+              {consolePillars.map((pillar) => (
+                <Card
+                  key={pillar.key}
+                  style={{
+                    flex: '1 1 260px',
+                    minWidth: 260,
+                    borderRadius: 20,
+                    background: 'rgba(15,23,42,0.48)',
+                    border: '1px solid rgba(148,163,184,0.16)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10}>
+                    <Tag color="grey">{pillar.label}</Tag>
+                    <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>{pillar.summary}</Typography.Text>
+                  </Space>
+                </Card>
+              ))}
+            </Space>
           </Space>
-        </Space>
+        </section>
       </Card>
 
       <Row gutter={16} style={{ width: '100%' }}>
@@ -462,50 +464,52 @@ export function SupplierDomainsPage() {
             </Card>
 
             <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
-              <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-                <div>
-                  <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
-                    共享接入桥接
-                  </Typography.Title>
-                  <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
-                    域名池准备完成后，继续在同一登录态中验证接入密钥、Webhook 与文档，不拆第二套供应商后台。
-                  </Typography.Paragraph>
-                </div>
-                <Space vertical align="start" spacing={12} style={{ width: '100%' }} data-testid="supplier-domains-shared-console-bridge">
-                  {visibleBridgeLinks.map((item) => (
-                    <Card
-                      key={item.path}
-                      style={{
-                        width: '100%',
-                        borderRadius: 18,
-                        background: 'rgba(15,23,42,0.48)',
-                        border: '1px solid rgba(148,163,184,0.16)',
-                      }}
-                      bodyStyle={{ padding: 16 }}
-                    >
-                      <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                        <Tag color="white" prefixIcon={item.icon}>{item.label}</Tag>
-                        <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>{item.summary}</Typography.Text>
-                        <Button
-                          theme="borderless"
-                          type="primary"
-                          aria-label={item.button}
-                          icon={<IconArrowRight />}
-                          onClick={() => navigate(item.path)}>
-                          {item.button}
+              <section role="region" aria-labelledby="supplier-domains-shared-console-bridge-heading" style={{ width: '100%' }}>
+                <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                  <div>
+                    <Typography.Title id="supplier-domains-shared-console-bridge-heading" heading={4} style={{ margin: 0, color: '#f8fafc' }}>
+                      共享接入桥接
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
+                      域名池准备完成后，继续在同一登录态中验证接入密钥、Webhook 与文档，不拆第二套供应商后台。
+                    </Typography.Paragraph>
+                  </div>
+                  <Space vertical align="start" spacing={12} style={{ width: '100%' }} data-testid="supplier-domains-shared-console-bridge">
+                    {visibleBridgeLinks.map((item) => (
+                      <Card
+                        key={item.path}
+                        style={{
+                          width: '100%',
+                          borderRadius: 18,
+                          background: 'rgba(15,23,42,0.48)',
+                          border: '1px solid rgba(148,163,184,0.16)',
+                        }}
+                        bodyStyle={{ padding: 16 }}
+                      >
+                        <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                          <Tag color="white" prefixIcon={item.icon}>{item.label}</Tag>
+                          <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>{item.summary}</Typography.Text>
+                          <Button
+                            theme="borderless"
+                            type="primary"
+                            aria-label={item.button}
+                            icon={<IconArrowRight />}
+                            onClick={() => navigate(item.path)}>
+                            {item.button}
+                          </Button>
+                        </Space>
+                      </Card>
+                    ))}
+                    {shouldShowBridgeFallback ? (
+                      <div data-testid="supplier-domains-shared-console-fallback">
+                        <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute || DASHBOARD_ROUTE)}>
+                          返回共享工作台
                         </Button>
-                      </Space>
-                    </Card>
-                  ))}
-                  {shouldShowBridgeFallback ? (
-                    <div data-testid="supplier-domains-shared-console-fallback">
-                      <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute || DASHBOARD_ROUTE)}>
-                        返回共享工作台
-                      </Button>
-                    </div>
-                  ) : null}
+                      </div>
+                    ) : null}
+                  </Space>
                 </Space>
-              </Space>
+              </section>
             </Card>
 
             <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} data-testid="supplier-domains-region-metrics">
