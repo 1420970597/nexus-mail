@@ -182,6 +182,8 @@ export function LoginPage() {
               </div>
               <Card
                 data-testid="login-control-plane-readiness"
+                role="region"
+                aria-labelledby="login-control-plane-readiness-heading"
                 bodyStyle={{ padding: 16 }}
                 style={{
                   width: '100%',
@@ -193,7 +195,7 @@ export function LoginPage() {
               >
                 <Space vertical spacing={12} align="start" style={{ width: '100%' }}>
                   <div>
-                    <Typography.Title heading={5} style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
+                    <Typography.Title heading={5} id="login-control-plane-readiness-heading" style={{ color: '#f7f8f8', marginBottom: 6, letterSpacing: '-0.18px' }}>
                       控制台入口信号
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, lineHeight: 1.6, fontSize: 13 }}>
