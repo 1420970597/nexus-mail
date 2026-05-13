@@ -296,14 +296,25 @@ export function AdminAuditPage() {
             ))}
           </Space>
         </Card>
-        <Card title="共享接入桥接" style={{ flex: '1 1 320px', borderRadius: 24 }}>
-          <Space vertical align="start" spacing={12} data-testid="admin-audit-shared-console-bridge">
+        <Card
+          data-testid="admin-audit-shared-console-bridge"
+          role="region"
+          aria-labelledby="admin-audit-shared-console-bridge-heading"
+          title={(
+            <Typography.Title heading={6} id="admin-audit-shared-console-bridge-heading" style={{ margin: 0 }}>
+              共享接入桥接
+            </Typography.Title>
+          )}
+          style={{ flex: '1 1 320px', borderRadius: 24 }}>
+          <Space vertical align="start" spacing={12}>
             <Typography.Paragraph style={{ marginBottom: 0 }}>
               审计页不是独立后台：查询完高危事件后，仍然通过风控中心、开发者 API 接入工作台与 API 文档与接入控制台在同一套控制台中继续验证真实鉴权契约与修复结果。
             </Typography.Paragraph>
             {canShowConsoleBridge ? (
               <Card
                 data-testid="admin-audit-capability-matrix"
+                role="region"
+                aria-labelledby="admin-audit-capability-matrix-heading"
                 style={{
                   width: '100%',
                   borderRadius: 18,
@@ -313,7 +324,7 @@ export function AdminAuditPage() {
                 bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Typography.Title heading={6} id="admin-audit-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>控制台能力矩阵</Typography.Title>
                   <Space wrap>
                     <Tag color="cyan" prefixIcon={<IconShield />}>统一审计入口</Tag>
                     <Tag color="blue" prefixIcon={<IconPulse />}>共享接入桥接</Tag>
