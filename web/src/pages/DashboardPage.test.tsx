@@ -240,7 +240,7 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
-    const capabilityMatrix = screen.getByTestId('dashboard-capability-matrix')
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     const matrixScope = within(capabilityMatrix)
     expect(matrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(matrixScope.getByText('统一身份入口')).toBeInTheDocument()
@@ -250,7 +250,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(matrixScope.getByText('API Keys、Webhook 与文档链路继续停留在共享壳内')).toBeInTheDocument()
     expect(matrixScope.getByText('服务端菜单开放更多角色工作台时，无需切换独立后台')).toBeInTheDocument()
 
-    const bridgeCard = screen.getByTestId('dashboard-shared-console-bridge')
+    const bridgeCard = screen.getByRole('region', { name: '共享接入桥接' })
     const bridgeScope = within(bridgeCard)
     expect(bridgeScope.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(bridgeScope.getByText('从总览直接继续 API Keys、Webhook 与文档核对；具体入口仍以后端返回的共享菜单为准，保持采购、履约与接入在同一套深色控制台里串联。')).toBeInTheDocument()

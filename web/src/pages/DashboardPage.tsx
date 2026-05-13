@@ -684,73 +684,79 @@ export function DashboardPage() {
         <Col xs={24} xl={10}>
           <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
             <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-capability-matrix" bodyStyle={{ padding: 22 }}>
-              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-                <div>
-                  <Tag color="cyan">共享壳能力总览</Tag>
-                  <Typography.Title heading={5} style={{ margin: '12px 0 0', color: '#f7f8f8' }}>
-                    控制台能力矩阵
-                  </Typography.Title>
-                  <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
-                    统一身份、共享接入与角色扩展继续遵循服务端菜单真值，保持所有动作停留在同一套深色控制台中。
-                  </Typography.Paragraph>
-                </div>
-                <Card
-                  bodyStyle={{ padding: 16 }}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                >
-                  <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f7f8f8' }}>统一身份入口</Typography.Text>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
-                      个人资料与角色核对继续留在单一登录后控制台
+              <section role="region" aria-labelledby="dashboard-capability-matrix-heading" style={{ width: '100%' }}>
+                <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                  <div>
+                    <Tag color="cyan">共享壳能力总览</Tag>
+                    <Typography.Title id="dashboard-capability-matrix-heading" heading={5} style={{ margin: '12px 0 0', color: '#f7f8f8' }}>
+                      控制台能力矩阵
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
+                      统一身份、共享接入与角色扩展继续遵循服务端菜单真值，保持所有动作停留在同一套深色控制台中。
                     </Typography.Paragraph>
-                  </Space>
-                </Card>
-                <Card
-                  bodyStyle={{ padding: 16 }}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                >
-                  <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f7f8f8' }}>共享接入桥接</Typography.Text>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
-                      API Keys、Webhook 与文档链路继续停留在共享壳内
-                    </Typography.Paragraph>
-                  </Space>
-                </Card>
-                <Card
-                  bodyStyle={{ padding: 16 }}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                >
-                  <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f7f8f8' }}>角色菜单扩展</Typography.Text>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
-                      服务端菜单开放更多角色工作台时，无需切换独立后台
-                    </Typography.Paragraph>
-                  </Space>
-                </Card>
-              </Space>
+                  </div>
+                  <Card
+                    bodyStyle={{ padding: 16 }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                      <Typography.Text strong style={{ color: '#f7f8f8' }}>统一身份入口</Typography.Text>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                        个人资料与角色核对继续留在单一登录后控制台
+                      </Typography.Paragraph>
+                    </Space>
+                  </Card>
+                  <Card
+                    bodyStyle={{ padding: 16 }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                      <Typography.Text strong style={{ color: '#f7f8f8' }}>共享接入桥接</Typography.Text>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                        API Keys、Webhook 与文档链路继续停留在共享壳内
+                      </Typography.Paragraph>
+                    </Space>
+                  </Card>
+                  <Card
+                    bodyStyle={{ padding: 16 }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                      <Typography.Text strong style={{ color: '#f7f8f8' }}>角色菜单扩展</Typography.Text>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                        服务端菜单开放更多角色工作台时，无需切换独立后台
+                      </Typography.Paragraph>
+                    </Space>
+                  </Card>
+                </Space>
+              </section>
             </Card>
             <Card
-              title="共享接入桥接"
               data-testid="dashboard-shared-console-bridge"
               style={metricCardStyle('rgba(94,106,210,0.24)')}
               bodyStyle={{ padding: 22 }}
             >
-              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
-                  从总览直接继续 API Keys、Webhook 与文档核对；具体入口仍以后端返回的共享菜单为准，保持采购、履约与接入在同一套深色控制台里串联。
-                </Typography.Paragraph>
-                <Space wrap>
-                  {canOpenApiKeys ? (
-                    <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
-                      打开 API Keys
-                    </Button>
-                  ) : null}
-                  {canOpenWebhooks ? (
-                    <Button onClick={() => navigate(WEBHOOKS_ROUTE)}>前往 {webhookBridgeLabel}</Button>
-                  ) : null}
-                  {canOpenDocs ? <Button onClick={() => navigate(DOCS_ROUTE)}>查看 API 文档</Button> : null}
+              <section role="region" aria-labelledby="dashboard-shared-console-bridge-heading" style={{ width: '100%' }}>
+                <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                  <Typography.Title id="dashboard-shared-console-bridge-heading" heading={6} style={{ margin: 0, color: '#f7f8f8' }}>
+                    共享接入桥接
+                  </Typography.Title>
+                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                    从总览直接继续 API Keys、Webhook 与文档核对；具体入口仍以后端返回的共享菜单为准，保持采购、履约与接入在同一套深色控制台里串联。
+                  </Typography.Paragraph>
+                  <Space wrap>
+                    {canOpenApiKeys ? (
+                      <Button type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
+                        打开 API Keys
+                      </Button>
+                    ) : null}
+                    {canOpenWebhooks ? (
+                      <Button onClick={() => navigate(WEBHOOKS_ROUTE)}>前往 {webhookBridgeLabel}</Button>
+                    ) : null}
+                    {canOpenDocs ? <Button onClick={() => navigate(DOCS_ROUTE)}>查看 API 文档</Button> : null}
+                  </Space>
                 </Space>
-              </Space>
+              </section>
             </Card>
             <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-role-surface-map" bodyStyle={{ padding: 22 }}>
               <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
