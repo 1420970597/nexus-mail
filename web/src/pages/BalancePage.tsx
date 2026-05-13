@@ -311,7 +311,9 @@ export function BalancePage() {
         </Col>
         <Col xs={24} xl={8}>
           <Card
-            title={<span style={{ color: '#f8fafc' }}>控制台能力矩阵</span>}
+            role="region"
+            aria-labelledby="balance-capability-matrix-heading"
+            title={<Typography.Title heading={6} id="balance-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>控制台能力矩阵</Typography.Title>}
             data-testid="balance-capability-matrix"
             style={{
               width: '100%',
@@ -348,7 +350,9 @@ export function BalancePage() {
           </Card>
           <Card
             data-testid="balance-shared-console-bridge"
-            title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
+            role="region"
+            aria-labelledby="balance-shared-console-bridge-heading"
+            title={<Typography.Title heading={6} id="balance-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>共享接入桥接</Typography.Title>}
             style={{
               width: '100%',
               marginTop: 16,

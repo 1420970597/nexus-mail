@@ -169,8 +169,8 @@ describe('BalancePage', () => {
     expect(within(missionCards).getByText('再追踪冻结与退款链路')).toBeInTheDocument()
     expect(within(missionCards).getByText('最后串联接入与回调')).toBeInTheDocument()
 
-    const capabilityMatrix = screen.getByTestId('balance-capability-matrix')
-    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     const capabilitySignals = within(capabilityMatrix).getByTestId('balance-capability-signals')
     expect(within(capabilitySignals).getByText('统一资金入口')).toBeInTheDocument()
     expect(within(capabilitySignals).getByText('共享接入桥接')).toBeInTheDocument()
@@ -181,8 +181,8 @@ describe('BalancePage', () => {
       background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
     })
 
-    const capabilityBridge = screen.getByTestId('balance-shared-console-bridge')
-    expect(within(capabilityBridge).getByText('共享接入桥接')).toBeInTheDocument()
+    const capabilityBridge = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(within(capabilityBridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(capabilityBridge).getByText('余额确认后继续前往 API Keys、Webhook 与 API 文档；采购、履约、售后与程序化接入保持在同一套深色共享控制台中串联。')).toBeInTheDocument()
     expect(within(capabilityBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(capabilityBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
