@@ -284,14 +284,15 @@ describe('ProjectsPage', () => {
     let view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('projects-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveTextContent('项目市场 → 订单中心 → 开发者 API 接入工作台 → API 文档与接入控制台')
     expect(bridge).toHaveTextContent('项目采购、履约追踪与开发接入继续留在同一深色共享控制台，不拆第二套后台。')
     expect(bridge).not.toHaveTextContent('项目采购页不是孤立列表：确认库存后，可继续回到订单中心查看履约，再进入开发者 API 接入工作台与 API 文档完成自动化接入闭环。')
+    expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
 
-    const matrix = screen.getByTestId('projects-capability-matrix')
+    const matrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     const matrixScope = within(matrix)
-    expect(matrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(matrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(matrixScope.getByText('统一采购入口')).toBeInTheDocument()
     expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
     expect(matrixScope.getByText('单壳接入延伸')).toBeInTheDocument()
@@ -305,14 +306,14 @@ describe('ProjectsPage', () => {
     view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('projects-shared-console-bridge')).getByRole('button', { name: '打开 API Keys' }))
+    await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByTestId('projects-route-stub-api-keys-bridge')).toBeInTheDocument()
 
     view.unmount()
     view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('projects-shared-console-bridge')).getByRole('button', { name: '查看 API 文档' }))
+    await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: '查看 API 文档' }))
     expect(await screen.findByTestId('projects-route-stub-docs-bridge')).toBeInTheDocument()
 
     view.unmount()

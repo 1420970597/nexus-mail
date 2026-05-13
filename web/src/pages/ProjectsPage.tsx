@@ -249,7 +249,9 @@ export function ProjectsPage() {
         <Col xs={24} xl={7}>
           <Card
             data-testid="projects-shared-console-bridge"
-            title="共享接入桥接"
+            role="region"
+            aria-labelledby="projects-shared-console-bridge-heading"
+            title={<Typography.Title heading={6} id="projects-shared-console-bridge-heading" style={{ margin: 0 }}>共享接入桥接</Typography.Title>}
             style={{ width: '100%', borderRadius: 24, marginBottom: 16 }}
             bodyStyle={{ padding: 20 }}
           >
@@ -279,7 +281,9 @@ export function ProjectsPage() {
           </Card>
           <Card
             data-testid="projects-capability-matrix"
-            title="控制台能力矩阵"
+            role="region"
+            aria-labelledby="projects-capability-matrix-heading"
+            title={<Typography.Title heading={6} id="projects-capability-matrix-heading" style={{ margin: 0 }}>控制台能力矩阵</Typography.Title>}
             style={{ width: '100%', borderRadius: 24, marginBottom: 16 }}
             bodyStyle={{ padding: 20 }}
           >
