@@ -455,6 +455,8 @@ export function WebhooksPage() {
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
           <Card
             data-testid="webhooks-shared-console-bridge"
+            role="region"
+            aria-labelledby="webhooks-shared-console-bridge-heading"
             style={{
               width: '100%',
               borderRadius: 24,
@@ -465,6 +467,9 @@ export function WebhooksPage() {
           >
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
               <Tag color="green">共享接入桥接</Tag>
+              <Typography.Title id="webhooks-shared-console-bridge-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
+                共享接入桥接
+              </Typography.Title>
               <Typography.Title heading={5} style={{ color: '#f8fafc', margin: 0 }}>
                 {bridgeHeading}
               </Typography.Title>
@@ -473,6 +478,8 @@ export function WebhooksPage() {
               </Typography.Paragraph>
               <Card
                 data-testid="webhooks-capability-matrix"
+                role="region"
+                aria-labelledby="webhooks-capability-matrix-heading"
                 style={{
                   width: '100%',
                   borderRadius: 18,
@@ -482,7 +489,9 @@ export function WebhooksPage() {
                 bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Typography.Title id="webhooks-capability-matrix-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
+                    控制台能力矩阵
+                  </Typography.Title>
                   <Space wrap>
                     <Tag color="cyan" prefixIcon={<IconServer />}>统一回调入口</Tag>
                     <Tag color="blue" prefixIcon={<IconArticle />}>共享接入桥接</Tag>
