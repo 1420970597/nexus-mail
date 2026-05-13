@@ -307,36 +307,40 @@ export function ProfilePage() {
           <Card
             role="region"
             aria-labelledby="profile-capability-bridge-heading"
-            title={<span id="profile-capability-bridge-heading" style={{ color: '#f8fafc' }}>共享接入桥接</span>}
             data-testid="profile-capability-bridge"
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
           >
-            <Row gutter={[16, 16]}>
-              {visibleCapabilityCards.map((item) => (
-                <Col xs={24} md={12} key={item.key}>
-                  <Card
-                    style={{
-                      height: '100%',
-                      borderRadius: 20,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: '1px solid rgba(94,106,210,0.24)',
-                    }}
-                    bodyStyle={{ padding: 18 }}
-                  >
-                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
-                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
-                        {item.description}
-                      </Typography.Paragraph>
-                      <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
-                        {item.buttonText}
-                      </Button>
-                    </Space>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+            <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+              <Typography.Title heading={5} id="profile-capability-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                共享接入桥接
+              </Typography.Title>
+              <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                {visibleCapabilityCards.map((item) => (
+                  <Col xs={24} md={12} key={item.key}>
+                    <Card
+                      style={{
+                        height: '100%',
+                        borderRadius: 20,
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                        border: '1px solid rgba(94,106,210,0.24)',
+                      }}
+                      bodyStyle={{ padding: 18 }}
+                    >
+                      <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                        <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                        <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
+                          {item.description}
+                        </Typography.Paragraph>
+                        <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                          {item.buttonText}
+                        </Button>
+                      </Space>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Space>
           </Card>
         </Col>
         <Col xs={24} xl={9}>
@@ -368,7 +372,9 @@ export function ProfilePage() {
                 bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text id="profile-capability-matrix-heading" strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Typography.Title heading={6} id="profile-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                    控制台能力矩阵
+                  </Typography.Title>
                   <Space wrap>
                     <Tag color="cyan" prefixIcon={<IconSafe />}>统一身份入口</Tag>
                     <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>

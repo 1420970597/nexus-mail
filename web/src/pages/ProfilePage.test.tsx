@@ -128,7 +128,7 @@ describe('ProfilePage', () => {
 
     const capabilityRegion = screen.getByRole('region', { name: '共享接入桥接' })
     expect(capabilityRegion).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
-    expect(within(capabilityRegion).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityRegion).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(capabilityRegion).queryByText('控制台桥接能力')).not.toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
@@ -138,7 +138,7 @@ describe('ProfilePage', () => {
     expect(within(capabilityRegion).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
 
     const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
-    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一身份入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
