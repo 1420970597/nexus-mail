@@ -312,6 +312,7 @@ describe('OrdersPage', () => {
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
     const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveAttribute('aria-labelledby', 'orders-shared-console-bridge-heading')
+    expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(bridge).toHaveTextContent('订单中心 → 开发者 API 接入工作台 → 项目市场')
     expect(bridge).toHaveTextContent('履约页不是独立后台：确认邮箱、结果与终态后，继续回到开发者 API 接入工作台校验自动化调用，或返回项目市场继续下一轮采购。')
 
