@@ -305,7 +305,9 @@ export function ProfilePage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
           <Card
-            title={<span style={{ color: '#f8fafc' }}>共享接入桥接</span>}
+            role="region"
+            aria-labelledby="profile-capability-bridge-heading"
+            title={<span id="profile-capability-bridge-heading" style={{ color: '#f8fafc' }}>共享接入桥接</span>}
             data-testid="profile-capability-bridge"
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
@@ -354,6 +356,8 @@ export function ProfilePage() {
                     : '当前账号默认以用户身份进入共享控制台；如后续被服务端授予供应商或管理员角色，菜单会继续在同一壳内扩展。'}
               </Typography.Paragraph>
               <Card
+                role="region"
+                aria-labelledby="profile-capability-matrix-heading"
                 data-testid="profile-capability-matrix"
                 style={{
                   width: '100%',
@@ -364,7 +368,7 @@ export function ProfilePage() {
                 bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Typography.Text id="profile-capability-matrix-heading" strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
                   <Space wrap>
                     <Tag color="cyan" prefixIcon={<IconSafe />}>统一身份入口</Tag>
                     <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>

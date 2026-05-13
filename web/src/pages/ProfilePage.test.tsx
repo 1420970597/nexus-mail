@@ -126,7 +126,7 @@ describe('ProfilePage', () => {
     expect(within(roleFocusCard).getByText('当前推荐：进入项目市场，继续共享控制台主链路。')).toBeInTheDocument()
     expect(within(roleFocusCard).queryByText('当前推荐动作：进入项目市场。保持单一登录后控制台，不额外拆分独立后台。')).not.toBeInTheDocument()
 
-    const capabilityRegion = screen.getByTestId('profile-capability-bridge')
+    const capabilityRegion = screen.getByRole('region', { name: '共享接入桥接' })
     expect(capabilityRegion).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(capabilityRegion).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(capabilityRegion).queryByText('控制台桥接能力')).not.toBeInTheDocument()
@@ -137,7 +137,7 @@ describe('ProfilePage', () => {
     expect(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
 
-    const capabilityMatrix = screen.getByTestId('profile-capability-matrix')
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一身份入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
@@ -156,14 +156,14 @@ describe('ProfilePage', () => {
 
     view.unmount()
     view = renderProfilePage()
-    const webhookRegion = screen.getByTestId('profile-capability-bridge')
+    const webhookRegion = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(webhookRegion).getByRole('button', { name: '继续配置 Webhook' }))
     const webhooksRouteStub = await screen.findByTestId('webhooks-route-stub')
     expect(within(webhooksRouteStub).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
-    const docsRegion = screen.getByTestId('profile-capability-bridge')
+    const docsRegion = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(docsRegion).getByRole('button', { name: '查看 API 文档' }))
     const docsRouteStub = await screen.findByTestId('api-docs-route-stub')
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
@@ -294,7 +294,7 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    const capabilityRegion = await screen.findByTestId('profile-capability-bridge')
+    const capabilityRegion = await screen.findByRole('region', { name: '共享接入桥接' })
     expect(within(capabilityRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier') })).toBeInTheDocument()
     expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'user') })).not.toBeInTheDocument()
 
@@ -320,7 +320,7 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    const capabilityRegion = await screen.findByTestId('profile-capability-bridge')
+    const capabilityRegion = await screen.findByRole('region', { name: '共享接入桥接' })
     expect(within(capabilityRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
     expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'user') })).not.toBeInTheDocument()
 
