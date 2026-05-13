@@ -280,7 +280,7 @@ describe('OrdersPage', () => {
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
   })
 
-  it('renders a shared-console capability matrix and bridge actions for the fulfillment slice', async () => {
+  it('renders semantic shared-console bridge and capability regions for the fulfillment slice', async () => {
     const user = userEvent.setup()
 
     const renderWithRoutes = () => render(
@@ -310,13 +310,15 @@ describe('OrdersPage', () => {
     let view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('orders-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(bridge).toHaveAttribute('aria-labelledby', 'orders-shared-console-bridge-heading')
     expect(bridge).toHaveTextContent('订单中心 → 开发者 API 接入工作台 → 项目市场')
     expect(bridge).toHaveTextContent('履约页不是独立后台：确认邮箱、结果与终态后，继续回到开发者 API 接入工作台校验自动化调用，或返回项目市场继续下一轮采购。')
 
-    const matrix = screen.getByTestId('orders-capability-matrix')
+    const matrix = screen.getByRole('region', { name: '控制台能力矩阵' })
+    expect(matrix).toHaveAttribute('aria-labelledby', 'orders-capability-matrix-heading')
     const matrixScope = within(matrix)
-    expect(matrixScope.getByText('控制台能力矩阵')).toBeInTheDocument()
+    expect(matrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(matrixScope.getByText('统一履约入口')).toBeInTheDocument()
     expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
     expect(matrixScope.getByText('采购回放路径')).toBeInTheDocument()
@@ -328,7 +330,7 @@ describe('OrdersPage', () => {
     view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('orders-shared-console-bridge')).getByRole('button', { name: '回到项目市场' }))
+    await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: '回到项目市场' }))
     expect(await screen.findByTestId('orders-route-stub-projects-bridge')).toBeInTheDocument()
 
     view.unmount()
