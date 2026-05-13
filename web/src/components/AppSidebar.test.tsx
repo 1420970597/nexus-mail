@@ -50,14 +50,15 @@ describe('AppSidebar', () => {
     expect(within(supplierGroup).getByText(resolveRouteTitle('/supplier/domains', 'supplier'))).toBeInTheDocument()
     expect(within(supplierGroup).getByText(resolveRouteTitle('/supplier/settlements', 'supplier'))).toBeInTheDocument()
 
-    const roleSummary = screen.getByTestId('app-sidebar-role-summary')
+    const roleSummary = screen.getByRole('region', { name: '当前角色摘要' })
     expect(screen.getByText('Nexus-Mail · 统一控制台')).toBeInTheDocument()
+    expect(within(roleSummary).getByRole('heading', { name: '当前角色摘要' })).toBeInTheDocument()
     expect(within(roleSummary).getByText('供应商')).toBeInTheDocument()
     expect(within(roleSummary).getByText('资源供给 / 供货规则 / 结算')).toBeInTheDocument()
     expect(screen.getByText('单一登录 · 按角色切换工作区')).toBeInTheDocument()
 
-    const topologyCard = screen.getByTestId('app-sidebar-workspace-topology')
-    expect(within(topologyCard).getByText('控制台拓扑')).toBeInTheDocument()
+    const topologyCard = screen.getByRole('region', { name: '控制台拓扑' })
+    expect(within(topologyCard).getByRole('heading', { name: '控制台拓扑' })).toBeInTheDocument()
     expect(topologyCard).toHaveTextContent('共享菜单 3')
     expect(topologyCard).toHaveTextContent('角色工作区 2')
     expect(topologyCard).toHaveTextContent('接入桥接 部分开放')
@@ -89,7 +90,8 @@ describe('AppSidebar', () => {
     expect(within(sharedGroup).getByText('余额中心')).toBeInTheDocument()
     expect(within(sharedGroup).queryByText('Webhook 设置')).not.toBeInTheDocument()
 
-    const roleSummary = screen.getByTestId('app-sidebar-role-summary')
+    const roleSummary = screen.getByRole('region', { name: '当前角色摘要' })
+    expect(within(roleSummary).getByRole('heading', { name: '当前角色摘要' })).toBeInTheDocument()
     expect(within(roleSummary).getByText('管理员')).toBeInTheDocument()
     expect(within(roleSummary).getByText('风控 / 审计 / 运营配置')).toBeInTheDocument()
   })

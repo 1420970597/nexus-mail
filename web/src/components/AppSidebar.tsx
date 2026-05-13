@@ -85,11 +85,17 @@ export function AppSidebar() {
             Nexus-Mail
           </Typography.Title>
           <Typography.Text style={{ color: 'rgba(208,214,224,0.74)' }}>单一登录 · 按角色切换工作区</Typography.Text>
-          <div data-testid="app-sidebar-role-summary" role="group" aria-label="当前角色摘要" style={{ width: '100%' }}>
+          <div data-testid="app-sidebar-role-summary" role="region" aria-label="当前角色摘要" style={{ width: '100%' }}>
             <Space spacing={8} align="center" wrap>
               <Tag color={meta.color}>{meta.label}</Tag>
               <Tag color="grey">{meta.pill}</Tag>
             </Space>
+            <Typography.Title
+              heading={6}
+              style={{ color: '#f7f8f8', margin: '10px 0 4px', fontSize: 12, letterSpacing: '0.02em' }}
+            >
+              当前角色摘要
+            </Typography.Title>
             <Typography.Paragraph
               style={{ color: 'rgba(138,143,152,0.96)', marginBottom: 0, fontSize: 12, lineHeight: 1.7 }}
             >
@@ -98,6 +104,8 @@ export function AppSidebar() {
           </div>
           <div
             data-testid="app-sidebar-workspace-topology"
+            role="region"
+            aria-label="控制台拓扑"
             style={{
               width: '100%',
               borderRadius: 16,
@@ -106,9 +114,12 @@ export function AppSidebar() {
               padding: '14px 14px 12px',
             }}
           >
-            <Typography.Text style={{ color: '#f7f8f8', fontWeight: 600, fontSize: 12, letterSpacing: '0.01em' }}>
+            <Typography.Title
+              heading={6}
+              style={{ color: '#f7f8f8', margin: '0 0 10px', fontSize: 12, letterSpacing: '0.01em' }}
+            >
               控制台拓扑
-            </Typography.Text>
+            </Typography.Title>
             <div
               style={{
                 marginTop: 10,
