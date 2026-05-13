@@ -735,7 +735,7 @@ describe('App', () => {
     expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
-  it('redirects plain users from supplier routes back into the shared shared-shell dashboard lane', async () => {
+  it('redirects plain users from supplier routes back into the shared dashboard next-steps lane', async () => {
     setSession('user')
     renderApp([SUPPLIER_RESOURCES_ROUTE])
     expect(await screen.findByTestId('dashboard-next-steps-lane')).toBeInTheDocument()

@@ -47,7 +47,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
         <Route
           path="/"
           element={(
-            <section data-testid="shared-console-home">
+            <section data-testid="shared-console-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -259,6 +259,8 @@ describe('ApiDocsPage', () => {
 
     await user.click(within(loopLane).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('keeps docs-to-integration loop actions inside the shared console after reading docs', async () => {
@@ -303,5 +305,7 @@ describe('ApiDocsPage', () => {
     loopLane = screen.getByTestId('docs-shared-console-loop')
     await user.click(within(loopLane).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })

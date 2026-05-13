@@ -56,7 +56,7 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
         <Route
           path="/"
           element={(
-            <section data-testid="webhooks-route-stub-home">
+            <section data-testid="webhooks-route-stub-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -365,6 +365,7 @@ describe('WebhooksPage', () => {
     const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
     await user.click(within(bridgeCard).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('webhooks-route-stub-home')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
@@ -467,7 +468,7 @@ describe('WebhooksPage', () => {
       <MemoryRouter initialEntries={[WEBHOOKS_ROUTE]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path={WEBHOOKS_ROUTE} element={<WebhooksPage />} />
-          <Route path="/" element={<section data-testid="shared-console-home-route-stub"><h1>控制台总览</h1></section>} />
+          <Route path="/" element={<section data-testid="shared-console-home-route-stub" role="region" aria-label="共享控制台首页"><h1>控制台总览</h1></section>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -481,6 +482,7 @@ describe('WebhooksPage', () => {
 
     await user.click(fallbackButton)
     expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
