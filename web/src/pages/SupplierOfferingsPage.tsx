@@ -369,93 +369,99 @@ export function SupplierOfferingsPage() {
       </Card>
 
       <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} data-testid="supplier-offerings-shared-console-bridge">
-        <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <div>
-            <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
-              共享接入桥接
-            </Typography.Title>
-            <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
-              供货侧页面继续和共享接入能力、文档与结算页处于同一控制台中，避免把供应商体验拆成独立后台。
-            </Typography.Paragraph>
-          </div>
-          <Card
-            data-testid="supplier-offerings-capability-matrix"
-            style={{
-              width: '100%',
-              borderRadius: 18,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-              border: '1px solid rgba(94,106,210,0.24)',
-            }}
-            bodyStyle={{ padding: 16 }}
-          >
-            <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-              <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
-              <Space wrap>
-                <Tag color="cyan" prefixIcon={<IconServer />}>统一供给入口</Tag>
-                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
-                <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
-              </Space>
-            </Space>
-          </Card>
-          <Space wrap spacing={16} style={{ width: '100%' }}>
-            {consolePillars.filter((pillar) => {
-              if (pillar.path === API_KEYS_ROUTE) return canOpenApiKeys
-              if (pillar.path === WEBHOOKS_ROUTE) return canOpenWebhooks
-              if (pillar.path === DOCS_ROUTE) return canOpenDocs
-              return true
-            }).map((pillar) => (
-              <Card
-                data-testid={`supplier-offerings-console-pillar-${pillar.key}`}
-                key={pillar.key}
-                style={{
-                  flex: '1 1 240px',
-                  minWidth: 240,
-                  borderRadius: 18,
-                  background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-                bodyStyle={{ padding: 18 }}
-              >
+        <section role="region" aria-labelledby="supplier-offerings-shared-console-bridge-heading">
+          <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+            <div>
+              <Typography.Title heading={4} id="supplier-offerings-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                共享接入桥接
+              </Typography.Title>
+              <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
+                供货侧页面继续和共享接入能力、文档与结算页处于同一控制台中，避免把供应商体验拆成独立后台。
+              </Typography.Paragraph>
+            </div>
+            <Card
+              data-testid="supplier-offerings-capability-matrix"
+              style={{
+                width: '100%',
+                borderRadius: 18,
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                border: '1px solid rgba(94,106,210,0.24)',
+              }}
+              bodyStyle={{ padding: 16 }}
+            >
+              <section role="region" aria-labelledby="supplier-offerings-capability-matrix-heading">
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>{pillar.label}</Typography.Text>
-                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>{pillar.summary}</Typography.Text>
-                  <Button icon={pillar.icon} onClick={() => navigate(pillar.path)}>
-                    {pillar.button}
-                  </Button>
+                  <Typography.Title heading={6} id="supplier-offerings-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc', fontSize: 14, letterSpacing: '0.01em' }}>
+                    控制台能力矩阵
+                  </Typography.Title>
+                  <Space wrap>
+                    <Tag color="cyan" prefixIcon={<IconServer />}>统一供给入口</Tag>
+                    <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                    <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
+                  </Space>
                 </Space>
-              </Card>
-            ))}
-            {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (
-              <Card
-                data-testid="supplier-offerings-shared-console-fallback"
-                style={{
-                  flex: '1 1 240px',
-                  minWidth: 240,
-                  borderRadius: 18,
-                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
-                  border: '1px solid rgba(148,163,184,0.28)',
-                }}
-                bodyStyle={{ padding: 18 }}
-              >
-                <Space vertical align="start" spacing={10}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
-                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
-                    当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。
-                  </Typography.Text>
-                  <Button
-                    data-testid="supplier-offerings-shared-console-fallback-button"
-                    theme="solid"
-                    type="primary"
-                    icon={<IconArrowRight />}
-                    onClick={() => navigate(fallbackRoute)}
-                  >
-                    返回共享工作台
-                  </Button>
-                </Space>
-              </Card>
-            ) : null}
+              </section>
+            </Card>
+            <Space wrap spacing={16} style={{ width: '100%' }}>
+              {consolePillars.filter((pillar) => {
+                if (pillar.path === API_KEYS_ROUTE) return canOpenApiKeys
+                if (pillar.path === WEBHOOKS_ROUTE) return canOpenWebhooks
+                if (pillar.path === DOCS_ROUTE) return canOpenDocs
+                return true
+              }).map((pillar) => (
+                <Card
+                  data-testid={`supplier-offerings-console-pillar-${pillar.key}`}
+                  key={pillar.key}
+                  style={{
+                    flex: '1 1 240px',
+                    minWidth: 240,
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Text strong style={{ color: '#f8fafc' }}>{pillar.label}</Typography.Text>
+                    <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>{pillar.summary}</Typography.Text>
+                    <Button icon={pillar.icon} onClick={() => navigate(pillar.path)}>
+                      {pillar.button}
+                    </Button>
+                  </Space>
+                </Card>
+              ))}
+              {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (
+                <Card
+                  data-testid="supplier-offerings-shared-console-fallback"
+                  style={{
+                    flex: '1 1 240px',
+                    minWidth: 240,
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                    border: '1px solid rgba(148,163,184,0.28)',
+                  }}
+                  bodyStyle={{ padding: 18 }}
+                >
+                  <Space vertical align="start" spacing={10}>
+                    <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
+                    <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
+                      当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。
+                    </Typography.Text>
+                    <Button
+                      data-testid="supplier-offerings-shared-console-fallback-button"
+                      theme="solid"
+                      type="primary"
+                      icon={<IconArrowRight />}
+                      onClick={() => navigate(fallbackRoute)}
+                    >
+                      返回共享工作台
+                    </Button>
+                  </Space>
+                </Card>
+              ) : null}
+            </Space>
           </Space>
-        </Space>
+        </section>
       </Card>
 
       <Card title="新增 / 更新供货规则" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading}>
