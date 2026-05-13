@@ -362,40 +362,33 @@ export function SupplierSettlementsPage() {
 
       <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <div>
-            <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
-              共享接入桥接
-            </Typography.Title>
-            <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
-              供应商财务动作完成后，继续与共享接入能力、回调配置和文档核对处于同一控制台中，避免把财务体验拆成孤岛页面。
-            </Typography.Paragraph>
-          </div>
           <Card
-            data-testid="supplier-settlements-capability-matrix"
+            data-testid="supplier-settlements-shared-console-bridge"
+            role="region"
+            aria-labelledby="supplier-settlements-shared-console-bridge-heading"
             style={{
               width: '100%',
-              borderRadius: 18,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+              borderRadius: 22,
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.012) 100%)',
               border: '1px solid rgba(255,255,255,0.08)',
             }}
-            bodyStyle={{ padding: 18 }}
+            bodyStyle={{ padding: 22 }}
           >
-            <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-              <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
-              <Space wrap>
-                <Tag color="cyan" prefixIcon={<IconActivity />}>统一结算入口</Tag>
-                <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
-                <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
-              </Space>
-            </Space>
-          </Card>
-          <Space wrap spacing={16} style={{ width: '100%' }} data-testid="supplier-settlements-shared-console-bridge">
-            {visibleConsolePillars.map((pillar) => (
+            <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+              <div>
+                <Typography.Title heading={4} id="supplier-settlements-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                  共享接入桥接
+                </Typography.Title>
+                <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
+                  供应商财务动作完成后，继续与共享接入能力、回调配置和文档核对处于同一控制台中，避免把财务体验拆成孤岛页面。
+                </Typography.Paragraph>
+              </div>
               <Card
-                key={pillar.key}
+                data-testid="supplier-settlements-capability-matrix"
+                role="region"
+                aria-labelledby="supplier-settlements-capability-matrix-heading"
                 style={{
-                  flex: '1 1 240px',
-                  minWidth: 240,
+                  width: '100%',
                   borderRadius: 18,
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
                   border: '1px solid rgba(255,255,255,0.08)',
@@ -403,43 +396,69 @@ export function SupplierSettlementsPage() {
                 bodyStyle={{ padding: 18 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>{pillar.label}</Typography.Text>
-                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>{pillar.summary}</Typography.Text>
-                  <Button icon={pillar.icon} onClick={pillar.action}>
-                    {pillar.key === 'api'
-                      ? '打开 API Keys'
-                      : pillar.key === 'webhooks'
-                        ? '继续配置 Webhook'
-                        : '查看 API 文档'}
-                  </Button>
+                  <Typography.Title heading={6} id="supplier-settlements-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                    控制台能力矩阵
+                  </Typography.Title>
+                  <Space wrap>
+                    <Tag color="cyan" prefixIcon={<IconActivity />}>统一结算入口</Tag>
+                    <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
+                    <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
+                  </Space>
                 </Space>
               </Card>
-            ))}
-            {shouldShowConsoleFallback ? (
-              <Card
-                key="console-fallback"
-                style={{
-                  flex: '1 1 240px',
-                  minWidth: 240,
-                  borderRadius: 18,
-                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
-                  border: '1px solid rgba(148,163,184,0.28)',
-                }}
-                bodyStyle={{ padding: 18 }}
-                data-testid="supplier-settlements-shared-console-fallback"
-              >
-                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
-                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
-                    共享接入入口暂未由服务端暴露时，先回到共享工作台继续真实业务主链路，不在当前页泄露未授权集成入口。
-                  </Typography.Text>
-                  <Button data-testid="supplier-settlements-shared-console-fallback-button" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
-                    返回共享工作台
-                  </Button>
-                </Space>
-              </Card>
-            ) : null}
-          </Space>
+              <Space wrap spacing={16} style={{ width: '100%' }}>
+                {visibleConsolePillars.map((pillar) => (
+                  <Card
+                    key={pillar.key}
+                    style={{
+                      flex: '1 1 240px',
+                      minWidth: 240,
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                      <Typography.Text strong style={{ color: '#f8fafc' }}>{pillar.label}</Typography.Text>
+                      <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>{pillar.summary}</Typography.Text>
+                      <Button icon={pillar.icon} onClick={pillar.action}>
+                        {pillar.key === 'api'
+                          ? '打开 API Keys'
+                          : pillar.key === 'webhooks'
+                            ? '继续配置 Webhook'
+                            : '查看 API 文档'}
+                      </Button>
+                    </Space>
+                  </Card>
+                ))}
+                {shouldShowConsoleFallback ? (
+                  <Card
+                    key="console-fallback"
+                    style={{
+                      flex: '1 1 240px',
+                      minWidth: 240,
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                      border: '1px solid rgba(148,163,184,0.28)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                    data-testid="supplier-settlements-shared-console-fallback"
+                  >
+                    <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                      <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
+                      <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
+                        共享接入入口暂未由服务端暴露时，先回到共享工作台继续真实业务主链路，不在当前页泄露未授权集成入口。
+                      </Typography.Text>
+                      <Button data-testid="supplier-settlements-shared-console-fallback-button" icon={<IconArrowRight />} onClick={() => navigate(fallbackRoute)}>
+                        返回共享工作台
+                      </Button>
+                    </Space>
+                  </Card>
+                ) : null}
+              </Space>
+            </Space>
+          </Card>
         </Space>
       </Card>
 
