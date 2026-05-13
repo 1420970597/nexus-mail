@@ -486,17 +486,25 @@ export function SupplierResourcesPage() {
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card style={sectionCardStyle()} bodyStyle={{ padding: 20 }} data-testid="supplier-resources-shared-console-bridge">
+          <Card
+            role="region"
+            aria-labelledby="supplier-resources-shared-console-bridge-heading"
+            style={sectionCardStyle()}
+            bodyStyle={{ padding: 20 }}
+            data-testid="supplier-resources-shared-console-bridge"
+          >
             <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
               <div style={{ width: '100%' }}>
-                <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
+                <Typography.Title id="supplier-resources-shared-console-bridge-heading" heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
                   共享接入桥接
                 </Typography.Title>
                 <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', marginTop: 8, marginBottom: 0 }}>
-                  资源侧页面继续和 API Keys、Webhook 与 Docs 处于同一套共享控制台中，避免把供应商接入路径拆成独立后台。
+                  资源准备、接入核对与文档回放继续留在同一套供应商共享控制台里，不拆成第二套后台。
                 </Typography.Paragraph>
               </div>
               <Card
+                role="region"
+                aria-labelledby="supplier-resources-capability-matrix-heading"
                 data-testid="supplier-resources-capability-matrix"
                 style={{
                   width: '100%',
@@ -507,12 +515,17 @@ export function SupplierResourcesPage() {
                 bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                  <Typography.Title id="supplier-resources-capability-matrix-heading" heading={6} style={{ margin: 0, color: '#f8fafc' }}>
+                    控制台能力矩阵
+                  </Typography.Title>
                   <Space wrap>
                     <Tag color="cyan" prefixIcon={<IconServer />}>统一资源入口</Tag>
                     <Tag color="blue" prefixIcon={<IconSafe />}>共享接入桥接</Tag>
                     <Tag color="green" prefixIcon={<IconBolt />}>服务端菜单扩展</Tag>
                   </Space>
+                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>
+                    域名池、账号健康与共享接入入口继续由同一登录后的菜单真值驱动。
+                  </Typography.Paragraph>
                 </Space>
               </Card>
               <Space wrap spacing={16} style={{ width: '100%' }}>
