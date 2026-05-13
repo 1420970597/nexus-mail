@@ -379,7 +379,17 @@ export function AdminUsersPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card data-testid="admin-users-shared-console-bridge" title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
+          <Card
+            data-testid="admin-users-shared-console-bridge"
+            role="region"
+            aria-labelledby="admin-users-shared-console-bridge-heading"
+            title={(
+              <Typography.Title heading={6} id="admin-users-shared-console-bridge-heading" style={{ margin: 0 }}>
+                共享接入桥接
+              </Typography.Title>
+            )}
+            style={{ width: '100%', borderRadius: 24 }}
+          >
             <Space vertical align="start" spacing={12}>
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 即使当前是管理员资金运营切片，也要保持单一登录后控制台叙事：完成账务 / 争议动作后，仍通过 API Keys、Webhook 与 API 文档与接入控制台继续验证平台对外接入链路。
@@ -387,6 +397,8 @@ export function AdminUsersPage() {
               {canShowConsoleBridge ? (
                 <Card
                   data-testid="admin-users-capability-matrix"
+                  role="region"
+                  aria-labelledby="admin-users-capability-matrix-heading"
                   style={{
                     width: '100%',
                     borderRadius: 18,
@@ -396,7 +408,9 @@ export function AdminUsersPage() {
                   bodyStyle={{ padding: 16 }}
                 >
                   <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                    <Typography.Title heading={6} id="admin-users-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                      控制台能力矩阵
+                    </Typography.Title>
                     <Space wrap>
                       <Tag color="cyan" prefixIcon={<IconUser />}>统一运营入口</Tag>
                       <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
