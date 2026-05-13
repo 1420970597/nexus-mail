@@ -295,7 +295,16 @@ export function AdminRiskPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
+          <Card
+            role="region"
+            aria-labelledby="admin-risk-shared-console-bridge-heading"
+            title={(
+              <Typography.Title heading={6} id="admin-risk-shared-console-bridge-heading" style={{ margin: 0 }}>
+                共享接入桥接
+              </Typography.Title>
+            )}
+            style={{ width: '100%', borderRadius: 24 }}
+          >
             <Space vertical align="start" spacing={12} data-testid="admin-risk-shared-console-bridge">
               <Typography.Paragraph style={{ marginBottom: 0 }}>
                 规则调整后，继续用 API Keys、审计日志与 API 文档复核限流、白名单与契约是否同步生效。
@@ -303,6 +312,8 @@ export function AdminRiskPage() {
               {canShowConsoleBridge ? (
                 <Card
                   data-testid="admin-risk-capability-matrix"
+                  role="region"
+                  aria-labelledby="admin-risk-capability-matrix-heading"
                   style={{
                     width: '100%',
                     borderRadius: 18,
@@ -312,7 +323,9 @@ export function AdminRiskPage() {
                   bodyStyle={{ padding: 16 }}
                 >
                   <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
+                    <Typography.Title heading={6} id="admin-risk-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                      控制台能力矩阵
+                    </Typography.Title>
                     <Space wrap>
                       <Tag color="cyan" prefixIcon={<IconShield />}>统一风控入口</Tag>
                       <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
