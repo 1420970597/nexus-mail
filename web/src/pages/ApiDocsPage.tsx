@@ -434,7 +434,12 @@ export function ApiDocsPage() {
         bodyStyle={{ padding: 22 }}
       >
         <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-          <div data-testid="docs-shared-console-bridge" style={{ width: '100%' }}>
+          <div
+            data-testid="docs-shared-console-bridge"
+            role="region"
+            aria-label="共享接入桥接"
+            style={{ width: '100%' }}
+          >
             <Tag color="cyan" shape="circle">共享接入桥接</Tag>
             <Space align="start" style={{ width: '100%', justifyContent: 'space-between', marginTop: 14 }} wrap>
             <div>
