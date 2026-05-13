@@ -288,83 +288,103 @@ export function AdminSuppliersPage() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card title="共享接入桥接" style={{ width: '100%', borderRadius: 24 }}>
-            <Space vertical align="start" spacing={12} data-testid="admin-suppliers-shared-console-bridge">
-              <Typography.Paragraph style={{ marginBottom: 0 }}>
-                即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。
-              </Typography.Paragraph>
-              {canShowConsoleBridge ? (
-                <Card
-                  data-testid="admin-suppliers-capability-matrix"
-                  style={{
-                    width: '100%',
-                    borderRadius: 18,
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                    border: '1px solid rgba(94,106,210,0.24)',
-                  }}
-                  bodyStyle={{ padding: 16 }}
+          <Card style={{ width: '100%', borderRadius: 24 }}>
+            <div
+              data-testid="admin-suppliers-shared-console-bridge"
+              role="region"
+              aria-labelledby="admin-suppliers-shared-console-bridge-heading"
+            >
+              <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                <Typography.Title
+                  heading={6}
+                  id="admin-suppliers-shared-console-bridge-heading"
+                  style={{ margin: 0 }}
                 >
-                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f8fafc' }}>控制台能力矩阵</Typography.Text>
-                    <Space wrap>
-                      <Tag color="cyan" prefixIcon={<IconBriefcase />}>统一运营入口</Tag>
-                      <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
-                      <Tag color="green" prefixIcon={<IconShield />}>管理员菜单扩展</Tag>
-                    </Space>
-                  </Space>
-                </Card>
-              ) : null}
-              <Space wrap data-testid="admin-suppliers-shared-console-links">
-                {sharedConsoleLinks.map((item) => (
+                  共享接入桥接
+                </Typography.Title>
+                <Typography.Paragraph style={{ marginBottom: 0 }}>
+                  即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。
+                </Typography.Paragraph>
+                {canShowConsoleBridge ? (
                   <Card
-                    key={item.key}
                     style={{
-                      minWidth: 220,
+                      width: '100%',
+                      borderRadius: 18,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                      border: '1px solid rgba(94,106,210,0.24)',
+                    }}
+                    bodyStyle={{ padding: 16 }}
+                  >
+                    <div
+                      data-testid="admin-suppliers-capability-matrix"
+                      role="region"
+                      aria-labelledby="admin-suppliers-capability-matrix-heading"
+                    >
+                      <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                        <Typography.Title heading={6} id="admin-suppliers-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                          控制台能力矩阵
+                        </Typography.Title>
+                        <Space wrap>
+                          <Tag color="cyan" prefixIcon={<IconBriefcase />}>统一运营入口</Tag>
+                          <Tag color="blue" prefixIcon={<IconBolt />}>共享接入桥接</Tag>
+                          <Tag color="green" prefixIcon={<IconShield />}>管理员菜单扩展</Tag>
+                        </Space>
+                      </Space>
+                    </div>
+                  </Card>
+                ) : null}
+                <Space wrap data-testid="admin-suppliers-shared-console-links">
+                  {sharedConsoleLinks.map((item) => (
+                    <Card
+                      key={item.key}
+                      style={{
+                        minWidth: 220,
+                        borderRadius: 18,
+                        background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
+                        border: '1px solid rgba(148,163,184,0.14)',
+                      }}
+                      bodyStyle={{ padding: 16 }}
+                    >
+                      <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                        <Tag color="blue" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>{item.key}</Tag>
+                        <Typography.Title heading={6} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                        <Button
+                          type="tertiary"
+                          theme="borderless"
+                          icon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}
+                          onClick={() => navigate(item.path)}
+                        >
+                          {item.button}
+                        </Button>
+                      </Space>
+                    </Card>
+                  ))}
+                </Space>
+                {shouldShowFallback ? (
+                  <Card
+                    data-testid="admin-suppliers-shared-console-fallback"
+                    style={{
+                      width: '100%',
                       borderRadius: 18,
                       background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
                       border: '1px solid rgba(148,163,184,0.14)',
                     }}
-                    bodyStyle={{ padding: 16 }}
+                    bodyStyle={{ padding: 18 }}
                   >
-                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                      <Tag color="blue" prefixIcon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}>{item.key}</Tag>
-                      <Typography.Title heading={6} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
-                      <Button
-                        type="tertiary"
-                        theme="borderless"
-                        icon={item.key === 'api-keys' ? <IconSafe /> : item.key === 'webhooks' ? <IconBolt /> : <IconActivity />}
-                        onClick={() => navigate(item.path)}
-                      >
-                        {item.button}
+                    <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                      <Tag color="cyan">Fallback</Tag>
+                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到共享工作台继续管理员主链路</Typography.Title>
+                      <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
+                        当前菜单未暴露结算、风控、审计或共享接入入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
+                      </Typography.Text>
+                      <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
+                        返回共享工作台
                       </Button>
                     </Space>
                   </Card>
-                ))}
+                ) : null}
               </Space>
-              {shouldShowFallback ? (
-                <Card
-                  data-testid="admin-suppliers-shared-console-fallback"
-                  style={{
-                    width: '100%',
-                    borderRadius: 18,
-                    background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)',
-                    border: '1px solid rgba(148,163,184,0.14)',
-                  }}
-                  bodyStyle={{ padding: 18 }}
-                >
-                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                    <Tag color="cyan">Fallback</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到共享工作台继续管理员主链路</Typography.Title>
-                    <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
-                      当前菜单未暴露结算、风控、审计或共享接入入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
-                    </Typography.Text>
-                    <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
-                      返回共享工作台
-                    </Button>
-                  </Space>
-                </Card>
-              ) : null}
-            </Space>
+            </div>
           </Card>
         </Col>
       </Row>

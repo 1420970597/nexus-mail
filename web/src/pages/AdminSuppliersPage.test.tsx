@@ -214,9 +214,10 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
 
-    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
-    const capabilityMatrix = screen.getByTestId('admin-suppliers-capability-matrix')
-    expect(within(capabilityMatrix).getByText('控制台能力矩阵')).toBeInTheDocument()
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
+    expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一运营入口')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('管理员菜单扩展')).toBeInTheDocument()
@@ -229,7 +230,7 @@ describe('AdminSuppliersPage', () => {
     expect(within(sharedLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(bridge).getByText('即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。')).toBeInTheDocument()
 
-    const bridgeLoop = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const bridgeLoop = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridgeLoop).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) }))
     const webhookRouteStub = await screen.findByTestId('admin-suppliers-route-stub-webhooks')
     expect(within(webhookRouteStub).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
@@ -237,7 +238,7 @@ describe('AdminSuppliersPage', () => {
     cleanup()
     renderAdminSuppliersPage()
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
-    const rerenderedBridgeLoop = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const rerenderedBridgeLoop = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(rerenderedBridgeLoop).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) }))
     const docsRouteStub = await screen.findByTestId('admin-suppliers-route-stub-docs')
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
@@ -278,7 +279,7 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
 
-    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
@@ -295,7 +296,7 @@ describe('AdminSuppliersPage', () => {
     renderAdminSuppliersPage()
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     const fallbackCard = screen.getByTestId('admin-suppliers-shared-console-fallback')
     expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
     expect(within(fallbackCard).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
@@ -318,7 +319,7 @@ describe('AdminSuppliersPage', () => {
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
 
-    const bridge = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(bridge).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).not.toBeInTheDocument()
