@@ -172,9 +172,11 @@ describe('LoginPage', () => {
     expect(registerButton).toHaveAttribute('aria-selected', 'false')
     expect(within(authShell).getByTestId('login-auth-guidance-banner')).toBeInTheDocument()
 
-    const registerJourneyScope = getRegisterJourneyScope()
+    const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
+    const registerJourneyScope = within(registerJourneyRegion)
     expect(registerJourneyScope.getByRole('heading', { name: '首轮接入路径' })).toBeInTheDocument()
-    expect(registerJourneyScope.getByText('注册后进入共享控制台，沿同一导航完成首轮接入。')).toBeInTheDocument()
+    expect(registerJourneyScope.getByText('注册后进入共享控制台，再按当前菜单继续选择首轮接入动作。')).toBeInTheDocument()
+    expect(registerJourneyScope.queryByText('注册后进入共享控制台，沿同一导航完成首轮接入。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('注册后进入共享控制台，按同一导航完成首轮接入。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('注册后进入共享控制台，按 API Keys → Webhook → Docs 完成首轮接入。')).not.toBeInTheDocument()
     expect(registerJourneyScope.queryByText('注册后沿同一导航完成首个 Key、Webhook 与文档核对。')).not.toBeInTheDocument()

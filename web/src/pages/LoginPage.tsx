@@ -367,6 +367,8 @@ export function LoginPage() {
               </Card>
               <Card
                 data-testid="login-register-journey"
+                role="region"
+                aria-labelledby="login-register-journey-heading"
                 bodyStyle={{ padding: 18 }}
                 style={{
                   width: '100%',
@@ -378,11 +380,11 @@ export function LoginPage() {
               >
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                   <div data-testid="login-register-journey-summary">
-                    <Typography.Title heading={4} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
+                    <Typography.Title heading={4} id="login-register-journey-heading" style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.22px' }}>
                       首轮接入路径
                     </Typography.Title>
                     <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, maxWidth: 460, lineHeight: 1.6, fontSize: 13 }}>
-                      注册后进入共享控制台，沿同一导航完成首轮接入。
+                      注册后进入共享控制台，再按当前菜单继续选择首轮接入动作。
                     </Typography.Paragraph>
                   </div>
                   <Row gutter={[12, 12]} style={{ width: '100%' }}>
