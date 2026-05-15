@@ -353,11 +353,10 @@ export function ApiKeysPage() {
                 </Button>
               ) : null}
               {!canOpenProjects && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== API_KEYS_ROUTE ? (
-                <Space
+                <div
                   data-testid="api-keys-shared-console-fallback"
-                  vertical
-                  align="start"
-                  spacing={10}
+                  role="region"
+                  aria-labelledby="api-keys-shared-console-fallback-heading"
                   style={{
                     width: '100%',
                     padding: 18,
@@ -366,14 +365,24 @@ export function ApiKeysPage() {
                     border: '1px solid rgba(148,163,184,0.16)',
                   }}
                 >
-                  <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
-                  <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
-                    当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。
-                  </Typography.Text>
-                  <Button theme="solid" type="primary" icon={<IconServer />} onClick={() => navigate(fallbackRoute)}>
-                    返回共享工作台
-                  </Button>
-                </Space>
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Title heading={6} id="api-keys-shared-console-fallback-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                      返回共享工作台
+                    </Typography.Title>
+                    <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
+                      当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。
+                    </Typography.Text>
+                    <Button
+                      data-testid="api-keys-shared-console-fallback-button"
+                      theme="solid"
+                      type="primary"
+                      icon={<IconServer />}
+                      onClick={() => navigate(fallbackRoute)}
+                    >
+                      返回共享工作台
+                    </Button>
+                  </Space>
+                </div>
               ) : null}
             </Space>
           </Space>

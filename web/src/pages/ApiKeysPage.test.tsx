@@ -515,7 +515,7 @@ describe('ApiKeysPage', () => {
     expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
   })
 
-  it('shows shared-console fallback when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {
+  it('shows a named shared-console fallback region when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',
@@ -530,9 +530,10 @@ describe('ApiKeysPage', () => {
 
     const keysCard = await screen.findByTestId('api-keys-current-keys-card')
     await within(keysCard).findByText('默认密钥')
-    const fallback = screen.getByTestId('api-keys-shared-console-fallback')
-    expect(within(fallback).getByRole('button', { name: /返回共享工作台/ })).toBeInTheDocument()
+    const fallback = screen.getByRole('region', { name: '返回共享工作台' })
+    expect(within(fallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(fallback).getByText(/当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。/)).toBeInTheDocument()
+    expect(within(fallback).getByTestId('api-keys-shared-console-fallback-button')).toBeInTheDocument()
   })
 
   it('navigates via the scoped fallback CTA to the preferred shared-console route stub', async () => {
@@ -552,8 +553,8 @@ describe('ApiKeysPage', () => {
 
     const keysCard = await screen.findByTestId('api-keys-current-keys-card')
     await within(keysCard).findByText('默认密钥')
-    const fallback = screen.getByTestId('api-keys-shared-console-fallback')
-    await user.click(within(fallback).getByRole('button', { name: /返回共享工作台/ }))
+    const fallback = screen.getByRole('region', { name: '返回共享工作台' })
+    await user.click(within(fallback).getByTestId('api-keys-shared-console-fallback-button'))
     expect(await screen.findByTestId('route-stub-dashboard')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
