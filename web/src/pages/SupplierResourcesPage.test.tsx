@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import '@testing-library/jest-dom'
@@ -202,6 +202,28 @@ describe('SupplierResourcesPage', () => {
     expect(within(availableMailboxesMetric).getByText('1')).toBeInTheDocument()
   })
 
+  it('promotes the shared bridge and capability matrix cards themselves into named regions', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
+
+    const sharedConsoleBridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    expect(sharedConsoleBridge).toHaveAttribute('role', 'region')
+    expect(sharedConsoleBridge).toHaveAttribute('aria-labelledby', 'supplier-resources-shared-console-bridge-heading')
+    expect(within(sharedConsoleBridge).getByRole('heading', { name: '共享接入桥接' })).toHaveAttribute(
+      'id',
+      'supplier-resources-shared-console-bridge-heading',
+    )
+
+    const capabilityMatrix = screen.getByTestId('supplier-resources-capability-matrix')
+    expect(capabilityMatrix).toHaveAttribute('role', 'region')
+    expect(capabilityMatrix).toHaveAttribute('aria-labelledby', 'supplier-resources-capability-matrix-heading')
+    expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toHaveAttribute(
+      'id',
+      'supplier-resources-capability-matrix-heading',
+    )
+  })
+
   it('shows loaded resource summaries and records from the real overview payload', async () => {
     renderPage()
 
@@ -304,7 +326,7 @@ describe('SupplierResourcesPage', () => {
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('suppresses unavailable supplier and shared-console CTAs then falls back to the preferred workspace', async () => {
+  it('suppresses unavailable supplier and shared-console CTAs then falls back to the preferred workspace via a named region contract', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -329,8 +351,8 @@ describe('SupplierResourcesPage', () => {
     expect(within(bridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
-    const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
-    expect(sharedConsoleFallback).toBeInTheDocument()
+    const sharedConsoleFallback = screen.getByRole('region', { name: '返回共享工作台' })
+    expect(within(sharedConsoleFallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到共享工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button')).toBeInTheDocument()
 
@@ -437,13 +459,20 @@ describe('SupplierResourcesPage', () => {
   })
 
   it('submits supplier domain, account, and mailbox actions then reloads overview data', async () => {
+    const user = userEvent.setup()
+
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
-    fireEvent.change(screen.getByPlaceholderText('mail.nexus.example'), { target: { value: 'us-mail.nexus.test' } })
-    fireEvent.change(screen.getByPlaceholderText('global / hk / us'), { target: { value: 'us' } })
-    fireEvent.click(screen.getByRole('button', { name: '保存域名' }))
+    const domainNameInput = screen.getByPlaceholderText('mail.nexus.example')
+    const regionInput = screen.getByPlaceholderText('global / hk / us')
+    await user.click(domainNameInput)
+    await user.paste('us-mail.nexus.test')
+    await user.clear(regionInput)
+    await user.click(regionInput)
+    await user.paste('us')
+    await user.click(screen.getByRole('button', { name: '保存域名' }))
 
     await waitFor(() =>
       expect(mockedCreateSupplierDomain).toHaveBeenCalledWith({
@@ -454,9 +483,13 @@ describe('SupplierResourcesPage', () => {
       }),
     )
 
-    fireEvent.change(screen.getByPlaceholderText('outlook / gmail / qq / proton'), { target: { value: 'outlook' } })
-    fireEvent.change(screen.getByPlaceholderText('supplier@example.com'), { target: { value: 'ops@example.com' } })
-    fireEvent.click(screen.getByRole('button', { name: '保存账号' }))
+    const providerInput = screen.getByPlaceholderText('outlook / gmail / qq / proton')
+    const identifierInput = screen.getByPlaceholderText('supplier@example.com')
+    await user.click(providerInput)
+    await user.paste('outlook')
+    await user.click(identifierInput)
+    await user.paste('ops@example.com')
+    await user.click(screen.getByRole('button', { name: '保存账号' }))
 
     await waitFor(() =>
       expect(mockedCreateSupplierAccount).toHaveBeenCalledWith(expect.objectContaining({
@@ -469,10 +502,17 @@ describe('SupplierResourcesPage', () => {
       })),
     )
 
-    fireEvent.change(screen.getByPlaceholderText('openai'), { target: { value: 'discord' } })
-    fireEvent.change(screen.getByPlaceholderText('可选，与 account_id 至少填一项'), { target: { value: '1' } })
-    fireEvent.change(screen.getByPlaceholderText('agent-001'), { target: { value: 'agent-002' } })
-    fireEvent.click(screen.getByRole('button', { name: '保存邮箱' }))
+    const projectKeyInput = screen.getByPlaceholderText('openai')
+    const relationInput = screen.getByPlaceholderText('可选，与 account_id 至少填一项')
+    const localPartInput = screen.getByPlaceholderText('agent-001')
+    await user.clear(projectKeyInput)
+    await user.click(projectKeyInput)
+    await user.paste('discord')
+    await user.click(relationInput)
+    await user.paste('1')
+    await user.click(localPartInput)
+    await user.paste('agent-002')
+    await user.click(screen.getByRole('button', { name: '保存邮箱' }))
 
     await waitFor(() =>
       expect(mockedCreateSupplierMailbox).toHaveBeenCalledWith(expect.objectContaining({
@@ -484,5 +524,5 @@ describe('SupplierResourcesPage', () => {
       })),
     )
     expect(mockedGetSupplierResourcesOverview).toHaveBeenCalledTimes(4)
-  })
+  }, 10000)
 })

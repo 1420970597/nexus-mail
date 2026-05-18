@@ -502,7 +502,7 @@ export function SupplierResourcesPage() {
                   资源准备、接入核对与文档回放继续留在同一套供应商共享控制台里，不拆成第二套后台。
                 </Typography.Paragraph>
               </div>
-              <Card
+              <section
                 role="region"
                 aria-labelledby="supplier-resources-capability-matrix-heading"
                 data-testid="supplier-resources-capability-matrix"
@@ -511,8 +511,8 @@ export function SupplierResourcesPage() {
                   borderRadius: 18,
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
                   border: '1px solid rgba(255,255,255,0.08)',
+                  padding: 16,
                 }}
-                bodyStyle={{ padding: 16 }}
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                   <Typography.Title id="supplier-resources-capability-matrix-heading" heading={6} style={{ margin: 0, color: '#f8fafc' }}>
@@ -527,7 +527,7 @@ export function SupplierResourcesPage() {
                     域名池、账号健康与共享接入入口继续由同一登录后的菜单真值驱动。
                   </Typography.Paragraph>
                 </Space>
-              </Card>
+              </section>
               <Space wrap spacing={16} style={{ width: '100%' }}>
                 {[
                   canOpenApiKeys
@@ -590,6 +590,8 @@ export function SupplierResourcesPage() {
                 {shouldShowSharedConsoleFallback ? (
                   <Card
                     data-testid="supplier-resources-shared-console-fallback"
+                    role="region"
+                    aria-labelledby="supplier-resources-shared-console-fallback-heading"
                     style={{
                       flex: '1 1 240px',
                       minWidth: 240,
@@ -600,9 +602,9 @@ export function SupplierResourcesPage() {
                     bodyStyle={{ padding: 16 }}
                   >
                     <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                      <Typography.Text strong style={{ color: '#f7f8f8' }}>
+                      <Typography.Title id="supplier-resources-shared-console-fallback-heading" heading={6} style={{ color: '#f7f8f8', margin: 0 }}>
                         返回共享工作台
-                      </Typography.Text>
+                      </Typography.Title>
                       <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
                         当前共享接入入口暂未由服务端暴露时，先回到共享工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。
                       </Typography.Paragraph>
