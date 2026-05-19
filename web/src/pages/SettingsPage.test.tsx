@@ -152,7 +152,7 @@ describe('SettingsPage', () => {
     settingsView.unmount()
   })
 
-  it('renders a darker shared-console settings workspace with runtime-scoped mission cards for regular users', async () => {
+  it('exposes the shared-console bridge as a named region with canonical role-aware mission cards for regular users', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -196,6 +196,9 @@ describe('SettingsPage', () => {
     expect(within(sharedBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(sharedBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(within(sharedBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(sharedBridge).queryByRole('heading', { name: '开发者 API 接入工作台' })).not.toBeInTheDocument()
+    expect(within(sharedBridge).queryByRole('heading', { name: '开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
+    expect(within(sharedBridge).queryByRole('heading', { name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
 
     const sessionCard = screen.getByTestId('settings-session-card')
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
