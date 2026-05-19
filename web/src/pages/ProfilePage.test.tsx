@@ -198,7 +198,7 @@ describe('ProfilePage', () => {
     expect(await screen.findByTestId('settings-route-stub')).toBeInTheDocument()
   })
 
-  it('scopes the user fallback CTA to the shared-console return region when project access is hidden', async () => {
+  it('scopes the user fallback CTA to the named shared-console return region when project access is hidden', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -213,15 +213,16 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(within(sharedConsoleReturn).getByText('回到共享工作台继续主链路')).toBeInTheDocument()
+    const sharedConsoleReturn = screen.getByRole('region', { name: '回到共享工作台继续主链路' })
+    expect(within(sharedConsoleReturn).getByRole('heading', { name: '回到共享工作台继续主链路' })).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('当服务端暂未暴露项目市场时，普通用户仍可从账号中枢回到共享工作台继续查看预算、订单或接入入口。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
-  it('scopes the supplier fallback CTA to the dedicated fallback region when settings is hidden', async () => {
+  it('scopes the supplier fallback CTA to the named shared-console return region when settings is hidden', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -236,15 +237,16 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(within(sharedConsoleReturn).getByText('回到共享工作台继续角色扩展链路')).toBeInTheDocument()
+    const sharedConsoleReturn = screen.getByRole('region', { name: '回到共享工作台继续角色扩展链路' })
+    expect(within(sharedConsoleReturn).getByRole('heading', { name: '回到共享工作台继续角色扩展链路' })).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('当设置中心入口暂未暴露时，仍可返回当前角色的共享工作台，继续同一控制台中的风控、供给或接入任务。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
-  it('scopes the admin fallback CTA to the dedicated fallback region when settings is hidden', async () => {
+  it('scopes the admin fallback CTA to the named shared-console return region when settings is hidden', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -259,15 +261,16 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(within(sharedConsoleReturn).getByText('回到共享工作台继续角色扩展链路')).toBeInTheDocument()
+    const sharedConsoleReturn = screen.getByRole('region', { name: '回到共享工作台继续角色扩展链路' })
+    expect(within(sharedConsoleReturn).getByRole('heading', { name: '回到共享工作台继续角色扩展链路' })).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('当设置中心入口暂未暴露时，仍可返回当前角色的共享工作台，继续同一控制台中的风控、供给或接入任务。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
     expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
   })
 
-  it('hides the shared-console return CTA when admin stays on profile as the only visible route', () => {
+  it('hides the shared-console return region when admin stays on profile as the only visible route', () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',
@@ -277,7 +280,7 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    expect(screen.queryByTestId('profile-shared-console-return')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /回到共享工作台|通过设置中心回到共享控制台/ })).not.toBeInTheDocument()
   })
 
   it('scopes the supplier shared-console webhook bridge copy to the supplier role title', async () => {
