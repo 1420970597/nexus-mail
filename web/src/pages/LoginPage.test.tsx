@@ -257,6 +257,24 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
   })
 
+  it('keeps the registration runway CTA buttons scoped to the shared journey region and excludes auth-shell duplicates before navigating', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
+    const registerJourneyScope = within(registerJourneyRegion)
+    expect(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('button', { name: /继续联调 Webhook/ })).toBeInTheDocument()
+    expect(registerJourneyScope.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    expect(within(screen.getByTestId('login-auth-shell')).queryByRole('button', { name: /先配置 API Keys/ })).not.toBeInTheDocument()
+    expect(within(screen.getByTestId('login-auth-shell')).queryByRole('button', { name: /继续联调 Webhook/ })).not.toBeInTheDocument()
+    expect(within(screen.getByTestId('login-auth-shell')).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
+
+    await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
+    expect(await screen.findByTestId('login-route-stub-api-keys')).toBeInTheDocument()
+  })
+
   it('keeps register CTA routing from the product runway cards into API Keys, Webhooks, and Docs stubs', async () => {
     const user = userEvent.setup()
 
