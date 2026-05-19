@@ -214,8 +214,16 @@ describe('AdminSuppliersPage', () => {
     expect(within(missionFlow).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
 
-    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
-    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
+    const bridgeCard = screen.getByTestId('admin-suppliers-shared-console-bridge')
+    expect(bridgeCard).toHaveAttribute('role', 'region')
+    expect(bridgeCard).toHaveAttribute('aria-labelledby', 'admin-suppliers-shared-console-bridge-heading')
+    const bridge = within(bridgeCard).getByRole('heading', { name: '共享接入桥接' }).closest('[role="region"]') as HTMLElement
+    expect(bridge).toBe(bridgeCard)
+    const capabilityMatrixCard = screen.getByTestId('admin-suppliers-capability-matrix')
+    expect(capabilityMatrixCard).toHaveAttribute('role', 'region')
+    expect(capabilityMatrixCard).toHaveAttribute('aria-labelledby', 'admin-suppliers-capability-matrix-heading')
+    const capabilityMatrix = within(capabilityMatrixCard).getByRole('heading', { name: '控制台能力矩阵' }).closest('[role="region"]') as HTMLElement
+    expect(capabilityMatrix).toBe(capabilityMatrixCard)
     expect(within(bridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(within(capabilityMatrix).getByText('统一运营入口')).toBeInTheDocument()
@@ -298,6 +306,10 @@ describe('AdminSuppliersPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     const fallbackCard = screen.getByTestId('admin-suppliers-shared-console-fallback')
+    expect(fallbackCard).toHaveAttribute('role', 'region')
+    expect(fallbackCard).toHaveAttribute('aria-labelledby', 'admin-suppliers-shared-console-fallback-heading')
+    const fallbackRegion = within(fallbackCard).getByRole('heading', { name: '回到共享工作台继续管理员主链路' }).closest('[role="region"]') as HTMLElement
+    expect(fallbackRegion).toBe(fallbackCard)
     expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
     expect(within(fallbackCard).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(bridge).queryByText('API Keys · /api-keys')).not.toBeInTheDocument()
