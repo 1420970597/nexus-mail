@@ -630,35 +630,73 @@ export function LoginPage() {
                 `}</style>
 
                 {mode === 'login' ? (
-                  <Banner
-                    className="login-auth-banner-surface"
+                  <div
                     data-testid="login-auth-guidance-banner"
-                    type="info"
-                    fullMode={false}
-                    closeIcon={null}
-                    description="已有账号可直接进入共享控制台，继续同一套工作区。"
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: '#e2e8f0',
-                    }}
-                  />
+                    role="region"
+                    aria-labelledby="login-auth-guidance-heading"
+                    style={{ width: '100%' }}
+                  >
+                    <Banner
+                      className="login-auth-banner-surface"
+                      type="info"
+                      fullMode={false}
+                      closeIcon={null}
+                      description={
+                        <div>
+                          <Typography.Title
+                            heading={6}
+                            id="login-auth-guidance-heading"
+                            style={{ margin: '0 0 6px', color: '#f7f8f8' }}
+                          >
+                            登录模式提示
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ margin: 0, color: '#e2e8f0', lineHeight: 1.58 }}>
+                            已有账号可直接进入共享控制台，继续同一套工作区。
+                          </Typography.Paragraph>
+                        </div>
+                      }
+                      style={{
+                        width: '100%',
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#e2e8f0',
+                      }}
+                    />
+                  </div>
                 ) : (
-                  <Banner
-                    className="login-auth-banner-surface"
+                  <div
                     data-testid="login-auth-guidance-banner"
-                    type="success"
-                    fullMode={false}
-                    closeIcon={null}
-                    description="注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。"
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: '#e2e8f0',
-                    }}
-                  />
+                    role="region"
+                    aria-labelledby="login-auth-guidance-heading"
+                    style={{ width: '100%' }}
+                  >
+                    <Banner
+                      className="login-auth-banner-surface"
+                      type="success"
+                      fullMode={false}
+                      closeIcon={null}
+                      description={
+                        <div>
+                          <Typography.Title
+                            heading={6}
+                            id="login-auth-guidance-heading"
+                            style={{ margin: '0 0 6px', color: '#f7f8f8' }}
+                          >
+                            注册模式提示
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ margin: 0, color: '#e2e8f0', lineHeight: 1.58 }}>
+                            注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。
+                          </Typography.Paragraph>
+                        </div>
+                      }
+                      style={{
+                        width: '100%',
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#e2e8f0',
+                      }}
+                    />
+                  </div>
                 )}
 
                 <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }} className="login-auth-form-surface">

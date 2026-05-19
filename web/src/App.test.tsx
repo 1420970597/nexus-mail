@@ -374,8 +374,8 @@ describe('App', () => {
     const onboardingRegion = await expectDefaultUserFirstRunLane()
     await user.click(within(onboardingRegion).getByRole('button', { name: '打开 API Keys' }))
 
-    expect(await screen.findByTestId('api-keys-current-keys-card')).toBeInTheDocument()
-    expect(await screen.findByRole('heading', { name: '当前密钥' })).toBeInTheDocument()
+    expect(await screen.findByTestId('api-keys-hero-card')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('keeps settings guidance entry available after dismissing first-run mission cards for default user', async () => {

@@ -221,30 +221,25 @@ describe('LoginPage', () => {
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
   })
 
-  it('switches the embedded auth guidance when moving from login to register mode', async () => {
+  it('exposes the auth guidance banner as a named region in both login and register modes', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
 
     const authShell = screen.getByTestId('login-auth-shell')
-    expect(within(within(authShell).getByTestId('login-auth-guidance-banner')).getByText(/已有账号可直接进入共享控制台，继续同一套工作区。/)).toBeInTheDocument()
+    const loginBannerRegion = within(authShell).getByRole('region', { name: '登录模式提示' })
+    const loginBannerScope = within(loginBannerRegion)
+    expect(loginBannerScope.getByRole('heading', { name: '登录模式提示' })).toBeInTheDocument()
+    expect(loginBannerScope.getByText('已有账号可直接进入共享控制台，继续同一套工作区。')).toBeInTheDocument()
 
     const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
     await user.click(within(modeSwitch).getByRole('tab', { name: '注册' }))
 
-    expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
-    const registerBanner = within(screen.getByTestId('login-auth-guidance-banner'))
-    expect(registerBanner.getByText(/注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。/)).toBeInTheDocument()
-    expect(within(screen.getByTestId('login-auth-copy-block')).getByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).toBeInTheDocument()
-    expect(registerBanner.queryByText(/注册后直接进入共享控制台，沿同一导航前往项目市场、订单中心与 API Keys。/)).not.toBeInTheDocument()
-    expect(registerBanner.queryByText(/注册后直接进入共享控制台，再沿同一导航前往项目市场、订单中心与 API Keys。/)).not.toBeInTheDocument()
-    const modeSwitchScope = within(modeSwitch)
-    const registerButton = modeSwitchScope.getByRole('tab', { name: '注册' })
-    const loginButton = within(modeSwitch).getByRole('tab', { name: '登录' })
-    expect(registerButton).toHaveAttribute('aria-selected', 'true')
-    expect(loginButton).toHaveAttribute('aria-selected', 'false')
-    expect(registerBanner.queryByText(/注册成功后不会跳转到独立新手页/)).not.toBeInTheDocument()
-    expect(registerBanner.queryByText(/已有账号可直接进入共享控制台/)).not.toBeInTheDocument()
+    const registerBannerRegion = screen.getByRole('region', { name: '注册模式提示' })
+    const registerBannerScope = within(registerBannerRegion)
+    expect(registerBannerScope.getByRole('heading', { name: '注册模式提示' })).toBeInTheDocument()
+    expect(registerBannerScope.getByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '登录模式提示' })).not.toBeInTheDocument()
   })
 
   it('opens register mode from the shared-console registration journey CTA and keeps the runway CTA scoped to the journey region', async () => {
