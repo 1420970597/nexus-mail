@@ -273,6 +273,7 @@ describe('LoginPage', () => {
 
     await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
     expect(await screen.findByTestId('login-route-stub-api-keys')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('keeps register CTA routing from the product runway cards into API Keys, Webhooks, and Docs stubs', async () => {
