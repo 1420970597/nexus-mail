@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, register } from '../services/auth'
 import { useAuthStore } from '../store/authStore'
+import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 type AuthMode = 'login' | 'register'
 
@@ -45,6 +46,8 @@ const integrationRunway = [
     title: 'API Keys 起步',
     eyebrow: '最小权限起步',
     description: '生成首个最小权限密钥。',
+    cta: '先配置 API Keys',
+    target: API_KEYS_ROUTE,
   },
   {
     key: 'webhooks',
@@ -52,6 +55,8 @@ const integrationRunway = [
     title: 'Webhook 联调',
     eyebrow: '真实回调验证',
     description: '确认回调地址并发起真实联调。',
+    cta: '继续联调 Webhook',
+    target: WEBHOOKS_ROUTE,
   },
   {
     key: 'docs',
@@ -59,6 +64,8 @@ const integrationRunway = [
     title: '文档核对',
     eyebrow: '契约核对',
     description: '查看 API 文档并核对请求契约。',
+    cta: '查看 API 文档',
+    target: DOCS_ROUTE,
   },
 ]
 
@@ -427,6 +434,21 @@ export function LoginPage() {
                             <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.62)', margin: 0, fontSize: 12, lineHeight: 1.6 }}>
                               {item.description}
                             </Typography.Paragraph>
+                            <Button
+                              theme="borderless"
+                              type="tertiary"
+                              icon={<IconArrowRight />}
+                              onClick={() => navigate(item.target)}
+                              style={{
+                                marginTop: 4,
+                                padding: 0,
+                                color: '#c7d2fe',
+                                fontSize: 12,
+                                fontWeight: 600,
+                              }}
+                            >
+                              {item.cta}
+                            </Button>
                           </Space>
                         </Card>
                       </Col>

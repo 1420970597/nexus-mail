@@ -247,18 +247,39 @@ describe('LoginPage', () => {
     expect(registerBanner.queryByText(/已有账号可直接进入共享控制台/)).not.toBeInTheDocument()
   })
 
-  it('opens register mode from the shared-console registration journey CTA', async () => {
+  it('opens register mode from the shared-console registration journey CTA and keeps the runway CTA scoped to the journey region', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
 
-    const registerJourneyScope = getRegisterJourneyScope()
+    const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
+    const registerJourneyScope = within(registerJourneyRegion)
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
 
     expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
+  })
+
+  it('keeps register CTA routing from the product runway cards into API Keys, Webhooks, and Docs stubs', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
+    const registerJourneyScope = within(registerJourneyRegion)
+
+    await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
+    expect(await screen.findByTestId('login-route-stub-api-keys')).toBeInTheDocument()
+
+    renderLoginPage()
+    await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /继续联调 Webhook/ }))
+    expect(await screen.findByTestId('login-route-stub-webhooks')).toBeInTheDocument()
+
+    renderLoginPage()
+    await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /查看 API 文档/ }))
+    expect(await screen.findByTestId('login-route-stub-docs')).toBeInTheDocument()
   })
 
   it('submits registration, persists the shared-console session, and redirects into the shared home route', async () => {
