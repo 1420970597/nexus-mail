@@ -444,9 +444,17 @@ export function SupplierSettlementsPage() {
                     }}
                     bodyStyle={{ padding: 18 }}
                     data-testid="supplier-settlements-shared-console-fallback"
+                    role="region"
+                    aria-labelledby="supplier-settlements-shared-console-fallback-heading"
                   >
                     <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                      <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
+                      <Typography.Title
+                        heading={6}
+                        id="supplier-settlements-shared-console-fallback-heading"
+                        style={{ margin: 0, color: '#f8fafc' }}
+                      >
+                        返回共享工作台
+                      </Typography.Title>
                       <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
                         共享接入入口暂未由服务端暴露时，先回到共享工作台继续真实业务主链路，不在当前页泄露未授权集成入口。
                       </Typography.Text>

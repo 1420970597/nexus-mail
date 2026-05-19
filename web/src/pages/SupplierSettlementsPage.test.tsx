@@ -325,43 +325,38 @@ describe('SupplierSettlementsPage', () => {
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
-  it('suppresses unavailable supplier and shared-console ctas then falls back to the preferred workspace when downstream routes are absent', async () => {
+  it('shows a named shared-console fallback region and routes back to the shared home when integration entries are hidden', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
-      user: { id: 89, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
+      user: { id: 88, email: 'supplier@nexus.test', role: 'supplier', created_at: '' },
       menu: [
         { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
+        { key: 'supplier-resources', label: '供应商资源', path: SUPPLIER_RESOURCES_ROUTE },
+        { key: 'supplier-offerings', label: '供货规则', path: SUPPLIER_OFFERINGS_ROUTE },
         { key: 'supplier-settlements', label: '供应商结算', path: SUPPLIER_SETTLEMENTS_ROUTE },
       ],
     })
 
-    let view = renderSupplierSettlementsPage()
+    renderSupplierSettlementsPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
-    expect(within(missionFlow).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
-    expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    expect(screen.getByTestId('supplier-settlements-mission-fallback')).toBeInTheDocument()
+    expect(screen.queryByTestId('supplier-settlements-mission-fallback')).not.toBeInTheDocument()
 
     const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
-    expect(within(bridge).queryByText(`API Keys · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
+    expect(within(bridge).queryByText(`开发者 API 接入工作台 · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
     expect(within(bridge).queryByText(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
     expect(within(bridge).queryByText(`API 文档与接入控制台 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
-    expect(screen.getByTestId('supplier-settlements-shared-console-fallback')).toBeInTheDocument()
+    const sharedConsoleFallback = screen.getByRole('region', { name: '返回共享工作台' })
+    expect(within(sharedConsoleFallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(sharedConsoleFallback).getByText('共享接入入口暂未由服务端暴露时，先回到共享工作台继续真实业务主链路，不在当前页泄露未授权集成入口。')).toBeInTheDocument()
 
-    await user.click(screen.getByTestId('supplier-settlements-shared-console-fallback-button'))
-    expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
-
-    view.unmount()
-    view = renderSupplierSettlementsPage()
-    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-
-    const fallbackButton = within(screen.getByTestId('supplier-settlements-mission-fallback')).getByRole('button', { name: /返回共享工作台/ })
-    await user.click(fallbackButton)
+    await user.click(within(sharedConsoleFallback).getByRole('button', { name: /返回共享工作台/ }))
     expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
