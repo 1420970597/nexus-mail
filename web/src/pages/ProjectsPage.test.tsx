@@ -231,6 +231,25 @@ describe('ProjectsPage', () => {
     expect(within(heroCard).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 
+  it('renders a named first-run procurement region so newly registered users keep budget, fulfillment, and API onboarding inside the same shared console lane', async () => {
+    render(
+      <MemoryRouter>
+        <ProjectsPage />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const lane = screen.getByRole('region', { name: '采购 → 履约 → 接入' })
+    const scoped = within(lane)
+    expect(scoped.getByRole('heading', { name: '采购 → 履约 → 接入' })).toBeInTheDocument()
+    expect(scoped.getByText('注册后首轮采购路径')).toBeInTheDocument()
+    expect(scoped.getByText('先确认真实库存与价格，再创建第一笔订单。订单结果与开发者 API 接入工作台都继续留在同一控制台。')).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /打开订单中心/ })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(scoped.queryByText('注册后进入共享控制台，再按当前菜单继续选择首轮接入动作。')).not.toBeInTheDocument()
+    expect(scoped.queryByRole('heading', { name: '订单结果 → API 接入 → 再次采购' })).not.toBeInTheDocument()
+  })
+
   it('renders a mission-control next-step lane for procurement, fulfillment, and integration', async () => {
     render(
       <MemoryRouter>
@@ -238,10 +257,10 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('注册后首轮采购路径')).toBeInTheDocument()
-    const lane = screen.getByTestId('projects-first-run-lane')
+    const lane = await screen.findByRole('region', { name: '采购 → 履约 → 接入' })
     const scoped = within(lane)
-    expect(scoped.getByText('采购 → 履约 → 接入')).toBeInTheDocument()
+    expect(scoped.getByText('注册后首轮采购路径')).toBeInTheDocument()
+    expect(scoped.getByRole('heading', { name: '采购 → 履约 → 接入' })).toBeInTheDocument()
     expect(scoped.getByText('先确认真实库存与价格，再创建第一笔订单。订单结果与开发者 API 接入工作台都继续留在同一控制台。')).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
   })

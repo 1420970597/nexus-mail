@@ -140,6 +140,8 @@ export function ProjectsPage() {
 
       <Card
         data-testid="projects-first-run-lane"
+        role="region"
+        aria-labelledby="projects-first-run-lane-heading"
         style={{
           width: '100%',
           borderRadius: 22,
@@ -152,7 +154,7 @@ export function ProjectsPage() {
           <Tag color="cyan" shape="circle">注册后首轮采购路径</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
-              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+              <Typography.Title id="projects-first-run-lane-heading" heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
                 采购 → 履约 → 接入
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
