@@ -253,7 +253,7 @@ describe('App', () => {
     expect(useAuthStore.getState().refreshToken).toBe('stored-refresh-token')
   })
 
-  it('falls back to the docs workspace when no preferred role landing route exists', async () => {
+  it('falls back to the dashboard workspace when no higher-priority landing route exists', async () => {
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })
     mockedGetMenu.mockResolvedValueOnce({
@@ -265,10 +265,18 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).toBeInTheDocument()
-    expect(screen.getByTestId('docs-shared-console-loop')).toBeInTheDocument()
-    expect(screen.getByTestId('docs-shared-console-bridge')).toBeInTheDocument()
-    expect(screen.getByTitle('nexus-mail-api-docs')).toHaveAttribute('src', '/openapi/index.html')
+    await waitFor(() => {
+      expect(useAuthStore.getState().bootstrapStatus).toBe('ready')
+      expect(useAuthStore.getState().menu).toEqual([
+        { key: 'docs', label: 'API 文档', path: '/docs' },
+      ])
+      expect(useAuthStore.getState().user).toMatchObject({ role: 'supplier' })
+    })
+
+    expect(screen.queryByRole('heading', { level: 3, name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('docs-shared-console-loop')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('docs-shared-console-bridge')).not.toBeInTheDocument()
+    expect(screen.queryByTitle('nexus-mail-api-docs')).not.toBeInTheDocument()
   })
 
   it('shows register journey CTA and opens register mode from the login shell', async () => {

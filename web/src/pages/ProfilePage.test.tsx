@@ -335,7 +335,7 @@ describe('ProfilePage', () => {
     expect(within(webhooksRouteStub).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
   })
 
-  it('keeps the admin return card isolated from user-only focus copy when settings is available', async () => {
+  it('keeps the admin return lane as a named shared-console region isolated from user-only focus copy when settings is available', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -351,9 +351,11 @@ describe('ProfilePage', () => {
 
     renderProfilePage()
 
-    const sharedConsoleReturn = screen.getByTestId('profile-shared-console-return')
-    expect(screen.getByText('管理员运营焦点')).toBeInTheDocument()
+    const sharedConsoleReturn = screen.getByRole('region', { name: '通过设置中心回到共享控制台' })
+    expect(within(sharedConsoleReturn).getByRole('heading', { name: '通过设置中心回到共享控制台' })).toBeInTheDocument()
     expect(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(sharedConsoleReturn).getByText('角色扩展仍留在同一套深色控制台中；如果当前页只负责身份核对，可先回到设置中心再继续风控、供给或接入链路。')).toBeInTheDocument()
+    expect(screen.getByText('管理员运营焦点')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
