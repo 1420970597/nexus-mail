@@ -253,6 +253,52 @@ describe('App', () => {
     expect(useAuthStore.getState().refreshToken).toBe('stored-refresh-token')
   })
 
+  it('shows a named bootstrap recovery region while restoring the shared console shell', async () => {
+    setSession('user')
+
+    let resolveCurrentUser: ((value: { user: { id: number; email: string; role: 'user' } }) => void) | undefined
+    let resolveMenu: ((value: { role: 'user'; items: Array<{ key: string; label: string; path: string }> }) => void) | undefined
+
+    mockedGetCurrentUser.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveCurrentUser = resolve
+        }),
+    )
+    mockedGetMenu.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveMenu = resolve
+        }),
+    )
+
+    renderApp(['/'])
+
+    const bootstrapRegion = await screen.findByRole('region', { name: '正在恢复共享控制台' })
+    expect(bootstrapRegion).toBeInTheDocument()
+    expect(within(bootstrapRegion).getByRole('heading', { name: '正在恢复共享控制台' })).toBeInTheDocument()
+    expect(within(bootstrapRegion).getByText('正在同步当前账号、角色菜单与深链落点，确保刷新页面后仍停留在同一套登录后工作台，而不是回退到错误角色页。')).toBeInTheDocument()
+    expect(within(bootstrapRegion).getByText('共享控制台引导')).toBeInTheDocument()
+    expect(within(bootstrapRegion).queryByRole('heading', { name: '控制台总览' })).not.toBeInTheDocument()
+
+    resolveCurrentUser?.({ user: { id: 1, email: 'user@nexus-mail.local', role: 'user' } })
+    resolveMenu?.({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'balance', label: '余额中心', path: '/balance' },
+        { key: 'profile', label: '个人资料', path: '/profile' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+        { key: 'webhooks', label: 'Webhook 设置', path: '/webhooks' },
+        { key: 'settings', label: '设置中心', path: '/settings' },
+      ],
+    })
+
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+  })
+
   it('falls back to the dashboard workspace when no higher-priority landing route exists', async () => {
     setSession('supplier')
     mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 2, email: 'supplier@nexus-mail.local', role: 'supplier' } })

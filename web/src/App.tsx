@@ -64,7 +64,9 @@ function AuthBootstrapShell() {
         padding: 32,
       }}
     >
-      <div
+      <section
+        role="region"
+        aria-labelledby="auth-bootstrap-shell-heading"
         style={{
           width: 'min(520px, 100%)',
           borderRadius: 28,
@@ -90,12 +92,14 @@ function AuthBootstrapShell() {
           >
             共享控制台引导
           </span>
-          <h2 style={{ margin: 0, color: '#f7f8f8', fontSize: 24, lineHeight: 1.2 }}>正在恢复共享控制台</h2>
+          <h2 id="auth-bootstrap-shell-heading" style={{ margin: 0, color: '#f7f8f8', fontSize: 24, lineHeight: 1.2 }}>
+            正在恢复共享控制台
+          </h2>
           <p style={{ margin: 0, color: 'rgba(208,214,224,0.78)', lineHeight: 1.7 }}>
             正在同步当前账号、角色菜单与深链落点，确保刷新页面后仍停留在同一套登录后工作台，而不是回退到错误角色页。
           </p>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

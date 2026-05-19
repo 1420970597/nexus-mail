@@ -185,6 +185,8 @@ export function AppSidebar() {
         ) : (
           <div
             data-testid="app-sidebar-loading-card"
+            role="region"
+            aria-labelledby="app-sidebar-loading-heading"
             style={{
               marginBottom: 14,
               borderRadius: 16,
@@ -193,9 +195,13 @@ export function AppSidebar() {
               padding: '16px 14px',
             }}
           >
-            <Typography.Text style={{ color: '#f7f8f8', fontWeight: 600, fontSize: 13 }}>
+            <Typography.Title
+              heading={6}
+              id="app-sidebar-loading-heading"
+              style={{ color: '#f7f8f8', margin: 0, fontWeight: 600, fontSize: 13 }}
+            >
               共享菜单加载中
-            </Typography.Text>
+            </Typography.Title>
             <Typography.Paragraph style={{ color: 'rgba(138,143,152,0.9)', margin: '8px 0 0', fontSize: 12, lineHeight: 1.6 }}>
               {SHARED_CONSOLE_MENU_LOADING_LABEL}
             </Typography.Paragraph>

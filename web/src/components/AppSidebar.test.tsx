@@ -161,7 +161,7 @@ describe('AppSidebar', () => {
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
   })
 
-  it('shows loading copy while waiting for server menu items', async () => {
+  it('shows loading copy inside a named shared-menu region while waiting for server menu items', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh-token',
@@ -172,8 +172,10 @@ describe('AppSidebar', () => {
 
     await renderSidebarAndWait(<AppSidebar />)
 
-    const loadingCard = screen.getByTestId('app-sidebar-loading-card')
-    expect(within(loadingCard).getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
-    expect(within(loadingCard).queryByText('API 文档')).not.toBeInTheDocument()
+    const loadingRegion = screen.getByRole('region', { name: '共享菜单加载中' })
+    expect(within(loadingRegion).getByRole('heading', { name: '共享菜单加载中' })).toBeInTheDocument()
+    expect(within(loadingRegion).getByText(SHARED_CONSOLE_MENU_LOADING_LABEL)).toBeInTheDocument()
+    expect(within(loadingRegion).queryByText('API 文档')).not.toBeInTheDocument()
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
 })
