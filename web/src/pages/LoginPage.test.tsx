@@ -45,7 +45,7 @@ function renderLoginPage(initialEntry = '/login') {
         <Route
           path="/"
           element={(
-            <section data-testid="shared-console-home">
+            <section data-testid="shared-console-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -294,6 +294,22 @@ describe('LoginPage', () => {
     renderLoginPage()
     await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByTestId('login-route-stub-docs')).toBeInTheDocument()
+  })
+
+  it('preserves a named shared-console home region after registration redirect so the post-register landing contract is user-visible, not only a test stub', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByPlaceholderText('至少 8 位密码'), { target: { value: 'Password123!' } })
+    fireEvent.change(screen.getByPlaceholderText('再次输入密码'), { target: { value: 'Password123!' } })
+    await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
+
+    const sharedConsoleHome = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(sharedConsoleHome).toBeInTheDocument()
+    expect(within(sharedConsoleHome).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('submits registration, persists the shared-console session, and redirects into the shared home route', async () => {
