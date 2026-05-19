@@ -242,7 +242,7 @@ describe('SupplierOfferingsPage', () => {
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
-  it('suppresses hidden shared-console bridge actions and falls back to the preferred workspace when integration routes are absent from the menu', async () => {
+  it('suppresses hidden shared-console bridge actions and falls back to the preferred workspace through a named shared-console region when integration routes are absent from the menu', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
     mockedGetSupplierOfferings.mockResolvedValue({ items: [] })
     useAuthStore.setState({
@@ -265,16 +265,17 @@ describe('SupplierOfferingsPage', () => {
     expect(within(bridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
 
-    const fallback = screen.getByTestId('supplier-offerings-shared-console-fallback')
-    expect(fallback).toBeInTheDocument()
+    const fallback = screen.getByRole('region', { name: '返回共享工作台' })
+    expect(fallback).toHaveAttribute('aria-labelledby', 'supplier-offerings-shared-console-fallback-heading')
+    expect(within(fallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
     expect(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button')).toBeInTheDocument()
-    await user.click(screen.getByTestId('supplier-offerings-shared-console-fallback-button'))
+    await user.click(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button'))
     expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
-  it('shows a mission fallback card and returns to dashboard when no supplier follow-up routes remain', async () => {
+  it('shows a named mission fallback region and returns to dashboard when no supplier follow-up routes remain', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
     mockedGetSupplierOfferings.mockResolvedValue({ items: [] })
     useAuthStore.setState({
@@ -297,6 +298,8 @@ describe('SupplierOfferingsPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
 
     const fallbackCard = screen.getByTestId('supplier-offerings-mission-fallback')
+    expect(fallbackCard).toHaveAttribute('role', 'region')
+    expect(fallbackCard).toHaveAttribute('aria-labelledby', 'supplier-offerings-mission-fallback-heading')
     expect(within(fallbackCard).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到共享工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
 
@@ -305,7 +308,7 @@ describe('SupplierOfferingsPage', () => {
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
-  it('submits create offering form and reloads data', async () => {
+  it('submits create offering form and surfaces the current domain selection requirement message', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({
       domains: [{ id: 11, name: 'mail.nexus.test', region: 'global', status: 'active', catch_all: true }],
       accounts: [],

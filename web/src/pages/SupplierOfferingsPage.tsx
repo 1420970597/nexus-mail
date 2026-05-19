@@ -335,6 +335,8 @@ export function SupplierOfferingsPage() {
             {shouldShowMissionFallback ? (
               <Card
                 data-testid="supplier-offerings-mission-fallback"
+                role="region"
+                aria-labelledby="supplier-offerings-mission-fallback-heading"
                 style={{
                   flex: '1 1 250px',
                   minWidth: 250,
@@ -346,7 +348,7 @@ export function SupplierOfferingsPage() {
               >
                 <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                   <Tag color="grey">Fallback</Tag>
-                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                  <Typography.Title heading={5} id="supplier-offerings-mission-fallback-heading" style={{ margin: 0, color: '#f8fafc' }}>
                     返回共享工作台
                   </Typography.Title>
                   <Typography.Text style={{ color: 'rgba(226,232,240,0.78)' }}>
@@ -438,6 +440,8 @@ export function SupplierOfferingsPage() {
               {!canOpenApiKeys && !canOpenWebhooks && !canOpenDocs && fallbackRoute !== SUPPLIER_RESOURCES_ROUTE ? (
                 <Card
                   data-testid="supplier-offerings-shared-console-fallback"
+                  role="region"
+                  aria-labelledby="supplier-offerings-shared-console-fallback-heading"
                   style={{
                     flex: '1 1 240px',
                     minWidth: 240,
@@ -448,7 +452,13 @@ export function SupplierOfferingsPage() {
                   bodyStyle={{ padding: 18 }}
                 >
                   <Space vertical align="start" spacing={10}>
-                    <Typography.Text strong style={{ color: '#f8fafc' }}>返回共享工作台</Typography.Text>
+                    <Typography.Title
+                      heading={6}
+                      id="supplier-offerings-shared-console-fallback-heading"
+                      style={{ margin: 0, color: '#f8fafc', fontSize: 15, letterSpacing: '0.01em' }}
+                    >
+                      返回共享工作台
+                    </Typography.Title>
                     <Typography.Text style={{ color: 'rgba(203,213,225,0.74)' }}>
                       当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。
                     </Typography.Text>
