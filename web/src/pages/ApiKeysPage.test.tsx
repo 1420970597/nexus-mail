@@ -197,10 +197,12 @@ describe('ApiKeysPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
-    const heroScope = within(screen.getByTestId('api-keys-hero-card'))
-    expect(heroScope.getByText('共享控制台 · 供应商扩展')).toBeInTheDocument()
-    expect(heroScope.getByText(/优先设置固定出口 IP 白名单/)).toBeInTheDocument()
-    expect(heroScope.getByText(/按供货能力拆分不同 scopes/)).toBeInTheDocument()
+    const heroCard = screen.getByTestId('api-keys-hero-card')
+    expect(within(heroCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(heroCard).toHaveTextContent('共享控制台 · 供应商扩展')
+    expect(heroCard).toHaveTextContent('优先设置固定出口 IP 白名单')
+    expect(heroCard).toHaveTextContent('按供货能力拆分不同 scopes')
+    expect(heroCard).not.toHaveTextContent('共享控制台 · 基础接入')
   })
 
   it('uses role-aware webhook route identity inside the shared integration bridge for supplier and admin users', async () => {
