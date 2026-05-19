@@ -135,7 +135,7 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
           }}
         >
           <Space vertical spacing={8} align="start" style={{ flex: 1, minWidth: 0 }}>
-            <div data-testid="console-layout-header-summary" role="group" aria-label="当前页面摘要" style={{ width: '100%' }}>
+            <div data-testid="console-layout-header-summary" role="region" aria-label="当前页面摘要" style={{ width: '100%' }}>
               <Breadcrumb routes={breadcrumbRoutes} style={{ color: 'rgba(208,214,224,0.72)' }} />
               <Space spacing={10} align="center" wrap>
                 <Typography.Title
@@ -256,6 +256,13 @@ export function ConsoleLayout({ children, onLogout }: ConsoleLayoutProps) {
             {children}
           </main>
         </Content>
+        <footer
+          role="contentinfo"
+          aria-label="共享控制台页脚"
+          style={{ padding: '0 28px 24px', color: 'rgba(138,143,152,0.96)', fontSize: 12, lineHeight: 1.7 }}
+        >
+          单一登录后控制台 · 共享布局骨架 · 按角色差异化菜单与页面
+        </footer>
       </Layout>
     </Layout>
   )
