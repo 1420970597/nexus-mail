@@ -160,9 +160,11 @@ describe('WebhooksPage', () => {
 
     const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
     expect(within(guidanceRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(guidanceRegion).toHaveTextContent('用户视角')
+    expect(guidanceRegion).toHaveTextContent('创建账户级回调 endpoint，测试真实投递链路，并跟踪最近 50 条异步 delivery 状态。')
     const roleTips = within(guidanceRegion).getByTestId('webhooks-role-tips')
     expect(roleTips).toHaveTextContent('打开 API Keys 与文档，再补上回调消费端校验逻辑')
-    expect(roleTips).not.toHaveTextContent('先配置 API Keys 与文档，再补上回调消费端校验逻辑')
+    expect(guidanceRegion).not.toHaveTextContent('先配置 API Keys 与文档，再补上回调消费端校验逻辑')
   })
 
   it('renders role-specific guidance for supplier role', async () => {
