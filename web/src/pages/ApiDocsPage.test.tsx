@@ -228,6 +228,38 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('balance-route-stub')).toBeInTheDocument()
   })
 
+  it('exposes the docs continuation lane as a named shared-console region with fallback CTA gated to the fallback card only', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 36, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+      ],
+    })
+
+    renderApiDocsPage()
+
+    const loopRegion = screen.getByRole('region', { name: '文档核对后继续沿共享控制台接入链路推进' })
+    const loopScope = within(loopRegion)
+    expect(loopScope.getByRole('heading', { name: '文档核对后继续沿共享控制台接入链路推进' })).toBeInTheDocument()
+    expect(loopRegion).toHaveTextContent('读完 API 文档后，继续回到 API Keys、Webhook 与共享工作台推进真实联调，让文档始终服务同一套接入链路。')
+    expect(loopScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(loopScope.getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(loopScope.getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(loopScope.queryByRole('button', { name: '打开 API Keys 工作台' })).not.toBeInTheDocument()
+    expect(loopScope.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
+
+    await user.click(loopScope.getByRole('button', { name: '返回共享工作台' }))
+    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+  })
+
   it('falls back to the preferred shared workspace when bridge destinations are unavailable', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({

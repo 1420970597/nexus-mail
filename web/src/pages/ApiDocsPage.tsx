@@ -318,51 +318,53 @@ export function ApiDocsPage() {
         }}
         bodyStyle={{ padding: 22 }}
       >
-        <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-          <Tag color="indigo" shape="circle">Docs → API Keys → Webhooks</Tag>
-          <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
-            <div>
-              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
-                文档核对后继续沿共享控制台接入链路推进
-              </Typography.Title>
-              <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
-                读完 API 文档后，继续回到 API Keys、Webhook 与共享工作台推进真实联调，让文档始终服务同一套接入链路。
-              </Typography.Paragraph>
-            </div>
+        <section role="region" aria-labelledby="docs-shared-console-loop-heading" style={{ width: '100%' }}>
+          <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+            <Tag color="indigo" shape="circle">Docs → API Keys → Webhooks</Tag>
+            <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+              <div>
+                <Typography.Title id="docs-shared-console-loop-heading" heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+                  文档核对后继续沿共享控制台接入链路推进
+                </Typography.Title>
+                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
+                  读完 API 文档后，继续回到 API Keys、Webhook 与共享工作台推进真实联调，让文档始终服务同一套接入链路。
+                </Typography.Paragraph>
+              </div>
+            </Space>
+            <Row gutter={[16, 16]} style={{ width: '100%' }}>
+              {loopCards.map((card) => (
+                <Col xs={24} md={8} key={card.key}>
+                  <Card
+                    style={{
+                      height: '100%',
+                      borderRadius: 20,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                      border: `1px solid ${card.accent}`,
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Tag color="grey">{card.tag}</Tag>
+                      <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>{card.title}</Typography.Title>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.76)', minHeight: 88 }}>
+                        {card.description}
+                      </Typography.Paragraph>
+                      <Button
+                        theme="borderless"
+                        type="primary"
+                        icon={<IconArrowRight />}
+                        onClick={() => navigate(card.path === DOCS_LOOP_FALLBACK_PATH ? fallbackRoute : card.path)}
+                        aria-label={card.button}
+                      >
+                        {card.button}
+                      </Button>
+                    </Space>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
           </Space>
-          <Row gutter={[16, 16]} style={{ width: '100%' }}>
-            {loopCards.map((card) => (
-              <Col xs={24} md={8} key={card.key}>
-                <Card
-                  style={{
-                    height: '100%',
-                    borderRadius: 20,
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                    border: `1px solid ${card.accent}`,
-                  }}
-                  bodyStyle={{ padding: 18 }}
-                >
-                  <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                    <Tag color="grey">{card.tag}</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>{card.title}</Typography.Title>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.76)', minHeight: 88 }}>
-                      {card.description}
-                    </Typography.Paragraph>
-                    <Button
-                      theme="borderless"
-                      type="primary"
-                      icon={<IconArrowRight />}
-                      onClick={() => navigate(card.path === DOCS_LOOP_FALLBACK_PATH ? fallbackRoute : card.path)}
-                      aria-label={card.button}
-                    >
-                      {card.button}
-                    </Button>
-                  </Space>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Space>
+        </section>
       </Card>
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
