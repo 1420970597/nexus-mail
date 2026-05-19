@@ -221,12 +221,19 @@ describe('LoginPage', () => {
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
   })
 
-  it('exposes the auth guidance banner as a named region in both login and register modes', async () => {
+  it('exposes named auth-copy and guidance regions for both login and register modes without leaking the wrong mode copy', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
 
     const authShell = screen.getByTestId('login-auth-shell')
+    const loginCopyRegion = within(authShell).getByRole('region', { name: '登录认证说明' })
+    const loginCopyScope = within(loginCopyRegion)
+    expect(loginCopyScope.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
+    expect(loginCopyScope.getByText('登录后按角色展开工作区，继续同一套导航。')).toBeInTheDocument()
+    expect(loginCopyScope.queryByRole('heading', { name: '创建账号并进入统一控制台' })).not.toBeInTheDocument()
+    expect(loginCopyScope.queryByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).not.toBeInTheDocument()
+
     const loginBannerRegion = within(authShell).getByRole('region', { name: '登录模式提示' })
     const loginBannerScope = within(loginBannerRegion)
     expect(loginBannerScope.getByRole('heading', { name: '登录模式提示' })).toBeInTheDocument()
@@ -234,6 +241,13 @@ describe('LoginPage', () => {
 
     const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
     await user.click(within(modeSwitch).getByRole('tab', { name: '注册' }))
+
+    const registerCopyRegion = within(screen.getByTestId('login-auth-shell')).getByRole('region', { name: '注册认证说明' })
+    const registerCopyScope = within(registerCopyRegion)
+    expect(registerCopyScope.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
+    expect(registerCopyScope.getByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).toBeInTheDocument()
+    expect(registerCopyScope.queryByRole('heading', { name: '登录并进入统一控制台' })).not.toBeInTheDocument()
+    expect(registerCopyScope.queryByText('登录后按角色展开工作区，继续同一套导航。')).not.toBeInTheDocument()
 
     const registerBannerRegion = screen.getByRole('region', { name: '注册模式提示' })
     const registerBannerScope = within(registerBannerRegion)

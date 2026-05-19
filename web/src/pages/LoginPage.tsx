@@ -488,7 +488,11 @@ export function LoginPage() {
             >
               <Space vertical spacing={16} align="start" style={{ width: '100%' }}>
                 <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                  <div data-testid="login-auth-copy-block">
+                  <div
+                    data-testid="login-auth-copy-block"
+                    role="region"
+                    aria-label={mode === 'login' ? '登录认证说明' : '注册认证说明'}
+                  >
                     <Typography.Text
                       style={{
                         display: 'inline-flex',
