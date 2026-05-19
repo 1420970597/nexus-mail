@@ -389,6 +389,8 @@ export function ProfilePage() {
               </Space>
               {sharedConsoleReturnCard ? (
                 <Card
+                  role="region"
+                  aria-labelledby="profile-shared-console-return-heading"
                   data-testid="profile-shared-console-return"
                   style={{
                     width: '100%',
@@ -399,7 +401,9 @@ export function ProfilePage() {
                   bodyStyle={{ padding: 16 }}
                 >
                   <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                    <Typography.Text strong style={{ color: '#f8fafc' }}>{sharedConsoleReturnCard.title}</Typography.Text>
+                    <Typography.Title heading={6} id="profile-shared-console-return-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                      {sharedConsoleReturnCard.title}
+                    </Typography.Title>
                     <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)' }}>
                       {sharedConsoleReturnCard.description}
                     </Typography.Paragraph>
