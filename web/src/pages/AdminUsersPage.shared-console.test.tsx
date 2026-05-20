@@ -39,19 +39,35 @@ function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
         />
         <Route
           path={API_KEYS_ROUTE}
-          element={<section data-testid="admin-users-route-stub-api-keys"><h1>开发者 API 接入工作台</h1></section>}
+          element={
+            <section data-testid="admin-users-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          }
         />
         <Route
           path={WEBHOOKS_ROUTE}
-          element={<section data-testid="admin-users-route-stub-webhooks"><h1>{resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}</h1></section>}
+          element={
+            <section data-testid="admin-users-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
+              <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}</h1>
+            </section>
+          }
         />
         <Route
           path={DOCS_ROUTE}
-          element={<section data-testid="admin-users-route-stub-docs"><h1>API 文档与接入控制台</h1></section>}
+          element={
+            <section data-testid="admin-users-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
+              <h1>API 文档与接入控制台</h1>
+            </section>
+          }
         />
         <Route
           path={DASHBOARD_ROUTE}
-          element={<section data-testid="admin-users-route-stub-dashboard"><h1>控制台总览</h1></section>}
+          element={
+            <section data-testid="admin-users-route-stub-dashboard" role="region" aria-label="共享控制台首页">
+              <h1>控制台总览</h1>
+            </section>
+          }
         />
       </Routes>
     </MemoryRouter>,
@@ -155,14 +171,14 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
   })
 
-  it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations', async () => {
+  it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations inside named shared-console regions', async () => {
     const user = userEvent.setup()
     let view = renderAdminUsersPage()
 
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     let bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
     await user.click(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(API_KEYS_ROUTE, 'admin')}`) }))
-    let apiKeysRouteStub = await screen.findByTestId('admin-users-route-stub-api-keys')
+    let apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
@@ -170,7 +186,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
     await user.click(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) }))
-    const webhooksRouteStub = await screen.findByTestId('admin-users-route-stub-webhooks')
+    const webhooksRouteStub = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(webhooksRouteStub).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
 
     view.unmount()
@@ -178,7 +194,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(await screen.findByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     bridgeLinks = screen.getByTestId('admin-users-shared-console-links')
     await user.click(within(bridgeLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) }))
-    const docsRouteStub = await screen.findByTestId('admin-users-route-stub-docs')
+    const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
@@ -235,7 +251,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     await waitFor(() => expect(mockedResolveAdminDispute).toHaveBeenCalled())
   })
 
-  it('suppresses unavailable shared-console CTAs and falls back to the shared console home when only the finance page remains', async () => {
+  it('suppresses unavailable shared-console CTAs and falls back to the shared console home region when only the finance page remains', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -265,7 +281,7 @@ describe('AdminUsersPage shared-console admin workbench', () => {
     expect(within(fallbackCard).getByText('当风控、审计与共享接入入口暂未由服务端暴露时，先回到共享工作台完成当前管理员主链路，再等待后续菜单授权。')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回共享工作台' }))
-    const dashboardRouteStub = await screen.findByTestId('admin-users-route-stub-dashboard')
+    const dashboardRouteStub = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })
