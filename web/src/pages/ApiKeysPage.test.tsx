@@ -74,7 +74,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="route-stub-webhooks">
+            <section data-testid="route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role)}</h1>
             </section>
           )}
@@ -82,7 +82,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="route-stub-docs">
+            <section data-testid="route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -90,7 +90,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
         <Route
           path="/"
           element={(
-            <section data-testid="route-stub-dashboard">
+            <section data-testid="route-stub-dashboard" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -404,6 +404,7 @@ describe('ApiKeysPage', () => {
     const bridgeScope = within(bridgeRegion)
     expect(bridgeRegion).toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
     expect(bridgeScope.getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    expect(bridgeScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: /返回项目市场/ })).toBeInTheDocument()
@@ -418,24 +419,25 @@ describe('ApiKeysPage', () => {
     expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
   })
 
-  it('navigates to shared integration routes from the scoped bridge before and after key creation', async () => {
+  it('navigates to shared integration routes from named destination regions before and after key creation', async () => {
     const user = userEvent.setup()
 
     let view = renderApiKeysPage()
 
     const firstKeysCard = await screen.findByTestId('api-keys-current-keys-card')
     await within(firstKeysCard).findByText('默认密钥')
-    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
-    expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    await user.click(within(bridgeRegion).getByRole('button', { name: /继续配置 Webhook/ }))
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
     const secondKeysCard = await screen.findByTestId('api-keys-current-keys-card')
     await within(secondKeysCard).findByText('默认密钥')
-    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByTestId('route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: /查看 API 文档/ }))
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
@@ -538,7 +540,7 @@ describe('ApiKeysPage', () => {
     expect(within(fallback).getByTestId('api-keys-shared-console-fallback-button')).toBeInTheDocument()
   })
 
-  it('navigates via the scoped fallback CTA to the preferred shared-console route stub', async () => {
+  it('navigates via the scoped fallback CTA to the preferred shared-console home region', async () => {
     const user = userEvent.setup()
 
     useAuthStore.setState({
@@ -557,8 +559,8 @@ describe('ApiKeysPage', () => {
     await within(keysCard).findByText('默认密钥')
     const fallback = screen.getByRole('region', { name: '返回共享工作台' })
     await user.click(within(fallback).getByTestId('api-keys-shared-console-fallback-button'))
-    expect(await screen.findByTestId('route-stub-dashboard')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(homeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('opens confirmation modal with precise revoke warning copy', async () => {
