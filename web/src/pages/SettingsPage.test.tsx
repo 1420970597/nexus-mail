@@ -200,7 +200,8 @@ describe('SettingsPage', () => {
     expect(within(sharedBridge).queryByRole('heading', { name: '开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
     expect(within(sharedBridge).queryByRole('heading', { name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
 
-    const sessionCard = screen.getByTestId('settings-session-card')
+    const sessionCard = screen.getByRole('region', { name: '当前登录会话' })
+    expect(within(sessionCard).getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     expect(within(sessionCard).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(sessionCard).queryByText('文档入口')).not.toBeInTheDocument()

@@ -667,7 +667,8 @@ describe('App', () => {
 
     renderApp([SETTINGS_ROUTE])
 
-    const sessionCard = await screen.findByTestId('settings-session-card')
+    const sessionCard = await screen.findByRole('region', { name: '当前登录会话' })
+    expect(within(sessionCard).getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     const settingsMain = screen.getByRole('main', { name: '控制台主内容' })
     expect(within(settingsMain).queryByText('首次使用清单')).not.toBeInTheDocument()

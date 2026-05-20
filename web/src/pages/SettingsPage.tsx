@@ -498,14 +498,20 @@ export function SettingsPage() {
         <Col xs={24} xl={8}>
           <Card
             data-testid="settings-session-card"
-            title="当前登录会话"
+            role="region"
+            aria-labelledby="settings-session-card-heading"
             style={{ height: '100%', borderRadius: 24 }}
             bodyStyle={{ padding: 20 }}
           >
-            <Descriptions data={sessionItems} align="left" />
-            <div style={{ marginTop: 16 }}>
-              <Tag color="blue">{user?.role ?? 'guest'}</Tag>
-            </div>
+            <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+              <Typography.Title heading={5} id="settings-session-card-heading" style={{ margin: 0 }}>
+                当前登录会话
+              </Typography.Title>
+              <Descriptions data={sessionItems} align="left" />
+              <div>
+                <Tag color="blue">{user?.role ?? 'guest'}</Tag>
+              </div>
+            </Space>
           </Card>
         </Col>
         <Col xs={24} xl={16}>
