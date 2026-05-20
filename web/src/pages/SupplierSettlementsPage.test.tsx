@@ -147,7 +147,11 @@ function renderSupplierSettlementsPage() {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="supplier-settlements-route-stub-api-keys">
+            <section
+              data-testid="supplier-settlements-route-stub-api-keys"
+              role="region"
+              aria-label="共享控制台 - API Keys"
+            >
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -155,7 +159,11 @@ function renderSupplierSettlementsPage() {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="supplier-settlements-route-stub-webhooks">
+            <section
+              data-testid="supplier-settlements-route-stub-webhooks"
+              role="region"
+              aria-label="共享控制台 - Webhooks"
+            >
               <h1>供给事件回调工作台</h1>
             </section>
           )}
@@ -163,7 +171,11 @@ function renderSupplierSettlementsPage() {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="supplier-settlements-route-stub-docs">
+            <section
+              data-testid="supplier-settlements-route-stub-docs"
+              role="region"
+              aria-label="共享控制台 - API 文档"
+            >
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -171,7 +183,11 @@ function renderSupplierSettlementsPage() {
         <Route
           path={DASHBOARD_ROUTE}
           element={(
-            <section data-testid="supplier-settlements-route-stub-shared-home">
+            <section
+              data-testid="supplier-settlements-route-stub-shared-home"
+              role="region"
+              aria-label="共享控制台首页"
+            >
               <h1>控制台总览</h1>
             </section>
           )}
@@ -252,30 +268,30 @@ describe('SupplierSettlementsPage', () => {
     expect(bridge).not.toHaveTextContent(`API 文档与接入控制台 · ${DOCS_ROUTE}`)
   })
 
-  it('navigates from the shared-console bridge to api keys, webhooks, and docs destinations', async () => {
+  it('navigates from the shared-console bridge into named api keys, webhooks, and docs regions', async () => {
     const user = userEvent.setup()
     let view = renderSupplierSettlementsPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    let bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    let bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /打开 API Keys/ }))
-    let apiKeysRouteStub = await screen.findByTestId('supplier-settlements-route-stub-api-keys')
+    let apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /继续配置 Webhook/ }))
-    const webhooksRouteStub = await screen.findByTestId('supplier-settlements-route-stub-webhooks')
+    const webhooksRouteStub = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(webhooksRouteStub).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
 
     view.unmount()
     renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /查看 API 文档/ }))
-    const docsRouteStub = await screen.findByTestId('supplier-settlements-route-stub-docs')
+    const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
@@ -321,8 +337,8 @@ describe('SupplierSettlementsPage', () => {
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByTestId('supplier-settlements-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('shows a named shared-console fallback region and routes back to the shared home when integration entries are hidden', async () => {
@@ -348,7 +364,7 @@ describe('SupplierSettlementsPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('supplier-settlements-mission-fallback')).not.toBeInTheDocument()
 
-    const bridge = screen.getByTestId('supplier-settlements-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).queryByText(`开发者 API 接入工作台 · ${API_KEYS_ROUTE}`)).not.toBeInTheDocument()
     expect(within(bridge).queryByText(`供给事件回调工作台 · ${WEBHOOKS_ROUTE}`)).not.toBeInTheDocument()
     expect(within(bridge).queryByText(`API 文档与接入控制台 · ${DOCS_ROUTE}`)).not.toBeInTheDocument()
@@ -357,8 +373,8 @@ describe('SupplierSettlementsPage', () => {
     expect(within(sharedConsoleFallback).getByText('共享接入入口暂未由服务端暴露时，先回到共享工作台继续真实业务主链路，不在当前页泄露未授权集成入口。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleFallback).getByRole('button', { name: /返回共享工作台/ }))
-    expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides the fallback slices when supplier settlements is the only visible route', async () => {
@@ -398,8 +414,8 @@ describe('SupplierSettlementsPage', () => {
     expect(within(sharedConsoleFallback).getByTestId('supplier-settlements-shared-console-fallback-button')).toBeInTheDocument()
 
     await user.click(within(missionFallback).getByRole('button', { name: /返回共享工作台/ }))
-    expect(await screen.findByTestId('supplier-settlements-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('submits supplier cost profile and dispute actions from scoped finance cards then reloads data', async () => {
