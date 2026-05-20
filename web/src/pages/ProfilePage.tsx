@@ -28,6 +28,7 @@ interface FocusItem {
 
 interface CapabilityCard {
   key: string
+  eyebrow: string
   title: string
   description: string
   buttonText: string
@@ -71,7 +72,6 @@ export function ProfilePage() {
   const canOpenProjects = hasMenuPath(menu, PROJECTS_ROUTE)
   const canOpenApiKeys = hasMenuPath(menu, API_KEYS_ROUTE)
   const canOpenWebhooks = hasMenuPath(menu, WEBHOOKS_ROUTE)
-  const webhooksTitle = resolveRouteTitle(WEBHOOKS_ROUTE, user?.role)
   const canOpenDocs = hasMenuPath(menu, DOCS_ROUTE)
   const canOpenSettings = hasMenuPath(menu, SETTINGS_ROUTE)
   const canOpenSupplierDomains = hasMenuPath(menu, '/supplier/domains')
@@ -122,6 +122,7 @@ export function ProfilePage() {
     () => [
       {
         key: 'projects',
+        eyebrow: '共享采购入口',
         title: '共享采购入口',
         description: '从账号页继续回到项目市场，保持从身份核对到真实采购的一条主路径。',
         buttonText: '打开项目市场',
@@ -130,7 +131,8 @@ export function ProfilePage() {
       },
       {
         key: 'api-keys',
-        title: '开发者 API 接入工作台',
+        eyebrow: '开发者接入动作',
+        title: '继续完成 API Keys 配置',
         description: '在同一控制台里继续完成 API Keys、白名单与最小权限发放，不拆出独立接入后台。',
         buttonText: '打开 API Keys',
         path: API_KEYS_ROUTE,
@@ -138,7 +140,8 @@ export function ProfilePage() {
       },
       {
         key: 'webhooks',
-        title: webhooksTitle,
+        eyebrow: '共享回调入口',
+        title: '继续配置 Webhook',
         description: '直接进入 Webhook 页面查看 endpoint、测试投递与失败重试状态，并保持接入链路留在同一壳内。',
         buttonText: '继续配置 Webhook',
         path: WEBHOOKS_ROUTE,
@@ -146,14 +149,15 @@ export function ProfilePage() {
       },
       {
         key: 'docs',
-        title: 'API 文档与接入控制台',
+        eyebrow: '文档核对入口',
+        title: '查看 API 文档',
         description: '通过共享导航进入 /docs，对照真实路由与接入契约继续联调。',
         buttonText: '查看 API 文档',
         path: DOCS_ROUTE,
         visible: canOpenDocs,
       },
     ],
-    [canOpenApiKeys, canOpenDocs, canOpenProjects, canOpenWebhooks, webhooksTitle],
+    [canOpenApiKeys, canOpenDocs, canOpenProjects, canOpenWebhooks],
   )
 
   const visibleCapabilityCards = capabilityCards.filter((item) => item.visible)
@@ -328,7 +332,10 @@ export function ProfilePage() {
                       bodyStyle={{ padding: 18 }}
                     >
                       <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                        <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                        <Tag color="blue" shape="circle">{item.eyebrow}</Tag>
+                        <Typography.Paragraph style={{ margin: 0, color: '#f8fafc', fontWeight: 600, lineHeight: 1.6 }}>
+                          {item.title}
+                        </Typography.Paragraph>
                         <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
                           {item.description}
                         </Typography.Paragraph>

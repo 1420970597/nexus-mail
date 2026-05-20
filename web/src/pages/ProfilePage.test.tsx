@@ -92,7 +92,7 @@ describe('ProfilePage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('keeps the account shell aligned with a dark single-console mission control and scopes shared bridge navigation to the capability region', async () => {
+  it('keeps the account shell aligned with a dark single-console mission control and scopes shared bridge navigation to bridge-owned CTA surfaces only', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -131,12 +131,12 @@ describe('ProfilePage', () => {
     expect(capabilityRegion).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(capabilityRegion).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
     expect(capabilityRegion).not.toHaveTextContent('控制台桥接能力')
-    expect(within(capabilityRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
-    expect(within(capabilityRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    expect(within(capabilityRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(capabilityRegion).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: '开发者 API 接入工作台' })).not.toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: '开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
 
     const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
@@ -283,7 +283,7 @@ describe('ProfilePage', () => {
     expect(screen.queryByRole('region', { name: /回到共享工作台|通过设置中心回到共享控制台/ })).not.toBeInTheDocument()
   })
 
-  it('scopes the supplier shared-console webhook bridge copy to the supplier role title', async () => {
+  it('scopes the supplier shared-console webhook bridge copy to CTA-level shared actions and keeps the supplier role title on the destination page', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -301,7 +301,8 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const capabilityRegion = await screen.findByRole('region', { name: '共享接入桥接' })
-    expect(within(capabilityRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier') })).toBeInTheDocument()
+    expect(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier') })).not.toBeInTheDocument()
     expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'user') })).not.toBeInTheDocument()
 
     await user.click(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' }))
@@ -309,7 +310,7 @@ describe('ProfilePage', () => {
     expect(within(webhooksRouteStub).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'supplier') })).toBeInTheDocument()
   })
 
-  it('scopes the admin shared-console webhook bridge copy to the admin role title', async () => {
+  it('scopes the admin shared-console webhook bridge copy to CTA-level shared actions and keeps the admin role title on the destination page', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -327,7 +328,8 @@ describe('ProfilePage', () => {
     renderProfilePage()
 
     const capabilityRegion = await screen.findByRole('region', { name: '共享接入桥接' })
-    expect(within(capabilityRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).toBeInTheDocument()
+    expect(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
+    expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'admin') })).not.toBeInTheDocument()
     expect(within(capabilityRegion).queryByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, 'user') })).not.toBeInTheDocument()
 
     await user.click(within(capabilityRegion).getByRole('button', { name: '继续配置 Webhook' }))
