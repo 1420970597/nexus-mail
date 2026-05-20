@@ -102,7 +102,7 @@ describe('ConsoleLayout', () => {
           <Route
             path="/api-keys"
             element={
-              <section data-testid="console-layout-route-stub-api-keys">
+              <section data-testid="console-layout-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -136,7 +136,7 @@ describe('ConsoleLayout', () => {
     expect(within(quickActions).queryByRole('button', { name: /Webhook 设置/ })).not.toBeInTheDocument()
 
     await user.click(within(quickActions).getByTestId('console-layout-quick-action-api-keys'))
-    expect(await screen.findByTestId('console-layout-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: resolveRouteTitle(API_KEYS_ROUTE, 'user') })).toBeInTheDocument()
+    const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(destinationRegion).getByRole('heading', { name: resolveRouteTitle(API_KEYS_ROUTE, 'user') })).toBeInTheDocument()
   })
 })
