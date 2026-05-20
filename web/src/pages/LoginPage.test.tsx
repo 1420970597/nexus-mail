@@ -293,7 +293,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
-  it('keeps login runway destination stubs inside the same shared-console shell contract after navigating to API Keys, Webhooks, and Docs', async () => {
+  it('keeps the shared-console route stubs region-scoped when opening API Keys, Webhooks, and Docs from the registration journey', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
