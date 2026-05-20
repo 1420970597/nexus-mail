@@ -255,7 +255,7 @@ describe('ApiDocsPage', () => {
     expect(loopScope.queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(loopScope.getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
@@ -290,7 +290,7 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(within(loopLane).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
@@ -336,7 +336,7 @@ describe('ApiDocsPage', () => {
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
     loopLane = screen.getByTestId('docs-shared-console-loop')
     await user.click(within(loopLane).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

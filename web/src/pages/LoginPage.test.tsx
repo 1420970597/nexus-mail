@@ -343,7 +343,7 @@ describe('LoginPage', () => {
       refreshToken: 'register-refresh',
       user: { id: 8, email: 'new@example.com', role: 'user' },
     })
-    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
   })
 
   it('blocks registration when email is invalid before calling the API', async () => {
@@ -395,7 +395,7 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: '注册并进入统一控制台' }))
 
     await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('boundary@example.com', exactBoundaryPassword))
-    expect(await screen.findByTestId('shared-console-home')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
   })
 
   it('blocks registration when confirmation password does not match', async () => {
