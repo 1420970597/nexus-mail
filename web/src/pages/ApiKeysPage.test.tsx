@@ -216,8 +216,8 @@ describe('ApiKeysPage', () => {
     expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → 供给事件回调工作台 → API 文档与接入控制台')
     expect(screen.getByTestId('api-keys-shared-console-bridge')).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
     await user.click(supplierBridge.getByRole('button', { name: /继续配置 Webhook/ }))
-    const supplierWebhookStub = await screen.findByTestId('route-stub-webhooks')
-    expect(within(supplierWebhookStub).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+    const supplierWebhookRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(supplierWebhookRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
 
     view.unmount()
     seedRole('admin')
@@ -228,8 +228,8 @@ describe('ApiKeysPage', () => {
     expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → Webhook 运维与回调观测 → API 文档与接入控制台')
     expect(screen.getByTestId('api-keys-shared-console-bridge')).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
     await user.click(adminBridge.getByRole('button', { name: /继续配置 Webhook/ }))
-    const adminWebhookStub = await screen.findByTestId('route-stub-webhooks')
-    expect(within(adminWebhookStub).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    const adminWebhookRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(adminWebhookRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
   it('loads and creates api key with trimmed scopes and whitelist', async () => {
