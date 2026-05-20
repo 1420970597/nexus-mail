@@ -229,7 +229,7 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('keeps settings runtime shortcuts limited to currently visible shared-console route cards', async () => {
+  it('keeps settings runtime shortcuts limited to a named shared-console shortcut region with only currently visible route cards', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -246,7 +246,7 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
-    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    const shortcutLane = await screen.findByRole('region', { name: '控制台运行快捷入口' })
     const shortcutScope = within(shortcutLane)
 
     expect(shortcutScope.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
