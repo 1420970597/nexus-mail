@@ -45,7 +45,7 @@ function renderSupplierOfferingsPage() {
         <Route
           path={DASHBOARD_ROUTE}
           element={
-            <section data-testid="supplier-offerings-route-stub-shared-home">
+            <section data-testid="supplier-offerings-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           }
@@ -118,7 +118,7 @@ describe('SupplierOfferingsPage', () => {
     })
   })
 
-  it('renders supplier offering mission shell with scoped metrics and shared-console guidance', async () => {
+  it('renders supplier offering mission shell with scoped metrics and named shared-console bridge/capability regions', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({
       domains: [
         { id: 11, name: 'mail.nexus.test', region: 'global', status: 'active', catch_all: true },
@@ -215,7 +215,7 @@ describe('SupplierOfferingsPage', () => {
     expect(screen.getByText('domain · 1')).toBeInTheDocument()
   })
 
-  it('navigates from mission-control actions to resource, settlement, and api key pages', async () => {
+  it('keeps supplier shared-console destination stubs inside named regions after mission and bridge navigation', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
     mockedGetSupplierOfferings.mockResolvedValue({ items: [] })
     const user = userEvent.setup()
@@ -238,8 +238,27 @@ describe('SupplierOfferingsPage', () => {
     view = renderSupplierOfferingsPage()
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-offerings-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByTestId('supplier-offerings-route-stub-api-keys')).toBeInTheDocument()
+    const apiKeysStub = await screen.findByTestId('supplier-offerings-route-stub-api-keys')
+    expect(apiKeysStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderSupplierOfferingsPage()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
+    const sharedBridge = screen.getByRole('region', { name: '共享接入桥接' })
+    await user.click(within(sharedBridge).getByRole('button', { name: /继续配置 Webhook/ }))
+    const webhooksStub = await screen.findByTestId('supplier-offerings-route-stub-webhooks')
+    expect(webhooksStub).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+
+    view.unmount()
+    view = renderSupplierOfferingsPage()
+    expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
+    const docsBridge = screen.getByRole('region', { name: '共享接入桥接' })
+    await user.click(within(docsBridge).getByRole('button', { name: /查看 API 文档/ }))
+    const docsStub = await screen.findByTestId('supplier-offerings-route-stub-docs')
+    expect(docsStub).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('suppresses hidden shared-console bridge actions and falls back to the preferred workspace through a named shared-console region when integration routes are absent from the menu', async () => {
@@ -271,8 +290,9 @@ describe('SupplierOfferingsPage', () => {
     expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
     expect(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button')).toBeInTheDocument()
     await user.click(within(fallback).getByTestId('supplier-offerings-shared-console-fallback-button'))
-    expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHome = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(sharedHome).toBeInTheDocument()
+    expect(within(sharedHome).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('shows a named mission fallback region and returns to dashboard when no supplier follow-up routes remain', async () => {
@@ -304,8 +324,9 @@ describe('SupplierOfferingsPage', () => {
     expect(within(fallbackCard).getByText('当服务端暂未暴露资源、结算与接入入口时，先回到共享工作台继续共享控制台中的供应商主链路。')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByTestId('supplier-offerings-mission-fallback-button'))
-    expect(await screen.findByTestId('supplier-offerings-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHome = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(sharedHome).toBeInTheDocument()
+    expect(within(sharedHome).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('submits create offering form and surfaces the current domain selection requirement message', async () => {
