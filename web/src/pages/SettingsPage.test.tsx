@@ -229,6 +229,35 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
+  it('keeps settings runtime shortcuts limited to currently visible shared-console route cards', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 24, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'profile', label: '个人资料', path: PROFILE_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
+    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    const shortcutScope = within(shortcutLane)
+
+    expect(shortcutScope.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(shortcutScope.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(shortcutScope.queryByRole('heading', { name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
+    expect(shortcutScope.queryByRole('heading', { name: '共享路由常驻同一壳' })).not.toBeInTheDocument()
+    expect(shortcutScope.queryByRole('heading', { name: '共享接入桥接' })).not.toBeInTheDocument()
+    expect(shortcutScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    expect(shortcutScope.queryByRole('button', { name: '打开项目市场' })).not.toBeInTheDocument()
+  })
+
   it('hides the shared bridge when the current account has no integration mission cards exposed by the server menu', async () => {
     useAuthStore.setState({
       token: 'token',
