@@ -96,6 +96,67 @@ describe('AppSidebar', () => {
     expect(within(roleSummary).getByText('风控 / 审计 / 运营配置')).toBeInTheDocument()
   })
 
+  it('exposes named sidebar workspace groups and keeps supplier/admin expansions scoped to the same shared shell', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 8, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+      ],
+      bootstrapStatus: 'ready',
+    })
+
+    await renderSidebarAndWait(<AppSidebar />)
+
+    const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
+    const sharedGroupScope = within(sharedGroup)
+    expect(sharedGroupScope.getByRole('menuitem', { name: /控制台总览/ })).toBeInTheDocument()
+    expect(sharedGroupScope.getByRole('menuitem', { name: /项目市场/ })).toBeInTheDocument()
+    expect(sharedGroupScope.getByRole('menuitem', { name: /开发者 API 接入工作台/ })).toBeInTheDocument()
+    expect(sharedGroupScope.queryByRole('menuitem', { name: '域名池运营中枢' })).not.toBeInTheDocument()
+    expect(sharedGroupScope.queryByRole('menuitem', { name: '风控中心' })).not.toBeInTheDocument()
+
+    const supplierGroup = screen.getByTestId('app-sidebar-supplier-group')
+    const supplierGroupScope = within(supplierGroup)
+    expect(supplierGroupScope.getByRole('menuitem', { name: /域名池运营中枢/ })).toBeInTheDocument()
+    expect(supplierGroupScope.queryByRole('menuitem', { name: '控制台总览' })).not.toBeInTheDocument()
+    expect(supplierGroupScope.queryByRole('menuitem', { name: '风控中心' })).not.toBeInTheDocument()
+
+    const adminGroup = screen.getByTestId('app-sidebar-admin-group')
+    const adminGroupScope = within(adminGroup)
+    expect(adminGroupScope.getByRole('menuitem', { name: /风控中心/ })).toBeInTheDocument()
+    expect(adminGroupScope.queryByRole('menuitem', { name: '控制台总览' })).not.toBeInTheDocument()
+    expect(adminGroupScope.queryByRole('menuitem', { name: '域名池运营中枢' })).not.toBeInTheDocument()
+  })
+
+  it('hides supplier and admin workspace expansions when the server menu only exposes shared routes', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh-token',
+      user: { id: 9, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+      ],
+      bootstrapStatus: 'ready',
+    })
+
+    await renderSidebarAndWait(<AppSidebar />)
+
+    const sharedGroup = screen.getByTestId('app-sidebar-shared-group')
+    expect(within(sharedGroup).getByRole('menuitem', { name: /控制台总览/ })).toBeInTheDocument()
+    expect(within(sharedGroup).getByRole('menuitem', { name: /项目市场/ })).toBeInTheDocument()
+    expect(within(sharedGroup).getByRole('menuitem', { name: /开发者 API 接入工作台/ })).toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar-supplier-group')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('app-sidebar-admin-group')).not.toBeInTheDocument()
+  })
+
   it('marks the current route as selected inside the navigation menu', async () => {
     useAuthStore.setState({
       token: 'token',
