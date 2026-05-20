@@ -609,9 +609,16 @@ export function DashboardPage() {
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         {user?.role === 'user' && nextSteps.length > 0 ? (
           <Col xs={24}>
-            <Card data-testid="dashboard-next-steps-lane" style={metricCardStyle('rgba(16,185,129,0.24)')} bodyStyle={{ padding: 22 }}>
+            <Card
+              data-testid="dashboard-next-steps-lane"
+              role="region"
+              aria-labelledby="dashboard-next-steps-lane-label"
+              style={metricCardStyle('rgba(16,185,129,0.24)')} bodyStyle={{ padding: 22 }}>
               <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                 <div>
+                  <span id="dashboard-next-steps-lane-label" style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+                    推荐下一步
+                  </span>
                   <Tag color="green">推荐下一步</Tag>
                   <Typography.Title heading={4} style={{ margin: '12px 0 6px', color: '#f7f8f8' }}>
                     预算 → 采购 → 履约 → 接入

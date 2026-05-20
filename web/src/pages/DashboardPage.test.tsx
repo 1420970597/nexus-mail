@@ -214,7 +214,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(firstRunScope.queryByText('Role-aware')).not.toBeInTheDocument()
     expect(screen.getByText('统一接入')).toBeInTheDocument()
     expect(screen.getByText('角色扩展')).toBeInTheDocument()
-    const lane = screen.getByTestId('dashboard-next-steps-lane')
+    const lane = screen.getByRole('region', { name: '推荐下一步' })
     const scoped = within(lane)
     expect(scoped.getByText('资金准备')).toBeInTheDocument()
     expect(scoped.getByText('项目采购')).toBeInTheDocument()
