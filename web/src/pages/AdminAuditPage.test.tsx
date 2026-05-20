@@ -21,7 +21,7 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
         <Route
           path={ADMIN_RISK_ROUTE}
           element={(
-            <section data-testid="admin-audit-route-stub-risk">
+            <section data-testid="admin-audit-route-stub-risk" role="region" aria-label="共享控制台 - 风控中心">
               <h1>风控中心</h1>
             </section>
           )}
@@ -29,7 +29,7 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
         <Route
           path={ADMIN_USERS_ROUTE}
           element={(
-            <section data-testid="admin-audit-route-stub-users">
+            <section data-testid="admin-audit-route-stub-users" role="region" aria-label="共享控制台 - 用户管理">
               <h1>用户管理</h1>
             </section>
           )}
@@ -37,7 +37,7 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="admin-audit-route-stub-api-keys">
+            <section data-testid="admin-audit-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -45,7 +45,7 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="admin-audit-route-stub-docs">
+            <section data-testid="admin-audit-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -53,7 +53,7 @@ function renderAdminAuditPage(initialEntry = ADMIN_AUDIT_ROUTE) {
         <Route
           path="/"
           element={(
-            <section data-testid="admin-audit-route-stub-shared-home">
+            <section data-testid="admin-audit-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -135,7 +135,7 @@ describe('AdminAuditPage', () => {
     expect(within(auditTable).getByText('blocked by whitelist')).toBeInTheDocument()
   })
 
-  it('navigates from the shared-console bridge to api keys, risk, and docs destinations', async () => {
+  it('navigates from the shared-console bridge to api keys, risk, and docs destinations inside named shared-console regions', async () => {
     const user = userEvent.setup()
     let view = renderAdminAuditPage()
 
@@ -143,24 +143,24 @@ describe('AdminAuditPage', () => {
 
     const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
     await user.click(within(bridge).getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByTestId('admin-audit-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    let apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const refreshedBridge = screen.getByTestId('admin-audit-shared-console-bridge')
     await user.click(within(refreshedBridge).getByRole('button', { name: /继续查看风控/ }))
-    expect(await screen.findByTestId('admin-audit-route-stub-risk')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    const riskRouteStub = await screen.findByRole('region', { name: '共享控制台 - 风控中心' })
+    expect(within(riskRouteStub).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     const docsBridge = screen.getByTestId('admin-audit-shared-console-bridge')
     await user.click(within(docsBridge).getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByTestId('admin-audit-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
@@ -192,8 +192,8 @@ describe('AdminAuditPage', () => {
     expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('admin-audit-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const dashboardRouteStub = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides the fallback slice when the audit page is the only visible admin route', async () => {

@@ -31,7 +31,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={ADMIN_USERS_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-users">
+            <section data-testid="admin-suppliers-route-stub-users" role="region" aria-label="共享控制台 - 用户管理">
               <h1>用户管理</h1>
             </section>
           )}
@@ -39,7 +39,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={ADMIN_RISK_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-risk">
+            <section data-testid="admin-suppliers-route-stub-risk" role="region" aria-label="共享控制台 - 风控中心">
               <h1>风控中心</h1>
             </section>
           )}
@@ -47,7 +47,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={ADMIN_AUDIT_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-audit">
+            <section data-testid="admin-suppliers-route-stub-audit" role="region" aria-label="共享控制台 - 审计日志">
               <h1>审计日志</h1>
             </section>
           )}
@@ -55,7 +55,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={DASHBOARD_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-shared-home">
+            <section data-testid="admin-suppliers-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -63,7 +63,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-api-keys">
+            <section data-testid="admin-suppliers-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -71,7 +71,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-webhooks">
+            <section data-testid="admin-suppliers-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}</h1>
             </section>
           )}
@@ -79,7 +79,7 @@ function renderAdminSuppliersPage(initialEntry = ADMIN_SUPPLIERS_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="admin-suppliers-route-stub-docs">
+            <section data-testid="admin-suppliers-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -181,7 +181,6 @@ describe('AdminSuppliersPage', () => {
   })
 
   it('renders the supplier mission-control heading, scoped overview signals, and shared-console links from overview data', async () => {
-    const user = userEvent.setup()
     renderAdminSuppliersPage()
 
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
@@ -237,10 +236,17 @@ describe('AdminSuppliersPage', () => {
     expect(within(sharedLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(sharedLinks).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) })).toBeInTheDocument()
     expect(within(bridge).getByText('即使当前是管理员供应商运营切片，也要保留单一登录后控制台叙事：处理完结算 / 风控 / 审计后，仍通过 API Keys、Webhook 与 API 文档与接入控制台验证对外接入链路。')).toBeInTheDocument()
+  })
+
+  it('navigates from the shared bridge to webhook and docs destinations inside named shared-console regions', async () => {
+    const user = userEvent.setup()
+    renderAdminSuppliersPage()
+
+    expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
 
     const bridgeLoop = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridgeLoop).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}`) }))
-    const webhookRouteStub = await screen.findByTestId('admin-suppliers-route-stub-webhooks')
+    const webhookRouteStub = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(webhookRouteStub).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
 
     cleanup()
@@ -248,7 +254,7 @@ describe('AdminSuppliersPage', () => {
     expect(await screen.findByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
     const rerenderedBridgeLoop = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(rerenderedBridgeLoop).getByRole('button', { name: new RegExp(`打开 ${resolveRouteTitle(DOCS_ROUTE, 'admin')}`) }))
-    const docsRouteStub = await screen.findByTestId('admin-suppliers-route-stub-docs')
+    const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     cleanup()
@@ -294,8 +300,8 @@ describe('AdminSuppliersPage', () => {
 
     const fallbackButton = within(bridge).getByRole('button', { name: '返回共享工作台' })
     await user.click(fallbackButton)
-    expect(await screen.findByTestId('admin-suppliers-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeRouteStub = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('shows the scoped fallback card when every downstream admin action is hidden', async () => {
