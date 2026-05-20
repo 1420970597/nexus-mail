@@ -39,7 +39,7 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="webhooks-route-stub-api-keys">
+            <section data-testid="webhooks-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -48,7 +48,7 @@ function renderWebhooksPage(initialEntry = WEBHOOKS_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="webhooks-route-stub-docs">
+            <section data-testid="webhooks-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -349,7 +349,7 @@ describe('WebhooksPage', () => {
     expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 
-  it('navigates from the bridge fallback to the preferred shared-console route', async () => {
+  it('navigates from the bridge fallback into the named shared-console home region', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -364,11 +364,10 @@ describe('WebhooksPage', () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
-    await user.click(within(bridgeCard).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('webhooks-route-stub-home')).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    await user.click(within(bridgeRegion).getByRole('button', { name: '返回共享工作台' }))
+    const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(homeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('keeps the bridge copy honest when webhooks is the only shared route still visible', async () => {
@@ -393,7 +392,7 @@ describe('WebhooksPage', () => {
     expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 
-  it('navigates from the docs-only bridge state via the remaining scoped CTA', async () => {
+  it('navigates from the docs-only bridge state into the named shared-console docs region', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -409,23 +408,23 @@ describe('WebhooksPage', () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
-    await user.click(within(bridgeCard).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByTestId('webhooks-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    await user.click(within(bridgeRegion).getByRole('button', { name: '查看 API 文档' }))
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('renders shared-console navigation actions for the first integration loop', async () => {
+  it('renders shared-console navigation actions for the first integration loop inside named destination regions', async () => {
     const user = userEvent.setup()
 
     let view = renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
-    const bridgeRegion = screen.getByTestId('webhooks-shared-console-bridge')
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridgeRegion).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('webhooks-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     seedRole('user')
@@ -434,8 +433,8 @@ describe('WebhooksPage', () => {
     const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
     expect(within(integrationRegion).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByTestId('webhooks-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('renders a shared integration loop card with scoped CTA contracts and stable step anchors when shared destinations are available', async () => {
