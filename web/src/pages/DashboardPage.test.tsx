@@ -72,7 +72,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={BALANCE_ROUTE}
           element={
-            <section data-testid="dashboard-balance-route-stub">
+            <section data-testid="dashboard-balance-route-stub" role="region" aria-label="共享控制台 - 余额中心">
               <h1>余额中心</h1>
             </section>
           }
@@ -80,7 +80,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={PROJECTS_ROUTE}
           element={
-            <section data-testid="dashboard-projects-route-stub">
+            <section data-testid="dashboard-projects-route-stub" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           }
@@ -88,7 +88,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={ORDERS_ROUTE}
           element={
-            <section data-testid="dashboard-orders-route-stub">
+            <section data-testid="dashboard-orders-route-stub" role="region" aria-label="共享控制台 - 订单中心">
               <h1>订单中心</h1>
             </section>
           }
@@ -96,7 +96,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={
-            <section data-testid="dashboard-api-keys-route-stub">
+            <section data-testid="dashboard-api-keys-route-stub" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           }
@@ -269,41 +269,41 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
-    const bridgeScope = within(screen.getByTestId('dashboard-shared-console-bridge'))
+    const bridgeScope = within(screen.getByRole('region', { name: '共享接入桥接' }))
     expect(bridgeScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(bridgeScope.queryByRole('button', { name: /Webhook/ })).not.toBeInTheDocument()
     expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
   })
 
-  it('navigates from the dashboard journey lane into balance, projects, orders, and api keys within the same console', async () => {
+  it('navigates from the dashboard journey lane into named shared-console destination regions for balance, projects, orders, and api keys', async () => {
     const user = userEvent.setup()
 
     let view = renderDashboard()
     let lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '查看余额中心' }))
-    expect(await screen.findByTestId('dashboard-balance-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
+    const balanceRegion = await screen.findByRole('region', { name: '共享控制台 - 余额中心' })
+    expect(within(balanceRegion).getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '前往项目市场' }))
-    expect(await screen.findByTestId('dashboard-projects-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const projectsRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
+    expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '查看订单中心' }))
-    expect(await screen.findByTestId('dashboard-orders-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    const ordersRegion = await screen.findByRole('region', { name: '共享控制台 - 订单中心' })
+    expect(within(ordersRegion).getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     lane = await screen.findByTestId('dashboard-next-steps-lane')
     await user.click(within(lane).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('dashboard-api-keys-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     view.unmount()
   })
 
