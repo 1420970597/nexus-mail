@@ -141,7 +141,7 @@ describe('OrdersPage', () => {
           <Route
             path={PROJECTS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-projects">
+              <section data-testid="orders-route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
                 <h1>项目市场</h1>
               </section>
             }
@@ -149,7 +149,7 @@ describe('OrdersPage', () => {
           <Route
             path={API_KEYS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-api-keys">
+              <section data-testid="orders-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -164,8 +164,8 @@ describe('OrdersPage', () => {
     expect(within(emptyActions).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 接入准备' })).not.toBeInTheDocument()
     await user.click(within(emptyActions).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('orders-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(destinationRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('opens result modal for an existing order', async () => {
@@ -217,7 +217,7 @@ describe('OrdersPage', () => {
           <Route
             path={API_KEYS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-api-keys-empty-state">
+              <section data-testid="orders-route-stub-api-keys-empty-state" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -225,7 +225,7 @@ describe('OrdersPage', () => {
           <Route
             path={PROJECTS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-projects-empty-state">
+              <section data-testid="orders-route-stub-projects-empty-state" role="region" aria-label="共享控制台 - 项目市场">
                 <h1>项目市场</h1>
               </section>
             }
@@ -239,8 +239,8 @@ describe('OrdersPage', () => {
     expect(within(emptyActions).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 接入准备' })).not.toBeInTheDocument()
     await user.click(within(emptyActions).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('orders-route-stub-api-keys-empty-state')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(destinationRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('hides the API continuation CTA from the fulfillment hero when the server menu does not expose API key management', async () => {
@@ -290,7 +290,7 @@ describe('OrdersPage', () => {
           <Route
             path={PROJECTS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-projects-bridge">
+              <section data-testid="orders-route-stub-projects-bridge" role="region" aria-label="共享控制台 - 项目市场">
                 <h1>项目市场</h1>
               </section>
             }
@@ -298,7 +298,7 @@ describe('OrdersPage', () => {
           <Route
             path={API_KEYS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-api-keys-bridge">
+              <section data-testid="orders-route-stub-api-keys-bridge" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -325,14 +325,16 @@ describe('OrdersPage', () => {
     expect(matrixScope.getByText('采购回放路径')).toBeInTheDocument()
 
     await user.click(within(bridge).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('orders-route-stub-api-keys-bridge')).toBeInTheDocument()
+    let destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(destinationRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
     await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: '回到项目市场' }))
-    expect(await screen.findByTestId('orders-route-stub-projects-bridge')).toBeInTheDocument()
+    destinationRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
+    expect(within(destinationRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
   })
@@ -374,7 +376,7 @@ describe('OrdersPage', () => {
           <Route
             path={PROJECTS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-projects-lane">
+              <section data-testid="orders-route-stub-projects-lane" role="region" aria-label="共享控制台 - 项目市场">
                 <h1>项目市场</h1>
               </section>
             }
@@ -382,7 +384,7 @@ describe('OrdersPage', () => {
           <Route
             path={API_KEYS_ROUTE}
             element={
-              <section data-testid="orders-route-stub-api-keys-lane">
+              <section data-testid="orders-route-stub-api-keys-lane" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -394,8 +396,8 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
     const lane = screen.getByTestId('orders-continuation-lane')
     await user.click(within(lane).getByRole('button', { name: /回到项目市场/ }))
-    expect(await screen.findByTestId('orders-route-stub-projects-lane')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
+    expect(within(destinationRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
   })
 
   it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
@@ -418,7 +420,7 @@ describe('OrdersPage', () => {
           <Route
             path="/"
             element={
-              <section data-testid="orders-route-stub-shared-home">
+              <section data-testid="orders-route-stub-shared-home" role="region" aria-label="共享控制台首页">
                 <h1>控制台总览</h1>
               </section>
             }
@@ -430,7 +432,7 @@ describe('OrdersPage', () => {
     expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     const emptyActions = screen.getByTestId('orders-empty-state-actions')
     await user.click(within(emptyActions).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('orders-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(homeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })

@@ -179,7 +179,7 @@ describe('ProjectsPage', () => {
           <Route
             path="/orders"
             element={
-              <section data-testid="projects-route-stub-orders">
+              <section data-testid="projects-route-stub-orders" role="region" aria-label="共享控制台 - 订单中心">
                 <h1>订单中心</h1>
               </section>
             }
@@ -191,8 +191,8 @@ describe('ProjectsPage', () => {
     expect(await screen.findByText('采购任务流')).toBeInTheDocument()
     const missionFlow = screen.getByTestId('projects-mission-flow-card')
     await user.click(within(missionFlow).getByRole('button', { name: '打开订单中心' }))
-    expect(await screen.findByTestId('projects-route-stub-orders')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    const ordersRegion = await screen.findByRole('region', { name: '共享控制台 - 订单中心' })
+    expect(within(ordersRegion).getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
   })
 
   it('shows a scoped shared-console docs bridge signal in the hero so newly registered users can continue API onboarding from the market view', async () => {
@@ -275,7 +275,7 @@ describe('ProjectsPage', () => {
           <Route
             path="/orders"
             element={
-              <section data-testid="projects-route-stub-orders-bridge">
+              <section data-testid="projects-route-stub-orders-bridge" role="region" aria-label="共享控制台 - 订单中心">
                 <h1>订单中心</h1>
               </section>
             }
@@ -283,7 +283,7 @@ describe('ProjectsPage', () => {
           <Route
             path="/api-keys"
             element={
-              <section data-testid="projects-route-stub-api-keys-bridge">
+              <section data-testid="projects-route-stub-api-keys-bridge" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -291,7 +291,7 @@ describe('ProjectsPage', () => {
           <Route
             path="/docs"
             element={
-              <section data-testid="projects-route-stub-docs-bridge">
+              <section data-testid="projects-route-stub-docs-bridge" role="region" aria-label="共享控制台 - API 文档">
                 <h1>API 文档与接入控制台</h1>
               </section>
             }
@@ -319,21 +319,24 @@ describe('ProjectsPage', () => {
     expect(matrixScope.queryByText('开发接入延伸')).not.toBeInTheDocument()
 
     await user.click(within(bridge).getByRole('button', { name: '打开订单中心' }))
-    expect(await screen.findByTestId('projects-route-stub-orders-bridge')).toBeInTheDocument()
+    let destinationRegion = await screen.findByRole('region', { name: '共享控制台 - 订单中心' })
+    expect(within(destinationRegion).getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('projects-route-stub-api-keys-bridge')).toBeInTheDocument()
+    destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(destinationRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderWithRoutes()
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByTestId('projects-route-stub-docs-bridge')).toBeInTheDocument()
+    destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(destinationRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     view.unmount()
   })
@@ -442,7 +445,7 @@ describe('ProjectsPage', () => {
           <Route
             path="/api-keys"
             element={
-              <section data-testid="projects-route-stub-api-keys">
+              <section data-testid="projects-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             }
@@ -454,8 +457,8 @@ describe('ProjectsPage', () => {
     expect(await screen.findByText('注册后首轮采购路径')).toBeInTheDocument()
     const lane = screen.getByTestId('projects-first-run-lane')
     await user.click(within(lane).getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByTestId('projects-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(destinationRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('shows a return-to-recommended-workspace CTA in the empty state when the user lands here from another preferred workspace', async () => {
@@ -478,7 +481,7 @@ describe('ProjectsPage', () => {
           <Route
             path="/"
             element={
-              <section data-testid="projects-route-stub-shared-home">
+              <section data-testid="projects-route-stub-shared-home" role="region" aria-label="共享控制台首页">
                 <h1>控制台总览</h1>
               </section>
             }
@@ -490,7 +493,7 @@ describe('ProjectsPage', () => {
     expect(await screen.findByText('当前暂无可售库存，请稍后再试或联系管理员补充供给。')).toBeInTheDocument()
     const emptyActions = await screen.findByTestId('projects-empty-state-actions')
     await user.click(within(emptyActions).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('projects-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(homeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 })
