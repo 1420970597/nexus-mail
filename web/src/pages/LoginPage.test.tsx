@@ -53,24 +53,27 @@ function renderLoginPage(initialEntry = '/login') {
         <Route
           path={API_KEYS_ROUTE}
           element={
-            <section data-testid="login-route-stub-api-keys">
+            <section data-testid="login-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
+              <p>仍位于同一共享控制台壳内继续配置 API Keys，不切换到独立后台。</p>
             </section>
           }
         />
         <Route
           path={WEBHOOKS_ROUTE}
           element={
-            <section data-testid="login-route-stub-webhooks">
+            <section data-testid="login-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>开发者 Webhook 接入工作台</h1>
+              <p>仍位于同一共享控制台壳内继续联调 Webhook，不切换到独立后台。</p>
             </section>
           }
         />
         <Route
           path={DOCS_ROUTE}
           element={
-            <section data-testid="login-route-stub-docs">
+            <section data-testid="login-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
+              <p>仍位于同一共享控制台壳内继续核对 API 文档与接入契约，不切换到独立后台。</p>
             </section>
           }
         />
@@ -288,6 +291,38 @@ describe('LoginPage', () => {
     await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
     expect(await screen.findByTestId('login-route-stub-api-keys')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+  })
+
+  it('keeps login runway destination stubs inside the same shared-console shell contract after navigating to API Keys, Webhooks, and Docs', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
+    const registerJourneyScope = within(registerJourneyRegion)
+
+    await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(apiKeysRegion).getByText('仍位于同一共享控制台壳内继续配置 API Keys，不切换到独立后台。')).toBeInTheDocument()
+    expect(within(apiKeysRegion).queryByRole('heading', { name: '控制台总览' })).not.toBeInTheDocument()
+    expect(within(apiKeysRegion).queryByText(/第二套后台|独立登录站/)).not.toBeInTheDocument()
+
+    renderLoginPage()
+    await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /继续联调 Webhook/ }))
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(webhooksRegion).getByText('仍位于同一共享控制台壳内继续联调 Webhook，不切换到独立后台。')).toBeInTheDocument()
+    expect(within(webhooksRegion).queryByRole('heading', { name: '控制台总览' })).not.toBeInTheDocument()
+    expect(within(webhooksRegion).queryByText(/第二套后台|独立登录站/)).not.toBeInTheDocument()
+
+    renderLoginPage()
+    await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /查看 API 文档/ }))
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    expect(within(docsRegion).getByText('仍位于同一共享控制台壳内继续核对 API 文档与接入契约，不切换到独立后台。')).toBeInTheDocument()
+    expect(within(docsRegion).queryByRole('heading', { name: '控制台总览' })).not.toBeInTheDocument()
+    expect(within(docsRegion).queryByText(/第二套后台|独立登录站/)).not.toBeInTheDocument()
   })
 
   it('keeps register CTA routing from the product runway cards into API Keys, Webhooks, and Docs stubs', async () => {
