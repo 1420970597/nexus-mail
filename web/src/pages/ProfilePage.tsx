@@ -199,6 +199,8 @@ export function ProfilePage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="profile-hero-card"
+        role="region"
+        aria-labelledby="profile-hero-card-heading"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -212,7 +214,7 @@ export function ProfilePage() {
           <Tag color="cyan" shape="circle">个人资料中枢</Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
-              <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>个人资料</Typography.Title>
+              <Typography.Title heading={3} id="profile-hero-card-heading" style={{ color: '#f8fafc', marginBottom: 8 }}>个人资料</Typography.Title>
               <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 820 }}>
                 统一账号、会话与下一步入口都留在同一深色共享控制台。
               </Typography.Paragraph>

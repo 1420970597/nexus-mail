@@ -53,7 +53,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route
           path={SETTINGS_ROUTE}
           element={(
-            <section data-testid="settings-route-stub">
+            <section data-testid="settings-route-stub" role="region" aria-label="共享控制台 - 设置中心">
               <h1>设置中心</h1>
             </section>
           )}
@@ -112,7 +112,7 @@ describe('ProfilePage', () => {
     let view = renderProfilePage()
 
     expect(await screen.findByRole('heading', { name: '个人资料' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('profile-hero-card')
+    const heroCard = screen.getByRole('region', { name: '个人资料' })
     expect(within(heroCard).getByText('个人资料中枢')).toBeInTheDocument()
     expect(heroCard).toHaveTextContent('统一账号、会话与下一步入口都留在同一深色共享控制台。')
     expect(heroCard).not.toHaveTextContent('账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。')
@@ -153,20 +153,21 @@ describe('ProfilePage', () => {
     expect(roleExpansionCard).not.toHaveTextContent('单一文档入口')
 
     await user.click(within(capabilityRegion).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
+    const apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
     const webhookRegion = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(webhookRegion).getByRole('button', { name: '继续配置 Webhook' }))
-    const webhooksRouteStub = await screen.findByTestId('webhooks-route-stub')
+    const webhooksRouteStub = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(webhooksRouteStub).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderProfilePage()
     const docsRegion = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(docsRegion).getByRole('button', { name: '查看 API 文档' }))
-    const docsRouteStub = await screen.findByTestId('api-docs-route-stub')
+    const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
@@ -195,7 +196,8 @@ describe('ProfilePage', () => {
     expect(screen.getByText('供应商运营焦点')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('settings-route-stub')).toBeInTheDocument()
+    const settingsRegion = await screen.findByRole('region', { name: '共享控制台 - 设置中心' })
+    expect(within(settingsRegion).getByRole('heading', { name: '设置中心' })).toBeInTheDocument()
   })
 
   it('scopes the user fallback CTA to the named shared-console return region when project access is hidden', async () => {
@@ -361,6 +363,7 @@ describe('ProfilePage', () => {
     expect(screen.queryByRole('heading', { name: '采购与订单串联' })).not.toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('settings-route-stub')).toBeInTheDocument()
+    const settingsRegion = await screen.findByRole('region', { name: '共享控制台 - 设置中心' })
+    expect(within(settingsRegion).getByRole('heading', { name: '设置中心' })).toBeInTheDocument()
   })
 })
