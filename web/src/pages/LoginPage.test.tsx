@@ -325,7 +325,7 @@ describe('LoginPage', () => {
     expect(within(docsRegion).queryByText(/第二套后台|独立登录站/)).not.toBeInTheDocument()
   })
 
-  it('keeps register CTA routing from the product runway cards into API Keys, Webhooks, and Docs stubs', async () => {
+  it('keeps register CTA routing from the product runway cards inside the named shared-console destination regions', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
@@ -334,15 +334,15 @@ describe('LoginPage', () => {
     const registerJourneyScope = within(registerJourneyRegion)
 
     await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
-    expect(await screen.findByTestId('login-route-stub-api-keys')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - API Keys' })).toBeInTheDocument()
 
     renderLoginPage()
     await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /继续联调 Webhook/ }))
-    expect(await screen.findByTestId('login-route-stub-webhooks')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - Webhooks' })).toBeInTheDocument()
 
     renderLoginPage()
     await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByTestId('login-route-stub-docs')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - API 文档' })).toBeInTheDocument()
   })
 
   it('preserves a named shared-console home region after registration redirect so the post-register landing contract is user-visible, not only a test stub', async () => {
