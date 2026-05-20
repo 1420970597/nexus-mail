@@ -242,6 +242,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     const matrixScope = within(capabilityMatrix)
+    expect(matrixScope.getByText('共享壳能力总览')).toBeInTheDocument()
     expect(matrixScope.getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
     expect(matrixScope.getByText('统一身份入口')).toBeInTheDocument()
     expect(matrixScope.getByText('共享接入桥接')).toBeInTheDocument()
@@ -257,6 +258,9 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(bridgeScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: '前往 开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(bridgeScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    expect(bridgeScope.queryByRole('heading', { name: '开发者 API 接入工作台' })).not.toBeInTheDocument()
+    expect(bridgeScope.queryByRole('heading', { name: '开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
+    expect(bridgeScope.queryByRole('heading', { name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
   })
 
   it('suppresses unavailable bridge actions when the server menu does not expose those shared routes', async () => {
