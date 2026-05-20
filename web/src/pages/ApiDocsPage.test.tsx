@@ -14,7 +14,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
         <Route
           path={PROJECTS_ROUTE}
           element={(
-            <section data-testid="projects-route-stub">
+            <section data-testid="projects-route-stub" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           )}
@@ -22,7 +22,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
         <Route
           path={BALANCE_ROUTE}
           element={(
-            <section data-testid="balance-route-stub">
+            <section data-testid="balance-route-stub" role="region" aria-label="共享控制台 - 余额中心">
               <h1>余额中心</h1>
             </section>
           )}
@@ -30,7 +30,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="api-keys-route-stub">
+            <section data-testid="api-keys-route-stub" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -38,7 +38,7 @@ function renderApiDocsPage(initialEntry = DOCS_ROUTE) {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="webhooks-route-stub">
+            <section data-testid="webhooks-route-stub" role="region" aria-label="共享控制台 - Webhooks">
               <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
@@ -137,7 +137,8 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('shows role-aware admin shortcuts with the semantic docs heading and without leaking unavailable actions', async () => {
@@ -203,29 +204,32 @@ describe('ApiDocsPage', () => {
     expect(scoped.getByRole('button', { name: '打开余额中心' })).toBeInTheDocument()
 
     await user.click(scoped.getByRole('button', { name: '查看项目市场基线' }))
-    expect(await screen.findByTestId('projects-route-stub')).toBeInTheDocument()
+    const projectsRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
+    expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const secondBridgeLane = screen.getByTestId('docs-shared-console-bridge')
     await user.click(within(secondBridgeLane).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
-    expect(screen.getByText('开发者 API 接入工作台')).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const thirdBridgeLane = screen.getByTestId('docs-shared-console-bridge')
     await user.click(within(thirdBridgeLane).getByRole('button', { name: '继续配置 Webhook' }))
-    expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-bridge')).toBeInTheDocument()
     const fourthBridgeLane = screen.getByTestId('docs-shared-console-bridge')
     await user.click(within(fourthBridgeLane).getByRole('button', { name: '打开余额中心' }))
-    expect(await screen.findByTestId('balance-route-stub')).toBeInTheDocument()
+    const balanceRegion = await screen.findByRole('region', { name: '共享控制台 - 余额中心' })
+    expect(within(balanceRegion).getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
   })
 
   it('exposes the docs continuation lane as a named shared-console region with fallback CTA gated to the fallback card only', async () => {
@@ -321,15 +325,16 @@ describe('ApiDocsPage', () => {
     expect(within(loopLane).getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(within(loopLane).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     await user.click(within(loopLane).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('api-keys-route-stub')).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
     expect(await screen.findByTestId('docs-shared-console-loop')).toBeInTheDocument()
     loopLane = screen.getByTestId('docs-shared-console-loop')
     await user.click(within(loopLane).getByRole('button', { name: '继续配置 Webhook' }))
-    expect(await screen.findByTestId('webhooks-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiDocsPage()
