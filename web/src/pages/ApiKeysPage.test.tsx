@@ -57,7 +57,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
         <Route
           path={PROJECTS_ROUTE}
           element={(
-            <section data-testid="route-stub-projects">
+            <section data-testid="route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           )}
@@ -65,7 +65,7 @@ function renderApiKeysPage(initialEntry = API_KEYS_ROUTE) {
         <Route
           path={ORDERS_ROUTE}
           element={(
-            <section data-testid="route-stub-orders">
+            <section data-testid="route-stub-orders" role="region" aria-label="共享控制台 - 订单中心">
               <h1>订单中心</h1>
             </section>
           )}
@@ -444,8 +444,8 @@ describe('ApiKeysPage', () => {
     const thirdKeysCard = await screen.findByTestId('api-keys-current-keys-card')
     await within(thirdKeysCard).findByText('默认密钥')
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /返回项目市场/ }))
-    expect(await screen.findByTestId('route-stub-projects')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const projectsRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
+    expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     mockedCreateAPIKey.mockResolvedValueOnce({
       plaintext_key: 'nmx_created_secret_2',
@@ -497,8 +497,8 @@ describe('ApiKeysPage', () => {
     await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
     await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
-    expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
+    const nextWebhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(nextWebhooksRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
   })
 
   it('shows canonical webhook/docs CTAs in the empty-state action area', async () => {
@@ -515,8 +515,8 @@ describe('ApiKeysPage', () => {
     expect(emptyScope.queryByRole('button', { name: '前往 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(emptyScope.getByRole('button', { name: '继续配置 Webhook' }))
-    expect(await screen.findByTestId('route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
   })
 
   it('shows a named shared-console fallback region when projects, webhooks, and docs are absent from menu but a preferred route still exists', async () => {

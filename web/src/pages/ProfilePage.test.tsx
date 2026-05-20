@@ -13,7 +13,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route
           path={PROJECTS_ROUTE}
           element={(
-            <section data-testid="projects-route-stub">
+            <section data-testid="projects-route-stub" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           )}
@@ -21,7 +21,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route
           path={ORDERS_ROUTE}
           element={(
-            <section data-testid="orders-route-stub">
+            <section data-testid="orders-route-stub" role="region" aria-label="共享控制台 - 订单中心">
               <h1>订单中心</h1>
             </section>
           )}
@@ -77,7 +77,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route
           path="/"
           element={(
-            <section data-testid="shared-console-home-route-stub">
+            <section data-testid="shared-console-home-route-stub" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -221,7 +221,8 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByText('当服务端暂未暴露项目市场时，普通用户仍可从账号中枢回到共享工作台继续查看预算、订单或接入入口。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('scopes the supplier fallback CTA to the named shared-console return region when settings is hidden', async () => {
@@ -245,7 +246,8 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByText('当设置中心入口暂未暴露时，仍可返回当前角色的共享工作台，继续同一控制台中的风控、供给或接入任务。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('scopes the admin fallback CTA to the named shared-console return region when settings is hidden', async () => {
@@ -269,7 +271,8 @@ describe('ProfilePage', () => {
     expect(within(sharedConsoleReturn).getByText('当设置中心入口暂未暴露时，仍可返回当前角色的共享工作台，继续同一控制台中的风控、供给或接入任务。')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleReturn).getByRole('button', { name: '返回共享工作台' }))
-    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides the shared-console return region when admin stays on profile as the only visible route', () => {
