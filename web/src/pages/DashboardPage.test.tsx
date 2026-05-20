@@ -104,7 +104,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={WEBHOOKS_ROUTE}
           element={
-            <section data-testid="dashboard-webhooks-route-stub">
+            <section data-testid="dashboard-webhooks-route-stub" role="region" aria-label="共享控制台 - Webhooks">
               <h1>开发者 Webhook 接入工作台</h1>
             </section>
           }
@@ -112,7 +112,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={
-            <section data-testid="dashboard-docs-route-stub">
+            <section data-testid="dashboard-docs-route-stub" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           }
@@ -120,7 +120,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={SETTINGS_ROUTE}
           element={
-            <section data-testid="dashboard-settings-route-stub">
+            <section data-testid="dashboard-settings-route-stub" role="region" aria-label="共享控制台 - 设置中心">
               <h1>设置中心</h1>
             </section>
           }
@@ -128,7 +128,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={SUPPLIER_DOMAINS_ROUTE}
           element={
-            <section data-testid="dashboard-supplier-domains-route-stub">
+            <section data-testid="dashboard-supplier-domains-route-stub" role="region" aria-label="共享控制台 - 域名池运营中枢">
               <h1>域名池运营中枢</h1>
             </section>
           }
@@ -144,7 +144,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={ADMIN_SUPPLIERS_ROUTE}
           element={
-            <section data-testid="dashboard-admin-suppliers-route-stub">
+            <section data-testid="dashboard-admin-suppliers-route-stub" role="region" aria-label="共享控制台 - 供应商管理">
               <h1>供应商管理</h1>
             </section>
           }
@@ -152,7 +152,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={ADMIN_RISK_ROUTE}
           element={
-            <section data-testid="dashboard-admin-risk-route-stub">
+            <section data-testid="dashboard-admin-risk-route-stub" role="region" aria-label="共享控制台 - 风控中心">
               <h1>风控中心</h1>
             </section>
           }
@@ -160,7 +160,7 @@ function renderDashboard(initialEntry = DASHBOARD_ROUTE) {
         <Route
           path={ADMIN_AUDIT_ROUTE}
           element={
-            <section data-testid="dashboard-admin-audit-route-stub">
+            <section data-testid="dashboard-admin-audit-route-stub" role="region" aria-label="共享控制台 - 审计日志">
               <h1>审计日志</h1>
             </section>
           }
@@ -445,8 +445,16 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(scopedAdminOps.getByRole('button', { name: '前往审计日志' })).toBeInTheDocument()
   })
 
-  it('navigates from admin dashboard ops summary to admin routes within the same shared shell', async () => {
-    seedSession('admin', [DASHBOARD_ROUTE, ADMIN_SUPPLIERS_ROUTE, ADMIN_RISK_ROUTE, ADMIN_AUDIT_ROUTE])
+  it('navigates from admin operations to named shared-console destination regions', async () => {
+    seedSession('admin', [
+      DASHBOARD_ROUTE,
+      ADMIN_SUPPLIERS_ROUTE,
+      ADMIN_RISK_ROUTE,
+      ADMIN_AUDIT_ROUTE,
+      WEBHOOKS_ROUTE,
+      DOCS_ROUTE,
+      API_KEYS_ROUTE,
+    ])
     mockedGetAdminOverview.mockResolvedValue({
       generated_at: '2026-05-07T13:00:00Z',
       summary: {
@@ -489,22 +497,22 @@ describe('DashboardPage shared-console journey hub', () => {
     let view = renderDashboard()
     let adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
     await user.click(within(adminOpsSummary).getByRole('button', { name: '前往供应商管理查看详情' }))
-    expect(await screen.findByTestId('dashboard-admin-suppliers-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
+    const adminSuppliersRegion = await screen.findByRole('region', { name: '共享控制台 - 供应商管理' })
+    expect(within(adminSuppliersRegion).getByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
     await user.click(within(adminOpsSummary).getByRole('button', { name: '前往风控中心' }))
-    expect(await screen.findByTestId('dashboard-admin-risk-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    const adminRiskRegion = await screen.findByRole('region', { name: '共享控制台 - 风控中心' })
+    expect(within(adminRiskRegion).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     adminOpsSummary = await screen.findByTestId('dashboard-admin-ops-summary-card')
     await user.click(within(adminOpsSummary).getByRole('button', { name: '前往审计日志' }))
-    expect(await screen.findByTestId('dashboard-admin-audit-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+    const adminAuditRegion = await screen.findByRole('region', { name: '共享控制台 - 审计日志' })
+    expect(within(adminAuditRegion).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     view.unmount()
   })
 
@@ -537,7 +545,7 @@ describe('DashboardPage shared-console journey hub', () => {
     expect(screen.queryByTestId('dashboard-next-steps-lane')).not.toBeInTheDocument()
   })
 
-  it('navigates from supplier role-surface cards to shared and supplier workspaces within the same shell', async () => {
+  it('navigates from supplier role-surface cards to named shared-console destination regions within the same shell', async () => {
     seedSession('supplier', [DASHBOARD_ROUTE, SUPPLIER_DOMAINS_ROUTE, SUPPLIER_OFFERINGS_ROUTE, SETTINGS_ROUTE])
     const user = userEvent.setup()
 
@@ -550,15 +558,15 @@ describe('DashboardPage shared-console journey hub', () => {
     view = renderDashboard()
     await screen.findByTestId('dashboard-role-surface-map')
     await user.click(within(screen.getByTestId('dashboard-role-surface-supplier-domains')).getByRole('button', { name: '打开该工作台' }))
-    expect(await screen.findByTestId('dashboard-supplier-domains-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    const supplierDomainsRegion = await screen.findByRole('region', { name: '共享控制台 - 域名池运营中枢' })
+    expect(within(supplierDomainsRegion).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
     await screen.findByTestId('dashboard-role-surface-map')
     await user.click(within(screen.getByTestId('dashboard-role-surface-settings')).getByRole('button', { name: '打开该工作台' }))
-    expect(await screen.findByTestId('dashboard-settings-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '设置中心' })).toBeInTheDocument()
+    const settingsRegion = await screen.findByRole('region', { name: '共享控制台 - 设置中心' })
+    expect(within(settingsRegion).getByRole('heading', { name: '设置中心' })).toBeInTheDocument()
     view.unmount()
   })
 })
