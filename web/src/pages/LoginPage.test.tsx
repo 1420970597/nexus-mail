@@ -5,7 +5,7 @@ import '@testing-library/jest-dom'
 import { LoginPage } from './LoginPage'
 import * as authService from '../services/auth'
 import { useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
 
 vi.mock('../services/auth', async () => {
   const actual = await vi.importActual<typeof import('../services/auth')>('../services/auth')
@@ -49,6 +49,22 @@ function renderLoginPage(initialEntry = '/login') {
               <h1>控制台总览</h1>
             </section>
           )}
+        />
+        <Route
+          path={PROJECTS_ROUTE}
+          element={
+            <section data-testid="login-route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
+              <h1>项目市场</h1>
+            </section>
+          }
+        />
+        <Route
+          path={ORDERS_ROUTE}
+          element={
+            <section data-testid="login-route-stub-orders" role="region" aria-label="共享控制台 - 订单中心">
+              <h1>订单中心</h1>
+            </section>
+          }
         />
         <Route
           path={API_KEYS_ROUTE}
@@ -289,8 +305,8 @@ describe('LoginPage', () => {
     expect(within(screen.getByTestId('login-auth-shell')).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
-    expect(await screen.findByTestId('login-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('keeps the shared-console route stubs region-scoped when opening API Keys, Webhooks, and Docs from the registration journey', async () => {
@@ -325,7 +341,7 @@ describe('LoginPage', () => {
     expect(within(docsRegion).queryByText(/第二套后台|独立登录站/)).not.toBeInTheDocument()
   })
 
-  it('keeps register CTA routing from the product runway cards inside the named shared-console destination regions', async () => {
+  it('keeps shared-console registration runway cards inside named destination regions for API Keys, Webhooks, and Docs without drifting into unrelated home, project, or order surfaces during those navigations', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
@@ -334,15 +350,22 @@ describe('LoginPage', () => {
     const registerJourneyScope = within(registerJourneyRegion)
 
     await user.click(registerJourneyScope.getByRole('button', { name: /先配置 API Keys/ }))
-    expect(await screen.findByRole('region', { name: '共享控制台 - API Keys' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     renderLoginPage()
     await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /继续联调 Webhook/ }))
-    expect(await screen.findByRole('region', { name: '共享控制台 - Webhooks' })).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     renderLoginPage()
     await user.click(within(screen.getByRole('region', { name: '首轮接入路径' })).getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByRole('region', { name: '共享控制台 - API 文档' })).toBeInTheDocument()
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+
+    expect(screen.queryByRole('region', { name: '共享控制台首页' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '共享控制台 - 项目市场' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '共享控制台 - 订单中心' })).not.toBeInTheDocument()
   })
 
   it('preserves a named shared-console home region after registration redirect so the post-register landing contract is user-visible, not only a test stub', async () => {
