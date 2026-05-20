@@ -53,7 +53,7 @@ function renderSupplierOfferingsPage() {
         <Route
           path={SUPPLIER_RESOURCES_ROUTE}
           element={
-            <section data-testid="supplier-offerings-route-stub-resources">
+            <section data-testid="supplier-offerings-route-stub-resources" role="region" aria-label="共享控制台 - 供应商资源">
               <h1>供应商资源</h1>
             </section>
           }
@@ -61,7 +61,7 @@ function renderSupplierOfferingsPage() {
         <Route
           path={SUPPLIER_SETTLEMENTS_ROUTE}
           element={
-            <section data-testid="supplier-offerings-route-stub-settlements">
+            <section data-testid="supplier-offerings-route-stub-settlements" role="region" aria-label="共享控制台 - 供应商结算">
               <h1>供应商结算</h1>
             </section>
           }
@@ -69,7 +69,7 @@ function renderSupplierOfferingsPage() {
         <Route
           path={API_KEYS_ROUTE}
           element={
-            <section data-testid="supplier-offerings-route-stub-api-keys">
+            <section data-testid="supplier-offerings-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           }
@@ -77,7 +77,7 @@ function renderSupplierOfferingsPage() {
         <Route
           path={WEBHOOKS_ROUTE}
           element={
-            <section data-testid="supplier-offerings-route-stub-webhooks">
+            <section data-testid="supplier-offerings-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>供给事件回调工作台</h1>
             </section>
           }
@@ -85,7 +85,7 @@ function renderSupplierOfferingsPage() {
         <Route
           path={DOCS_ROUTE}
           element={
-            <section data-testid="supplier-offerings-route-stub-docs">
+            <section data-testid="supplier-offerings-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           }
@@ -224,21 +224,23 @@ describe('SupplierOfferingsPage', () => {
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /查看供应商资源/ }))
-    expect(await screen.findByTestId('supplier-offerings-route-stub-resources')).toBeInTheDocument()
+    const resourcesStub = await screen.findByRole('region', { name: '共享控制台 - 供应商资源' })
+    expect(resourcesStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierOfferingsPage()
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /打开供应商结算/ }))
-    expect(await screen.findByTestId('supplier-offerings-route-stub-settlements')).toBeInTheDocument()
+    const settlementsStub = await screen.findByRole('region', { name: '共享控制台 - 供应商结算' })
+    expect(settlementsStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供应商结算' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierOfferingsPage()
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-offerings-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
-    const apiKeysStub = await screen.findByTestId('supplier-offerings-route-stub-api-keys')
+    const apiKeysStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(apiKeysStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
@@ -247,7 +249,7 @@ describe('SupplierOfferingsPage', () => {
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     const sharedBridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(sharedBridge).getByRole('button', { name: /继续配置 Webhook/ }))
-    const webhooksStub = await screen.findByTestId('supplier-offerings-route-stub-webhooks')
+    const webhooksStub = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(webhooksStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
 
@@ -256,7 +258,7 @@ describe('SupplierOfferingsPage', () => {
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
     const docsBridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(docsBridge).getByRole('button', { name: /查看 API 文档/ }))
-    const docsStub = await screen.findByTestId('supplier-offerings-route-stub-docs')
+    const docsStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(docsStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })

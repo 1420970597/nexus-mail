@@ -55,7 +55,7 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route
           path={PROJECTS_ROUTE}
           element={(
-            <section data-testid="balance-route-stub-projects">
+            <section data-testid="balance-route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           )}
@@ -63,7 +63,7 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route
           path={ORDERS_ROUTE}
           element={(
-            <section data-testid="balance-route-stub-orders">
+            <section data-testid="balance-route-stub-orders" role="region" aria-label="共享控制台 - 订单中心">
               <h1>订单中心</h1>
             </section>
           )}
@@ -71,7 +71,7 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="balance-route-stub-api-keys">
+            <section data-testid="balance-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -79,7 +79,7 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="balance-route-stub-webhooks">
+            <section data-testid="balance-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>开发者 Webhook 接入工作台</h1>
             </section>
           )}
@@ -87,7 +87,7 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="balance-route-stub-docs">
+            <section data-testid="balance-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -95,7 +95,7 @@ function renderBalancePage(initialEntry = '/balance') {
         <Route
           path="/"
           element={(
-            <section data-testid="balance-route-stub-shared-home">
+            <section data-testid="balance-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -193,7 +193,7 @@ describe('BalancePage', () => {
   })
 
 
-  it('navigates through the balance mission cards and shared-console bridge CTAs', async () => {
+  it('navigates through the balance mission cards and shared-console bridge CTAs inside named destination regions', async () => {
     const user = userEvent.setup()
 
     let view = renderBalancePage()
@@ -202,7 +202,7 @@ describe('BalancePage', () => {
 
     const missionCards = await screen.findByTestId('balance-mission-cards')
     await user.click(within(missionCards).getByRole('button', { name: /前往项目市场/ }))
-    expect(await screen.findByTestId('balance-route-stub-projects')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - 项目市场' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
@@ -212,7 +212,7 @@ describe('BalancePage', () => {
     const refreshedMissionCards = await screen.findByTestId('balance-mission-cards')
     const ordersMissionCard = within(refreshedMissionCards).getByTestId('balance-orders-mission-card')
     await user.click(within(ordersMissionCard).getByRole('button', { name: /查看订单中心/ }))
-    expect(await screen.findByTestId('balance-route-stub-orders')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - 订单中心' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
@@ -221,7 +221,7 @@ describe('BalancePage', () => {
 
     const firstCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
     await user.click(within(firstCapabilityBridge).getByTestId('balance-open-api-keys'))
-    expect(await screen.findByTestId('balance-route-stub-api-keys')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - API Keys' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
@@ -232,7 +232,7 @@ describe('BalancePage', () => {
     const secondCapabilityActions = within(secondCapabilityBridge).getByTestId('balance-capability-actions')
     expect(within(secondCapabilityActions).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
-    expect(await screen.findByTestId('balance-route-stub-webhooks')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - Webhooks' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
@@ -243,7 +243,7 @@ describe('BalancePage', () => {
     const thirdCapabilityActions = within(thirdCapabilityBridge).getByTestId('balance-capability-actions')
     expect(within(thirdCapabilityActions).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
     await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
-    expect(await screen.findByTestId('balance-route-stub-docs')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - API 文档' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 

@@ -24,23 +24,43 @@ function renderAdminRiskPage(initialEntry = ADMIN_RISK_ROUTE) {
         <Route path={ADMIN_RISK_ROUTE} element={<AdminRiskPage />} />
         <Route
           path={ADMIN_AUDIT_ROUTE}
-          element={<section data-testid="admin-risk-route-stub-audit"><h1>审计日志</h1></section>}
+          element={
+            <section data-testid="admin-risk-route-stub-audit" role="region" aria-label="共享控制台 - 审计日志">
+              <h1>审计日志</h1>
+            </section>
+          }
         />
         <Route
           path={ADMIN_USERS_ROUTE}
-          element={<section data-testid="admin-risk-route-stub-users"><h1>用户管理</h1></section>}
+          element={
+            <section data-testid="admin-risk-route-stub-users" role="region" aria-label="共享控制台 - 用户管理">
+              <h1>用户管理</h1>
+            </section>
+          }
         />
         <Route
           path={API_KEYS_ROUTE}
-          element={<section data-testid="admin-risk-route-stub-api-keys"><h1>开发者 API 接入工作台</h1></section>}
+          element={
+            <section data-testid="admin-risk-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          }
         />
         <Route
           path={DOCS_ROUTE}
-          element={<section data-testid="admin-risk-route-stub-docs"><h1>API 文档与接入控制台</h1></section>}
+          element={
+            <section data-testid="admin-risk-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
+              <h1>API 文档与接入控制台</h1>
+            </section>
+          }
         />
         <Route
           path="/"
-          element={<section data-testid="admin-risk-route-stub-dashboard"><h1>控制台总览</h1></section>}
+          element={
+            <section data-testid="admin-risk-route-stub-dashboard" role="region" aria-label="共享控制台首页">
+              <h1>控制台总览</h1>
+            </section>
+          }
         />
       </Routes>
     </MemoryRouter>,
@@ -138,7 +158,7 @@ describe('AdminRiskPage', () => {
     expect(within(actionsCard).getByText('处置建议')).toBeInTheDocument()
   })
 
-  it('navigates from the shared-console bridge to api keys, audit, and docs destinations', async () => {
+  it('navigates from the shared-console bridge to api keys, audit, and docs destinations inside named shared-console regions', async () => {
     const user = userEvent.setup()
     let view = renderAdminRiskPage()
 
@@ -146,7 +166,7 @@ describe('AdminRiskPage', () => {
 
     let bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
     await user.click(within(bridgeLinks).getByRole('button', { name: /打开 API Keys/ }))
-    let apiKeysRouteStub = await screen.findByTestId('admin-risk-route-stub-api-keys')
+    let apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
@@ -154,7 +174,7 @@ describe('AdminRiskPage', () => {
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
     await user.click(within(bridgeLinks).getByRole('button', { name: /继续查看审计/ }))
-    const auditRouteStub = await screen.findByTestId('admin-risk-route-stub-audit')
+    const auditRouteStub = await screen.findByRole('region', { name: '共享控制台 - 审计日志' })
     expect(within(auditRouteStub).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     view.unmount()
@@ -162,11 +182,11 @@ describe('AdminRiskPage', () => {
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
     await user.click(within(bridgeLinks).getByRole('button', { name: /查看 API 文档/ }))
-    const docsRouteStub = await screen.findByTestId('admin-risk-route-stub-docs')
+    const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('navigates from mission-control actions to audit, finance, and api key pages', async () => {
+  it('navigates from mission-control actions to audit, finance, and api key pages inside named shared-console regions', async () => {
     const user = userEvent.setup()
     let view = renderAdminRiskPage()
 
@@ -174,7 +194,7 @@ describe('AdminRiskPage', () => {
 
     const missionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看审计日志' }))
-    const auditRouteStub = await screen.findByTestId('admin-risk-route-stub-audit')
+    const auditRouteStub = await screen.findByRole('region', { name: '共享控制台 - 审计日志' })
     expect(within(auditRouteStub).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     view.unmount()
@@ -182,7 +202,7 @@ describe('AdminRiskPage', () => {
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
     const refreshedMissionFlow = screen.getByTestId('admin-risk-mission-flow')
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
-    const usersRouteStub = await screen.findByTestId('admin-risk-route-stub-users')
+    const usersRouteStub = await screen.findByRole('region', { name: '共享控制台 - 用户管理' })
     expect(within(usersRouteStub).getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
 
     view.unmount()
@@ -222,7 +242,7 @@ describe('AdminRiskPage', () => {
     expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回共享工作台' }))
-    const dashboardRouteStub = await screen.findByTestId('admin-risk-route-stub-dashboard')
+    const dashboardRouteStub = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(within(dashboardRouteStub).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 

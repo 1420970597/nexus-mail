@@ -52,7 +52,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route
             path={ADMIN_RISK_ROUTE}
             element={(
-              <section data-testid="admin-pricing-route-stub-risk">
+              <section data-testid="admin-pricing-route-stub-risk" role="region" aria-label="共享控制台 - 风控中心">
                 <h1>风控中心</h1>
               </section>
             )}
@@ -60,7 +60,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route
             path={ADMIN_AUDIT_ROUTE}
             element={(
-              <section data-testid="admin-pricing-route-stub-audit">
+              <section data-testid="admin-pricing-route-stub-audit" role="region" aria-label="共享控制台 - 审计日志">
                 <h1>审计日志</h1>
               </section>
             )}
@@ -68,7 +68,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route
             path={API_KEYS_ROUTE}
             element={(
-              <section data-testid="admin-pricing-route-stub-api-keys">
+              <section data-testid="admin-pricing-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
                 <h1>开发者 API 接入工作台</h1>
               </section>
             )}
@@ -76,7 +76,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route
             path={WEBHOOKS_ROUTE}
             element={(
-              <section data-testid="admin-pricing-route-stub-webhooks">
+              <section data-testid="admin-pricing-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
                 <h1>{resolveRouteTitle(WEBHOOKS_ROUTE, 'admin')}</h1>
               </section>
             )}
@@ -84,7 +84,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route
             path={DOCS_ROUTE}
             element={(
-              <section data-testid="admin-pricing-route-stub-docs">
+              <section data-testid="admin-pricing-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
                 <h1>{resolveRouteTitle(DOCS_ROUTE, 'admin')}</h1>
               </section>
             )}
@@ -92,7 +92,7 @@ function renderAdminProjectsPage(initialEntry = ADMIN_PRICING_ROUTE) {
           <Route
             path="/"
             element={(
-              <section data-testid="admin-pricing-route-stub-shared-home">
+              <section data-testid="admin-pricing-route-stub-shared-home" role="region" aria-label="共享控制台首页">
                 <h1>控制台总览</h1>
               </section>
             )}
@@ -181,7 +181,7 @@ describe('AdminProjectsPage', () => {
     expect(within(projectListCard).getByText('Gmail 验证码')).toBeInTheDocument()
   })
 
-  it('navigates through risk, audit, and integration mission cards plus shared-console bridge destinations', async () => {
+  it('navigates through risk, audit, and integration mission cards plus shared-console bridge destinations inside named regions', async () => {
     const user = userEvent.setup()
     let view = renderAdminProjectsPage()
 
@@ -189,35 +189,35 @@ describe('AdminProjectsPage', () => {
 
     const missionFlow = screen.getByTestId('admin-pricing-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: '查看风控中心' }))
-    expect(await screen.findByTestId('admin-pricing-route-stub-risk')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - 风控中心' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '查看审计日志' }))
-    expect(await screen.findByTestId('admin-pricing-route-stub-audit')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - 审计日志' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-mission-flow')).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('admin-pricing-route-stub-api-keys')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - API Keys' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-shared-console-bridge')).getByRole('button', { name: '打开 Webhooks' }))
-    expect(await screen.findByTestId('admin-pricing-route-stub-webhooks')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - Webhooks' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
 
     view.unmount()
     view = renderAdminProjectsPage()
     expect(await screen.findByRole('heading', { name: '价格策略' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('admin-pricing-shared-console-bridge')).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByTestId('admin-pricing-route-stub-docs')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台 - API 文档' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
     view.unmount()
   })
@@ -291,7 +291,7 @@ describe('AdminProjectsPage', () => {
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
-    expect(await screen.findByTestId('admin-pricing-route-stub-shared-home')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
