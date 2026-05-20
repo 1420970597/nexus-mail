@@ -25,7 +25,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path="/"
           element={(
-            <section data-testid="settings-route-stub-shared-home">
+            <section data-testid="settings-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -144,7 +144,7 @@ describe('SettingsPage', () => {
     await user.click(getButtonByLabel(checklistScopeAgain, '重新打开首轮引导'))
 
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(11))).toBe('false')
-    const homeRegion = await screen.findByTestId('settings-route-stub-shared-home')
+    const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     expect(within(homeRegion).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(within(homeRegion).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
