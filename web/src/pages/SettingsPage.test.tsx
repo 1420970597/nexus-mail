@@ -33,7 +33,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path={PROJECTS_ROUTE}
           element={(
-            <section data-testid="settings-route-stub-projects">
+            <section data-testid="settings-route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           )}
@@ -41,7 +41,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path={ORDERS_ROUTE}
           element={(
-            <section data-testid="settings-route-stub-orders">
+            <section data-testid="settings-route-stub-orders" role="region" aria-label="共享控制台 - 订单中心">
               <h1>订单中心</h1>
             </section>
           )}
@@ -49,7 +49,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="settings-route-stub-api-keys">
+            <section data-testid="settings-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -57,7 +57,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="settings-route-stub-docs">
+            <section data-testid="settings-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -65,7 +65,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path={PROFILE_ROUTE}
           element={(
-            <section data-testid="settings-route-stub-profile">
+            <section data-testid="settings-route-stub-profile" role="region" aria-label="共享控制台 - 个人资料">
               <h1>个人资料</h1>
             </section>
           )}
@@ -73,7 +73,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="settings-route-stub-webhooks">
+            <section data-testid="settings-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>{webhookRouteTitleForCurrentRole()}</h1>
             </section>
           )}
@@ -81,7 +81,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path="/supplier/resources"
           element={(
-            <section data-testid="settings-route-stub-supplier-resources">
+            <section data-testid="settings-route-stub-supplier-resources" role="region" aria-label="共享控制台 - 供应商资源">
               <h1>供应商资源</h1>
             </section>
           )}
@@ -89,7 +89,7 @@ function renderSettingsPage(initialEntry = SETTINGS_ROUTE) {
         <Route
           path="/supplier/settlements"
           element={(
-            <section data-testid="settings-route-stub-supplier-settlements">
+            <section data-testid="settings-route-stub-supplier-settlements" role="region" aria-label="共享控制台 - 供应商结算">
               <h1>供应商结算</h1>
             </section>
           )}
@@ -131,8 +131,8 @@ describe('SettingsPage', () => {
     expect(checklistScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
 
     await user.click(checklistScope.getByRole('button', { name: '打开项目市场' }))
-    expect(await screen.findByTestId('settings-route-stub-projects')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    const projectsRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
+    expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     const settingsView = renderSettingsPage()
     const checklistCardAgain = await screen.findByTestId('settings-user-first-run-checklist')
@@ -226,8 +226,8 @@ describe('SettingsPage', () => {
     expect(within(shortcutLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(within(missionCards).getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByTestId('settings-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
   it('keeps settings runtime shortcuts limited to a named shared-console shortcut region with only currently visible route cards', async () => {
@@ -296,8 +296,8 @@ describe('SettingsPage', () => {
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
     const shortcutLane = screen.getByTestId('settings-shortcut-cards')
     await user.click(within(shortcutLane).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('settings-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
   it('hides the user first-run checklist for supplier users while keeping supplier/shared shortcuts scoped to the runtime shortcut lane', async () => {
@@ -334,8 +334,8 @@ describe('SettingsPage', () => {
     expect(within(shortcutLane).queryByRole('button', { name: '打开项目市场' })).not.toBeInTheDocument()
 
     await user.click(within(shortcutLane).getByRole('button', { name: '继续配置 Webhook' }))
-    expect(await screen.findByTestId('settings-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+    const supplierWebhookRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(supplierWebhookRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
   })
 
   it('keeps only one admin webhook shortcut and aligns it to the canonical role-aware shared-console identity', async () => {
@@ -366,7 +366,7 @@ describe('SettingsPage', () => {
     expect(within(shortcutLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
     await user.click(within(shortcutLane).getByRole('button', { name: '继续配置 Webhook' }))
-    expect(await screen.findByTestId('settings-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
+    const adminWebhookRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(adminWebhookRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 })

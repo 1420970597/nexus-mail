@@ -94,7 +94,7 @@ describe('ConsoleLayout', () => {
           <Route
             path="/projects"
             element={
-              <section data-testid="console-layout-route-stub-projects">
+              <section data-testid="console-layout-route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
                 <h1>项目市场</h1>
               </section>
             }
@@ -110,7 +110,7 @@ describe('ConsoleLayout', () => {
           <Route
             path="/webhooks"
             element={
-              <section data-testid="console-layout-route-stub-webhooks">
+              <section data-testid="console-layout-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
                 <h1>开发者 Webhook 接入工作台</h1>
               </section>
             }

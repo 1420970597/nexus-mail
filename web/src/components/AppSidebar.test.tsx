@@ -198,7 +198,7 @@ describe('AppSidebar', () => {
         <Route
           path="/projects"
           element={
-            <section data-testid="app-sidebar-route-stub-projects">
+            <section data-testid="app-sidebar-route-stub-projects" role="region" aria-label="共享控制台 - 项目市场">
               <h1>项目市场</h1>
             </section>
           }
@@ -218,8 +218,8 @@ describe('AppSidebar', () => {
 
     const menu = screen.getByRole('menu')
     await user.click(within(menu).getByRole('menuitem', { name: new RegExp(resolveRouteTitle(WEBHOOKS_ROUTE, 'user')) }))
-    const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
-    expect(within(destinationRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
   })
 
   it('shows loading copy inside a named shared-menu region while waiting for server menu items', async () => {
