@@ -65,7 +65,7 @@ function renderPage() {
         <Route
           path={SUPPLIER_DOMAINS_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-domains">
+            <section data-testid="supplier-resources-route-stub-domains" role="region" aria-label="共享控制台 - 域名池运营中枢">
               <h1>域名池运营中枢</h1>
             </section>
           )}
@@ -73,7 +73,7 @@ function renderPage() {
         <Route
           path={SUPPLIER_OFFERINGS_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-offerings">
+            <section data-testid="supplier-resources-route-stub-offerings" role="region" aria-label="共享控制台 - 供货规则编排中枢">
               <h1>供货规则编排中枢</h1>
             </section>
           )}
@@ -81,7 +81,7 @@ function renderPage() {
         <Route
           path={SUPPLIER_SETTLEMENTS_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-settlements">
+            <section data-testid="supplier-resources-route-stub-settlements" role="region" aria-label="共享控制台 - 供应商资金与争议指挥台">
               <h1>供应商资金与争议指挥台</h1>
             </section>
           )}
@@ -89,7 +89,7 @@ function renderPage() {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-api-keys">
+            <section data-testid="supplier-resources-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -97,7 +97,7 @@ function renderPage() {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-webhooks">
+            <section data-testid="supplier-resources-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>供给事件回调工作台</h1>
             </section>
           )}
@@ -105,7 +105,7 @@ function renderPage() {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-docs">
+            <section data-testid="supplier-resources-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -113,7 +113,7 @@ function renderPage() {
         <Route
           path={DASHBOARD_ROUTE}
           element={(
-            <section data-testid="supplier-resources-route-stub-shared-home">
+            <section data-testid="supplier-resources-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -172,9 +172,9 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('supplier-resources-hero-card')
+    const heroCard = screen.getByRole('region', { name: '供应商资源' })
     expect(within(heroCard).getByText('资源运营中枢')).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商任务流' })
     expect(within(missionFlow).getByRole('heading', { name: '先维护域名池与 Catch-All' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('heading', { name: '继续收敛供货规则' })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('heading', { name: '最后观察结算与争议' })).toBeInTheDocument()
@@ -270,63 +270,63 @@ describe('SupplierResourcesPage', () => {
     expect(screen.getByRole('button', { name: '保存邮箱' })).toBeInTheDocument()
   })
 
-  it('navigates from mission-control actions to supplier domains, offerings, and settlements pages', async () => {
+  it('keeps mission-control navigation inside local named route-stub regions', async () => {
     const user = userEvent.setup()
 
     let view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
-    const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商任务流' })
     await user.click(within(missionFlow).getByRole('button', { name: /前往域名管理/ }))
-    expect(await screen.findByTestId('supplier-resources-route-stub-domains')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    const domainsRegion = await screen.findByRole('region', { name: '共享控制台 - 域名池运营中枢' })
+    expect(within(domainsRegion).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    const refreshedMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    const refreshedMissionFlow = screen.getByRole('region', { name: '供应商任务流' })
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: /查看供货规则/ }))
-    expect(await screen.findByTestId('supplier-resources-route-stub-offerings')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
+    const offeringsRegion = await screen.findByRole('region', { name: '共享控制台 - 供货规则编排中枢' })
+    expect(within(offeringsRegion).getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    const finalMissionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    const finalMissionFlow = screen.getByRole('region', { name: '供应商任务流' })
     await user.click(within(finalMissionFlow).getByRole('button', { name: /打开供应商结算/ }))
-    expect(await screen.findByTestId('supplier-resources-route-stub-settlements')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    const settlementsRegion = await screen.findByRole('region', { name: '共享控制台 - 供应商资金与争议指挥台' })
+    expect(within(settlementsRegion).getByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
   })
 
-  it('navigates from the shared-console bridge to API keys, webhooks, and docs pages', async () => {
+  it('keeps shared-console bridge navigation inside local named route-stub regions', async () => {
     const user = userEvent.setup()
 
     let view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
-    let bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    let bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /打开 API Keys/ }))
-    expect(await screen.findByTestId('supplier-resources-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /继续配置 Webhook/ }))
-    expect(await screen.findByTestId('supplier-resources-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderPage()
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /查看 API 文档/ }))
-    expect(await screen.findByTestId('supplier-resources-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
 
-  it('suppresses unavailable supplier and shared-console CTAs then falls back to the preferred workspace via a named region contract', async () => {
+  it('suppresses unavailable supplier and shared-console CTAs then falls back via the preferred local named route stub', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -341,13 +341,14 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('supplier-resources-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商任务流' })
     expect(within(missionFlow).queryByRole('button', { name: '前往域名管理' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '查看供货规则' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
-    expect(screen.getByTestId('supplier-resources-mission-fallback')).toBeInTheDocument()
+    const missionFallback = screen.getByRole('region', { name: '返回共享工作台继续供应商主链路' })
+    expect(within(missionFallback).getByRole('heading', { name: '返回共享工作台继续供应商主链路' })).toBeInTheDocument()
 
-    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
@@ -357,8 +358,8 @@ describe('SupplierResourcesPage', () => {
     expect(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button'))
-    expect(await screen.findByTestId('supplier-resources-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('hides shared-console fallback when at least one bridge route remains visible', async () => {
@@ -376,11 +377,11 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('supplier-resources-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })
 
   it('hides both fallback slices when supplier resources is the only visible supplier route', async () => {
@@ -394,8 +395,8 @@ describe('SupplierResourcesPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-mission-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-resources-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '返回共享工作台继续供应商主链路' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })
 
   it('keeps the shared-console fallback button scoped to the shared fallback region when supplier follow-up routes are absent', async () => {
@@ -414,17 +415,17 @@ describe('SupplierResourcesPage', () => {
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
-    const missionFallback = screen.getByTestId('supplier-resources-mission-fallback')
+    const missionFallback = screen.getByRole('region', { name: '返回共享工作台继续供应商主链路' })
     expect(within(missionFallback).getByText('返回共享工作台继续供应商主链路')).toBeInTheDocument()
     expect(within(missionFallback).queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
 
-    const sharedConsoleFallback = screen.getByTestId('supplier-resources-shared-console-fallback')
+    const sharedConsoleFallback = screen.getByRole('region', { name: '返回共享工作台' })
     expect(within(sharedConsoleFallback).getByText('当前共享接入入口暂未由服务端暴露时，先回到共享工作台继续供应商主链路，再根据后续授予的菜单继续完成接入配置。')).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button')).toBeInTheDocument()
 
     await user.click(within(sharedConsoleFallback).getByTestId('supplier-resources-shared-console-fallback-button'))
-    expect(await screen.findByTestId('supplier-resources-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('renders Chinese runtime labels for account and mailbox forms plus the localized accounts column title', async () => {

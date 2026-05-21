@@ -367,6 +367,8 @@ export function SupplierResourcesPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="supplier-resources-hero-card"
+        role="region"
+        aria-labelledby="supplier-resources-hero-card-heading"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -381,7 +383,7 @@ export function SupplierResourcesPage() {
             资源运营中枢
           </Tag>
           <div>
-            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>
+            <Typography.Title heading={3} id="supplier-resources-hero-card-heading" style={{ marginBottom: 8, color: '#f7f8f8' }}>
               供应商资源
             </Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
@@ -435,7 +437,12 @@ export function SupplierResourcesPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={16}>
-          <Card title={<span style={{ color: '#f7f8f8' }}>供应商任务流</span>} style={sectionCardStyle()} bodyStyle={{ padding: 20 }}>
+          <Card
+            role="region"
+            aria-labelledby="supplier-resources-mission-flow-heading"
+            title={<span id="supplier-resources-mission-flow-heading" style={{ color: '#f7f8f8' }}>供应商任务流</span>}
+            style={sectionCardStyle()}
+            bodyStyle={{ padding: 20 }}>
             <Row gutter={[16, 16]} data-testid="supplier-resources-mission-flow">
               {visibleMissionCards.map((item) => (
                 <Col xs={24} md={8} key={item.key}>
@@ -453,6 +460,8 @@ export function SupplierResourcesPage() {
                 <Col xs={24} md={8}>
                   <Card
                     data-testid="supplier-resources-mission-fallback"
+                    role="region"
+                    aria-labelledby="supplier-resources-mission-fallback-heading"
                     style={{
                       height: '100%',
                       borderRadius: 20,
@@ -463,7 +472,7 @@ export function SupplierResourcesPage() {
                   >
                     <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                       <Tag color="cyan">Fallback</Tag>
-                      <Typography.Title heading={5} style={{ color: '#f7f8f8', margin: 0 }}>
+                      <Typography.Title heading={5} id="supplier-resources-mission-fallback-heading" style={{ color: '#f7f8f8', margin: 0 }}>
                         返回共享工作台继续供应商主链路
                       </Typography.Title>
                       <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.74)', margin: 0 }}>
