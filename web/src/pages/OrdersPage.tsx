@@ -135,6 +135,8 @@ export function OrdersPage() {
       <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
         <Card
           data-testid="orders-shared-console-hero"
+          role="region"
+          aria-labelledby="orders-shared-console-hero-heading"
           style={{
             width: '100%',
             borderRadius: 24,
@@ -146,7 +148,7 @@ export function OrdersPage() {
           <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
             <Tag color="cyan" shape="circle">共享控制台履约切片</Tag>
             <div>
-              <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>订单中心</Typography.Title>
+              <Typography.Title id="orders-shared-console-hero-heading" heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>订单中心</Typography.Title>
               <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
                 把首轮采购后的邮箱分配、提取结果、履约终态与接入回放统一收敛在同一套深色共享控制台内。
               </Typography.Paragraph>
@@ -162,6 +164,8 @@ export function OrdersPage() {
 
         <Card
           data-testid="orders-continuation-lane"
+          role="region"
+          aria-labelledby="orders-continuation-lane-heading"
           style={{
             width: '100%',
             borderRadius: 22,
@@ -174,7 +178,7 @@ export function OrdersPage() {
             <Tag color="cyan" shape="circle">首轮履约与接入衔接</Tag>
             <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
               <div>
-                <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+                <Typography.Title id="orders-continuation-lane-heading" heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
                   订单结果 → API 接入 → 再次采购
                 </Typography.Title>
                 <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>

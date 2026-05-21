@@ -113,6 +113,8 @@ export function ProjectsPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="projects-shared-console-hero"
+        role="region"
+        aria-labelledby="projects-shared-console-hero-heading"
         style={{
           width: '100%',
           borderRadius: 24,
@@ -124,7 +126,7 @@ export function ProjectsPage() {
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
           <Tag color="cyan" shape="circle">共享控制台采购切片</Tag>
           <div>
-            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>项目市场</Typography.Title>
+            <Typography.Title id="projects-shared-console-hero-heading" heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>项目市场</Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
               让注册后的首轮采购、订单回流与开发者 API 接入工作台都保持在同一套深色共享控制台里继续完成。
             </Typography.Paragraph>

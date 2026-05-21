@@ -86,14 +86,14 @@ describe('ProjectsPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders a procurement shared-console slice shell with semantic hero signals', async () => {
+  it('renders a procurement shared-console slice shell with a named hero region', async () => {
     render(
       <MemoryRouter>
         <ProjectsPage />
       </MemoryRouter>,
     )
 
-    const heroCard = await screen.findByTestId('projects-shared-console-hero')
+    const heroCard = await screen.findByRole('region', { name: '项目市场' })
     const heroScope = within(heroCard)
     expect(heroScope.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
     expect(heroScope.getByText('采购路径信号')).toBeInTheDocument()
@@ -365,7 +365,7 @@ describe('ProjectsPage', () => {
     ])
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    let bridge = screen.getByTestId('projects-shared-console-bridge')
+    let bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveTextContent('项目市场 → 订单中心 → 开发者 API 接入工作台')
     expect(bridge).toHaveTextContent('项目采购、履约追踪与开发接入继续留在同一深色共享控制台，当前先开放订单中心与 API Keys。')
     expect(bridge).not.toHaveTextContent('API 文档与接入控制台')
@@ -381,7 +381,7 @@ describe('ProjectsPage', () => {
     ])
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    bridge = screen.getByTestId('projects-shared-console-bridge')
+    bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveTextContent('项目市场 → 订单中心')
     expect(bridge).toHaveTextContent('项目采购与履约追踪继续留在同一深色共享控制台，当前先沿订单中心推进下一步。')
     expect(bridge).not.toHaveTextContent('开发者 API 接入工作台')
@@ -396,7 +396,7 @@ describe('ProjectsPage', () => {
     ])
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    bridge = screen.getByTestId('projects-shared-console-bridge')
+    bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveTextContent('项目市场 → 开发者 API 接入工作台')
     expect(bridge).toHaveTextContent('项目采购与开发接入继续留在同一深色共享控制台，当前可直接前往 API Keys。')
     expect(bridge).not.toHaveTextContent('订单中心')
@@ -424,7 +424,7 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '项目市场' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('projects-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveTextContent('项目市场')
     expect(bridge).toHaveTextContent('项目采购继续留在当前深色共享控制台，等待服务端后续开放更多共享入口。')
     expect(bridge).not.toHaveTextContent('订单中心')
@@ -455,7 +455,7 @@ describe('ProjectsPage', () => {
     )
 
     expect(await screen.findByText('注册后首轮采购路径')).toBeInTheDocument()
-    const lane = screen.getByTestId('projects-first-run-lane')
+    const lane = screen.getByRole('region', { name: '采购 → 履约 → 接入' })
     await user.click(within(lane).getByRole('button', { name: /打开 API Keys/ }))
     const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(destinationRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()

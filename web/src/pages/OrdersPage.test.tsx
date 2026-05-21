@@ -104,14 +104,14 @@ describe('OrdersPage', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
   })
 
-  it('renders the fulfillment shared-console slice shell with semantic hero signals', async () => {
+  it('renders the fulfillment shared-console slice shell with a named hero region', async () => {
     render(
       <MemoryRouter>
         <OrdersPage />
       </MemoryRouter>,
     )
 
-    const heroCard = await screen.findByTestId('orders-shared-console-hero')
+    const heroCard = await screen.findByRole('region', { name: '订单中心' })
     const heroScope = within(heroCard)
     expect(heroScope.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
     expect(heroScope.getByText('履约路径信号')).toBeInTheDocument()
@@ -262,7 +262,7 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('orders-shared-console-hero')
+    const heroCard = screen.getByRole('region', { name: '订单中心' })
     expect(within(heroCard).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
   })
 
@@ -273,7 +273,7 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    const lane = await screen.findByTestId('orders-continuation-lane')
+    const lane = await screen.findByRole('region', { name: '订单结果 → API 接入 → 再次采购' })
     const scoped = within(lane)
     expect(scoped.getByRole('heading', { name: '订单结果 → API 接入 → 再次采购' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: /回到项目市场/ })).toBeInTheDocument()
@@ -357,7 +357,7 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('orders-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(bridge).toHaveTextContent('订单中心')
     expect(bridge).toHaveTextContent('履约页不是独立后台：确认邮箱、结果与终态后，继续沿当前账号已开放的共享控制台路径推进下一步动作。')
     expect(bridge).not.toHaveTextContent('开发者 API 接入工作台')
@@ -394,7 +394,7 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByText('首轮履约与接入衔接')).toBeInTheDocument()
-    const lane = screen.getByTestId('orders-continuation-lane')
+    const lane = screen.getByRole('region', { name: '订单结果 → API 接入 → 再次采购' })
     await user.click(within(lane).getByRole('button', { name: /回到项目市场/ }))
     const destinationRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
     expect(within(destinationRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
