@@ -353,7 +353,7 @@ describe('App', () => {
   }
 
   async function expectDefaultUserFirstRunLane() {
-    const onboardingRegion = await screen.findByTestId('dashboard-next-steps-lane')
+    const onboardingRegion = await screen.findByRole('region', { name: '推荐下一步' })
     await within(onboardingRegion).findByTestId('dashboard-next-step-api-keys')
     const scoped = within(onboardingRegion)
     expect(scoped.getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
@@ -567,7 +567,7 @@ describe('App', () => {
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
     await waitFor(() => expect(screen.queryByTestId('dashboard-first-run-dismiss')).not.toBeInTheDocument())
-    expect(screen.getByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '推荐下一步' })).toBeInTheDocument()
     firstView.unmount()
 
     useAuthStore.setState({
@@ -616,7 +616,7 @@ describe('App', () => {
     await user.click(screen.getByTestId('dashboard-first-run-dismiss'))
     await waitFor(() => expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('true'))
     await waitFor(() => expect(screen.queryByTestId('dashboard-first-run-dismiss')).not.toBeInTheDocument())
-    expect(screen.getByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: '推荐下一步' })).toBeInTheDocument()
   })
 
   it('does not show first-run onboarding guidance for supplier dashboard', async () => {
@@ -790,9 +790,9 @@ describe('App', () => {
     expect(within(headerSummary).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
   })
 
-  it('redirects plain users from supplier routes back into the shared dashboard next-steps lane', async () => {
+  it('redirects plain users from supplier routes back into the shared dashboard next-steps region', async () => {
     setSession('user')
     renderApp([SUPPLIER_RESOURCES_ROUTE])
-    expect(await screen.findByTestId('dashboard-next-steps-lane')).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: '推荐下一步' })).toBeInTheDocument()
   })
 })

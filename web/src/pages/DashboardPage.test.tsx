@@ -279,28 +279,28 @@ describe('DashboardPage shared-console journey hub', () => {
     const user = userEvent.setup()
 
     let view = renderDashboard()
-    let lane = await screen.findByTestId('dashboard-next-steps-lane')
+    let lane = await screen.findByRole('region', { name: '推荐下一步' })
     await user.click(within(lane).getByRole('button', { name: '查看余额中心' }))
     const balanceRegion = await screen.findByRole('region', { name: '共享控制台 - 余额中心' })
     expect(within(balanceRegion).getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
-    lane = await screen.findByTestId('dashboard-next-steps-lane')
+    lane = await screen.findByRole('region', { name: '推荐下一步' })
     await user.click(within(lane).getByRole('button', { name: '前往项目市场' }))
     const projectsRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
     expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
-    lane = await screen.findByTestId('dashboard-next-steps-lane')
+    lane = await screen.findByRole('region', { name: '推荐下一步' })
     await user.click(within(lane).getByRole('button', { name: '查看订单中心' }))
     const ordersRegion = await screen.findByRole('region', { name: '共享控制台 - 订单中心' })
     expect(within(ordersRegion).getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderDashboard()
-    lane = await screen.findByTestId('dashboard-next-steps-lane')
+    lane = await screen.findByRole('region', { name: '推荐下一步' })
     await user.click(within(lane).getByRole('button', { name: '打开 API Keys' }))
     const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
@@ -313,7 +313,7 @@ describe('DashboardPage shared-console journey hub', () => {
     renderDashboard()
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
-    const lane = await screen.findByTestId('dashboard-next-steps-lane')
+    const lane = await screen.findByRole('region', { name: '推荐下一步' })
     expect(within(lane).queryByTestId('dashboard-next-step-balance')).not.toBeInTheDocument()
     expect(within(lane).getByTestId('dashboard-next-step-projects')).toBeInTheDocument()
     expect(within(lane).queryByTestId('dashboard-next-step-orders')).not.toBeInTheDocument()
@@ -326,7 +326,7 @@ describe('DashboardPage shared-console journey hub', () => {
     const user = userEvent.setup()
 
     const view = renderDashboard()
-    const lane = await screen.findByTestId('dashboard-next-steps-lane')
+    const lane = await screen.findByRole('region', { name: '推荐下一步' })
     const scoped = within(lane)
     const integrationCard = scoped.getByTestId('dashboard-next-step-api-keys')
 
