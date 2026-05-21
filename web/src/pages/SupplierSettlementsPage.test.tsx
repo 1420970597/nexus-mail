@@ -131,7 +131,11 @@ function renderSupplierSettlementsPage() {
         <Route
           path={SUPPLIER_RESOURCES_ROUTE}
           element={(
-            <section data-testid="supplier-settlements-route-stub-resources">
+            <section
+              data-testid="supplier-settlements-route-stub-resources"
+              role="region"
+              aria-label="共享控制台 - 供应商资源"
+            >
               <h1>供应商资源</h1>
             </section>
           )}
@@ -139,7 +143,11 @@ function renderSupplierSettlementsPage() {
         <Route
           path={SUPPLIER_OFFERINGS_ROUTE}
           element={(
-            <section data-testid="supplier-settlements-route-stub-offerings">
+            <section
+              data-testid="supplier-settlements-route-stub-offerings"
+              role="region"
+              aria-label="共享控制台 - 供货规则编排中枢"
+            >
               <h1>供货规则编排中枢</h1>
             </section>
           )}
@@ -323,15 +331,15 @@ describe('SupplierSettlementsPage', () => {
 
     const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
-    expect(await screen.findByTestId('supplier-settlements-route-stub-resources')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
+    const resourcesRegion = await screen.findByRole('region', { name: '共享控制台 - 供应商资源' })
+    expect(within(resourcesRegion).getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
-    expect(await screen.findByTestId('supplier-settlements-route-stub-offerings')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
+    const offeringsRegion = await screen.findByRole('region', { name: '共享控制台 - 供货规则编排中枢' })
+    expect(within(offeringsRegion).getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
