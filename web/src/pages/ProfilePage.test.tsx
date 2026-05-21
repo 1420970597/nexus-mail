@@ -61,7 +61,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route
           path="/supplier/domains"
           element={(
-            <section data-testid="supplier-domains-route-stub">
+            <section data-testid="supplier-domains-route-stub" role="region" aria-label="共享控制台 - 域名池运营中枢">
               <h1>域名池运营中枢</h1>
             </section>
           )}
@@ -69,7 +69,7 @@ function renderProfilePage(initialEntry = PROFILE_ROUTE) {
         <Route
           path="/admin/risk"
           element={(
-            <section data-testid="admin-risk-route-stub">
+            <section data-testid="admin-risk-route-stub" role="region" aria-label="共享控制台 - 风控中心">
               <h1>风控中心</h1>
             </section>
           )}

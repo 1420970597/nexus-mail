@@ -526,7 +526,6 @@ describe('App', () => {
       stats: { projects: 6, suppliers: 1, orders: 5 },
     })
     renderApp(['/'])
-
     expect(await screen.findByTestId('app-sidebar-shared-group')).toBeInTheDocument()
 
     const sharedGroup = screen.getByTestId('app-sidebar-shared-group')

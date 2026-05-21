@@ -55,7 +55,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={SUPPLIER_RESOURCES_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-resources">
+            <section data-testid="supplier-domains-route-stub-resources" role="region" aria-label="共享控制台 - 供应商资源">
               <h1>供应商资源</h1>
             </section>
           )}
@@ -63,7 +63,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={SUPPLIER_OFFERINGS_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-offerings">
+            <section data-testid="supplier-domains-route-stub-offerings" role="region" aria-label="共享控制台 - 供货规则编排中枢">
               <h1>供货规则编排中枢</h1>
             </section>
           )}
@@ -71,7 +71,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={SUPPLIER_SETTLEMENTS_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-settlements">
+            <section data-testid="supplier-domains-route-stub-settlements" role="region" aria-label="共享控制台 - 供应商资金与争议指挥台">
               <h1>供应商资金与争议指挥台</h1>
             </section>
           )}
@@ -79,7 +79,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={API_KEYS_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-api-keys">
+            <section data-testid="supplier-domains-route-stub-api-keys" role="region" aria-label="共享控制台 - API Keys">
               <h1>开发者 API 接入工作台</h1>
             </section>
           )}
@@ -87,7 +87,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={WEBHOOKS_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-webhooks">
+            <section data-testid="supplier-domains-route-stub-webhooks" role="region" aria-label="共享控制台 - Webhooks">
               <h1>供给事件回调工作台</h1>
             </section>
           )}
@@ -95,7 +95,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={DOCS_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-docs">
+            <section data-testid="supplier-domains-route-stub-docs" role="region" aria-label="共享控制台 - API 文档">
               <h1>API 文档与接入控制台</h1>
             </section>
           )}
@@ -103,7 +103,7 @@ function renderSupplierDomainsPage(initialEntry = SUPPLIER_DOMAINS_ROUTE) {
         <Route
           path={DASHBOARD_ROUTE}
           element={(
-            <section data-testid="supplier-domains-route-stub-shared-home">
+            <section data-testid="supplier-domains-route-stub-shared-home" role="region" aria-label="共享控制台首页">
               <h1>控制台总览</h1>
             </section>
           )}
@@ -214,7 +214,7 @@ describe('SupplierDomainsPage', () => {
     })
   })
 
-  it('navigates from mission-control actions to resource, offering, api key, and settlement pages', async () => {
+  it('keeps mission-control and shared bridge navigation inside local named route-stub regions', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
     const user = userEvent.setup()
 
@@ -223,47 +223,47 @@ describe('SupplierDomainsPage', () => {
 
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-resources')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
+    const resourcesRegion = await screen.findByRole('region', { name: '共享控制台 - 供应商资源' })
+    expect(within(resourcesRegion).getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-offerings')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
+    const offeringsRegion = await screen.findByRole('region', { name: '共享控制台 - 供货规则编排中枢' })
+    expect(within(offeringsRegion).getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
     await user.click(within(bridge).getByRole('button', { name: '打开 API Keys' }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-api-keys')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
+    expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: '继续配置 Webhook' }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-webhooks')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
+    const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
+    expect(within(webhooksRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: '查看 API 文档' }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-docs')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
+    const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
+    expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
     await user.click(within(screen.getByTestId('supplier-domains-shared-console-bridge')).getByRole('button', { name: '打开供应商结算' }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-settlements')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    const settlementsRegion = await screen.findByRole('region', { name: '共享控制台 - 供应商资金与争议指挥台' })
+    expect(within(settlementsRegion).getByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
   })
 
-  it('suppresses unavailable supplier and shared-console CTAs, then falls back to dashboard', async () => {
+  it('keeps mission and shared-console fallback navigation inside local named route-stub regions', async () => {
     mockedGetSupplierResourcesOverview.mockResolvedValue({ domains: [], accounts: [], mailboxes: [] })
     seedSupplierMenu([DASHBOARD_ROUTE, SUPPLIER_DOMAINS_ROUTE])
     const user = userEvent.setup()
@@ -278,8 +278,8 @@ describe('SupplierDomainsPage', () => {
 
     const missionFallback = screen.getByTestId('supplier-domains-mission-fallback')
     await user.click(within(missionFallback).getByRole('button', { name: /返回共享工作台/ }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeFromMissionFallback = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeFromMissionFallback).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
@@ -292,8 +292,8 @@ describe('SupplierDomainsPage', () => {
 
     const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
     await user.click(within(fallback).getByRole('button', { name: /返回共享工作台/ }))
-    expect(await screen.findByTestId('supplier-domains-route-stub-shared-home')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeFromBridgeFallback = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeFromBridgeFallback).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('shows explicit overview failure state instead of empty-state copy when overview loading fails', async () => {
