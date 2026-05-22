@@ -196,13 +196,12 @@ describe('ApiKeysPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('api-keys-hero-card')
-    expect(within(heroCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
-    expect(heroCard).toHaveTextContent('共享控制台 · 供应商扩展')
-    expect(heroCard).toHaveTextContent('优先设置固定出口 IP 白名单')
-    expect(heroCard).toHaveTextContent('按供货能力拆分不同 scopes')
-    expect(heroCard).not.toHaveTextContent('共享控制台 · 基础接入')
+    const heroRegion = await screen.findByRole('region', { name: '开发者 API 接入工作台' })
+    expect(within(heroRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(heroRegion).toHaveTextContent('共享控制台 · 供应商扩展')
+    expect(heroRegion).toHaveTextContent('优先设置固定出口 IP 白名单')
+    expect(heroRegion).toHaveTextContent('按供货能力拆分不同 scopes')
+    expect(heroRegion).not.toHaveTextContent('共享控制台 · 基础接入')
   })
 
   it('uses role-aware webhook route identity inside the shared integration bridge for supplier and admin users', async () => {
@@ -210,11 +209,12 @@ describe('ApiKeysPage', () => {
 
     seedRole('supplier')
     let view = renderApiKeysPage()
-    const firstKeysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(firstKeysCard).findByText('默认密钥')
-    const supplierBridge = within(screen.getByTestId('api-keys-shared-console-bridge'))
-    expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → 供给事件回调工作台 → API 文档与接入控制台')
-    expect(screen.getByTestId('api-keys-shared-console-bridge')).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
+    const firstKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(firstKeysRegion).findByText('默认密钥')
+    const supplierBridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    const supplierBridge = within(supplierBridgeRegion)
+    expect(supplierBridgeRegion).toHaveTextContent('API Keys → 供给事件回调工作台 → API 文档与接入控制台')
+    expect(supplierBridgeRegion).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
     await user.click(supplierBridge.getByRole('button', { name: /继续配置 Webhook/ }))
     const supplierWebhookRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(supplierWebhookRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
@@ -222,11 +222,12 @@ describe('ApiKeysPage', () => {
     view.unmount()
     seedRole('admin')
     view = renderApiKeysPage()
-    const secondKeysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(secondKeysCard).findByText('默认密钥')
-    const adminBridge = within(screen.getByTestId('api-keys-shared-console-bridge'))
-    expect(screen.getByTestId('api-keys-shared-console-bridge')).toHaveTextContent('API Keys → Webhook 运维与回调观测 → API 文档与接入控制台')
-    expect(screen.getByTestId('api-keys-shared-console-bridge')).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
+    const secondKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(secondKeysRegion).findByText('默认密钥')
+    const adminBridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    const adminBridge = within(adminBridgeRegion)
+    expect(adminBridgeRegion).toHaveTextContent('API Keys → Webhook 运维与回调观测 → API 文档与接入控制台')
+    expect(adminBridgeRegion).not.toHaveTextContent('API Keys → 开发者 Webhook 接入工作台 → API 文档与接入控制台')
     await user.click(adminBridge.getByRole('button', { name: /继续配置 Webhook/ }))
     const adminWebhookRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(adminWebhookRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
@@ -240,9 +241,9 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
-    const createCard = screen.getByTestId('api-keys-create-card')
+    const currentKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(currentKeysRegion).findByText('默认密钥')
+    const createRegion = screen.getByRole('region', { name: '创建 API Key' })
     const nameInput = screen.getByLabelText('名称')
     const scopesInput = screen.getByLabelText('权限范围')
     const whitelistInput = screen.getByPlaceholderText('127.0.0.1,10.0.0.0/24')
@@ -250,7 +251,7 @@ describe('ApiKeysPage', () => {
     fireEvent.change(nameInput, { target: { value: '新密钥' } })
     fireEvent.change(scopesInput, { target: { value: ' finance:write , , activation:read ' } })
     fireEvent.change(whitelistInput, { target: { value: ' 10.0.0.0/24, ,127.0.0.1 ' } })
-    await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
+    await user.click(within(createRegion).getByRole('button', { name: '创建新密钥' }))
 
     await waitFor(() =>
       expect(mockedCreateAPIKey).toHaveBeenCalledWith({
@@ -269,8 +270,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('已撤销密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('已撤销密钥')
 
     const activeRow = within(getApiKeyRow('默认密钥'))
     const revokedRow = within(getApiKeyRow('已撤销密钥'))
@@ -286,8 +287,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: '撤销' }))
 
@@ -303,8 +304,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('默认密钥')
 
     mockedGetAPIKeys.mockResolvedValueOnce({
       items: [
@@ -354,8 +355,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
     const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
@@ -376,8 +377,8 @@ describe('ApiKeysPage', () => {
         <ApiKeysPage />
       </MemoryRouter>,
     )
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
     const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
@@ -394,9 +395,11 @@ describe('ApiKeysPage', () => {
   it('renders audit trail, shared navigation bridge actions, and the capability matrix contract', async () => {
     renderApiKeysPage()
 
-    expect(await screen.findByRole('heading', { name: '创建 API Key' })).toBeInTheDocument()
-    const auditCard = screen.getByTestId('api-keys-audit-log-card')
-    const auditScope = within(auditCard)
+    const createRegion = await screen.findByRole('region', { name: '创建 API Key' })
+    expect(within(createRegion).getByRole('heading', { name: '创建 API Key' })).toBeInTheDocument()
+    const auditRegion = screen.getByRole('region', { name: '审计日志' })
+    const auditScope = within(auditRegion)
+    expect(auditScope.getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
     expect(auditScope.getByText('创建 API Key')).toBeInTheDocument()
     expect(auditScope.getByText('create')).toBeInTheDocument()
 
@@ -424,8 +427,8 @@ describe('ApiKeysPage', () => {
 
     let view = renderApiKeysPage()
 
-    const firstKeysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(firstKeysCard).findByText('默认密钥')
+    const firstKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(firstKeysRegion).findByText('默认密钥')
     const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridgeRegion).getByRole('button', { name: /继续配置 Webhook/ }))
     const webhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
@@ -433,17 +436,17 @@ describe('ApiKeysPage', () => {
 
     view.unmount()
     view = renderApiKeysPage()
-    const secondKeysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(secondKeysCard).findByText('默认密钥')
+    const secondKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(secondKeysRegion).findByText('默认密钥')
     await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: /查看 API 文档/ }))
     const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderApiKeysPage()
-    const thirdKeysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(thirdKeysCard).findByText('默认密钥')
-    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /返回项目市场/ }))
+    const thirdKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(thirdKeysRegion).findByText('默认密钥')
+    await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: /返回项目市场/ }))
     const projectsRegion = await screen.findByRole('region', { name: '共享控制台 - 项目市场' })
     expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
@@ -489,14 +492,14 @@ describe('ApiKeysPage', () => {
 
     view.unmount()
     renderApiKeysPage()
-    const finalKeysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(finalKeysCard).findByText('默认密钥')
-    const createCard = screen.getByTestId('api-keys-create-card')
+    const finalKeysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(finalKeysRegion).findByText('默认密钥')
+    const createRegionAfterReload = screen.getByRole('region', { name: '创建 API Key' })
     fireEvent.change(screen.getByLabelText('名称'), { target: { value: '联调密钥' } })
     fireEvent.change(screen.getByLabelText('权限范围'), { target: { value: 'activation:write' } })
-    await user.click(within(createCard).getByRole('button', { name: '创建新密钥' }))
+    await user.click(within(createRegionAfterReload).getByRole('button', { name: '创建新密钥' }))
     expect(await screen.findByText(/nmx_created_secret_2/)).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('api-keys-shared-console-bridge')).getByRole('button', { name: /继续配置 Webhook/ }))
+    await user.click(within(screen.getByRole('region', { name: '共享接入桥接' })).getByRole('button', { name: /继续配置 Webhook/ }))
     const nextWebhooksRegion = await screen.findByRole('region', { name: '共享控制台 - Webhooks' })
     expect(within(nextWebhooksRegion).getByRole('heading', { name: resolveRouteTitle(WEBHOOKS_ROUTE, useAuthStore.getState().user?.role) })).toBeInTheDocument()
   })
@@ -507,8 +510,8 @@ describe('ApiKeysPage', () => {
 
     renderApiKeysPage()
 
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    const emptyScope = within(keysCard)
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    const emptyScope = within(keysRegion)
     expect(emptyScope.getByText('暂无 API Key，先创建第一个凭证完成接入。')).toBeInTheDocument()
     expect(emptyScope.getByRole('button', { name: '继续配置 Webhook' })).toBeInTheDocument()
     expect(emptyScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
@@ -532,8 +535,8 @@ describe('ApiKeysPage', () => {
 
     renderApiKeysPage()
 
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('默认密钥')
     const fallback = screen.getByRole('region', { name: '返回共享工作台' })
     expect(within(fallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(fallback).getByText(/当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。/)).toBeInTheDocument()
@@ -555,8 +558,8 @@ describe('ApiKeysPage', () => {
 
     renderApiKeysPage()
 
-    const keysCard = await screen.findByTestId('api-keys-current-keys-card')
-    await within(keysCard).findByText('默认密钥')
+    const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
+    await within(keysRegion).findByText('默认密钥')
     const fallback = screen.getByRole('region', { name: '返回共享工作台' })
     await user.click(within(fallback).getByTestId('api-keys-shared-console-fallback-button'))
     const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })

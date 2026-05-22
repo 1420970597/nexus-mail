@@ -232,6 +232,8 @@ export function ApiKeysPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="api-keys-hero-card"
+        role="region"
+        aria-labelledby="api-keys-hero-heading"
         style={{
           width: '100%',
           borderRadius: 24,
@@ -245,7 +247,7 @@ export function ApiKeysPage() {
             {copy.badge}
           </Tag>
           <div>
-            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>
+            <Typography.Title heading={3} id="api-keys-hero-heading" style={{ marginBottom: 8, color: '#f7f8f8' }}>
               {copy.title}
             </Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
@@ -436,7 +438,13 @@ export function ApiKeysPage() {
         />
       ) : null}
 
-      <Card title="创建 API Key" data-testid="api-keys-create-card" style={{ width: '100%' }}>
+      <Card
+        role="region"
+        aria-labelledby="api-keys-create-heading"
+        title={<Typography.Title heading={5} id="api-keys-create-heading" style={{ margin: 0 }}>创建 API Key</Typography.Title>}
+        data-testid="api-keys-create-card"
+        style={{ width: '100%' }}
+      >
         <Form form={form} layout="horizontal" labelPosition="left">
           <Form.Input field="name" label="名称" rules={[{ required: true, message: '请输入名称' }]} />
           <Form.Input field="scopes" label="权限范围" placeholder="activation:read, finance:write" />
@@ -447,7 +455,14 @@ export function ApiKeysPage() {
         </Form>
       </Card>
 
-      <Card title="当前密钥" data-testid="api-keys-current-keys-card" style={{ width: '100%' }} loading={loading}>
+      <Card
+        role="region"
+        aria-labelledby="api-keys-current-keys-heading"
+        title={<Typography.Title heading={5} id="api-keys-current-keys-heading" style={{ margin: 0 }}>当前密钥</Typography.Title>}
+        data-testid="api-keys-current-keys-card"
+        style={{ width: '100%' }}
+        loading={loading}
+      >
         {items.length === 0 ? (
           <Empty description="暂无 API Key，先创建第一个凭证完成接入。">
             <Space>
@@ -572,7 +587,14 @@ export function ApiKeysPage() {
         </Space>
       </Card>
 
-      <Card title="审计日志" data-testid="api-keys-audit-log-card" style={{ width: '100%' }} loading={loading}>
+      <Card
+        role="region"
+        aria-labelledby="api-keys-audit-log-heading"
+        title={<Typography.Title heading={5} id="api-keys-audit-log-heading" style={{ margin: 0 }}>审计日志</Typography.Title>}
+        data-testid="api-keys-audit-log-card"
+        style={{ width: '100%' }}
+        loading={loading}
+      >
         <Table
           pagination={false}
           dataSource={audit}
