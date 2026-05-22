@@ -316,12 +316,10 @@ describe('DashboardPage shared-console journey hub', () => {
 
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     const lane = await screen.findByRole('region', { name: '推荐下一步' })
-    expect(within(lane).queryByTestId('dashboard-next-step-balance')).not.toBeInTheDocument()
-    expect(within(lane).getByTestId('dashboard-next-step-projects')).toBeInTheDocument()
-    expect(within(lane).queryByTestId('dashboard-next-step-orders')).not.toBeInTheDocument()
-    expect(within(lane).queryByTestId('dashboard-next-step-api-keys')).not.toBeInTheDocument()
-    expect(within(lane).queryByTestId('dashboard-next-step-action-balance')).not.toBeInTheDocument()
-    expect(within(lane).getByTestId('dashboard-next-step-action-projects')).toBeInTheDocument()
+    expect(within(lane).queryByRole('button', { name: '查看余额中心' })).not.toBeInTheDocument()
+    expect(within(lane).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
+    expect(within(lane).queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
+    expect(within(lane).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
   })
 
   it('shows the dashboard integration lane using the shared API Keys route constant without leaking extra journey cards', async () => {
@@ -329,18 +327,17 @@ describe('DashboardPage shared-console journey hub', () => {
 
     const view = renderDashboard()
     const lane = await screen.findByRole('region', { name: '推荐下一步' })
-    const scoped = within(lane)
-    const integrationCard = scoped.getByTestId('dashboard-next-step-api-keys')
+    const integrationButton = within(lane).getByRole('button', { name: '打开 API Keys' })
+    const integrationCard = integrationButton.parentElement?.parentElement?.parentElement as HTMLElement
 
     expect(integrationCard).toBeInTheDocument()
     expect(within(integrationCard).getByText('开发者 API 接入工作台')).toBeInTheDocument()
     expect(within(integrationCard).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(integrationCard).queryByText('集成与回调')).not.toBeInTheDocument()
-    expect(scoped.getByTestId('dashboard-next-step-action-api-keys')).toBeInTheDocument()
-    expect(scoped.queryByTestId('dashboard-next-step-webhooks')).not.toBeInTheDocument()
-    expect(scoped.queryByTestId('dashboard-next-step-docs')).not.toBeInTheDocument()
+    expect(within(lane).queryByRole('button', { name: '前往 开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
+    expect(within(lane).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
 
-    await user.click(scoped.getByTestId('dashboard-next-step-action-api-keys'))
+    await user.click(integrationButton)
     expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     view.unmount()
   })

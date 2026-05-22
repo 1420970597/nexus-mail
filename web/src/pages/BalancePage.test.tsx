@@ -305,7 +305,7 @@ describe('BalancePage', () => {
 
     renderBalancePage()
 
-    const heroCard = await screen.findByTestId('balance-hero-card')
+    const heroCard = await screen.findByRole('region', { name: '余额中心' })
     expect(within(heroCard).getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
     expect(within(heroCard).getByText('供应商仍通过同一套共享控制台观察供货结算与争议结果')).toBeInTheDocument()
   })
@@ -316,7 +316,7 @@ describe('BalancePage', () => {
 
     renderBalancePage()
 
-    const heroCard = await screen.findByTestId('balance-hero-card')
+    const heroCard = await screen.findByRole('region', { name: '余额中心' })
     expect(within(heroCard).getByRole('heading', { name: '余额中心' })).toBeInTheDocument()
     expect(within(heroCard).getByText('管理员可在共享控制台的运营链路继续跟进调账、结算与争议处理')).toBeInTheDocument()
   })
