@@ -475,4 +475,50 @@ describe('LoginPage', () => {
     expect(await screen.findByText('两次输入的密码不一致')).toBeInTheDocument()
     expect(mockedRegister).not.toHaveBeenCalled()
   })
+
+  it('keeps login mode on real auth login without leaking register-only fields or validation text', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    const authShell = screen.getByTestId('login-auth-shell')
+    const loginFormRegion = within(authShell).getByRole('region', { name: '登录并进入统一控制台' })
+    const loginFormScope = within(loginFormRegion)
+
+    expect(loginFormScope.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
+    expect(loginFormScope.getByPlaceholderText('name@example.com')).toBeInTheDocument()
+    expect(loginFormScope.getByPlaceholderText('请输入密码')).toBeInTheDocument()
+    expect(loginFormScope.queryByPlaceholderText('至少 8 位密码')).not.toBeInTheDocument()
+    expect(loginFormScope.queryByPlaceholderText('再次输入密码')).not.toBeInTheDocument()
+    expect(screen.queryByText('请输入有效邮箱')).not.toBeInTheDocument()
+    expect(screen.queryByText('密码长度至少为 8 位')).not.toBeInTheDocument()
+
+    fireEvent.change(loginFormScope.getByPlaceholderText('name@example.com'), { target: { value: 'user@example.com' } })
+    fireEvent.change(loginFormScope.getByPlaceholderText('请输入密码'), { target: { value: 'Password123!' } })
+    await user.click(loginFormScope.getByRole('button', { name: '登录并进入统一控制台' }))
+
+    await waitFor(() => expect(mockedLogin).toHaveBeenCalledWith('user@example.com', 'Password123!'))
+    expect(mockedRegister).not.toHaveBeenCalled()
+    expect(await screen.findByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
+  })
+
+  it('keeps register mode validation local-only and sends only backend-supported email/password fields on successful submit', async () => {
+    const user = userEvent.setup()
+
+    renderLoginPage()
+
+    await user.click(getRegisterJourneyScope().getByRole('button', { name: /立即注册，进入共享控制台/ }))
+    const authShell = screen.getByTestId('login-auth-shell')
+    const registerFormRegion = within(authShell).getByRole('region', { name: '创建账号并进入统一控制台' })
+    const registerFormScope = within(registerFormRegion)
+
+    fireEvent.change(registerFormScope.getByPlaceholderText('name@example.com'), { target: { value: 'new@example.com' } })
+    fireEvent.change(registerFormScope.getByPlaceholderText('至少 8 位密码'), { target: { value: 'Password123!' } })
+    fireEvent.change(registerFormScope.getByPlaceholderText('再次输入密码'), { target: { value: 'Password123!' } })
+    await user.click(registerFormScope.getByRole('button', { name: '注册并进入统一控制台' }))
+
+    await waitFor(() => expect(mockedRegister).toHaveBeenCalledWith('new@example.com', 'Password123!'))
+    expect(mockedLogin).not.toHaveBeenCalled()
+    expect(screen.queryByText('请求参数无效')).not.toBeInTheDocument()
+  })
 })
