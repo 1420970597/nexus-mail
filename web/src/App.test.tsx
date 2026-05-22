@@ -220,7 +220,8 @@ describe('App', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp([DEFAULT_LOGIN_ROUTE])
     expect(await screen.findByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
+    const loginCopyRegion = screen.getByRole('region', { name: '登录认证说明' })
+    expect(within(loginCopyRegion).getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
   })
 
   it('clears local session on bootstrap failure without revoking refresh session server-side', async () => {
@@ -364,7 +365,7 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
-  it('shows register journey CTA and opens register mode from the login shell', async () => {
+  it('shows register journey CTA and opens a named registration form region from the login shell', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp(['/login'])
@@ -375,8 +376,10 @@ describe('App', () => {
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
-    expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
+    const authShell = screen.getByTestId('login-auth-shell')
+    const registerFormRegion = within(authShell).getByRole('region', { name: '创建账号并进入统一控制台' })
+    expect(within(registerFormRegion).getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
+    expect(within(registerFormRegion).getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
   })
 
   async function openRegisterMode(user: ReturnType<typeof userEvent.setup>) {

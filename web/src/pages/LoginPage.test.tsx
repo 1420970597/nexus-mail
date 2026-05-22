@@ -177,7 +177,8 @@ describe('LoginPage', () => {
     expect(capabilityMatrix.queryByText('多后台切换')).not.toBeInTheDocument()
 
     expect(screen.getByTestId('login-auth-shell')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
+    const authCopyRegion = within(screen.getByTestId('login-auth-shell')).getByRole('region', { name: '登录认证说明' })
+    expect(within(authCopyRegion).getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
     expect(screen.getByText('登录后按角色展开工作区，继续同一套导航。')).toBeInTheDocument()
     expect(screen.queryByText('登录后按角色展开工作区，无需切换后台。')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '登录并进入统一控制台' })).toBeInTheDocument()
@@ -272,7 +273,7 @@ describe('LoginPage', () => {
     expect(registerCopyScope.queryByText('登录后按角色展开工作区，继续同一套导航。')).not.toBeInTheDocument()
   })
 
-  it('opens register mode from the shared-console registration journey CTA and keeps the runway CTA scoped to the journey region', async () => {
+  it('exposes a named registration runway region with scoped CTA navigation and a named registration form region after the CTA switches modes', async () => {
     const user = userEvent.setup()
 
     renderLoginPage()
@@ -283,8 +284,15 @@ describe('LoginPage', () => {
 
     await user.click(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ }))
 
-    expect(screen.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
+    const authShell = screen.getByTestId('login-auth-shell')
+    const registerFormRegion = within(authShell).getByRole('region', { name: '创建账号并进入统一控制台' })
+    const registerFormScope = within(registerFormRegion)
+    expect(registerFormScope.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
+    expect(registerFormScope.getByPlaceholderText('name@example.com')).toBeInTheDocument()
+    expect(registerFormScope.getByPlaceholderText('至少 8 位密码')).toBeInTheDocument()
+    expect(registerFormScope.getByPlaceholderText('再次输入密码')).toBeInTheDocument()
+    expect(registerFormScope.getByRole('button', { name: '注册并进入统一控制台' })).toBeInTheDocument()
+    expect(registerFormScope.queryByPlaceholderText('请输入密码')).not.toBeInTheDocument()
   })
 
   it('keeps the registration runway CTA buttons scoped to the shared journey region and excludes auth-shell duplicates before navigating', async () => {

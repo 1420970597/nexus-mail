@@ -643,7 +643,19 @@ export function LoginPage() {
                   }
                 `}</style>
 
-                <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }} className="login-auth-form-surface">
+                  <div
+                    role="region"
+                    aria-labelledby="login-auth-form-heading"
+                    style={{ width: '100%' }}
+                  >
+                    <Typography.Title
+                      heading={5}
+                      id="login-auth-form-heading"
+                      style={{ color: '#f7f8f8', marginBottom: 12, letterSpacing: '-0.18px' }}
+                    >
+                      {copy.title}
+                    </Typography.Title>
+                    <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }} className="login-auth-form-surface">
                     <Form.Input
                       field="email"
                       label="邮箱"
@@ -677,6 +689,7 @@ export function LoginPage() {
                       {copy.button}
                     </Button>
                   </Form>
+                  </div>
 
                   <Divider margin="12px" />
                   <Typography.Text type="tertiary" className="login-auth-footer-copy">
