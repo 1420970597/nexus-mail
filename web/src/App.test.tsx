@@ -826,7 +826,7 @@ describe('App', () => {
 
     renderApp(['/webhooks'])
 
-    const currentEndpointCard = await screen.findByTestId('webhooks-current-endpoints-card')
+    const currentEndpointCard = await screen.findByRole('region', { name: '当前 endpoint' })
     expect(currentEndpointCard).toBeInTheDocument()
 
     const headerSummary = screen.getByTestId('console-layout-header-summary')

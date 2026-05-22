@@ -370,7 +370,6 @@ export function WebhooksPage() {
         render: (_: unknown, record: WebhookEndpointRecord) => (
           <Space>
             <Button
-              data-testid={`webhooks-send-test-button-${record.id}`}
               theme="solid"
               type="primary"
               loading={testingID === record.id}
@@ -664,8 +663,9 @@ export function WebhooksPage() {
       </Card>
 
       <Card
-        data-testid="webhooks-current-endpoints-card"
         title="当前 endpoint"
+        role="region"
+        aria-labelledby="webhooks-current-endpoints-heading"
         style={{ width: '100%' }}
         loading={loading}
       >

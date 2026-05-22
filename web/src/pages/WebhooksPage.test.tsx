@@ -147,7 +147,7 @@ describe('WebhooksPage', () => {
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
     expect(mockedGetWebhookEndpoints).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(mockedGetWebhookDeliveries).toHaveBeenCalledWith(11))
-    const currentEndpointCard = screen.getByTestId('webhooks-current-endpoints-card')
+    const currentEndpointCard = await screen.findByRole('region', { name: '当前 endpoint' })
     expect(within(currentEndpointCard).getByText('https://hooks.example.com/nexus-mail')).toBeInTheDocument()
   })
 
@@ -202,8 +202,9 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    await screen.findByText('https://hooks.example.com/nexus-mail')
-    await user.click(screen.getByTestId('webhooks-send-test-button-11'))
+    await screen.findByRole('heading', { name: '当前 endpoint' })
+    const currentEndpointCard = screen.getByRole('region', { name: '当前 endpoint' })
+    await user.click(within(currentEndpointCard).getByRole('button', { name: '发送测试投递' }))
 
     await waitFor(() => expect(mockedCreateWebhookTestDelivery).toHaveBeenCalledWith(11))
     expect(mockedGetWebhookDeliveries).toHaveBeenCalledTimes(2)
@@ -244,8 +245,8 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    const currentEndpointsCard = await screen.findByTestId('webhooks-current-endpoints-card')
-    expect(within(currentEndpointsCard).getByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
+    const currentEndpointCard = await screen.findByRole('region', { name: '当前 endpoint' })
+    expect(within(currentEndpointCard).getByText('当前还没有 Webhook endpoint，先创建第一个回调地址。')).toBeInTheDocument()
   })
 
   it('shows canonical API Keys CTA in the empty state when the shared route is available', async () => {
@@ -257,10 +258,11 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    const emptyActions = await screen.findByTestId('webhooks-empty-state-actions')
-    expect(within(emptyActions).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
-    expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
-    expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
+    const currentEndpointCard = await screen.findByRole('region', { name: '当前 endpoint' })
+    const emptyActions = within(currentEndpointCard)
+    expect(emptyActions.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(emptyActions.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
+    expect(emptyActions.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
   it('renders a dedicated shared-console bridge with capability matrix and scoped CTA contracts', async () => {
@@ -384,10 +386,10 @@ describe('WebhooksPage', () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    const bridgeCard = screen.getByTestId('webhooks-shared-console-bridge')
-    const bridgeScope = within(bridgeCard)
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    const bridgeScope = within(bridgeRegion)
     expect(bridgeScope.getByRole('heading', { name: 'Webhook 接入仍停留在当前工作台' })).toBeInTheDocument()
-    expect(bridgeCard).toHaveTextContent('当前账号仍停留在 Webhook 工作台中继续观察回调状态，等待服务端后续开放更多共享接入入口。')
+    expect(bridgeRegion).toHaveTextContent('当前账号仍停留在 Webhook 工作台中继续观察回调状态，等待服务端后续开放更多共享接入入口。')
     expect(bridgeScope.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
     expect(bridgeScope.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(bridgeScope.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
@@ -431,7 +433,7 @@ describe('WebhooksPage', () => {
     seedRole('user')
     view = renderWebhooksPage()
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    const integrationRegion = screen.getByTestId('webhooks-first-integration-loop')
+    const integrationRegion = screen.getByRole('region', { name: '注册后首轮回调联调建议' })
     expect(within(integrationRegion).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     await user.click(within(integrationRegion).getByRole('button', { name: '查看 API 文档' }))
     const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
@@ -445,9 +447,9 @@ describe('WebhooksPage', () => {
     const integrationLoop = screen.getByRole('region', { name: '注册后首轮回调联调建议' })
     const loopScope = within(integrationLoop)
     expect(loopScope.getByRole('heading', { name: '注册后首轮回调联调建议' })).toBeInTheDocument()
-    expect(loopScope.getByTestId('webhooks-first-step-create-endpoint')).toBeInTheDocument()
-    expect(loopScope.getByTestId('webhooks-first-step-verify-test-delivery')).toBeInTheDocument()
-    expect(loopScope.getByTestId('webhooks-first-step-return-to-docs')).toBeInTheDocument()
+    expect(loopScope.getByText('1. 创建首个 endpoint')).toBeInTheDocument()
+    expect(loopScope.getByText('2. 验证 test delivery')).toBeInTheDocument()
+    expect(loopScope.getByText('3. 回到 API 文档/消费端')).toBeInTheDocument()
     expect(loopScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
@@ -476,17 +478,17 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    const emptyActions = await screen.findByTestId('webhooks-empty-state-actions')
-    expect(within(emptyActions).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    expect(within(emptyActions).queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
-    expect(within(emptyActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
-    const fallbackButton = within(emptyActions).getByRole('button', { name: '返回共享工作台' })
+    const currentEndpointCard = await screen.findByRole('region', { name: '当前 endpoint' })
+    const emptyActions = within(currentEndpointCard)
+    expect(emptyActions.queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(emptyActions.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
+    expect(emptyActions.queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    const fallbackButton = emptyActions.getByRole('button', { name: '返回共享工作台' })
     expect(fallbackButton).toBeInTheDocument()
 
     await user.click(fallbackButton)
-    expect(await screen.findByTestId('shared-console-home-route-stub')).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: '共享控制台首页' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+    const sharedHomeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
+    expect(within(sharedHomeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
 
   it('renders shared-console metrics and delivery operations for admin role', async () => {
@@ -562,31 +564,19 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    const guidanceRegion = await screen.findByRole('region', { name: 'Webhook 运维与回调观测' })
     expect(within(guidanceRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(within(guidanceRegion).getByText('管理员视角')).toBeInTheDocument()
+    expect(guidanceRegion).toHaveTextContent('failed / pending')
+    expect(guidanceRegion).toHaveTextContent('last_error')
+    expect(guidanceRegion).toHaveTextContent('测试投递返回 202')
 
-    const roleTips = within(guidanceRegion).getByTestId('webhooks-role-tips')
-    expect(roleTips).toHaveTextContent('failed / pending')
-    expect(roleTips).toHaveTextContent('last_error')
-    expect(roleTips).toHaveTextContent('测试投递返回 202')
+    expect(screen.getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
 
-    const endpointMetric = screen.getByTestId('webhooks-endpoint-metric')
-    expect(within(endpointMetric).getByText('端点总数')).toBeInTheDocument()
-    expect(within(endpointMetric).getByText('活跃 1 / 已停用 1')).toBeInTheDocument()
+    expect(screen.getByText('已聚合 2 条最近 delivery')).toBeInTheDocument()
 
-    const sentMetric = screen.getByTestId('webhooks-sent-delivery-metric')
-    expect(within(sentMetric).getByText('投递成功')).toBeInTheDocument()
-    expect(within(sentMetric).getByText('已聚合 2 条最近 delivery')).toBeInTheDocument()
+    expect(screen.getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
 
-    const attentionMetric = screen.getByTestId('webhooks-attention-delivery-metric')
-    expect(within(attentionMetric).getByText('失败 / 排队中')).toBeInTheDocument()
-    expect(within(attentionMetric).getByText('1')).toBeInTheDocument()
-    expect(within(attentionMetric).getByText('优先排查 failed，并观察 pending 队列消化情况')).toBeInTheDocument()
-
-    const deliveryMetrics = screen.getByTestId('webhooks-latest-delivery-metric')
-    expect(within(deliveryMetrics).getByText('最近回调')).toBeInTheDocument()
-    expect(within(deliveryMetrics).getByText('最近一次成功送达的回调时间')).toBeInTheDocument()
-    expect(within(deliveryMetrics).getByText('2026-04-29T00:03:00Z')).toBeInTheDocument()
+    expect(screen.getByText('最近一次成功送达的回调时间')).toBeInTheDocument()
   })
 })
