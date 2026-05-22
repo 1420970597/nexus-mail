@@ -173,12 +173,21 @@ describe('SettingsPage', () => {
     const continueScope = within(continueLane)
     expect(continueScope.getByRole('heading', { name: '继续当前角色主路径' })).toBeInTheDocument()
     expect(continueScope.getByText('根据当前服务端角色与实际菜单，继续进入下一步工作区，而不是退回泛化的共享首页提示。')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-projects')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-orders')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-api-keys')).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /前往项目市场/ })).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /查看订单中心/ })).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+
+    const projectsStep = within(continueLane).getByRole('region', { name: '项目市场' })
+    expect(within(projectsStep).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
+    expect(within(projectsStep).getByRole('button', { name: /前往项目市场/ })).toBeInTheDocument()
+
+    const ordersStep = within(continueLane).getByRole('region', { name: '订单中心' })
+    expect(within(ordersStep).getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
+    expect(within(ordersStep).getByRole('button', { name: /查看订单中心/ })).toBeInTheDocument()
+
+    const apiKeysStep = within(continueLane).getByRole('region', { name: '开发者 API 接入工作台' })
+    expect(within(apiKeysStep).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(apiKeysStep).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+
+    expect(within(continueLane).queryByRole('region', { name: '供应商资源' })).not.toBeInTheDocument()
+    expect(within(continueLane).queryByRole('region', { name: '风控中心' })).not.toBeInTheDocument()
     expect(continueScope.queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(continueScope.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
   })
@@ -203,12 +212,21 @@ describe('SettingsPage', () => {
 
     const continueLane = await screen.findByRole('region', { name: '继续当前角色主路径' })
     const continueScope = within(continueLane)
-    expect(continueScope.getByTestId('settings-continue-console-step-supplier-domains')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-supplier-resources')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-supplier-settlements')).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /前往域名管理/ })).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /前往供应商结算/ })).toBeInTheDocument()
+
+    const supplierDomainsStep = within(continueLane).getByRole('region', { name: '域名池运营中枢' })
+    expect(within(supplierDomainsStep).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    expect(within(supplierDomainsStep).getByRole('button', { name: /前往域名管理/ })).toBeInTheDocument()
+
+    const supplierResourcesStep = within(continueLane).getByRole('region', { name: '供应商资源' })
+    expect(within(supplierResourcesStep).getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
+    expect(within(supplierResourcesStep).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
+
+    const supplierSettlementsStep = within(continueLane).getByRole('region', { name: '供应商资金与争议指挥台' })
+    expect(within(supplierSettlementsStep).getByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
+    expect(within(supplierSettlementsStep).getByRole('button', { name: /前往供应商结算/ })).toBeInTheDocument()
+
+    expect(within(continueLane).queryByRole('region', { name: '项目市场' })).not.toBeInTheDocument()
+    expect(within(continueLane).queryByRole('region', { name: '风控中心' })).not.toBeInTheDocument()
     expect(continueScope.queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
     expect(continueScope.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
   })
@@ -234,12 +252,21 @@ describe('SettingsPage', () => {
 
     const continueLane = await screen.findByRole('region', { name: '继续当前角色主路径' })
     const continueScope = within(continueLane)
-    expect(continueScope.getByTestId('settings-continue-console-step-admin-suppliers')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-admin-risk')).toBeInTheDocument()
-    expect(continueScope.getByTestId('settings-continue-console-step-admin-audit')).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /前往供应商管理/ })).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /查看风控中心/ })).toBeInTheDocument()
-    expect(continueScope.getByRole('button', { name: /查看审计日志/ })).toBeInTheDocument()
+
+    const adminSuppliersStep = within(continueLane).getByRole('region', { name: '供应商管理' })
+    expect(within(adminSuppliersStep).getByRole('heading', { name: '供应商管理' })).toBeInTheDocument()
+    expect(within(adminSuppliersStep).getByRole('button', { name: /前往供应商管理/ })).toBeInTheDocument()
+
+    const adminRiskStep = within(continueLane).getByRole('region', { name: '风控中心' })
+    expect(within(adminRiskStep).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    expect(within(adminRiskStep).getByRole('button', { name: /查看风控中心/ })).toBeInTheDocument()
+
+    const adminAuditStep = within(continueLane).getByRole('region', { name: '审计日志' })
+    expect(within(adminAuditStep).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
+    expect(within(adminAuditStep).getByRole('button', { name: /查看审计日志/ })).toBeInTheDocument()
+
+    expect(within(continueLane).queryByRole('region', { name: '项目市场' })).not.toBeInTheDocument()
+    expect(within(continueLane).queryByRole('region', { name: '供应商资源' })).not.toBeInTheDocument()
     expect(continueScope.queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
     expect(continueScope.queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
   })

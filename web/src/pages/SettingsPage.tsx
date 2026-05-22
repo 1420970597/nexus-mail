@@ -543,6 +543,8 @@ export function SettingsPage() {
                 <Col xs={24} md={8} key={step.key}>
                   <Card
                     data-testid={`settings-continue-console-step-${step.key}`}
+                    role="region"
+                    aria-labelledby={`settings-continue-console-step-${step.key}-heading`}
                     style={{
                       height: '100%',
                       borderRadius: 18,
@@ -553,7 +555,7 @@ export function SettingsPage() {
                   >
                     <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                       <Tag color="grey">{step.badge}</Tag>
-                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{step.title}</Typography.Title>
+                      <Typography.Title heading={5} id={`settings-continue-console-step-${step.key}-heading`} style={{ margin: 0, color: '#f8fafc' }}>{step.title}</Typography.Title>
                       <Typography.Text strong style={{ color: '#dbeafe' }}>{step.label}</Typography.Text>
                       <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
                         {step.description}
