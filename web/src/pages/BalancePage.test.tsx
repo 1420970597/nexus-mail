@@ -156,15 +156,12 @@ describe('BalancePage', () => {
   it('renders balance hero, mission, and capability regions for regular users', async () => {
     renderBalancePage()
 
-    const heading = await screen.findByRole('heading', { name: '余额中心' })
-    expect(heading).toBeInTheDocument()
-
-    const hero = screen.getByTestId('balance-hero-card')
+    const hero = await screen.findByRole('region', { name: '余额中心' })
     expect(within(hero).getByText('余额任务总览')).toBeInTheDocument()
     expect(within(hero).getByText('资金工作台已与共享控制台深色壳对齐：先确认余额与预算，再回到订单、API Keys、Webhook 与 API 文档完成业务闭环。')).toBeInTheDocument()
 
-    const missionCards = screen.getByTestId('balance-mission-cards')
-    expect(within(missionCards).getByText('资金任务流')).toBeInTheDocument()
+    const missionCards = screen.getByRole('region', { name: '资金任务流' })
+    expect(within(missionCards).getByRole('heading', { name: '资金任务流' })).toBeInTheDocument()
     expect(within(missionCards).getByText('先确认采购预算与库存')).toBeInTheDocument()
     expect(within(missionCards).getByText('再追踪冻结与退款链路')).toBeInTheDocument()
     expect(within(missionCards).getByText('最后串联接入与回调')).toBeInTheDocument()
@@ -188,8 +185,8 @@ describe('BalancePage', () => {
     expect(within(capabilityBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(within(capabilityBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
 
-    const disputesCard = screen.getByTestId('balance-session-disputes-card')
-    expect(within(disputesCard).getByText('本次会话新提交的争议')).toBeInTheDocument()
+    const disputesCard = screen.getByRole('region', { name: '本次会话新提交的争议' })
+    expect(within(disputesCard).getByRole('heading', { name: '本次会话新提交的争议' })).toBeInTheDocument()
   })
 
 
@@ -198,51 +195,42 @@ describe('BalancePage', () => {
 
     let view = renderBalancePage()
 
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
-
-    const missionCards = await screen.findByTestId('balance-mission-cards')
+    const missionCards = await screen.findByRole('region', { name: '资金任务流' })
     await user.click(within(missionCards).getByRole('button', { name: /前往项目市场/ }))
     expect(await screen.findByRole('region', { name: '共享控制台 - 项目市场' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    const refreshedMissionCards = await screen.findByTestId('balance-mission-cards')
-    const ordersMissionCard = within(refreshedMissionCards).getByTestId('balance-orders-mission-card')
-    await user.click(within(ordersMissionCard).getByRole('button', { name: /查看订单中心/ }))
+    const refreshedMissionCards = await screen.findByRole('region', { name: '资金任务流' })
+    await user.click(within(refreshedMissionCards).getByRole('button', { name: /查看订单中心/ }))
     expect(await screen.findByRole('region', { name: '共享控制台 - 订单中心' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    const firstCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
-    await user.click(within(firstCapabilityBridge).getByTestId('balance-open-api-keys'))
+    const firstCapabilityBridge = await screen.findByRole('region', { name: '共享接入桥接' })
+    await user.click(within(firstCapabilityBridge).getByRole('button', { name: /打开 API Keys/ }))
     expect(await screen.findByRole('region', { name: '共享控制台 - API Keys' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    const secondCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
-    const secondCapabilityActions = within(secondCapabilityBridge).getByTestId('balance-capability-actions')
-    expect(within(secondCapabilityActions).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
-    await user.click(within(secondCapabilityActions).getByTestId('balance-open-webhooks'))
+    const secondCapabilityBridge = await screen.findByRole('region', { name: '共享接入桥接' })
+    expect(within(secondCapabilityBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    await user.click(within(secondCapabilityBridge).getByRole('button', { name: /继续配置 Webhook/ }))
     expect(await screen.findByRole('region', { name: '共享控制台 - Webhooks' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
 
     view.unmount()
     view = renderBalancePage()
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
 
-    const thirdCapabilityBridge = await screen.findByTestId('balance-shared-console-bridge')
-    const thirdCapabilityActions = within(thirdCapabilityBridge).getByTestId('balance-capability-actions')
-    expect(within(thirdCapabilityActions).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
-    await user.click(within(thirdCapabilityActions).getByTestId('balance-open-docs'))
+    const thirdCapabilityBridge = await screen.findByRole('region', { name: '共享接入桥接' })
+    expect(within(thirdCapabilityBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
+    await user.click(within(thirdCapabilityBridge).getByRole('button', { name: /查看 API 文档/ }))
     expect(await screen.findByRole('region', { name: '共享控制台 - API 文档' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
@@ -267,17 +255,17 @@ describe('BalancePage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
-    const missionCards = screen.getByTestId('balance-mission-cards')
+    expect(await screen.findByRole('region', { name: '余额中心' })).toBeInTheDocument()
+    const missionCards = screen.getByRole('region', { name: '资金任务流' })
     expect(within(missionCards).queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
     expect(within(missionCards).queryByRole('button', { name: '查看订单中心' })).not.toBeInTheDocument()
     expect(within(missionCards).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    const capabilityActions = screen.getByTestId('balance-capability-actions')
-    expect(within(capabilityActions).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    expect(within(capabilityActions).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
-    expect(within(capabilityActions).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
-    const fallback = screen.getByTestId('balance-shared-console-fallback')
-    expect(within(fallback).getByText('共享控制台回退')).toBeInTheDocument()
+    const capabilityBridge = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(within(capabilityBridge).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
+    expect(within(capabilityBridge).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
+    expect(within(capabilityBridge).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
+    const fallback = screen.getByRole('region', { name: '共享控制台回退' })
+    expect(within(fallback).getByRole('heading', { name: '共享控制台回退' })).toBeInTheDocument()
     expect(within(fallback).getByText('当前资金页已是唯一可见业务工作台')).toBeInTheDocument()
     expect(within(fallback).getByText('当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到共享工作台继续查看当前角色仍可访问的主链路。')).toBeInTheDocument()
     expect(within(fallback).getByRole('button', { name: /返回共享工作台/ })).toBeInTheDocument()
@@ -289,7 +277,7 @@ describe('BalancePage', () => {
     renderBalancePage()
 
     expect(await screen.findByRole('heading', { name: '余额中心' })).toBeInTheDocument()
-    expect(screen.queryByTestId('balance-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '共享控制台回退' })).not.toBeInTheDocument()
   })
 
   it('supports topup and dispute submission flows', async () => {

@@ -209,6 +209,8 @@ export function BalancePage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="balance-hero-card"
+        role="region"
+        aria-labelledby="balance-hero-heading"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -221,7 +223,7 @@ export function BalancePage() {
         <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
           <Tag color="cyan" shape="circle">余额任务总览</Tag>
           <div>
-            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>余额中心</Typography.Title>
+            <Typography.Title id="balance-hero-heading" heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>余额中心</Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
               在共享控制台中统一查看可用余额、冻结金额与待结算状态，让资金观察、充值与售后动作不再依赖额外后台。
             </Typography.Paragraph>
@@ -251,7 +253,9 @@ export function BalancePage() {
         <Col xs={24} xl={16}>
           <Card
             data-testid="balance-mission-cards"
-            title={<span style={{ color: '#f7f8f8' }}>资金任务流</span>}
+            role="region"
+            aria-labelledby="balance-mission-cards-heading"
+            title={<Typography.Title heading={6} id="balance-mission-cards-heading" style={{ margin: 0, color: '#f7f8f8' }}>资金任务流</Typography.Title>}
             style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
           >
@@ -292,12 +296,15 @@ export function BalancePage() {
             ) : canShowFallback ? (
               <Card
                 data-testid="balance-shared-console-fallback"
+                role="region"
+                aria-labelledby="balance-shared-console-fallback-heading"
                 style={{ width: '100%', borderRadius: 20, background: 'rgba(15, 23, 42, 0.72)', border: '1px solid rgba(148,163,184,0.16)' }}
                 bodyStyle={{ padding: 20 }}
               >
                 <Space vertical align="start" spacing={12}>
                   <Tag color="blue">共享控制台回退</Tag>
-                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>当前资金页已是唯一可见业务工作台</Typography.Title>
+                  <Typography.Title id="balance-shared-console-fallback-heading" heading={5} style={{ margin: 0, color: '#f8fafc' }}>共享控制台回退</Typography.Title>
+                  <Typography.Text strong style={{ color: '#f8fafc' }}>当前资金页已是唯一可见业务工作台</Typography.Text>
                   <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.76)', maxWidth: 720 }}>
                     当服务端暂未暴露采购、订单或接入入口时，保持留在同一套共享控制台，并回到共享工作台继续查看当前角色仍可访问的主链路。
                   </Typography.Paragraph>
@@ -412,7 +419,7 @@ export function BalancePage() {
         </Col>
       </Row>
 
-      <Card title="本次会话新提交的争议" data-testid="balance-session-disputes-card" style={{ width: '100%', borderRadius: 24 }}>
+      <Card role="region" aria-labelledby="balance-session-disputes-heading" title={<Typography.Title id="balance-session-disputes-heading" heading={6} style={{ margin: 0 }}>本次会话新提交的争议</Typography.Title>} data-testid="balance-session-disputes-card" style={{ width: '100%', borderRadius: 24 }}>
         <Table
           pagination={false}
           rowKey="id"
