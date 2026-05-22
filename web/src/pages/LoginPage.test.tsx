@@ -191,8 +191,12 @@ describe('LoginPage', () => {
     const loginButton = within(modeSwitch).getByRole('tab', { name: '登录' })
     const registerButton = within(modeSwitch).getByRole('tab', { name: '注册' })
     expect(loginButton).toHaveAttribute('aria-selected', 'true')
+    expect(loginButton).toHaveAttribute('aria-controls', 'login-auth-panel')
     expect(registerButton).toHaveAttribute('aria-selected', 'false')
-    expect(within(authShell).getByTestId('login-auth-guidance-banner')).toBeInTheDocument()
+    expect(registerButton).toHaveAttribute('aria-controls', 'login-auth-panel')
+    expect(within(authShell).getByRole('tabpanel')).toHaveAttribute('id', 'login-auth-panel')
+    expect(within(authShell).getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'login-auth-tab-login')
+    expect(within(authShell).getByRole('tabpanel', { name: '登录' })).toBeInTheDocument()
 
     const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
     const registerJourneyScope = within(registerJourneyRegion)
@@ -253,26 +257,19 @@ describe('LoginPage', () => {
     expect(loginCopyScope.queryByRole('heading', { name: '创建账号并进入统一控制台' })).not.toBeInTheDocument()
     expect(loginCopyScope.queryByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).not.toBeInTheDocument()
 
-    const loginBannerRegion = within(authShell).getByRole('region', { name: '登录模式提示' })
-    const loginBannerScope = within(loginBannerRegion)
-    expect(loginBannerScope.getByRole('heading', { name: '登录模式提示' })).toBeInTheDocument()
-    expect(loginBannerScope.getByText('已有账号可直接进入共享控制台，继续同一套工作区。')).toBeInTheDocument()
-
     const modeSwitch = within(authShell).getByTestId('login-auth-mode-switch')
     await user.click(within(modeSwitch).getByRole('tab', { name: '注册' }))
+
+    expect(within(modeSwitch).getByRole('tab', { name: '登录' })).toHaveAttribute('aria-selected', 'false')
+    expect(within(modeSwitch).getByRole('tab', { name: '注册' })).toHaveAttribute('aria-selected', 'true')
+    expect(within(authShell).getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'login-auth-tab-register')
 
     const registerCopyRegion = within(screen.getByTestId('login-auth-shell')).getByRole('region', { name: '注册认证说明' })
     const registerCopyScope = within(registerCopyRegion)
     expect(registerCopyScope.getByRole('heading', { name: '创建账号并进入统一控制台' })).toBeInTheDocument()
-    expect(registerCopyScope.getByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).toBeInTheDocument()
+    expect(registerCopyScope.getByText('注册后直接进入共享控制台，后续菜单与页面能力按角色开放。')).toBeInTheDocument()
     expect(registerCopyScope.queryByRole('heading', { name: '登录并进入统一控制台' })).not.toBeInTheDocument()
     expect(registerCopyScope.queryByText('登录后按角色展开工作区，继续同一套导航。')).not.toBeInTheDocument()
-
-    const registerBannerRegion = screen.getByRole('region', { name: '注册模式提示' })
-    const registerBannerScope = within(registerBannerRegion)
-    expect(registerBannerScope.getByRole('heading', { name: '注册模式提示' })).toBeInTheDocument()
-    expect(registerBannerScope.getByText('注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。')).toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: '登录模式提示' })).not.toBeInTheDocument()
   })
 
   it('opens register mode from the shared-console registration journey CTA and keeps the runway CTA scoped to the journey region', async () => {

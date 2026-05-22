@@ -219,8 +219,8 @@ describe('App', () => {
   it('renders the login shell when unauthenticated', async () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp([DEFAULT_LOGIN_ROUTE])
-    expect(await screen.findByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
   })
 
   it('clears local session on bootstrap failure without revoking refresh session server-side', async () => {
@@ -229,7 +229,7 @@ describe('App', () => {
 
     renderApp(['/'])
 
-    expect(await screen.findByRole('heading', { name: '登录并进入统一控制台' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '统一登录后控制台' })).toBeInTheDocument()
 
     expect(authService.logoutSession).not.toHaveBeenCalled()
     expect(useAuthStore.getState()).toMatchObject({

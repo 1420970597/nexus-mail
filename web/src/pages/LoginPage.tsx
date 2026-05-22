@@ -17,7 +17,7 @@ const modeCopy: Record<AuthMode, { title: string; button: string; helper: string
   register: {
     title: '创建账号并进入统一控制台',
     button: '注册并进入统一控制台',
-    helper: '注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。',
+    helper: '注册后直接进入共享控制台，后续菜单与页面能力按角色开放。',
   },
 }
 
@@ -548,8 +548,10 @@ export function LoginPage() {
                   }}
                 >
                   <Button
+                    id="login-auth-tab-login"
                     role="tab"
                     aria-selected={mode === 'login'}
+                    aria-controls="login-auth-panel"
                     theme={mode === 'login' ? 'solid' : 'borderless'}
                     type={mode === 'login' ? 'primary' : 'tertiary'}
                     style={
@@ -570,8 +572,10 @@ export function LoginPage() {
                     登录
                   </Button>
                   <Button
+                    id="login-auth-tab-register"
                     role="tab"
                     aria-selected={mode === 'register'}
+                    aria-controls="login-auth-panel"
                     theme={mode === 'register' ? 'solid' : 'borderless'}
                     type={mode === 'register' ? 'primary' : 'tertiary'}
                     style={
@@ -593,7 +597,13 @@ export function LoginPage() {
                   </Button>
                 </div>
 
-                <style>{`
+                <div
+                  id="login-auth-panel"
+                  role="tabpanel"
+                  aria-labelledby={mode === 'login' ? 'login-auth-tab-login' : 'login-auth-tab-register'}
+                  style={{ width: '100%' }}
+                >
+                  <style>{`
                   .login-auth-form-surface .semi-form-field-label,
                   .login-auth-form-surface .semi-form-field-label-text,
                   .login-auth-form-surface .semi-form-field-label-required {
@@ -633,115 +643,47 @@ export function LoginPage() {
                   }
                 `}</style>
 
-                {mode === 'login' ? (
-                  <div
-                    data-testid="login-auth-guidance-banner"
-                    role="region"
-                    aria-labelledby="login-auth-guidance-heading"
-                    style={{ width: '100%' }}
-                  >
-                    <Banner
-                      className="login-auth-banner-surface"
-                      type="info"
-                      fullMode={false}
-                      closeIcon={null}
-                      description={
-                        <div>
-                          <Typography.Title
-                            heading={6}
-                            id="login-auth-guidance-heading"
-                            style={{ margin: '0 0 6px', color: '#f7f8f8' }}
-                          >
-                            登录模式提示
-                          </Typography.Title>
-                          <Typography.Paragraph style={{ margin: 0, color: '#e2e8f0', lineHeight: 1.58 }}>
-                            已有账号可直接进入共享控制台，继续同一套工作区。
-                          </Typography.Paragraph>
-                        </div>
-                      }
-                      style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        color: '#e2e8f0',
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    data-testid="login-auth-guidance-banner"
-                    role="region"
-                    aria-labelledby="login-auth-guidance-heading"
-                    style={{ width: '100%' }}
-                  >
-                    <Banner
-                      className="login-auth-banner-surface"
-                      type="success"
-                      fullMode={false}
-                      closeIcon={null}
-                      description={
-                        <div>
-                          <Typography.Title
-                            heading={6}
-                            id="login-auth-guidance-heading"
-                            style={{ margin: '0 0 6px', color: '#f7f8f8' }}
-                          >
-                            注册模式提示
-                          </Typography.Title>
-                          <Typography.Paragraph style={{ margin: 0, color: '#e2e8f0', lineHeight: 1.58 }}>
-                            注册后直接进入共享控制台，你可以继续前往项目市场、订单中心与 API Keys。
-                          </Typography.Paragraph>
-                        </div>
-                      }
-                      style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        color: '#e2e8f0',
-                      }}
-                    />
-                  </div>
-                )}
-
                 <Form onSubmit={onSubmit} labelPosition="top" style={{ width: '100%' }} className="login-auth-form-surface">
-                  <Form.Input
-                    field="email"
-                    label="邮箱"
-                    placeholder="name@example.com"
-                    rules={[{ required: true, message: '请输入邮箱' }]}
-                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
-                    inputStyle={{ color: '#f7f8f8' }}
-                  />
-                  <Form.Input
-                    field="password"
-                    label="密码"
-                    mode="password"
-                    placeholder={mode === 'login' ? '请输入密码' : '至少 8 位密码'}
-                    rules={[{ required: true, message: '请输入密码' }]}
-                    fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
-                    inputStyle={{ color: '#f7f8f8' }}
-                  />
-                  {mode === 'register' ? (
                     <Form.Input
-                      field="confirm_password"
-                      label="确认密码"
-                      mode="password"
-                      placeholder="再次输入密码"
-                      rules={[{ required: true, message: '请再次输入密码' }]}
+                      field="email"
+                      label="邮箱"
+                      placeholder="name@example.com"
+                      rules={[{ required: true, message: '请输入邮箱' }]}
                       fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
                       inputStyle={{ color: '#f7f8f8' }}
                     />
-                  ) : null}
-                  {error ? <Typography.Text type="danger">{error}</Typography.Text> : null}
-                  <Button htmlType="submit" theme="solid" type="primary" loading={loading} style={{ marginTop: 12, width: '100%', height: 44, borderRadius: 12, background: '#5e6ad2', border: '1px solid rgba(130, 143, 255, 0.92)', boxShadow: '0 12px 28px rgba(94,106,210,0.24)' }}>
-                    {copy.button}
-                  </Button>
-                </Form>
+                    <Form.Input
+                      field="password"
+                      label="密码"
+                      mode="password"
+                      placeholder={mode === 'login' ? '请输入密码' : '至少 8 位密码'}
+                      rules={[{ required: true, message: '请输入密码' }]}
+                      fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
+                      inputStyle={{ color: '#f7f8f8' }}
+                    />
+                    {mode === 'register' ? (
+                      <Form.Input
+                        field="confirm_password"
+                        label="确认密码"
+                        mode="password"
+                        placeholder="再次输入密码"
+                        rules={[{ required: true, message: '请再次输入密码' }]}
+                        fieldStyle={{ background: 'rgba(255,255,255,0.035)', borderColor: 'rgba(255,255,255,0.08)' }}
+                        inputStyle={{ color: '#f7f8f8' }}
+                      />
+                    ) : null}
+                    {error ? <Typography.Text type="danger">{error}</Typography.Text> : null}
+                    <Button htmlType="submit" theme="solid" type="primary" loading={loading} style={{ marginTop: 12, width: '100%', height: 44, borderRadius: 12, background: '#5e6ad2', border: '1px solid rgba(130, 143, 255, 0.92)', boxShadow: '0 12px 28px rgba(94,106,210,0.24)' }}>
+                      {copy.button}
+                    </Button>
+                  </Form>
 
-                <Divider margin="12px" />
-                <Typography.Text type="tertiary" className="login-auth-footer-copy">
-                  登录后进入同一套控制台布局；菜单与页面能力由角色控制，而不是拆分多个独立后台。
-                </Typography.Text>
+                  <Divider margin="12px" />
+                  <Typography.Text type="tertiary" className="login-auth-footer-copy">
+                    登录后进入同一套控制台布局；菜单与页面能力由角色控制，而不是拆分多个独立后台。
+                  </Typography.Text>
+                </div>
+
               </Space>
             </Card>
           </Col>
