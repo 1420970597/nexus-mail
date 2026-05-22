@@ -332,7 +332,7 @@ describe('SupplierSettlementsPage', () => {
 
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
 
-    const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商资金任务流' })
     await user.click(within(missionFlow).getByRole('button', { name: /查看供应商资源/ }))
     const resourcesRegion = await screen.findByRole('region', { name: '共享控制台 - 供应商资源' })
     expect(within(resourcesRegion).getByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
@@ -340,14 +340,14 @@ describe('SupplierSettlementsPage', () => {
     view.unmount()
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /继续维护供货规则/ }))
+    await user.click(within(screen.getByRole('region', { name: '供应商资金任务流' })).getByRole('button', { name: /继续维护供货规则/ }))
     const offeringsRegion = await screen.findByRole('region', { name: '共享控制台 - 供货规则编排中枢' })
     expect(within(offeringsRegion).getByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierSettlementsPage()
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-settlements-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
+    await user.click(within(screen.getByRole('region', { name: '供应商资金任务流' })).getByRole('button', { name: /打开 API Keys/ }))
     const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
@@ -369,7 +369,7 @@ describe('SupplierSettlementsPage', () => {
     renderSupplierSettlementsPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商资金任务流' })
     expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
     expect(within(missionFlow).getByRole('button', { name: /继续维护供货规则/ })).toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
