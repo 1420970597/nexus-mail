@@ -117,8 +117,8 @@ describe('ProfilePage', () => {
     expect(heroCard).toHaveTextContent('统一账号、会话与下一步入口都留在同一深色共享控制台。')
     expect(heroCard).not.toHaveTextContent('账号身份、会话边界与下一步操作都在同一套深色共享控制台内完成，不额外拆出角色后台。')
 
-    const roleFocusCard = screen.getByTestId('profile-role-focus-card')
-    expect(within(roleFocusCard).getByText('用户接入焦点')).toBeInTheDocument()
+    const roleFocusCard = screen.getByRole('region', { name: '用户接入焦点' })
+    expect(within(roleFocusCard).getByRole('heading', { name: '用户接入焦点' })).toBeInTheDocument()
     expect(roleFocusCard).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
     expect(within(roleFocusCard).getByRole('heading', { name: '采购与订单串联' })).toBeInTheDocument()
     expect(within(roleFocusCard).getByRole('heading', { name: '集成准备' })).toBeInTheDocument()
@@ -144,8 +144,8 @@ describe('ProfilePage', () => {
     expect(capabilityMatrix).toHaveTextContent('共享接入桥接')
     expect(capabilityMatrix).toHaveTextContent('角色菜单扩展')
 
-    const roleExpansionCard = screen.getByTestId('profile-role-expansion-card')
-    expect(roleExpansionCard).toHaveTextContent('共享账号中枢')
+    const roleExpansionCard = screen.getByRole('region', { name: '角色扩展说明' })
+    expect(within(roleExpansionCard).getByRole('heading', { name: '角色扩展说明' })).toBeInTheDocument()
     expect(roleExpansionCard).not.toHaveTextContent('深色共享账号中枢')
     expect(roleExpansionCard).toHaveTextContent('最小权限')
     expect(roleExpansionCard).toHaveTextContent('Webhook / API')

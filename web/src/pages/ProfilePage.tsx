@@ -271,8 +271,9 @@ export function ProfilePage() {
         </Col>
         <Col xs={24} xl={14}>
           <Card
+            role="region"
+            aria-labelledby="profile-role-focus-heading"
             data-testid="profile-role-focus-card"
-            title={<span style={{ color: '#f8fafc' }}>{profileScene.title}</span>}
             style={{
               width: '100%',
               borderRadius: 24,
@@ -282,6 +283,9 @@ export function ProfilePage() {
             bodyStyle={{ padding: 24 }}
           >
             <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+              <Typography.Title heading={5} id="profile-role-focus-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                {profileScene.title}
+              </Typography.Title>
               {profileScene.focuses.map((item) => (
                 <Card
                   key={item.title}
@@ -354,12 +358,16 @@ export function ProfilePage() {
         </Col>
         <Col xs={24} xl={9}>
           <Card
+            role="region"
+            aria-labelledby="profile-role-expansion-heading"
             data-testid="profile-role-expansion-card"
-            title={<span style={{ color: '#f8fafc' }}>角色扩展说明</span>}
             style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
             bodyStyle={{ padding: 20 }}
           >
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+              <Typography.Title heading={5} id="profile-role-expansion-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                角色扩展说明
+              </Typography.Title>
               <Tag color="grey" prefixIcon={<IconServer />}>{user?.role === 'admin' ? '管理员角色扩展' : user?.role === 'supplier' ? '供应商角色扩展' : '共享账号中枢'}</Tag>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.78)' }}>
                 {user?.role === 'admin'
