@@ -115,14 +115,13 @@ describe('AdminRiskPage', () => {
     mockedUpdateAdminRiskRules.mockImplementation(async (items) => ({ items }))
   })
 
-  it('renders risk mission control shell with shared-console guidance and CTA bridge contracts', async () => {
+  it('renders risk mission control shell with named hero, mission-flow, and bridge regions plus scoped overview contracts', async () => {
     renderAdminRiskPage()
 
-    expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('admin-risk-hero-card')
-    expect(within(heroCard).getByText('风控中枢')).toBeInTheDocument()
-    expect(screen.getByText('风控中心')).toBeInTheDocument()
-    expect(screen.getByText(/将真实风险信号、规则编辑、审计回放与高危运营处置统一收敛/)).toBeInTheDocument()
+    const heroRegion = await screen.findByRole('region', { name: '风控中心' })
+    expect(within(heroRegion).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+    expect(within(heroRegion).getByText('风控中枢')).toBeInTheDocument()
+    expect(within(heroRegion).getByText(/将真实风险信号、规则编辑、审计回放与高危运营处置统一收敛/)).toBeInTheDocument()
 
     const missionSignals = screen.getByTestId('admin-risk-mission-signals')
     expect(within(missionSignals).getByText('高风险信号')).toBeInTheDocument()
@@ -131,8 +130,8 @@ describe('AdminRiskPage', () => {
     expect(within(missionSignals).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(missionSignals).queryByText('共享控制台联动')).not.toBeInTheDocument()
 
-    const missionFlow = screen.getByTestId('admin-risk-mission-flow')
-    expect(within(missionFlow).getByText('管理员主任务流')).toBeInTheDocument()
+    const missionFlow = screen.getByRole('region', { name: '管理员主任务流' })
+    expect(within(missionFlow).getByRole('heading', { name: '管理员主任务流' })).toBeInTheDocument()
 
     const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     const bridgeLinks = screen.getByTestId('admin-risk-shared-console-links')
@@ -192,7 +191,7 @@ describe('AdminRiskPage', () => {
 
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
 
-    const missionFlow = screen.getByTestId('admin-risk-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '管理员主任务流' })
     await user.click(within(missionFlow).getByRole('button', { name: '查看审计日志' }))
     const auditRouteStub = await screen.findByRole('region', { name: '共享控制台 - 审计日志' })
     expect(within(auditRouteStub).getByRole('heading', { name: '审计日志' })).toBeInTheDocument()
@@ -200,7 +199,7 @@ describe('AdminRiskPage', () => {
     view.unmount()
     view = renderAdminRiskPage()
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
-    const refreshedMissionFlow = screen.getByTestId('admin-risk-mission-flow')
+    const refreshedMissionFlow = screen.getByRole('region', { name: '管理员主任务流' })
     await user.click(within(refreshedMissionFlow).getByRole('button', { name: '打开资金工作台' }))
     const usersRouteStub = await screen.findByRole('region', { name: '共享控制台 - 用户管理' })
     expect(within(usersRouteStub).getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
@@ -208,13 +207,13 @@ describe('AdminRiskPage', () => {
     view.unmount()
     renderAdminRiskPage()
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
-    const finalMissionFlow = screen.getByTestId('admin-risk-mission-flow')
+    const finalMissionFlow = screen.getByRole('region', { name: '管理员主任务流' })
     await user.click(within(finalMissionFlow).getByRole('button', { name: '打开 API Keys' }))
-    const apiKeysRouteStub = await screen.findByTestId('admin-risk-route-stub-api-keys')
+    const apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
   })
 
-  it('suppresses unavailable shared-console CTAs and shows a fallback slice back to the preferred workspace', async () => {
+  it('suppresses unavailable shared-console CTAs and shows a named fallback slice back to the preferred workspace', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({
       token: 'token',
@@ -229,7 +228,7 @@ describe('AdminRiskPage', () => {
     renderAdminRiskPage()
 
     expect(await screen.findByRole('heading', { name: '风控中心' })).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('admin-risk-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '管理员主任务流' })
     expect(within(missionFlow).queryByRole('button', { name: '查看审计日志' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
@@ -237,9 +236,8 @@ describe('AdminRiskPage', () => {
     expect(within(bridgeLinks).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
     expect(within(bridgeLinks).queryByRole('button', { name: /继续查看审计/ })).not.toBeInTheDocument()
     expect(within(bridgeLinks).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
-    const fallbackCard = screen.getByTestId('admin-risk-shared-console-fallback')
-    expect(fallbackCard).toBeInTheDocument()
-    expect(within(fallbackCard).getByText('回到共享工作台继续管理员主链路')).toBeInTheDocument()
+    const fallbackCard = screen.getByRole('region', { name: '回到共享工作台继续管理员主链路' })
+    expect(within(fallbackCard).getByRole('heading', { name: '回到共享工作台继续管理员主链路' })).toBeInTheDocument()
 
     await user.click(within(fallbackCard).getByRole('button', { name: '返回共享工作台' }))
     const dashboardRouteStub = await screen.findByRole('region', { name: '共享控制台首页' })

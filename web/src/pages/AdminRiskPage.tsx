@@ -198,6 +198,8 @@ export function AdminRiskPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="admin-risk-hero-card"
+        role="region"
+        aria-labelledby="admin-risk-hero-heading"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -213,7 +215,7 @@ export function AdminRiskPage() {
           </Tag>
           <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
-              <Typography.Title heading={3} style={{ color: '#f8fafc', marginBottom: 8 }}>
+              <Typography.Title heading={3} id="admin-risk-hero-heading" style={{ color: '#f8fafc', marginBottom: 8 }}>
                 风控中心
               </Typography.Title>
               <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.78)', maxWidth: 860 }}>
@@ -240,7 +242,7 @@ export function AdminRiskPage() {
         </Space>
       </Card>
 
-      <Space wrap style={{ width: '100%' }} spacing={16} data-testid="admin-risk-mission-signals">
+      <Space wrap style={{ width: '100%' }} spacing={16} data-testid="admin-risk-mission-signals" role="region" aria-label="风控摘要信号">
         {missionSignals.map((item) => (
           <Card
             key={item.key}
@@ -266,7 +268,17 @@ export function AdminRiskPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
-          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-risk-mission-flow">
+          <Card
+            role="region"
+            aria-labelledby="admin-risk-mission-flow-heading"
+            style={{ width: '100%', borderRadius: 24 }}
+            data-testid="admin-risk-mission-flow"
+            title={(
+              <Typography.Title heading={5} id="admin-risk-mission-flow-heading" style={{ margin: 0 }}>
+                管理员主任务流
+              </Typography.Title>
+            )}
+          >
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
               {visibleActionLanes.map((item) => (
                 <Card
@@ -354,6 +366,8 @@ export function AdminRiskPage() {
               {!canShowConsoleBridge && shouldShowFallbackCta ? (
                 <Card
                   data-testid="admin-risk-shared-console-fallback"
+                  role="region"
+                  aria-labelledby="admin-risk-shared-console-fallback-heading"
                   style={{
                     width: '100%',
                     borderRadius: 18,
@@ -364,7 +378,7 @@ export function AdminRiskPage() {
                 >
                   <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                     <Tag color="cyan">Fallback</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                    <Typography.Title heading={5} id="admin-risk-shared-console-fallback-heading" style={{ margin: 0, color: '#f8fafc' }}>
                       回到共享工作台继续管理员主链路
                     </Typography.Title>
                     <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
