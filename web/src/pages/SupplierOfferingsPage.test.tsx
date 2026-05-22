@@ -174,7 +174,7 @@ describe('SupplierOfferingsPage', () => {
     expect(within(readyDomainsMetric).getByText('可挂接域名池')).toBeInTheDocument()
     expect(within(readyDomainsMetric).getByText('1')).toBeInTheDocument()
 
-    const missionFlow = screen.getByTestId('supplier-offerings-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商主任务流' })
     expect(within(missionFlow).getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
     expect(within(missionFlow).getByText('资源准备')).toBeInTheDocument()
     expect(within(missionFlow).getByText('结算反馈')).toBeInTheDocument()
@@ -239,7 +239,7 @@ describe('SupplierOfferingsPage', () => {
     view.unmount()
     view = renderSupplierOfferingsPage()
     expect(await screen.findByRole('heading', { name: '供货规则编排中枢' })).toBeInTheDocument()
-    await user.click(within(screen.getByTestId('supplier-offerings-mission-flow')).getByRole('button', { name: /打开 API Keys/ }))
+    await user.click(within(screen.getByRole('region', { name: '供应商主任务流' })).getByRole('button', { name: /打开 API Keys/ }))
     const apiKeysStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(apiKeysStub).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()

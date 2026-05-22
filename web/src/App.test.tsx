@@ -731,7 +731,8 @@ describe('App', () => {
     const profileIdentityCard = await screen.findByTestId('profile-primary-identity-card')
     expect(within(profileIdentityCard).getByText('supplier@nexus-mail.local')).toBeInTheDocument()
     await user.click(within(profileIdentityCard).getByRole('button', { name: '前往域名管理' }))
-    expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
+    const supplierDomainsHero = await screen.findByTestId('supplier-domains-hero-card')
+    expect(within(supplierDomainsHero).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
   })
 
   it('renders supplier dashboard CTA flow and routes into supplier domains', async () => {

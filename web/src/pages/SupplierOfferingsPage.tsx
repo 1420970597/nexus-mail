@@ -299,10 +299,16 @@ export function SupplierOfferingsPage() {
         </Space>
       </Card>
 
-      <Card data-testid="supplier-offerings-mission-flow" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card
+        data-testid="supplier-offerings-mission-flow"
+        role="region"
+        aria-labelledby="supplier-offerings-mission-flow-heading"
+        style={sectionCardStyle()}
+        bodyStyle={{ padding: 24 }}
+      >
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
-            <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
+            <Typography.Title heading={4} id="supplier-offerings-mission-flow-heading" style={{ margin: 0, color: '#f8fafc' }}>
               供应商主任务流
             </Typography.Title>
             <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
