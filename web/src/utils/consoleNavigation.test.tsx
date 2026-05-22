@@ -16,6 +16,7 @@ import {
   ORDERS_ROUTE,
   PROFILE_ROUTE,
   PROJECTS_ROUTE,
+  resolveBootstrapConsoleRoute,
   resolvePreferredConsoleRoute,
   resolveRouteTitle,
   SETTINGS_ROUTE,
@@ -121,6 +122,19 @@ describe('consoleNavigation shared-console contracts', () => {
     expect(resolvePreferredConsoleRoute([{ path: SUPPLIER_RESOURCES_ROUTE }, { path: PROJECTS_ROUTE }], 'supplier')).toBe(PROJECTS_ROUTE)
     expect(resolvePreferredConsoleRoute([{ path: ADMIN_RISK_ROUTE }, { path: DASHBOARD_ROUTE }], 'admin')).toBe(DASHBOARD_ROUTE)
     expect(resolvePreferredConsoleRoute([{ path: '/unknown' }], 'admin')).toBe(DASHBOARD_ROUTE)
+  })
+
+  it('preserves an allowed deep link during bootstrap and otherwise falls back to the dashboard or preferred allowed route', () => {
+    const userMenu = [
+      { key: 'dashboard', label: '仪表盘', path: DASHBOARD_ROUTE },
+      { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+      { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+      { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+    ]
+
+    expect(resolveBootstrapConsoleRoute(API_KEYS_ROUTE, userMenu, 'user')).toBe(API_KEYS_ROUTE)
+    expect(resolveBootstrapConsoleRoute('/missing-route', userMenu, 'user')).toBe(DASHBOARD_ROUTE)
+    expect(resolveBootstrapConsoleRoute('/totally-unknown', [{ path: '/unknown-only' }], 'user')).toBe(DASHBOARD_ROUTE)
   })
 
   it('derives quick actions only from visible menu paths and excludes the current route', () => {

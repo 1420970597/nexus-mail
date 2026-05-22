@@ -325,6 +325,45 @@ describe('App', () => {
     expect(screen.queryByTitle('nexus-mail-api-docs')).not.toBeInTheDocument()
   })
 
+  it('keeps an allowed shared-console deep link after bootstrap instead of forcing a root-only landing redirect', async () => {
+    setSession('user')
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'user@nexus-mail.local', role: 'user' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderApp([API_KEYS_ROUTE])
+
+    const apiKeysHeading = await screen.findByRole('heading', { name: '开发者 API 接入工作台' })
+    expect(apiKeysHeading).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '控制台总览' })).not.toBeInTheDocument()
+  })
+
+  it('redirects an invalid deep link back to the dashboard when the shared home route remains available', async () => {
+    setSession('user')
+    mockedGetCurrentUser.mockResolvedValueOnce({ user: { id: 1, email: 'user@nexus-mail.local', role: 'user' } })
+    mockedGetMenu.mockResolvedValueOnce({
+      role: 'user',
+      items: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+      ],
+    })
+
+    renderApp(['/missing-shared-route'])
+
+    expect(await screen.findByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
+  })
+
   it('shows register journey CTA and opens register mode from the login shell', async () => {
     const user = userEvent.setup()
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })

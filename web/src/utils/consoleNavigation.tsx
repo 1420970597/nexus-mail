@@ -331,6 +331,20 @@ export function resolvePostAuthLandingRoute(menuItems: Array<{ path: string }> =
   return candidates[0]?.path ?? DEFAULT_SHARED_ROUTE
 }
 
+export function resolveBootstrapConsoleRoute(
+  currentPath: string,
+  menuItems: Array<{ path: string }> = [],
+  role?: Role,
+) {
+  if (hasMenuPath(menuItems, currentPath)) {
+    return currentPath
+  }
+
+  return hasMenuPath(menuItems, DEFAULT_SHARED_ROUTE)
+    ? DEFAULT_SHARED_ROUTE
+    : resolvePostAuthLandingRoute(menuItems, role)
+}
+
 export function resolvePreferredConsoleRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
   return resolvePostAuthLandingRoute(menuItems, role)
 }

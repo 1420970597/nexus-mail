@@ -25,7 +25,7 @@ import {
   SUPPLIER_RESOURCES_ROUTE,
   SUPPLIER_SETTLEMENTS_ROUTE,
   WEBHOOKS_ROUTE,
-  resolvePostAuthLandingRoute,
+  resolveBootstrapConsoleRoute,
 } from './utils/consoleNavigation'
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then((module) => ({ default: module.DashboardPage })))
@@ -127,10 +127,10 @@ function Shell() {
         setUser(currentUser.user)
         setMenu(menu.items)
         setBootstrapStatus('ready')
-        if (!redirectedOnceRef.current && menu.role === currentUser.user.role && initialPathRef.current === DEFAULT_SHARED_ROUTE) {
-          const preferredRoute = resolvePostAuthLandingRoute(menu.items, currentUser.user.role)
+        if (!redirectedOnceRef.current && menu.role === currentUser.user.role) {
+          const preferredRoute = resolveBootstrapConsoleRoute(initialPathRef.current, menu.items, currentUser.user.role)
           redirectedOnceRef.current = true
-          if (preferredRoute !== DEFAULT_SHARED_ROUTE) {
+          if (preferredRoute !== initialPathRef.current) {
             navigate(preferredRoute, { replace: true })
           }
         }
