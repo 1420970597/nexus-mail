@@ -449,26 +449,27 @@ export function DashboardPage() {
 
   return (
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
-      <Card
-        data-testid="dashboard-hero-card"
-        style={{
-          width: '100%',
-          borderRadius: 24,
-          background: 'linear-gradient(135deg, rgba(94,106,210,0.18) 0%, rgba(17,24,39,0.9) 58%, rgba(15,16,17,0.96) 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}
-        bodyStyle={{ padding: 24 }}
-      >
-        <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-          <Tag color="cyan" shape="circle">共享控制台入口</Tag>
-          <div>
-            <Typography.Title heading={2} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.6px' }}>
-              控制台总览
-            </Typography.Title>
-            <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.82)', marginBottom: 0, maxWidth: 860, fontSize: 16 }}>
-              登录后先在这里确认实时经营指标、角色可执行动作与关键跳转入口，再继续进入采购、供给、风控、审计与对外集成页面。
-            </Typography.Paragraph>
-          </div>
+      <section role="region" aria-labelledby="dashboard-hero-heading" style={{ width: '100%' }}>
+        <Card
+          data-testid="dashboard-hero-card"
+          style={{
+            width: '100%',
+            borderRadius: 24,
+            background: 'linear-gradient(135deg, rgba(94,106,210,0.18) 0%, rgba(17,24,39,0.9) 58%, rgba(15,16,17,0.96) 100%)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+          bodyStyle={{ padding: 24 }}
+        >
+          <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+            <Tag color="cyan" shape="circle">共享控制台入口</Tag>
+            <div>
+              <Typography.Title id="dashboard-hero-heading" heading={2} style={{ color: '#f7f8f8', marginBottom: 8, letterSpacing: '-0.6px' }}>
+                控制台总览
+              </Typography.Title>
+              <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.82)', marginBottom: 0, maxWidth: 860, fontSize: 16 }}>
+                登录后先在这里确认实时经营指标、角色可执行动作与关键跳转入口，再继续进入采购、供给、风控、审计与对外集成页面。
+              </Typography.Paragraph>
+            </div>
           <Banner
             fullMode={false}
             type="info"
@@ -476,135 +477,151 @@ export function DashboardPage() {
             description={message}
             style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#d0d6e0' }}
           />
-          {user?.role === 'user' && showUserFirstRun ? (
-            <Card
-              style={{
-                width: '100%',
-                borderRadius: 24,
-                background: 'linear-gradient(135deg, rgba(94,106,210,0.24) 0%, rgba(15,23,42,0.96) 54%, rgba(8,9,10,0.98) 100%)',
-                border: '1px solid rgba(125,211,252,0.24)',
-                boxShadow: '0 26px 60px rgba(2, 6, 23, 0.28)',
-              }}
-              bodyStyle={{ padding: 24 }}
-            >
-              <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
-                <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
-                  <Space vertical align="start" spacing={8}>
-                    <Tag color="cyan" shape="circle">首次使用指引</Tag>
-                    <div>
-                      <Typography.Title heading={3} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
-                        欢迎进入共享控制台
-                      </Typography.Title>
-                      <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.82)', margin: 0, maxWidth: 860 }}>
-                        当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。
-                      </Typography.Paragraph>
-                    </div>
-                  </Space>
-                  <Button
-                    data-testid="dashboard-first-run-dismiss"
-                    theme="borderless"
-                    icon={<IconRotate />}
-                    style={{ color: '#d0d6e0' }}
-                    onClick={dismissUserFirstRun}
+          <Row gutter={[16, 16]} style={{ width: '100%' }}>
+            {user?.role === 'user' && showUserFirstRun ? (
+              <Col xs={24}>
+                <section role="region" aria-labelledby="dashboard-first-run-heading" style={{ width: '100%' }}>
+                  <Card
+                    style={{
+                      width: '100%',
+                      borderRadius: 24,
+                      background: 'linear-gradient(135deg, rgba(94,106,210,0.24) 0%, rgba(15,23,42,0.96) 54%, rgba(8,9,10,0.98) 100%)',
+                      border: '1px solid rgba(125,211,252,0.24)',
+                      boxShadow: '0 26px 60px rgba(2, 6, 23, 0.28)',
+                    }}
+                    bodyStyle={{ padding: 24 }}
                   >
-                    稍后再看
-                  </Button>
-                </Space>
-
-                <Row gutter={[16, 16]} style={{ width: '100%' }}>
-                  {firstRunMissionCards.map((card) => (
-                    <Col xs={24} xl={8} key={card.key}>
-                      <Card
-                        data-testid={`dashboard-first-run-mission-card-${card.key}`}
-                        style={{
-                          height: '100%',
-                          borderRadius: 20,
-                          background: 'rgba(255,255,255,0.04)',
-                          border: '1px solid rgba(255,255,255,0.08)',
-                        }}
-                        bodyStyle={{ padding: 18 }}
-                      >
-                        <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                          <Tag color="grey">{card.tag}</Tag>
-                          <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
-                            {card.title}
-                          </Typography.Title>
-                          <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
-                            {card.description}
-                          </Typography.Paragraph>
-                          <Button
-                            type="primary"
-                            theme="solid"
-                            icon={<IconArrowRight />}
-                            onClick={() => navigate(card.path)}
-                            style={{ background: '#5e6ad2', borderRadius: 10 }}
-                          >
-                            {card.button}
-                          </Button>
+                    <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+                      <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+                        <Space vertical align="start" spacing={8}>
+                          <Tag color="cyan" shape="circle">首次使用指引</Tag>
+                          <div>
+                            <Typography.Title id="dashboard-first-run-heading" heading={3} style={{ color: '#f7f8f8', margin: '0 0 8px' }}>
+                              欢迎进入共享控制台
+                            </Typography.Title>
+                            <Typography.Paragraph style={{ color: 'rgba(208,214,224,0.82)', margin: 0, maxWidth: 860 }}>
+                              当前角色：普通用户。先走通采购、订单与接入三步，再在同一套工作台里继续扩展角色能力。
+                            </Typography.Paragraph>
+                          </div>
                         </Space>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
+                        <Button
+                          data-testid="dashboard-first-run-dismiss"
+                          theme="borderless"
+                          icon={<IconRotate />}
+                          style={{ color: '#d0d6e0' }}
+                          onClick={dismissUserFirstRun}
+                        >
+                          稍后再看
+                        </Button>
+                      </Space>
 
-                <Row gutter={[16, 16]} style={{ width: '100%' }}>
-                  {firstRunSteps.map((step, index) => (
-                    <Col xs={24} lg={8} key={step.key}>
-                      <Card
-                        style={{
-                          height: '100%',
-                          borderRadius: 18,
-                          background: 'rgba(2,6,23,0.32)',
-                          border: '1px solid rgba(255,255,255,0.06)',
-                        }}
-                        bodyStyle={{ padding: 18 }}
-                      >
-                        <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                          <Tag color="blue">步骤 {index + 1}</Tag>
-                          <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
-                            {step.title}
-                          </Typography.Title>
-                          <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
-                            {step.description}
-                          </Typography.Paragraph>
-                          <Button type="primary" theme="borderless" onClick={() => navigate(step.path)} style={{ color: '#93c5fd' }}>
-                            {step.action}
-                          </Button>
-                        </Space>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
+                      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                        {firstRunMissionCards.map((card) => (
+                          <Col xs={24} xl={8} key={card.key}>
+                            <section role="region" aria-labelledby={`dashboard-first-run-mission-heading-${card.key}`} style={{ width: '100%' }}>
+                              <Card
+                                data-testid={`dashboard-first-run-mission-card-${card.key}`}
+                                style={{
+                                  height: '100%',
+                                  borderRadius: 20,
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
+                                }}
+                                bodyStyle={{ padding: 18 }}
+                              >
+                                <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                                  <Tag color="grey">{card.tag}</Tag>
+                                  <Typography.Title id={`dashboard-first-run-mission-heading-${card.key}`} heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
+                                    {card.title}
+                                  </Typography.Title>
+                                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
+                                    {card.description}
+                                  </Typography.Paragraph>
+                                  <Button
+                                    type="primary"
+                                    theme="solid"
+                                    icon={<IconArrowRight />}
+                                    onClick={() => navigate(card.path)}
+                                    style={{ background: '#5e6ad2', borderRadius: 10 }}
+                                  >
+                                    {card.button}
+                                  </Button>
+                                </Space>
+                              </Card>
+                            </section>
+                          </Col>
+                        ))}
+                      </Row>
 
-                <Space wrap>
-                  <Tag color="grey">统一控制台内完成首次使用，不跳转独立新手后台</Tag>
-                  <Tag color="grey">供应商 / 管理员能力属于后续角色扩展，不影响当前首轮路径</Tag>
-                </Space>
-              </Space>
-            </Card>
-          ) : null}
-          <Row gutter={[16, 16]} style={{ width: '100%' }} data-testid="dashboard-role-actions">
-            {actions.map((item) => (
-              <Col xs={24} lg={8} key={item.title}>
-                <Card data-testid={`dashboard-role-action-${item.key}`} style={metricCardStyle(item.accent)} bodyStyle={{ padding: 18 }}>
-                  <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                    <Tag color="grey" prefixIcon={item.icon}>{item.title}</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
-                      {item.title}
-                    </Typography.Title>
-                    <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 66 }}>
-                      {item.description}
-                    </Typography.Paragraph>
-                    <Button type="primary" theme="solid" onClick={() => navigate(item.path)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
-                      {item.button}
-                    </Button>
-                  </Space>
-                </Card>
+                      <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                        {firstRunSteps.map((step, index) => (
+                          <Col xs={24} lg={8} key={step.key}>
+                            <Card
+                              style={{
+                                height: '100%',
+                                borderRadius: 18,
+                                background: 'rgba(2,6,23,0.32)',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                              }}
+                              bodyStyle={{ padding: 18 }}
+                            >
+                              <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                                <Tag color="blue">步骤 {index + 1}</Tag>
+                                <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
+                                  {step.title}
+                                </Typography.Title>
+                                <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 72 }}>
+                                  {step.description}
+                                </Typography.Paragraph>
+                                <Button type="primary" theme="borderless" onClick={() => navigate(step.path)} style={{ color: '#93c5fd' }}>
+                                  {step.action}
+                                </Button>
+                              </Space>
+                            </Card>
+                          </Col>
+                        ))}
+                      </Row>
+
+                      <Space wrap>
+                        <Tag color="grey">统一控制台内完成首次使用，不跳转独立新手后台</Tag>
+                        <Tag color="grey">供应商 / 管理员能力属于后续角色扩展，不影响当前首轮路径</Tag>
+                      </Space>
+                    </Space>
+                  </Card>
+                </section>
               </Col>
-            ))}
+            ) : null}
+            <Col xs={24}>
+              <section role="region" aria-labelledby="dashboard-role-actions-heading" style={{ width: '100%' }}>
+                <Typography.Title id="dashboard-role-actions-heading" heading={6} style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+                  {`${roleHeadline(user?.role)}动作`}
+                </Typography.Title>
+                <Row gutter={[16, 16]} style={{ width: '100%' }} data-testid="dashboard-role-actions">
+                  {actions.map((item) => (
+                    <Col xs={24} lg={8} key={item.title}>
+                      <Card data-testid={`dashboard-role-action-${item.key}`} style={metricCardStyle(item.accent)} bodyStyle={{ padding: 18 }}>
+                        <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                          <Tag color="grey" prefixIcon={item.icon}>{item.title}</Tag>
+                          <Typography.Title heading={5} style={{ margin: 0, color: '#f7f8f8' }}>
+                            {item.title}
+                          </Typography.Title>
+                          <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)', minHeight: 66 }}>
+                            {item.description}
+                          </Typography.Paragraph>
+                          <Button type="primary" theme="solid" onClick={() => navigate(item.path)} style={{ background: '#5e6ad2', borderRadius: 10 }}>
+                            {item.button}
+                          </Button>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </section>
+            </Col>
           </Row>
         </Space>
       </Card>
+      </section>
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         {user?.role === 'user' && nextSteps.length > 0 ? (
@@ -766,33 +783,38 @@ export function DashboardPage() {
               </section>
             </Card>
             <Card style={metricCardStyle('rgba(14,165,233,0.24)')} data-testid="dashboard-role-surface-map" bodyStyle={{ padding: 22 }}>
-              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-                <div>
-                  <Tag color="cyan">共享壳中的角色菜单映射</Tag>
-                  <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
-                    当前菜单与页面能力以服务端返回的角色权限与菜单结果为准，以下跳转全部对应现有真实路由。
-                  </Typography.Paragraph>
-                </div>
-                {roleSurfaceItems.map((item) => (
-                  <Card
-                    key={item.key}
-                    data-testid={`dashboard-role-surface-${item.key}`}
-                    bodyStyle={{ padding: 16 }}
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                  >
-                    <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
-                      <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                        <Typography.Text strong style={{ color: '#f7f8f8' }}>{item.label}</Typography.Text>
-                        <Tag color="grey">{item.route}</Tag>
+              <section role="region" aria-labelledby="dashboard-role-surface-map-heading" style={{ width: '100%' }}>
+                <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+                  <div>
+                    <Tag color="cyan">共享壳中的角色菜单映射</Tag>
+                    <Typography.Title id="dashboard-role-surface-map-heading" heading={6} style={{ margin: '12px 0 0', color: '#f7f8f8' }}>
+                      共享壳中的角色菜单映射
+                    </Typography.Title>
+                    <Typography.Paragraph style={{ margin: '12px 0 0', color: 'rgba(208,214,224,0.72)' }}>
+                      当前菜单与页面能力以服务端返回的角色权限与菜单结果为准，以下跳转全部对应现有真实路由。
+                    </Typography.Paragraph>
+                  </div>
+                  {roleSurfaceItems.map((item) => (
+                    <Card
+                      key={item.key}
+                      data-testid={`dashboard-role-surface-${item.key}`}
+                      bodyStyle={{ padding: 16 }}
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <Space vertical align="start" spacing={8} style={{ width: '100%' }}>
+                        <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                          <Typography.Text strong style={{ color: '#f7f8f8' }}>{item.label}</Typography.Text>
+                          <Tag color="grey">{item.route}</Tag>
+                        </Space>
+                        <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>{item.summary}</Typography.Paragraph>
+                        <Button theme="borderless" type="primary" onClick={() => navigate(item.route)}>
+                          打开该工作台
+                        </Button>
                       </Space>
-                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.72)' }}>{item.summary}</Typography.Paragraph>
-                      <Button theme="borderless" type="primary" onClick={() => navigate(item.route)}>
-                        打开该工作台
-                      </Button>
-                    </Space>
-                  </Card>
-                ))}
-              </Space>
+                    </Card>
+                  ))}
+                </Space>
+              </section>
             </Card>
           </Space>
         </Col>
