@@ -165,10 +165,11 @@ describe('SupplierDomainsPage', () => {
     renderSupplierDomainsPage()
 
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('supplier-domains-hero-card')
+    const heroCard = screen.getByRole('region', { name: '域名池运营中枢' })
     expect(within(heroCard).getByText('域名运营中枢')).toBeInTheDocument()
+    expect(within(heroCard).getByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
 
-    const missionSection = screen.getByTestId('supplier-domains-mission-section')
+    const missionSection = screen.getByRole('region', { name: '供应商主任务流' })
     expect(within(missionSection).getByRole('heading', { name: '供应商主任务流' })).toBeInTheDocument()
     const missionFlow = screen.getByTestId('supplier-domains-mission-flow')
     expect(within(missionFlow).getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
@@ -276,22 +277,31 @@ describe('SupplierDomainsPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '继续维护供货规则' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: /留在域名管理/ })).not.toBeInTheDocument()
 
-    const missionFallback = screen.getByTestId('supplier-domains-mission-fallback')
-    await user.click(within(missionFallback).getByRole('button', { name: /返回共享工作台/ }))
+    const fallbackRegions = screen.getAllByRole('region', { name: '返回共享工作台' })
+    expect(fallbackRegions).toHaveLength(2)
+
+    const missionFallback = fallbackRegions[0]
+    expect(missionFallback).toHaveAttribute('aria-labelledby', 'supplier-domains-mission-fallback-heading')
+    expect(within(missionFallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(missionFallback).getByText('当服务端暂未暴露资源与供货规则入口时，先回到共享工作台继续共享控制台中的域名运营主链路。')).toBeInTheDocument()
+    await user.click(within(missionFallback).getByTestId('supplier-domains-mission-fallback-button'))
     const sharedHomeFromMissionFallback = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(within(sharedHomeFromMissionFallback).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
 
     view.unmount()
     view = renderSupplierDomainsPage()
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
-    const bridge = screen.getByTestId('supplier-domains-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: '继续配置 Webhook' })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: '打开供应商结算' })).not.toBeInTheDocument()
 
-    const fallback = screen.getByTestId('supplier-domains-shared-console-fallback')
-    await user.click(within(fallback).getByRole('button', { name: /返回共享工作台/ }))
+    const fallback = screen.getAllByRole('region', { name: '返回共享工作台' })[1]
+    expect(fallback).toHaveAttribute('aria-labelledby', 'supplier-domains-shared-console-fallback-heading')
+    expect(within(fallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
+    expect(within(fallback).getByText('当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的域名运营主链路。')).toBeInTheDocument()
+    await user.click(within(fallback).getByTestId('supplier-domains-shared-console-fallback-button'))
     const sharedHomeFromBridgeFallback = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(within(sharedHomeFromBridgeFallback).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })
@@ -317,8 +327,8 @@ describe('SupplierDomainsPage', () => {
     renderSupplierDomainsPage()
 
     expect(await screen.findByRole('heading', { name: '域名池运营中枢' })).toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-domains-mission-fallback')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('supplier-domains-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '返回共享工作台' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '共享接入桥接' })).toBeInTheDocument()
   })
 
   it('submits create domain form and reloads data', async () => {

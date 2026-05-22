@@ -247,6 +247,8 @@ export function SupplierDomainsPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="supplier-domains-hero-card"
+        role="region"
+        aria-labelledby="supplier-domains-hero-heading"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -259,7 +261,7 @@ export function SupplierDomainsPage() {
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <Tag color="blue" size="large">域名运营中枢</Tag>
           <Space vertical align="start" spacing={8}>
-            <Typography.Title heading={2} style={{ margin: 0, color: '#f8fafc' }}>
+            <Typography.Title id="supplier-domains-hero-heading" heading={2} style={{ margin: 0, color: '#f8fafc' }}>
               域名池运营中枢
             </Typography.Title>
             <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.82)', maxWidth: 920 }}>
@@ -306,10 +308,15 @@ export function SupplierDomainsPage() {
         </Space>
       </Card>
 
-      <Card data-testid="supplier-domains-mission-section" style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card
+        data-testid="supplier-domains-mission-section"
+        role="region"
+        aria-labelledby="supplier-domains-mission-section-heading"
+        style={sectionCardStyle()}
+        bodyStyle={{ padding: 24 }}>
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
-            <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
+            <Typography.Title id="supplier-domains-mission-section-heading" heading={4} style={{ margin: 0, color: '#f8fafc' }}>
               供应商主任务流
             </Typography.Title>
             <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
@@ -346,11 +353,35 @@ export function SupplierDomainsPage() {
               </Card>
             ))}
             {shouldShowMissionFallback ? (
-              <div data-testid="supplier-domains-mission-fallback">
-                <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute)}>
-                  返回共享工作台
-                </Button>
-              </div>
+              <Card
+                data-testid="supplier-domains-mission-fallback"
+                role="region"
+                aria-labelledby="supplier-domains-mission-fallback-heading"
+                style={{
+                  flex: '1 1 250px',
+                  minWidth: 250,
+                  borderRadius: 20,
+                  background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                  border: '1px solid rgba(148,163,184,0.28)',
+                }}
+                bodyStyle={{ padding: 18 }}>
+                <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                  <Tag color="grey">Fallback</Tag>
+                  <Typography.Title id="supplier-domains-mission-fallback-heading" heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                    返回共享工作台
+                  </Typography.Title>
+                  <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>
+                    当服务端暂未暴露资源与供货规则入口时，先回到共享工作台继续共享控制台中的域名运营主链路。
+                  </Typography.Text>
+                  <Button
+                    data-testid="supplier-domains-mission-fallback-button"
+                    theme="solid"
+                    type="primary"
+                    onClick={() => navigate(fallbackRoute)}>
+                    返回共享工作台
+                  </Button>
+                </Space>
+              </Card>
             ) : null}
           </Space>
         </Space>
@@ -463,8 +494,11 @@ export function SupplierDomainsPage() {
               </Space>
             </Card>
 
-            <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
-              <section role="region" aria-labelledby="supplier-domains-shared-console-bridge-heading" style={{ width: '100%' }}>
+            <Card
+              style={sectionCardStyle()}
+              bodyStyle={{ padding: 24 }}
+              role="region"
+              aria-labelledby="supplier-domains-shared-console-bridge-heading">
                 <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
                   <div>
                     <Typography.Title id="supplier-domains-shared-console-bridge-heading" heading={4} style={{ margin: 0, color: '#f8fafc' }}>
@@ -501,15 +535,40 @@ export function SupplierDomainsPage() {
                       </Card>
                     ))}
                     {shouldShowBridgeFallback ? (
-                      <div data-testid="supplier-domains-shared-console-fallback">
-                        <Button theme="solid" type="primary" onClick={() => navigate(fallbackRoute || DASHBOARD_ROUTE)}>
-                          返回共享工作台
-                        </Button>
-                      </div>
+                      <Card
+                        data-testid="supplier-domains-shared-console-fallback"
+                        role="region"
+                        aria-labelledby="supplier-domains-shared-console-fallback-heading"
+                        style={{
+                          width: '100%',
+                          borderRadius: 18,
+                          background: 'linear-gradient(180deg, rgba(148,163,184,0.18) 0%, rgba(15,23,42,0.55) 100%)',
+                          border: '1px solid rgba(148,163,184,0.28)',
+                        }}
+                        bodyStyle={{ padding: 18 }}>
+                        <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                          <Tag color="grey">Fallback</Tag>
+                          <Typography.Title
+                            id="supplier-domains-shared-console-fallback-heading"
+                            heading={6}
+                            style={{ margin: 0, color: '#f8fafc', fontSize: 15, letterSpacing: '0.01em' }}>
+                            返回共享工作台
+                          </Typography.Title>
+                          <Typography.Text style={{ color: 'rgba(226,232,240,0.76)' }}>
+                            当前接入入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的域名运营主链路。
+                          </Typography.Text>
+                          <Button
+                            data-testid="supplier-domains-shared-console-fallback-button"
+                            theme="solid"
+                            type="primary"
+                            onClick={() => navigate(fallbackRoute || DASHBOARD_ROUTE)}>
+                            返回共享工作台
+                          </Button>
+                        </Space>
+                      </Card>
                     ) : null}
                   </Space>
                 </Space>
-              </section>
             </Card>
 
             <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} data-testid="supplier-domains-region-metrics">
