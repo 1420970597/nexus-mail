@@ -175,9 +175,10 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    const guidanceRegion = await screen.findByRole('region', { name: '供给事件回调工作台' })
     expect(within(guidanceRegion).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
     expect(within(guidanceRegion).getByText('供应商视角')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '共享接入桥接' })).not.toBeInTheDocument()
   })
 
   it('renders role-specific guidance for admin role', async () => {
@@ -188,9 +189,10 @@ describe('WebhooksPage', () => {
       </MemoryRouter>,
     )
 
-    const guidanceRegion = await screen.findByTestId('webhooks-role-guidance')
+    const guidanceRegion = await screen.findByRole('region', { name: 'Webhook 运维与回调观测' })
     expect(within(guidanceRegion).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(within(guidanceRegion).getByText('管理员视角')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '共享接入桥接' })).not.toBeInTheDocument()
   })
 
   it('queues test delivery and reloads deliveries', async () => {
@@ -441,13 +443,14 @@ describe('WebhooksPage', () => {
     renderWebhooksPage()
 
     expect(await screen.findByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    const integrationLoop = screen.getByTestId('webhooks-first-integration-loop')
+    const integrationLoop = screen.getByRole('region', { name: '注册后首轮回调联调建议' })
     const loopScope = within(integrationLoop)
+    expect(loopScope.getByRole('heading', { name: '注册后首轮回调联调建议' })).toBeInTheDocument()
     expect(loopScope.getByTestId('webhooks-first-step-create-endpoint')).toBeInTheDocument()
     expect(loopScope.getByTestId('webhooks-first-step-verify-test-delivery')).toBeInTheDocument()
     expect(loopScope.getByTestId('webhooks-first-step-return-to-docs')).toBeInTheDocument()
-    expect(loopScope.getByTestId('webhooks-first-loop-action-api-keys')).toHaveTextContent('打开 API Keys')
-    expect(loopScope.getByTestId('webhooks-first-loop-action-docs')).toHaveTextContent('查看 API 文档')
+    expect(loopScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+    expect(loopScope.getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '先配置 API Keys' })).not.toBeInTheDocument()
     expect(loopScope.queryByRole('button', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })

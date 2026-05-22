@@ -402,6 +402,8 @@ export function WebhooksPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="webhooks-role-guidance"
+        role="region"
+        aria-labelledby="webhooks-role-guidance-heading"
         style={{
           width: '100%',
           borderRadius: 24,
@@ -415,7 +417,7 @@ export function WebhooksPage() {
             {copy.badge}
           </Tag>
           <div>
-            <Typography.Title heading={3} style={{ marginBottom: 8, color: '#f7f8f8' }}>
+            <Typography.Title heading={3} id="webhooks-role-guidance-heading" style={{ marginBottom: 8, color: '#f7f8f8' }}>
               {copy.title}
             </Typography.Title>
             <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(208,214,224,0.82)', maxWidth: 860 }}>
@@ -451,125 +453,132 @@ export function WebhooksPage() {
         description="Webhook 仅允许公网可达的 https 地址，禁止 localhost、内网、link-local、回环地址与 DNS 解析到私网目标；测试投递返回 202 代表已入队，实际回调由 worker 异步执行。"
       />
 
-      {user?.role === 'user' ? (
-        <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-          <Card
-            data-testid="webhooks-shared-console-bridge"
-            role="region"
-            aria-labelledby="webhooks-shared-console-bridge-heading"
-            style={{
-              width: '100%',
-              borderRadius: 24,
-              background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.94) 0%, rgba(12, 18, 30, 0.98) 100%)',
-              border: '1px solid rgba(56, 189, 248, 0.16)',
-            }}
-            bodyStyle={{ padding: 20 }}
-          >
-            <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-              <Tag color="green">共享接入桥接</Tag>
-              <Typography.Title id="webhooks-shared-console-bridge-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
-                共享接入桥接
-              </Typography.Title>
-              <Typography.Title heading={5} style={{ color: '#f8fafc', margin: 0 }}>
-                {bridgeHeading}
-              </Typography.Title>
-              <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
-                {bridgeDescription}
-              </Typography.Paragraph>
-              <Card
-                data-testid="webhooks-capability-matrix"
-                role="region"
-                aria-labelledby="webhooks-capability-matrix-heading"
-                style={{
-                  width: '100%',
-                  borderRadius: 18,
-                  background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                  border: '1px solid rgba(94,106,210,0.24)',
-                }}
-                bodyStyle={{ padding: 16 }}
-              >
-                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                  <Typography.Title id="webhooks-capability-matrix-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
-                    控制台能力矩阵
-                  </Typography.Title>
-                  <Space wrap>
-                    <Tag color="cyan" prefixIcon={<IconServer />}>统一回调入口</Tag>
-                    <Tag color="blue" prefixIcon={<IconArticle />}>共享接入桥接</Tag>
-                    <Tag color="green" prefixIcon={<IconSafe />}>角色菜单扩展</Tag>
-                  </Space>
-                </Space>
-              </Card>
-              <Space wrap>
-                {canOpenApiKeys ? (
-                  <Button data-testid="webhooks-bridge-action-api-keys" type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
-                    打开 API Keys
-                  </Button>
-                ) : null}
-                {canOpenDocs ? (
-                  <Button data-testid="webhooks-bridge-action-docs" theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
-                    查看 API 文档
-                  </Button>
-                ) : null}
-                {!canOpenApiKeys && !canOpenDocs && fallbackRoute !== WEBHOOKS_ROUTE ? (
-                  <Button data-testid="webhooks-bridge-fallback" theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
-                    返回共享工作台
-                  </Button>
-                ) : null}
-              </Space>
-            </Space>
-          </Card>
-          <Card
-            data-testid="webhooks-first-integration-loop"
-            style={{
-              width: '100%',
-              borderRadius: 24,
-              background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.94) 0%, rgba(12, 18, 30, 0.98) 100%)',
-              border: '1px solid rgba(56, 189, 248, 0.16)',
-            }}
-            bodyStyle={{ padding: 20 }}
-          >
-            <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
-              <Tag color="green">注册后首轮回调联调建议</Tag>
-              <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
-                在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。
-              </Typography.Paragraph>
-              <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
-                {firstHourTimeline.map((item) => (
-                  <Card
-                    key={item.title}
-                    data-testid={`webhooks-first-step-${item.key}`}
-                    bodyStyle={{ padding: 16 }}
-                    style={{
-                      width: '100%',
-                      background: 'rgba(2, 6, 23, 0.28)',
-                      border: '1px solid rgba(148, 163, 184, 0.16)',
-                    }}
-                  >
-                    <Typography.Title heading={6} style={{ color: '#f8fafc', marginBottom: 8 }}>
-                      {item.title}
+      <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+          {user?.role === 'user' ? (
+            <Card
+              data-testid="webhooks-shared-console-bridge"
+              role="region"
+              aria-labelledby="webhooks-shared-console-bridge-heading"
+              style={{
+                width: '100%',
+                borderRadius: 24,
+                background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.94) 0%, rgba(12, 18, 30, 0.98) 100%)',
+                border: '1px solid rgba(56, 189, 248, 0.16)',
+              }}
+              bodyStyle={{ padding: 20 }}
+            >
+              <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                <Tag color="green">共享接入桥接</Tag>
+                <Typography.Title id="webhooks-shared-console-bridge-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
+                  共享接入桥接
+                </Typography.Title>
+                <Typography.Title heading={5} style={{ color: '#f8fafc', margin: 0 }}>
+                  {bridgeHeading}
+                </Typography.Title>
+                <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
+                  {bridgeDescription}
+                </Typography.Paragraph>
+                <Card
+                  data-testid="webhooks-capability-matrix"
+                  role="region"
+                  aria-labelledby="webhooks-capability-matrix-heading"
+                  style={{
+                    width: '100%',
+                    borderRadius: 18,
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(94,106,210,0.24)',
+                  }}
+                  bodyStyle={{ padding: 16 }}
+                >
+                  <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                    <Typography.Title id="webhooks-capability-matrix-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
+                      控制台能力矩阵
                     </Typography.Title>
-                    <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.72)', margin: 0 }}>
-                      {item.description}
-                    </Typography.Paragraph>
-                  </Card>
-                ))}
+                    <Space wrap>
+                      <Tag color="cyan" prefixIcon={<IconServer />}>统一回调入口</Tag>
+                      <Tag color="blue" prefixIcon={<IconArticle />}>共享接入桥接</Tag>
+                      <Tag color="green" prefixIcon={<IconSafe />}>角色菜单扩展</Tag>
+                    </Space>
+                  </Space>
+                </Card>
+                <Space wrap>
+                  {canOpenApiKeys ? (
+                    <Button data-testid="webhooks-bridge-action-api-keys" type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
+                      打开 API Keys
+                    </Button>
+                  ) : null}
+                  {canOpenDocs ? (
+                    <Button data-testid="webhooks-bridge-action-docs" theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                      查看 API 文档
+                    </Button>
+                  ) : null}
+                  {!canOpenApiKeys && !canOpenDocs && fallbackRoute !== WEBHOOKS_ROUTE ? (
+                    <Button data-testid="webhooks-bridge-fallback" theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
+                      返回共享工作台
+                    </Button>
+                  ) : null}
+                </Space>
               </Space>
-              <Space>
-                {canOpenApiKeys ? (
-                  <Button data-testid="webhooks-first-loop-action-api-keys" type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
-                    打开 API Keys
-                  </Button>
-                ) : null}
-                {canOpenDocs ? (
-                  <Button data-testid="webhooks-first-loop-action-docs" theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
-                    查看 API 文档
-                  </Button>
-                ) : null}
+            </Card>
+          ) : null}
+          {user?.role === 'user' ? (
+            <Card
+              data-testid="webhooks-first-integration-loop"
+              role="region"
+              aria-labelledby="webhooks-first-integration-loop-heading"
+              style={{
+                width: '100%',
+                borderRadius: 24,
+                background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.94) 0%, rgba(12, 18, 30, 0.98) 100%)',
+                border: '1px solid rgba(56, 189, 248, 0.16)',
+              }}
+              bodyStyle={{ padding: 20 }}
+            >
+              <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+                <Tag color="green">注册后首轮回调联调建议</Tag>
+                <Typography.Title id="webhooks-first-integration-loop-heading" heading={6} style={{ color: '#f8fafc', margin: 0 }}>
+                  注册后首轮回调联调建议
+                </Typography.Title>
+                <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.8)', margin: 0 }}>
+                  在同一套控制台里先创建 endpoint、再发起 test delivery，并根据返回的投递状态完善自己的接入检查表。
+                </Typography.Paragraph>
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                  {firstHourTimeline.map((item) => (
+                    <Card
+                      key={item.title}
+                      data-testid={`webhooks-first-step-${item.key}`}
+                      bodyStyle={{ padding: 16 }}
+                      style={{
+                        width: '100%',
+                        background: 'rgba(2, 6, 23, 0.28)',
+                        border: '1px solid rgba(148, 163, 184, 0.16)',
+                      }}
+                    >
+                      <Typography.Title heading={6} style={{ color: '#f8fafc', marginBottom: 8 }}>
+                        {item.title}
+                      </Typography.Title>
+                      <Typography.Paragraph style={{ color: 'rgba(226,232,240,0.72)', margin: 0 }}>
+                        {item.description}
+                      </Typography.Paragraph>
+                    </Card>
+                  ))}
+                </Space>
+                <Space>
+                  {canOpenApiKeys ? (
+                    <Button data-testid="webhooks-first-loop-action-api-keys" type="primary" theme="solid" onClick={() => navigate(API_KEYS_ROUTE)}>
+                      打开 API Keys
+                    </Button>
+                  ) : null}
+                  {canOpenDocs ? (
+                    <Button data-testid="webhooks-first-loop-action-docs" theme="borderless" type="primary" onClick={() => navigate(DOCS_ROUTE)}>
+                      查看 API 文档
+                    </Button>
+                  ) : null}
+                </Space>
               </Space>
-            </Space>
-          </Card>
+            </Card>
+          ) : null}
         </Space>
-      ) : null}
 
       {createdSecret ? (
         <Banner
@@ -619,6 +628,9 @@ export function WebhooksPage() {
       ) : null}
 
       <Card title="创建回调 endpoint" style={{ width: '100%' }}>
+        <Typography.Title id="webhooks-create-endpoint-heading" heading={5} style={{ marginTop: 0, marginBottom: 16, color: '#111827' }}>
+          创建回调 endpoint
+        </Typography.Title>
         <Form form={form} layout="horizontal" labelPosition="left">
           <Form.Input
             field="url"
@@ -641,6 +653,9 @@ export function WebhooksPage() {
       </Card>
 
       <Card title="接入流程" style={{ width: '100%' }}>
+        <Typography.Title id="webhooks-flow-heading" heading={5} style={{ marginTop: 0, marginBottom: 16, color: '#111827' }}>
+          接入流程
+        </Typography.Title>
         <Space vertical align="start" spacing={12}>
           <Tag color="cyan">1. 创建公网 HTTPS endpoint 并复制签名密钥</Tag>
           <Tag color="blue">2. 在消费端校验签名、记录 event_id / payload 并做好幂等</Tag>
@@ -648,7 +663,15 @@ export function WebhooksPage() {
         </Space>
       </Card>
 
-      <Card data-testid="webhooks-current-endpoints-card" title="当前 endpoint" style={{ width: '100%' }} loading={loading}>
+      <Card
+        data-testid="webhooks-current-endpoints-card"
+        title="当前 endpoint"
+        style={{ width: '100%' }}
+        loading={loading}
+      >
+        <Typography.Title id="webhooks-current-endpoints-heading" heading={5} style={{ marginTop: 0, marginBottom: 16, color: '#111827' }}>
+          当前 endpoint
+        </Typography.Title>
         {hasEndpoints ? (
           <Table
             pagination={false}
