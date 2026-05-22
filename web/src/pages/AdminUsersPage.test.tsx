@@ -1,8 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import { fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AdminUsersPage, buildDisputeResolutionPayload } from './AdminUsersPage'
 import * as financeService from '../services/finance'
+import { ADMIN_AUDIT_ROUTE, ADMIN_RISK_ROUTE, ADMIN_USERS_ROUTE, API_KEYS_ROUTE, DOCS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import { useAuthStore } from '../store/authStore'
 
 vi.mock('../services/finance', () => ({
   adminAdjustWallet: vi.fn(),
@@ -18,8 +20,89 @@ const mockedResolveAdminDispute = vi.mocked(financeService.resolveAdminDispute)
 const mockedAdminAdjustWallet = vi.mocked(financeService.adminAdjustWallet)
 const mockedSettleSupplierPending = vi.mocked(financeService.settleSupplierPending)
 
+function seedAdminMenu(includeSharedBridge = true) {
+  useAuthStore.setState({
+    token: 'admin-token',
+    refreshToken: 'admin-refresh-token',
+    user: { id: 1, email: 'admin@nexus-mail.local', role: 'admin' },
+    menu: includeSharedBridge
+      ? [
+          { key: 'dashboard', label: '仪表盘', path: '/' },
+          { key: 'admin-users', label: '用户管理', path: ADMIN_USERS_ROUTE },
+          { key: 'admin-risk', label: '风控中心', path: ADMIN_RISK_ROUTE },
+          { key: 'admin-audit', label: '审计日志', path: ADMIN_AUDIT_ROUTE },
+          { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+          { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+          { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+        ]
+      : [
+          { key: 'dashboard', label: '仪表盘', path: '/' },
+          { key: 'admin-users', label: '用户管理', path: ADMIN_USERS_ROUTE },
+        ],
+  })
+}
+
+function renderAdminUsersPage(initialEntry = ADMIN_USERS_ROUTE) {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Routes>
+        <Route path={ADMIN_USERS_ROUTE} element={<AdminUsersPage />} />
+        <Route
+          path={ADMIN_RISK_ROUTE}
+          element={(
+            <section role="region" aria-label="共享控制台 - 风控中心">
+              <h1>风控中心</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={ADMIN_AUDIT_ROUTE}
+          element={(
+            <section role="region" aria-label="共享控制台 - 审计日志">
+              <h1>审计日志</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={API_KEYS_ROUTE}
+          element={(
+            <section role="region" aria-label="共享控制台 - API Keys">
+              <h1>开发者 API 接入工作台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={WEBHOOKS_ROUTE}
+          element={(
+            <section role="region" aria-label="共享控制台 - Webhooks">
+              <h1>Webhook 运维与回调观测</h1>
+            </section>
+          )}
+        />
+        <Route
+          path={DOCS_ROUTE}
+          element={(
+            <section role="region" aria-label="共享控制台 - API 文档">
+              <h1>API 文档与接入控制台</h1>
+            </section>
+          )}
+        />
+        <Route
+          path="/"
+          element={(
+            <section role="region" aria-label="共享控制台首页">
+              <h1>控制台总览</h1>
+            </section>
+          )}
+        />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
 describe('AdminUsersPage dispute handling', () => {
   beforeEach(() => {
+    seedAdminMenu()
     mockedGetAdminWalletUsers.mockResolvedValue({
       items: [
         {
@@ -91,6 +174,52 @@ describe('AdminUsersPage dispute handling', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
+    useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
+  })
+
+  it('renders named admin mission-control regions and bridge destinations inside the shared console shell', async () => {
+    renderAdminUsersPage()
+
+    const heroCard = await screen.findByTestId('admin-users-hero-card')
+    expect(within(heroCard).getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
+    expect(within(heroCard).getByText('用户运营中枢')).toBeInTheDocument()
+
+    const missionRegion = await screen.findByRole('heading', { name: '管理员主任务流' }).then((heading) => heading.closest('.semi-card') as HTMLElement)
+    expect(within(missionRegion).getByRole('heading', { name: '管理员主任务流' })).toBeInTheDocument()
+    expect(within(missionRegion).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
+    expect(within(missionRegion).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
+    expect(within(missionRegion).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
+
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(within(bridgeRegion).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    const capabilityMatrix = within(bridgeRegion).getByRole('region', { name: '控制台能力矩阵' })
+    expect(within(capabilityMatrix).getByText('统一运营入口')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getByText('管理员菜单扩展')).toBeInTheDocument()
+  })
+
+  it('navigates from named admin mission-control regions into shared-console destinations', async () => {
+    renderAdminUsersPage()
+
+    const missionRegion = await screen.findByRole('heading', { name: '管理员主任务流' }).then((heading) => heading.closest('.semi-card') as HTMLElement)
+    fireEvent.click(within(missionRegion).getByRole('button', { name: '查看风控中心' }))
+    const riskRegion = await screen.findByRole('region', { name: '共享控制台 - 风控中心' })
+    expect(within(riskRegion).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
+  })
+
+  it('shows named shared-console fallback when bridge routes are hidden by menu truth', async () => {
+    seedAdminMenu(false)
+    renderAdminUsersPage()
+
+    const fallbackHeading = await screen.findByRole('heading', { name: '回到共享工作台继续管理员主链路' })
+    const fallbackRegion = fallbackHeading.closest('.semi-card') as HTMLElement
+    expect(fallbackRegion).toBeTruthy()
+    expect(within(fallbackRegion).getByRole('heading', { name: '回到共享工作台继续管理员主链路' })).toBeInTheDocument()
+    expect(within(fallbackRegion).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
+    const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(within(bridgeRegion).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    expect(within(bridgeRegion).queryByRole('button', { name: /打开 Webhook/ })).not.toBeInTheDocument()
+    expect(within(bridgeRegion).queryByRole('button', { name: /打开 API 文档/ })).not.toBeInTheDocument()
   })
 
   it('uses select controls for dispute resolution and submits explicit refund contract', async () => {

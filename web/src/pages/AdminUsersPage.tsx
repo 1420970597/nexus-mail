@@ -354,7 +354,13 @@ export function AdminUsersPage() {
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
         <Col xs={24} xl={15}>
-          <Card title="管理员主任务流" style={{ width: '100%', borderRadius: 24 }} data-testid="admin-users-mission-flow">
+          <Card
+            title={<Typography.Title heading={5} id="admin-users-mission-flow-heading" style={{ margin: 0 }}>管理员主任务流</Typography.Title>}
+            role="region"
+            aria-labelledby="admin-users-mission-flow-heading"
+            style={{ width: '100%', borderRadius: 24 }}
+            data-testid="admin-users-mission-flow"
+          >
             <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
               {visibleActionLanes.map((item) => (
                 <Card
@@ -444,6 +450,8 @@ export function AdminUsersPage() {
               {!canShowConsoleBridge && fallbackRoute !== ADMIN_USERS_ROUTE ? (
                 <Card
                   data-testid="admin-users-shared-console-fallback"
+                  role="region"
+                  aria-labelledby="admin-users-shared-console-fallback-heading"
                   style={{
                     width: '100%',
                     borderRadius: 18,
@@ -454,7 +462,7 @@ export function AdminUsersPage() {
                 >
                   <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                     <Tag color="cyan">Fallback</Tag>
-                    <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>回到共享工作台继续管理员主链路</Typography.Title>
+                    <Typography.Title heading={5} id="admin-users-shared-console-fallback-heading" style={{ margin: 0, color: '#f8fafc' }}>回到共享工作台继续管理员主链路</Typography.Title>
                     <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
                       当风控、审计与共享接入入口暂未由服务端暴露时，先回到共享工作台完成当前管理员主链路，再等待后续菜单授权。
                     </Typography.Text>
