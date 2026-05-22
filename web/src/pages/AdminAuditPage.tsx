@@ -273,8 +273,21 @@ export function AdminAuditPage() {
       </Space>
 
       <Space align="start" wrap style={{ width: '100%' }} spacing={16}>
-        <Card title="管理员主任务流" style={{ flex: '1 1 560px', borderRadius: 24 }} data-testid="admin-audit-mission-flow">
+        <Card
+          role="region"
+          aria-labelledby="admin-audit-mission-flow-heading"
+          style={{ flex: '1 1 560px', borderRadius: 24 }}
+          data-testid="admin-audit-mission-flow"
+        >
           <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+            <div>
+              <Typography.Title heading={5} id="admin-audit-mission-flow-heading" style={{ margin: 0 }}>
+                管理员主任务流
+              </Typography.Title>
+              <Typography.Paragraph style={{ marginBottom: 0, color: 'rgba(226,232,240,0.72)' }}>
+                审计、风控、资金工作台与开发者接入页继续收敛在同一共享控制台里推进，而不是拆出额外后台。
+              </Typography.Paragraph>
+            </div>
             {visibleActionLanes.map((item) => (
               <Card
                 key={item.key}
@@ -349,6 +362,8 @@ export function AdminAuditPage() {
             {!canShowConsoleBridge && shouldShowFallbackCta ? (
               <Card
                 data-testid="admin-audit-shared-console-fallback"
+                role="region"
+                aria-labelledby="admin-audit-shared-console-fallback-heading"
                 style={{
                   width: '100%',
                   borderRadius: 18,
@@ -359,8 +374,8 @@ export function AdminAuditPage() {
               >
                 <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
                   <Tag color="cyan">Fallback</Tag>
-                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
-                    回到共享工作台继续管理员主链路
+                  <Typography.Title heading={5} id="admin-audit-shared-console-fallback-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                    返回共享工作台
                   </Typography.Title>
                   <Typography.Text style={{ color: 'rgba(226,232,240,0.72)' }}>
                     当前菜单未暴露风控、接入或文档入口时，继续回到服务端授予的共享工作台完成后续运营闭环。
