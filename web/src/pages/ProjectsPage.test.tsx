@@ -150,20 +150,23 @@ describe('ProjectsPage', () => {
     expect(within(emptyActions).getByRole('button', { name: '查看 API 文档' })).toBeInTheDocument()
   })
 
-  it('renders procurement mission guidance through scoped next-step and fallback cards inside the shared console', async () => {
+  it('renders procurement mission guidance through named shared-console regions instead of test-id-only cards', async () => {
     render(
       <MemoryRouter>
         <ProjectsPage />
       </MemoryRouter>,
     )
 
-    const missionFlow = await screen.findByTestId('projects-mission-flow-card')
+    const missionFlow = await screen.findByRole('region', { name: '采购任务流' })
     const missionScope = within(missionFlow)
     expect(missionScope.getByRole('heading', { name: '采购任务流' })).toBeInTheDocument()
     expect(missionScope.queryByText('采购动作提示')).not.toBeInTheDocument()
-    const nextStepCard = missionScope.getByTestId('projects-guidance-next-step-card')
-    const fallbackCard = missionScope.getByTestId('projects-guidance-fallback-card')
 
+    const procurementCard = within(missionFlow).getByRole('region', { name: '先挑库存，再下单' })
+    const nextStepCard = within(missionFlow).getByRole('region', { name: '下单后下一步' })
+    const fallbackCard = within(missionFlow).getByRole('region', { name: '共享控制台回退路径' })
+
+    expect(within(procurementCard).getByRole('heading', { name: '先挑库存，再下单' })).toBeInTheDocument()
     expect(within(nextStepCard).getByRole('heading', { name: '下单后下一步' })).toBeInTheDocument()
     expect(within(nextStepCard).getByRole('button', { name: '打开订单中心' })).toBeInTheDocument()
     expect(within(fallbackCard).getByRole('heading', { name: '共享控制台回退路径' })).toBeInTheDocument()
@@ -188,8 +191,7 @@ describe('ProjectsPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('采购任务流')).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('projects-mission-flow-card')
+    const missionFlow = await screen.findByRole('region', { name: '采购任务流' })
     await user.click(within(missionFlow).getByRole('button', { name: '打开订单中心' }))
     const ordersRegion = await screen.findByRole('region', { name: '共享控制台 - 订单中心' })
     expect(within(ordersRegion).getByRole('heading', { name: '订单中心' })).toBeInTheDocument()
