@@ -263,6 +263,8 @@ export function SupplierSettlementsPage() {
     <Space vertical align="start" style={{ width: '100%' }} spacing={24}>
       <Card
         data-testid="supplier-settlements-hero-card"
+        role="region"
+        aria-labelledby="supplier-settlements-hero-heading"
         style={{
           width: '100%',
           borderRadius: 28,
@@ -275,7 +277,7 @@ export function SupplierSettlementsPage() {
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <Tag color="purple" size="large">资金争议中枢</Tag>
           <Space vertical align="start" spacing={8}>
-            <Typography.Title heading={2} style={{ margin: 0, color: '#f8fafc' }}>
+            <Typography.Title heading={2} id="supplier-settlements-hero-heading" style={{ margin: 0, color: '#f8fafc' }}>
               供应商资金与争议指挥台
             </Typography.Title>
             <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.82)', maxWidth: 920 }}>
@@ -298,10 +300,10 @@ export function SupplierSettlementsPage() {
         </Space>
       </Card>
 
-      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }}>
+      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} role="region" aria-labelledby="supplier-settlements-mission-flow-heading">
         <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
           <div>
-            <Typography.Title heading={4} style={{ margin: 0, color: '#f8fafc' }}>
+            <Typography.Title heading={4} id="supplier-settlements-mission-flow-heading" style={{ margin: 0, color: '#f8fafc' }}>
               供应商资金任务流
             </Typography.Title>
             <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8 }}>
@@ -343,10 +345,12 @@ export function SupplierSettlementsPage() {
                 }}
                 bodyStyle={{ padding: 20 }}
                 data-testid="supplier-settlements-mission-fallback"
+                role="region"
+                aria-labelledby="supplier-settlements-mission-fallback-heading"
               >
                 <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
                   <Tag color="grey">Fallback</Tag>
-                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>返回共享工作台</Typography.Title>
+                  <Typography.Title heading={5} id="supplier-settlements-mission-fallback-heading" style={{ margin: 0, color: '#f8fafc' }}>返回共享工作台</Typography.Title>
                   <Typography.Text style={{ color: 'rgba(226,232,240,0.78)' }}>
                     当服务端暂未暴露资源、供货或接入入口时，先回到共享工作台继续保持单一登录后的供应商控制台路径。
                   </Typography.Text>
@@ -470,7 +474,10 @@ export function SupplierSettlementsPage() {
         </Space>
       </Card>
 
-      <Card title="供应商成本模型" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-cost-profiles-card">
+      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-cost-profiles-card" role="region" aria-labelledby="supplier-settlements-cost-profiles-heading">
+        <Typography.Title heading={4} id="supplier-settlements-cost-profiles-heading" style={{ margin: '0 0 16px', color: '#f8fafc' }}>
+          供应商成本模型
+        </Typography.Title>
         <Form form={costForm} layout="horizontal" labelPosition="left" initValues={{ currency: 'CNY', status: 'active' }} data-testid="supplier-settlements-cost-profile-form">
           <Form.Input field="project_key" label="项目键" maxLength={64} rules={[{ required: true, message: '请输入项目键' }]} />
           <Form.InputNumber field="cost_per_success" label="成功成本（分）" min={0} rules={[{ required: true, message: '请输入成功成本' }]} style={{ width: '100%' }} />
@@ -496,7 +503,10 @@ export function SupplierSettlementsPage() {
         />
       </Card>
 
-      <Card title="项目报表" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-reports-card">
+      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-reports-card" role="region" aria-labelledby="supplier-settlements-reports-heading">
+        <Typography.Title heading={4} id="supplier-settlements-reports-heading" style={{ margin: '0 0 16px', color: '#f8fafc' }}>
+          项目报表
+        </Typography.Title>
         <Form layout="horizontal" labelPosition="left" initValues={reportDraft}>
           <Form.Input
             field="from"
@@ -537,7 +547,10 @@ export function SupplierSettlementsPage() {
         />
       </Card>
 
-      <Card title="供应商争议单" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-disputes-card">
+      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-disputes-card" role="region" aria-labelledby="supplier-settlements-disputes-heading">
+        <Typography.Title heading={4} id="supplier-settlements-disputes-heading" style={{ margin: '0 0 16px', color: '#f8fafc' }}>
+          供应商争议单
+        </Typography.Title>
         <Form form={disputeForm} layout="horizontal" labelPosition="left" data-testid="supplier-settlements-dispute-form">
           <Form.InputNumber field="order_id" label="订单 ID" rules={[{ required: true, message: '请输入订单 ID' }]} style={{ width: '100%' }} />
           <Form.Input field="reason" label="争议原因" rules={[{ required: true, message: '请输入争议原因' }]} />
@@ -560,7 +573,10 @@ export function SupplierSettlementsPage() {
         />
       </Card>
 
-      <Card title="结算流水" style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-entries-card">
+      <Card style={sectionCardStyle()} bodyStyle={{ padding: 24 }} loading={loading} data-testid="supplier-settlements-entries-card" role="region" aria-labelledby="supplier-settlements-entries-heading">
+        <Typography.Title heading={4} id="supplier-settlements-entries-heading" style={{ margin: '0 0 16px', color: '#f8fafc' }}>
+          结算流水
+        </Typography.Title>
         <Table
           pagination={false}
           rowKey="id"

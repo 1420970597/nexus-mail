@@ -240,8 +240,7 @@ describe('SupplierSettlementsPage', () => {
   it('renders supplier finance mission-control shell with metrics and shared-console guidance', async () => {
     renderSupplierSettlementsPage()
 
-    expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    const heroCard = screen.getByTestId('supplier-settlements-hero-card')
+    const heroCard = await screen.findByRole('region', { name: '供应商资金与争议指挥台' })
     expect(within(heroCard).getByText('资金争议中枢')).toBeInTheDocument()
     const pendingMetric = screen.getByTestId('supplier-settlements-metric-pending')
     expect(within(pendingMetric).getByText('待结算余额')).toBeInTheDocument()
@@ -251,9 +250,9 @@ describe('SupplierSettlementsPage', () => {
     expect(within(openDisputesMetric).getByText('开放争议')).toBeInTheDocument()
     const entryTotalMetric = screen.getByTestId('supplier-settlements-metric-entry-total')
     expect(within(entryTotalMetric).getByText('当前列表流水')).toBeInTheDocument()
-    const missionFlow = screen.getByTestId('supplier-settlements-mission-flow')
+    const missionFlow = screen.getByRole('region', { name: '供应商资金任务流' })
     const missionScope = within(missionFlow)
-    expect(screen.getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
+    expect(within(missionFlow).getByRole('heading', { name: '供应商资金任务流' })).toBeInTheDocument()
     const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     expect(bridge).toHaveAttribute('aria-labelledby', 'supplier-settlements-shared-console-bridge-heading')
@@ -306,19 +305,23 @@ describe('SupplierSettlementsPage', () => {
   it('shows real supplier settlement records, reports, and disputes from loaded payloads', async () => {
     renderSupplierSettlementsPage()
 
-    const entriesSection = await screen.findByTestId('supplier-settlements-entries-card')
+    const entriesSection = await screen.findByRole('region', { name: '结算流水' })
+    expect(within(entriesSection).getByRole('heading', { name: '结算流水' })).toBeInTheDocument()
     expect(within(entriesSection).getByText('Discord 首单')).toBeInTheDocument()
     expect(within(entriesSection).getByText('¥32.00')).toBeInTheDocument()
 
-    const reportSection = screen.getByTestId('supplier-settlements-reports-card')
+    const reportSection = screen.getByRole('region', { name: '项目报表' })
+    expect(within(reportSection).getByRole('heading', { name: '项目报表' })).toBeInTheDocument()
     expect(within(reportSection).getByText(/^discord$/i)).toBeInTheDocument()
     expect(within(reportSection).getByText('¥388.00')).toBeInTheDocument()
     expect(within(reportSection).getByText('¥235.00')).toBeInTheDocument()
 
-    const costProfilesSection = screen.getByTestId('supplier-settlements-cost-profiles-card')
+    const costProfilesSection = screen.getByRole('region', { name: '供应商成本模型' })
+    expect(within(costProfilesSection).getByRole('heading', { name: '供应商成本模型' })).toBeInTheDocument()
     expect(within(costProfilesSection).getByText('主力供给')).toBeInTheDocument()
 
-    const disputesSection = screen.getByTestId('supplier-settlements-disputes-card')
+    const disputesSection = screen.getByRole('region', { name: '供应商争议单' })
+    expect(within(disputesSection).getByRole('heading', { name: '供应商争议单' })).toBeInTheDocument()
     expect(within(disputesSection).getByText('验证码错误')).toBeInTheDocument()
     expect(within(disputesSection).getByText('¥0.00')).toBeInTheDocument()
   })
@@ -415,8 +418,10 @@ describe('SupplierSettlementsPage', () => {
     renderSupplierSettlementsPage()
 
     expect(await screen.findByRole('heading', { name: '供应商资金与争议指挥台' })).toBeInTheDocument()
-    const missionFallback = screen.getByTestId('supplier-settlements-mission-fallback')
-    const sharedConsoleFallback = screen.getByTestId('supplier-settlements-shared-console-fallback')
+    const fallbackRegions = screen.getAllByRole('region', { name: '返回共享工作台' })
+    expect(fallbackRegions).toHaveLength(2)
+    const missionFallback = fallbackRegions[0]
+    const sharedConsoleFallback = fallbackRegions[1]
 
     expect(within(missionFallback).getByRole('button', { name: /返回共享工作台/ })).toBeInTheDocument()
     expect(within(sharedConsoleFallback).getByTestId('supplier-settlements-shared-console-fallback-button')).toBeInTheDocument()
