@@ -333,7 +333,7 @@ describe('ApiKeysPage', () => {
       ],
     })
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
+    const whitelistEditor = screen.getByRole('region', { name: '编辑 API Key 白名单' })
     const whitelistInput = within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     expect((whitelistInput as HTMLInputElement).value).toContain('127.0.0.1')
     await user.clear(whitelistInput)
@@ -359,7 +359,7 @@ describe('ApiKeysPage', () => {
     await within(keysRegion).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
+    const whitelistEditor = screen.getByRole('region', { name: '编辑 API Key 白名单' })
     const whitelistInput = within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     await user.clear(whitelistInput)
     await user.click(within(whitelistEditor).getByRole('button', { name: '保存白名单' }))
@@ -381,7 +381,7 @@ describe('ApiKeysPage', () => {
     await within(keysRegion).findByText('默认密钥')
 
     await user.click(within(getApiKeyRow('默认密钥')).getByRole('button', { name: /编辑白名单/ }))
-    const whitelistEditor = screen.getByTestId('api-keys-whitelist-editor-card')
+    const whitelistEditor = screen.getByRole('region', { name: '编辑 API Key 白名单' })
     const whitelistInput = within(whitelistEditor).getByPlaceholderText('172.18.0.1,10.0.0.0/24')
     await user.clear(whitelistInput)
     await user.type(whitelistInput, 'invalid host')

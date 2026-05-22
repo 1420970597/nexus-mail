@@ -563,11 +563,15 @@ export function ApiKeysPage() {
       </Card>
 
       <Card
-        title="编辑 API Key 白名单"
+        role="region"
+        aria-labelledby="api-keys-whitelist-editor-heading"
         data-testid="api-keys-whitelist-editor-card"
         style={{ width: '100%', borderRadius: 20, display: editingWhitelistID !== null ? 'block' : 'none' }}
       >
         <Space vertical align="start" style={{ width: '100%' }} spacing={16}>
+          <Typography.Title heading={5} id="api-keys-whitelist-editor-heading" style={{ margin: 0 }}>
+            编辑 API Key 白名单
+          </Typography.Title>
           <Typography.Paragraph style={{ margin: 0, color: '#475569' }}>
             请输入合法的 IP 或 CIDR，使用英文逗号分隔。留空表示移除白名单限制。
           </Typography.Paragraph>
