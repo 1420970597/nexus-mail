@@ -17,6 +17,17 @@ export interface ConsoleRouteDefinition {
   allowedRoles: Role[]
 }
 
+export interface ContinueConsoleStep {
+  key: string
+  path: string
+  title: string
+  label: string
+  description: string
+  actionLabel: string
+  badge: string
+  group: ConsoleNavGroup
+}
+
 export const DEFAULT_SHARED_ROUTE = '/'
 export const DEFAULT_LOGIN_ROUTE = '/login'
 export const DASHBOARD_ROUTE = '/'
@@ -261,8 +272,29 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
   },
 ]
 
+function routeMatchesRole(route: ConsoleRouteDefinition, role?: Role) {
+  if (!role) {
+    return route.group === 'shared'
+  }
+  return route.allowedRoles.includes(role)
+}
+
+export function resolveRouteDefinition(path: string) {
+  return consoleRoutes.find((route) => route.path === path)
+}
+
+export function resolveRouteTitle(path: string, role?: Role) {
+  const route = resolveRouteDefinition(path)
+  if (!route) {
+    return path === DEFAULT_SHARED_ROUTE ? '控制台' : path
+  }
+  return route.titleByRole?.[role ?? 'user'] ?? route.title
+}
+
 export function getConsoleRoutesForRole(role?: Role) {
-  return consoleRoutes.filter((route) => route.allowedRoles.includes(role ?? 'user'))
+  return consoleRoutes
+    .filter((route) => routeMatchesRole(route, role))
+    .sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))
 }
 
 export function getConsoleMenuForRole(role?: Role): MenuItem[] {
@@ -273,33 +305,16 @@ export function getConsoleMenuForRole(role?: Role): MenuItem[] {
   }))
 }
 
-export function resolvePostAuthLandingRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
-  const allowedPaths = new Set(menuItems.map((item) => item.path))
-  const candidates = getConsoleRoutesForRole(role).filter((route) => allowedPaths.has(route.path))
-  const fallback = [...candidates].sort((left, right) => routePriorityForRole(left, role) - routePriorityForRole(right, role))[0]
-  return fallback?.path ?? DEFAULT_SHARED_ROUTE
-}
-
-export function resolvePreferredConsoleRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
-  return resolvePostAuthLandingRoute(menuItems, role)
-}
-
-export function getQuickActionRoutes(role?: Role) {
-  return getConsoleRoutesForRole(role)
-    .filter((route) => typeof route.quickActionPriority === 'number')
-    .sort((left, right) => (left.quickActionPriority ?? 999) - (right.quickActionPriority ?? 999))
-}
-
 export function allowedLandingPathsForRole(role?: Role) {
   return getConsoleRoutesForRole(role).map((route) => route.path)
 }
 
-export function visibleQuickActionPaths(menuItems: Array<{ path: string }> = [], currentPath?: string, role?: Role) {
+export function visibleQuickActionPaths(menuItems: MenuItem[] = [], currentPath?: string, role?: Role) {
   const allowedPaths = new Set(menuItems.map((item) => item.path))
-  return getQuickActionRoutes(role)
+  return consoleRoutes
+    .filter((route) => route.quickActionPriority !== undefined && allowedPaths.has(route.path) && route.path !== currentPath && routeMatchesRole(route, role))
+    .sort((left, right) => (left.quickActionPriority ?? 0) - (right.quickActionPriority ?? 0))
     .map((route) => route.path)
-    .filter((path) => allowedPaths.has(path))
-    .filter((path) => path !== currentPath)
 }
 
 export function groupedConsolePaths() {
@@ -310,18 +325,114 @@ export function groupedConsolePaths() {
   }
 }
 
-export function hasMenuPath(menuItems: MenuItem[] = [], path: string) {
+export function resolvePostAuthLandingRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
+  const allowedPaths = new Set(menuItems.map((item) => item.path))
+  const candidates = getConsoleRoutesForRole(role).filter((route) => allowedPaths.has(route.path))
+  return candidates[0]?.path ?? DEFAULT_SHARED_ROUTE
+}
+
+export function resolvePreferredConsoleRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
+  return resolvePostAuthLandingRoute(menuItems, role)
+}
+
+export function hasMenuPath(menuItems: Array<{ path: string }> = [], path: string) {
   return menuItems.some((item) => item.path === path)
 }
 
-export function resolveRouteDefinition(path: string) {
-  return consoleRoutes.find((route) => route.path === path)
+const continueStepTemplates: Record<Role, Array<Omit<ContinueConsoleStep, 'path' | 'title'>>> = {
+  user: [
+    {
+      key: 'projects',
+      label: '项目市场',
+      description: '从项目市场开始首轮采购，确认真实库存、成功率与当前可售资源。',
+      actionLabel: '前往项目市场',
+      badge: '基础采购',
+      group: 'shared',
+    },
+    {
+      key: 'orders',
+      label: '订单中心',
+      description: '继续回到订单中心跟踪履约结果、邮箱分配与 READY / FINISHED 状态。',
+      actionLabel: '查看订单中心',
+      badge: '订单履约',
+      group: 'shared',
+    },
+    {
+      key: 'api-keys',
+      label: 'API Keys',
+      description: '继续进入 API Keys、Webhook 与文档，完成自动化接入与真实 API 联调。',
+      actionLabel: '打开 API Keys',
+      badge: '共享接入',
+      group: 'shared',
+    },
+  ],
+  supplier: [
+    {
+      key: 'supplier-domains',
+      label: '域名池运营中枢',
+      description: '优先核对域名池、Catch-All 覆盖与入口质量，再展开资源与供货维护。',
+      actionLabel: '前往域名管理',
+      badge: '供应商扩展',
+      group: 'supplier',
+    },
+    {
+      key: 'supplier-resources',
+      label: '供应商资源',
+      description: '继续在同一套控制台里维护资源账号、协议配置与供给健康状态。',
+      actionLabel: '查看供应商资源',
+      badge: '资源维护',
+      group: 'supplier',
+    },
+    {
+      key: 'supplier-settlements',
+      label: '供应商资金与争议指挥台',
+      description: '最后回到供应商结算页观察待结算余额、争议与最终结算链路。',
+      actionLabel: '前往供应商结算',
+      badge: '资金结算',
+      group: 'supplier',
+    },
+  ],
+  admin: [
+    {
+      key: 'admin-suppliers',
+      label: '供应商管理',
+      description: '先进入供应商管理，确认供给表现、待结算余额与经营协同状态。',
+      actionLabel: '前往供应商管理',
+      badge: '经营协同',
+      group: 'admin',
+    },
+    {
+      key: 'admin-risk',
+      label: '风控中心',
+      description: '继续回到风控中心复核高风险信号、限流命中与白名单拒绝轨迹。',
+      actionLabel: '查看风控中心',
+      badge: '风险治理',
+      group: 'admin',
+    },
+    {
+      key: 'admin-audit',
+      label: '审计日志',
+      description: '最后在审计日志中核对高危操作、接入事件与结算复核记录。',
+      actionLabel: '查看审计日志',
+      badge: '审计复核',
+      group: 'admin',
+    },
+  ],
 }
 
-export function resolveRouteTitle(path: string, role?: Role) {
-  const route = resolveRouteDefinition(path)
-  if (!route) {
-    return 'Nexus Console'
-  }
-  return route.titleByRole?.[role ?? 'user'] ?? route.title
+export function resolveContinueConsoleSteps(menuItems: MenuItem[] = [], role: Role = 'user') {
+  const itemsByPath = new Map(menuItems.map((item) => [item.path, item]))
+  return continueStepTemplates[role]
+    .map((template) => {
+      const route = consoleRoutes.find((candidate) => candidate.key === template.key)
+      if (!route || !itemsByPath.has(route.path)) {
+        return null
+      }
+      return {
+        ...template,
+        path: route.path,
+        title: resolveRouteTitle(route.path, role),
+      } satisfies ContinueConsoleStep
+    })
+    .filter((step): step is ContinueConsoleStep => Boolean(step))
 }

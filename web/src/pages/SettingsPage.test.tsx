@@ -123,7 +123,7 @@ describe('SettingsPage', () => {
 
     expect(screen.getByRole('heading', { name: '首次使用清单' })).toBeInTheDocument()
 
-    const checklistCard = screen.getByTestId('settings-user-first-run-checklist')
+    const checklistCard = screen.getByRole('region', { name: '首次使用清单' })
     const checklistScope = within(checklistCard)
     expect(checklistScope.getByRole('button', { name: '打开项目市场' })).toBeInTheDocument()
     expect(checklistScope.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
@@ -135,7 +135,7 @@ describe('SettingsPage', () => {
     expect(within(projectsRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
 
     const settingsView = renderSettingsPage()
-    const checklistCardAgain = await screen.findByTestId('settings-user-first-run-checklist')
+    const checklistCardAgain = await screen.findByRole('region', { name: '首次使用清单' })
     const checklistScopeAgain = within(checklistCardAgain)
     expect(checklistScopeAgain.getByRole('button', { name: '查看订单中心' })).toBeInTheDocument()
     expect(checklistScopeAgain.getByText('3. 开发者 API 接入工作台')).toBeInTheDocument()
@@ -148,8 +148,100 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
     expect(within(homeRegion).queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
     expect(within(homeRegion).queryByRole('button', { name: '前往供应商结算' })).not.toBeInTheDocument()
-    expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '首次使用清单' })).not.toBeInTheDocument()
     settingsView.unmount()
+  })
+
+  it('shows a named continue-current-role lane with user next-step cards instead of only shortcut cards', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 25, email: 'user@nexus-mail.local', role: 'user' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: PROJECTS_ROUTE },
+        { key: 'orders', label: '订单中心', path: ORDERS_ROUTE },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    const continueLane = await screen.findByRole('region', { name: '继续当前角色主路径' })
+    const continueScope = within(continueLane)
+    expect(continueScope.getByRole('heading', { name: '继续当前角色主路径' })).toBeInTheDocument()
+    expect(continueScope.getByText('根据当前服务端角色与实际菜单，继续进入下一步工作区，而不是退回泛化的共享首页提示。')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-projects')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-orders')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-api-keys')).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /前往项目市场/ })).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /查看订单中心/ })).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(continueScope.queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
+    expect(continueScope.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+  })
+
+  it('shows supplier continue-current-role lane with supplier-only next steps inside the same shared console shell', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 26, email: 'supplier@nexus-mail.local', role: 'supplier' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+        { key: 'supplier-resources', label: '供应商资源', path: '/supplier/resources' },
+        { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    const continueLane = await screen.findByRole('region', { name: '继续当前角色主路径' })
+    const continueScope = within(continueLane)
+    expect(continueScope.getByTestId('settings-continue-console-step-supplier-domains')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-supplier-resources')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-supplier-settlements')).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /前往域名管理/ })).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /查看供应商资源/ })).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /前往供应商结算/ })).toBeInTheDocument()
+    expect(continueScope.queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
+    expect(continueScope.queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
+  })
+
+  it('shows admin continue-current-role lane with admin-only next steps inside the same shared console shell', async () => {
+    useAuthStore.setState({
+      token: 'token',
+      refreshToken: 'refresh',
+      user: { id: 27, email: 'admin@nexus-mail.local', role: 'admin' },
+      menu: [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-suppliers', label: '供应商管理', path: '/admin/suppliers' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+        { key: 'api-keys', label: 'API Keys', path: API_KEYS_ROUTE },
+        { key: 'webhooks', label: 'Webhook 设置', path: WEBHOOKS_ROUTE },
+        { key: 'docs', label: 'API 文档', path: DOCS_ROUTE },
+        { key: 'settings', label: '设置中心', path: SETTINGS_ROUTE },
+      ],
+    })
+
+    renderSettingsPage()
+
+    const continueLane = await screen.findByRole('region', { name: '继续当前角色主路径' })
+    const continueScope = within(continueLane)
+    expect(continueScope.getByTestId('settings-continue-console-step-admin-suppliers')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-admin-risk')).toBeInTheDocument()
+    expect(continueScope.getByTestId('settings-continue-console-step-admin-audit')).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /前往供应商管理/ })).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /查看风控中心/ })).toBeInTheDocument()
+    expect(continueScope.getByRole('button', { name: /查看审计日志/ })).toBeInTheDocument()
+    expect(continueScope.queryByRole('button', { name: '前往项目市场' })).not.toBeInTheDocument()
+    expect(continueScope.queryByRole('button', { name: '查看供应商资源' })).not.toBeInTheDocument()
   })
 
   it('exposes the shared-console bridge as a named region with canonical role-aware mission cards for regular users', async () => {
@@ -181,9 +273,9 @@ describe('SettingsPage', () => {
 
     const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('统一身份入口')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('共享接入桥接')).toBeInTheDocument()
-    expect(within(capabilityMatrix).getByText('角色菜单扩展')).toBeInTheDocument()
+    expect(within(capabilityMatrix).getAllByText('统一身份入口').length).toBeGreaterThan(0)
+    expect(within(capabilityMatrix).getAllByText('共享接入桥接').length).toBeGreaterThan(0)
+    expect(within(capabilityMatrix).getAllByText('角色菜单扩展').length).toBeGreaterThan(0)
     expect(within(capabilityMatrix).queryByText('账号入口')).not.toBeInTheDocument()
     expect(within(capabilityMatrix).queryByText('集成入口')).not.toBeInTheDocument()
     expect(within(capabilityMatrix).queryByText('文档入口')).not.toBeInTheDocument()
@@ -196,26 +288,18 @@ describe('SettingsPage', () => {
     expect(within(sharedBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
     expect(within(sharedBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
     expect(within(sharedBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
-    expect(within(sharedBridge).queryByRole('heading', { name: '开发者 API 接入工作台' })).not.toBeInTheDocument()
-    expect(within(sharedBridge).queryByRole('heading', { name: '开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
-    expect(within(sharedBridge).queryByRole('heading', { name: 'API 文档与接入控制台' })).not.toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
 
     const sessionCard = screen.getByRole('region', { name: '当前登录会话' })
     expect(within(sessionCard).getByRole('heading', { name: '当前登录会话' })).toBeInTheDocument()
     expect(within(sessionCard).getByText('控制台模式')).toBeInTheDocument()
     expect(within(sessionCard).getByText('共享接入桥接')).toBeInTheDocument()
     expect(within(sessionCard).queryByText('文档入口')).not.toBeInTheDocument()
-    const missionCards = screen.getByTestId('settings-mission-cards')
-    expect(missionCards).toHaveStyle({ background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)' })
-    expect(within(missionCards).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
-    expect(within(missionCards).getByRole('heading', { name: '开发者 Webhook 接入工作台' })).toBeInTheDocument()
-    expect(within(missionCards).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
-    expect(within(missionCards).getByText('从设置中心直接进入 API Keys，继续完成 token 发放、白名单准备与基础接入校验，保持接入链路留在同一控制台。')).toBeInTheDocument()
-    expect(within(missionCards).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
-    expect(within(missionCards).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
-    expect(within(missionCards).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
-    expect(within(missionCards).queryByRole('button', { name: /打开 Webhook 设置/ })).not.toBeInTheDocument()
-    expect(within(missionCards).queryByRole('button', { name: /打开 API 文档/ })).not.toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('button', { name: /打开 API Keys/ })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('button', { name: /继续配置 Webhook/ })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('button', { name: /查看 API 文档/ })).toBeInTheDocument()
 
     const shortcutLane = screen.getByTestId('settings-shortcut-cards')
     expect(within(shortcutLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
@@ -225,7 +309,7 @@ describe('SettingsPage', () => {
     expect(within(shortcutLane).queryByRole('button', { name: '管理 API Keys' })).not.toBeInTheDocument()
     expect(within(shortcutLane).queryByRole('button', { name: '打开 Webhook 设置' })).not.toBeInTheDocument()
 
-    await user.click(within(missionCards).getByRole('button', { name: /查看 API 文档/ }))
+    await user.click(within(sharedBridge).getByRole('button', { name: /查看 API 文档/ }))
     const docsRegion = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRegion).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
   })
@@ -259,7 +343,7 @@ describe('SettingsPage', () => {
     expect(shortcutScope.queryByRole('button', { name: '打开项目市场' })).not.toBeInTheDocument()
   })
 
-  it('hides the shared bridge when the current account has no integration mission cards exposed by the server menu', async () => {
+  it('keeps the shared bridge visible as a named explanatory region even when the current account has no integration mission cards exposed by the server menu', async () => {
     useAuthStore.setState({
       token: 'token',
       refreshToken: 'refresh',
@@ -273,7 +357,13 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
-    expect(screen.queryByTestId('settings-shared-console-bridge')).not.toBeInTheDocument()
+    const sharedBridge = screen.getByRole('region', { name: '共享接入桥接' })
+    expect(sharedBridge).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('heading', { name: '共享接入桥接' })).toBeInTheDocument()
+    expect(within(sharedBridge).getByRole('heading', { name: '当前已开放的接入入口' })).toBeInTheDocument()
+    expect(within(sharedBridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
+    expect(within(sharedBridge).queryByRole('button', { name: /继续配置 Webhook/ })).not.toBeInTheDocument()
+    expect(within(sharedBridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
   })
 
   it('navigates from the regular-user shortcut lane into the canonical api keys workspace', async () => {

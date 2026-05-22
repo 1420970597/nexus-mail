@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allowedLandingPathsForRole, resolvePreferredConsoleRoute, visibleQuickActionPaths } from './consoleNavigation'
+import { allowedLandingPathsForRole, resolveContinueConsoleSteps, resolvePreferredConsoleRoute, visibleQuickActionPaths } from './consoleNavigation'
 
 describe('console navigation landing rules', () => {
   it('keeps shared dashboard ahead of admin-specific routes for admin users in the current shared-console model', () => {
@@ -66,5 +66,50 @@ describe('console navigation landing rules', () => {
 
   it('returns no quick actions when the menu exposes none of the quick-action routes', () => {
     expect(visibleQuickActionPaths([{ path: '/' }, { path: '/profile' }], '/profile', 'user')).toEqual([])
+  })
+
+  it('returns user continue-console steps in the intended procurement-to-integration order', () => {
+    const steps = resolveContinueConsoleSteps(
+      [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'projects', label: '项目市场', path: '/projects' },
+        { key: 'orders', label: '订单中心', path: '/orders' },
+        { key: 'api-keys', label: 'API Keys', path: '/api-keys' },
+      ],
+      'user',
+    )
+
+    expect(steps.map((step) => step.key)).toEqual(['projects', 'orders', 'api-keys'])
+    expect(steps.map((step) => step.actionLabel)).toEqual(['前往项目市场', '查看订单中心', '打开 API Keys'])
+  })
+
+  it('returns supplier continue-console steps only for supplier-visible routes', () => {
+    const steps = resolveContinueConsoleSteps(
+      [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'supplier-domains', label: '域名管理', path: '/supplier/domains' },
+        { key: 'supplier-resources', label: '供应商资源', path: '/supplier/resources' },
+        { key: 'supplier-settlements', label: '供应商结算', path: '/supplier/settlements' },
+      ],
+      'supplier',
+    )
+
+    expect(steps.map((step) => step.key)).toEqual(['supplier-domains', 'supplier-resources', 'supplier-settlements'])
+    expect(steps.every((step) => step.group === 'supplier')).toBe(true)
+  })
+
+  it('returns admin continue-console steps only for admin-visible routes', () => {
+    const steps = resolveContinueConsoleSteps(
+      [
+        { key: 'dashboard', label: '仪表盘', path: '/' },
+        { key: 'admin-suppliers', label: '供应商管理', path: '/admin/suppliers' },
+        { key: 'admin-risk', label: '风控中心', path: '/admin/risk' },
+        { key: 'admin-audit', label: '审计日志', path: '/admin/audit' },
+      ],
+      'admin',
+    )
+
+    expect(steps.map((step) => step.key)).toEqual(['admin-suppliers', 'admin-risk', 'admin-audit'])
+    expect(steps.every((step) => step.group === 'admin')).toBe(true)
   })
 })

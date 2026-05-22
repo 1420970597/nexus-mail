@@ -13,7 +13,17 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userFirstRunStorageKeyForUser } from './DashboardPage'
 import { MenuItem, useAuthStore } from '../store/authStore'
-import { API_KEYS_ROUTE, DOCS_ROUTE, ORDERS_ROUTE, PROFILE_ROUTE, PROJECTS_ROUTE, WEBHOOKS_ROUTE } from '../utils/consoleNavigation'
+import {
+  API_KEYS_ROUTE,
+  DOCS_ROUTE,
+  ORDERS_ROUTE,
+  PROFILE_ROUTE,
+  PROJECTS_ROUTE,
+  SETTINGS_ROUTE,
+  WEBHOOKS_ROUTE,
+  resolveContinueConsoleSteps,
+  resolveRouteTitle,
+} from '../utils/consoleNavigation'
 
 const sharedFirstRunRoutes = {
   projects: PROJECTS_ROUTE,
@@ -126,7 +136,6 @@ function webhookShortcutTitle(role?: string) {
 }
 
 const settingsPillars: SettingsPillar[] = [
-
   {
     key: 'dark-console',
     label: '深色共享工作台',
@@ -293,6 +302,13 @@ export function SettingsPage() {
     }
   }, [menu, user?.role])
 
+  const continueConsoleSteps = useMemo(() => {
+    if (!user?.role) {
+      return []
+    }
+    return resolveContinueConsoleSteps(menu, user.role)
+  }, [menu, user?.role])
+
   const missionCards = useMemo(() => sharedMissionCards(user?.role).filter((item) => menuHasPath(menu, item.path)), [menu, user?.role])
 
   const capabilitySignals = useMemo(
@@ -364,101 +380,106 @@ export function SettingsPage() {
       </Card>
 
       <Row gutter={[16, 16]} style={{ width: '100%' }}>
-        <Col xs={24} xl={15}>
+        <Col xs={24} xl={12}>
           <Card
-            data-testid="settings-mission-cards"
-            title={<span style={{ color: '#f8fafc' }}>集成任务流</span>}
-            style={{ width: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
-            bodyStyle={{ padding: 20 }}
+            data-testid="settings-capability-matrix"
+            role="region"
+            aria-labelledby="settings-capability-matrix-heading"
+            style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            bodyStyle={{ padding: 24 }}
           >
-            <Row gutter={[16, 16]}>
-              {missionCards.map((item) => (
-                <Col xs={24} md={8} key={item.key}>
-                  <Card
-                    style={{
-                      height: '100%',
-                      borderRadius: 20,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                      border: '1px solid rgba(94,106,210,0.24)',
-                    }}
-                    bodyStyle={{ padding: 18 }}
-                  >
-                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
-                      <Tag color="cyan">{item.tag}</Tag>
-                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
-                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 88 }}>
-                        {item.description}
-                      </Typography.Paragraph>
-                      <Button icon={<IconArrowRight />} type="primary" theme="solid" onClick={() => navigate(item.path)}>
-                        {item.button}
-                      </Button>
-                    </Space>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+            <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
+              <Typography.Title heading={4} id="settings-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                控制台能力矩阵
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(203,213,225,0.76)' }}>
+                统一身份、共享接入与角色扩展仍旧在同一套控制台内逐步展开，避免退回多后台切换模式。
+              </Typography.Paragraph>
+              <Space wrap>
+                {capabilitySignals.map((item) => (
+                  <Tag key={item.key} color="cyan">{item.key}</Tag>
+                ))}
+              </Space>
+              <Descriptions
+                data={capabilitySignals.map((item) => ({ key: item.key, value: item.value }))}
+                align="left"
+                style={{ color: '#e2e8f0' }}
+              />
+            </Space>
           </Card>
         </Col>
-        <Col xs={24} xl={9}>
-          <Space vertical spacing={16} style={{ width: '100%' }}>
-            <Card
-              data-testid="settings-capability-matrix"
-              role="region"
-              aria-labelledby="settings-capability-matrix-heading"
-              style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
-              bodyStyle={{ padding: 20 }}
-            >
-              <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-                <Typography.Title heading={5} id="settings-capability-matrix-heading" style={{ margin: 0, color: '#f8fafc' }}>
-                  控制台能力矩阵
+        <Col xs={24} xl={12}>
+          <Card
+            data-testid="settings-shared-console-bridge"
+            role="region"
+            aria-labelledby="settings-shared-console-bridge-heading"
+            style={{ borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            bodyStyle={{ padding: 24 }}
+          >
+            <Space vertical align="start" spacing={18} style={{ width: '100%' }}>
+              <div>
+                <Typography.Title heading={4} id="settings-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
+                  共享接入桥接
                 </Typography.Title>
-                <Descriptions data={capabilitySignals} align="left" />
-              </Space>
-            </Card>
-            {missionCards.length > 0 ? (
+                <Typography.Paragraph style={{ color: 'rgba(203,213,225,0.76)', marginTop: 8, marginBottom: 0 }}>
+                  从设置中心直接进入当前账号已开放的接入入口，继续在同一登录后的共享控制台内完成接入核对。
+                </Typography.Paragraph>
+              </div>
               <Card
-                data-testid="settings-shared-console-bridge"
-                role="region"
-                aria-labelledby="settings-shared-console-bridge-heading"
-                style={{ borderRadius: 24, background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
-                bodyStyle={{ padding: 20 }}
+                data-testid="settings-capability-summary"
+                style={{ width: '100%', borderRadius: 18, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+                bodyStyle={{ padding: 16 }}
               >
-                <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
-                  <Typography.Title heading={5} id="settings-shared-console-bridge-heading" style={{ margin: 0, color: '#f8fafc' }}>
-                    共享接入桥接
-                  </Typography.Title>
-                  <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>
+                <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                  <Typography.Title heading={6} style={{ margin: 0, color: '#f8fafc', fontSize: 14, letterSpacing: '0.01em' }}>
                     当前已开放的接入入口
                   </Typography.Title>
-                  <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', lineHeight: 1.7 }}>
-                    从设置中心直接进入当前账号已开放的接入入口，继续在同一登录后的共享控制台内完成接入核对。
-                  </Typography.Paragraph>
-                  <Space wrap>
+                  <Row gutter={[12, 12]} style={{ width: '100%' }}>
                     {missionCards.map((item) => (
-                      <Button key={`bridge-${item.key}`} type="primary" theme="solid" icon={<IconArrowRight />} onClick={() => navigate(item.path)}>
-                        {item.button}
-                      </Button>
+                      <Col xs={24} md={8} key={item.key}>
+                        <Card style={{ height: '100%', borderRadius: 16, background: 'rgba(2,6,23,0.28)', border: '1px solid rgba(255,255,255,0.06)' }} bodyStyle={{ padding: 16 }}>
+                          <Space vertical align="start" spacing={10} style={{ width: '100%' }}>
+                            <Tag color="grey">{item.tag}</Tag>
+                            <Typography.Title heading={6} style={{ margin: 0, color: '#f8fafc' }}>{item.title}</Typography.Title>
+                            <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
+                              {item.description}
+                            </Typography.Paragraph>
+                            <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
+                              {item.button}
+                            </Button>
+                          </Space>
+                        </Card>
+                      </Col>
                     ))}
-                  </Space>
+                  </Row>
                 </Space>
               </Card>
-            ) : null}
-          </Space>
+            </Space>
+          </Card>
         </Col>
       </Row>
 
       {user?.role === 'user' ? (
         <Card
           data-testid="settings-user-first-run-checklist"
-          title="首次使用清单"
+          role="region"
+          aria-labelledby="settings-user-first-run-checklist-heading"
           style={{ width: '100%', borderRadius: 24 }}
           bodyStyle={{ padding: 20 }}
         >
           <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+            <div>
+              <Typography.Title heading={4} id="settings-user-first-run-checklist-heading" style={{ margin: 0 }}>
+                首次使用清单
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: '8px 0 0', color: '#475569' }}>
+                新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。
+              </Typography.Paragraph>
+            </div>
             <Banner
               type="info"
               fullMode={false}
-              description="新注册普通用户建议先完成项目市场、订单中心与 API 接入三步；供应商 / 管理员能力会在后续角色扩展时出现在同一套共享控制台内。"
+              description="如果已经完成首轮采购或接入，可以直接回到共享首页重新打开首轮引导。"
               style={{ width: '100%' }}
             />
             <Button icon={<IconRotate />} theme="solid" type="primary" onClick={reopenUserFirstRun}>
@@ -484,6 +505,61 @@ export function SettingsPage() {
                       </Typography.Paragraph>
                       <Button type="primary" theme="solid" onClick={() => navigate(item.path)}>
                         {item.button}
+                      </Button>
+                    </Space>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Space>
+        </Card>
+      ) : null}
+
+      {continueConsoleSteps.length > 0 ? (
+        <Card
+          data-testid="settings-continue-console-lane"
+          role="region"
+          aria-labelledby="settings-continue-console-lane-heading"
+          style={{
+            width: '100%',
+            borderRadius: 24,
+            background: 'linear-gradient(180deg, rgba(15,16,17,0.94) 0%, rgba(25,26,27,0.92) 100%)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+          bodyStyle={{ padding: 22 }}
+        >
+          <Space vertical align="start" spacing={16} style={{ width: '100%' }}>
+            <div>
+              <Tag color="green">继续当前角色主路径</Tag>
+              <Typography.Title heading={4} id="settings-continue-console-lane-heading" style={{ margin: '12px 0 6px', color: '#f8fafc' }}>
+                继续当前角色主路径
+              </Typography.Title>
+              <Typography.Paragraph style={{ margin: 0, color: 'rgba(203,213,225,0.76)' }}>
+                根据当前服务端角色与实际菜单，继续进入下一步工作区，而不是退回泛化的共享首页提示。
+              </Typography.Paragraph>
+            </div>
+            <Row gutter={[16, 16]} style={{ width: '100%' }}>
+              {continueConsoleSteps.map((step) => (
+                <Col xs={24} md={8} key={step.key}>
+                  <Card
+                    data-testid={`settings-continue-console-step-${step.key}`}
+                    style={{
+                      height: '100%',
+                      borderRadius: 18,
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                    }}
+                    bodyStyle={{ padding: 18 }}
+                  >
+                    <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                      <Tag color="grey">{step.badge}</Tag>
+                      <Typography.Title heading={5} style={{ margin: 0, color: '#f8fafc' }}>{step.title}</Typography.Title>
+                      <Typography.Text strong style={{ color: '#dbeafe' }}>{step.label}</Typography.Text>
+                      <Typography.Paragraph style={{ margin: 0, color: 'rgba(226,232,240,0.72)', minHeight: 72 }}>
+                        {step.description}
+                      </Typography.Paragraph>
+                      <Button type="primary" theme="borderless" icon={<IconArrowRight />} onClick={() => navigate(step.path)}>
+                        {step.actionLabel}
                       </Button>
                     </Space>
                   </Card>

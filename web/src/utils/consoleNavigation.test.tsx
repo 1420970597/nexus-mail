@@ -70,11 +70,11 @@ describe('consoleNavigation shared-console contracts', () => {
       DASHBOARD_ROUTE,
       PROJECTS_ROUTE,
       ORDERS_ROUTE,
-      BALANCE_ROUTE,
-      PROFILE_ROUTE,
       API_KEYS_ROUTE,
       WEBHOOKS_ROUTE,
       SETTINGS_ROUTE,
+      PROFILE_ROUTE,
+      BALANCE_ROUTE,
       DOCS_ROUTE,
     ])
 
@@ -82,11 +82,11 @@ describe('consoleNavigation shared-console contracts', () => {
       DASHBOARD_ROUTE,
       PROJECTS_ROUTE,
       ORDERS_ROUTE,
-      BALANCE_ROUTE,
-      PROFILE_ROUTE,
       API_KEYS_ROUTE,
       WEBHOOKS_ROUTE,
       SETTINGS_ROUTE,
+      PROFILE_ROUTE,
+      BALANCE_ROUTE,
       DOCS_ROUTE,
       SUPPLIER_DOMAINS_ROUTE,
       SUPPLIER_RESOURCES_ROUTE,
@@ -98,20 +98,20 @@ describe('consoleNavigation shared-console contracts', () => {
       DASHBOARD_ROUTE,
       PROJECTS_ROUTE,
       ORDERS_ROUTE,
-      BALANCE_ROUTE,
-      PROFILE_ROUTE,
       API_KEYS_ROUTE,
       WEBHOOKS_ROUTE,
       SETTINGS_ROUTE,
+      PROFILE_ROUTE,
+      BALANCE_ROUTE,
       DOCS_ROUTE,
       SUPPLIER_DOMAINS_ROUTE,
+      ADMIN_RISK_ROUTE,
       SUPPLIER_RESOURCES_ROUTE,
+      ADMIN_PRICING_ROUTE,
       SUPPLIER_OFFERINGS_ROUTE,
+      ADMIN_SUPPLIERS_ROUTE,
       SUPPLIER_SETTLEMENTS_ROUTE,
       ADMIN_USERS_ROUTE,
-      ADMIN_SUPPLIERS_ROUTE,
-      ADMIN_PRICING_ROUTE,
-      ADMIN_RISK_ROUTE,
       ADMIN_AUDIT_ROUTE,
     ])
   })
@@ -156,7 +156,7 @@ describe('consoleNavigation shared-console contracts', () => {
     expect(resolveRouteTitle(SUPPLIER_OFFERINGS_ROUTE)).toBe('供货规则编排中枢')
     expect(resolveRouteTitle(SUPPLIER_SETTLEMENTS_ROUTE)).toBe('供应商资金与争议指挥台')
     expect(resolveRouteTitle(ADMIN_AUDIT_ROUTE)).toBe('审计日志')
-    expect(resolveRouteTitle('/missing')).toBe('Nexus Console')
+    expect(resolveRouteTitle('/missing')).toBe('/missing')
   })
 
   it('keeps console route definitions unique so menu truth and route truth cannot silently drift', () => {
