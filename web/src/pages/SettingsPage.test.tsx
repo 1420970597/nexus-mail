@@ -412,7 +412,7 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
-    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    const shortcutLane = screen.getByRole('region', { name: '控制台运行快捷入口' })
     await user.click(within(shortcutLane).getByRole('button', { name: '打开 API Keys' }))
     const apiKeysRegion = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRegion).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
@@ -438,9 +438,8 @@ describe('SettingsPage', () => {
 
     expect(await screen.findByText('设置中心')).toBeInTheDocument()
     expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
-    expect(screen.getByText('控制台运行快捷入口')).toBeInTheDocument()
+    const shortcutLane = screen.getByRole('region', { name: '控制台运行快捷入口' })
 
-    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
     expect(within(shortcutLane).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(shortcutLane).getByRole('heading', { name: '供给事件回调工作台' })).toBeInTheDocument()
     expect(within(shortcutLane).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
@@ -476,7 +475,7 @@ describe('SettingsPage', () => {
     renderSettingsPage()
 
     expect(await screen.findByRole('heading', { name: '设置中心' })).toBeInTheDocument()
-    const shortcutLane = screen.getByTestId('settings-shortcut-cards')
+    const shortcutLane = screen.getByRole('region', { name: '控制台运行快捷入口' })
     expect(within(shortcutLane).getByRole('heading', { name: 'Webhook 运维与回调观测' })).toBeInTheDocument()
     expect(within(shortcutLane).getAllByRole('button', { name: '继续配置 Webhook' })).toHaveLength(1)
     expect(within(shortcutLane).queryByRole('heading', { name: 'Webhook 回调工作台' })).not.toBeInTheDocument()
