@@ -309,7 +309,6 @@ export function ApiDocsPage() {
       </Card>
 
       <Card
-        data-testid="docs-shared-console-loop"
         style={{
           width: '100%',
           borderRadius: 24,
@@ -441,7 +440,6 @@ export function ApiDocsPage() {
       >
         <Space vertical align="start" spacing={14} style={{ width: '100%' }}>
           <div
-            data-testid="docs-shared-console-bridge"
             role="region"
             aria-label="共享接入桥接"
             style={{ width: '100%' }}
@@ -449,7 +447,7 @@ export function ApiDocsPage() {
             <Tag color="cyan" shape="circle">共享接入桥接</Tag>
             <Space align="start" style={{ width: '100%', justifyContent: 'space-between', marginTop: 14 }} wrap>
             <div>
-              <Typography.Title heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
+              <Typography.Title id="docs-shared-console-bridge-heading" heading={4} style={{ margin: '0 0 8px', color: '#f7f8f8' }}>
                 文档、接入与回调共用一套共享控制台
               </Typography.Title>
               <Typography.Paragraph style={{ margin: 0, color: 'rgba(208,214,224,0.78)', maxWidth: 760 }}>
