@@ -375,7 +375,6 @@ export function ApiKeysPage() {
                       当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。
                     </Typography.Text>
                     <Button
-                      data-testid="api-keys-shared-console-fallback-button"
                       theme="solid"
                       type="primary"
                       icon={<IconServer />}

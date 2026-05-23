@@ -52,6 +52,16 @@ func TestAPIKeyActivationWriteRouteIsRegistered(t *testing.T) {
 	t.Fatalf("expected POST /api/v1/orders/activations/api-key route to be registered for activation:write API keys")
 }
 
+func TestAPIKeyInventoryReadRouteIsRegistered(t *testing.T) {
+	r := NewRouter(testApp())
+	for _, route := range r.Routes() {
+		if route.Method == http.MethodGet && route.Path == "/api/v1/projects/inventory" {
+			return
+		}
+	}
+	t.Fatalf("expected GET /api/v1/projects/inventory route to be registered for activation:read API keys")
+}
+
 func testApp() *bootstrap.App {
 	return &bootstrap.App{
 		AuthService:    auth.NewService(nil, nil, "test-secret", time.Hour, 24*time.Hour),

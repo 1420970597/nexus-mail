@@ -540,7 +540,7 @@ describe('ApiKeysPage', () => {
     const fallback = screen.getByRole('region', { name: '返回共享工作台' })
     expect(within(fallback).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(fallback).getByText(/当 Webhook、文档与项目入口暂未由服务端暴露时，先回到共享工作台继续共享控制台中的真实业务主链路。/)).toBeInTheDocument()
-    expect(within(fallback).getByTestId('api-keys-shared-console-fallback-button')).toBeInTheDocument()
+    expect(within(fallback).getByRole('button', { name: /返回共享工作台/ })).toBeInTheDocument()
   })
 
   it('navigates via the scoped fallback CTA to the preferred shared-console home region', async () => {
@@ -561,7 +561,7 @@ describe('ApiKeysPage', () => {
     const keysRegion = await screen.findByRole('region', { name: '当前密钥' })
     await within(keysRegion).findByText('默认密钥')
     const fallback = screen.getByRole('region', { name: '返回共享工作台' })
-    await user.click(within(fallback).getByTestId('api-keys-shared-console-fallback-button'))
+    await user.click(within(fallback).getByRole('button', { name: /返回共享工作台/ }))
     const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(within(homeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
   })

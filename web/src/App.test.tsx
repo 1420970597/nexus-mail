@@ -488,13 +488,13 @@ describe('App', () => {
     dashboardView.unmount()
     renderApp([SETTINGS_ROUTE])
 
-    const checklist = await screen.findByTestId('settings-user-first-run-checklist')
+    const checklist = await screen.findByRole('region', { name: '首次使用清单' })
     expect(within(checklist).getByRole('button', { name: /重新打开首轮引导/ })).toBeInTheDocument()
     await user.click(within(checklist).getByRole('button', { name: /重新打开首轮引导/ }))
     expect(window.localStorage.getItem(userFirstRunStorageKeyForUser(1))).toBe('false')
 
     const reopenedOnboarding = await expectDefaultUserFirstRunLane()
-    expect(screen.queryByTestId('settings-user-first-run-checklist')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '首次使用清单' })).not.toBeInTheDocument()
     expect(within(reopenedOnboarding).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
   })
 
