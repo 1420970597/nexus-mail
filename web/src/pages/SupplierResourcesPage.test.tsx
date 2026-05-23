@@ -207,16 +207,14 @@ describe('SupplierResourcesPage', () => {
 
     expect(await screen.findByRole('heading', { name: '供应商资源' })).toBeInTheDocument()
 
-    const sharedConsoleBridge = screen.getByTestId('supplier-resources-shared-console-bridge')
-    expect(sharedConsoleBridge).toHaveAttribute('role', 'region')
+    const sharedConsoleBridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(sharedConsoleBridge).toHaveAttribute('aria-labelledby', 'supplier-resources-shared-console-bridge-heading')
     expect(within(sharedConsoleBridge).getByRole('heading', { name: '共享接入桥接' })).toHaveAttribute(
       'id',
       'supplier-resources-shared-console-bridge-heading',
     )
 
-    const capabilityMatrix = screen.getByTestId('supplier-resources-capability-matrix')
-    expect(capabilityMatrix).toHaveAttribute('role', 'region')
+    const capabilityMatrix = screen.getByRole('region', { name: '控制台能力矩阵' })
     expect(capabilityMatrix).toHaveAttribute('aria-labelledby', 'supplier-resources-capability-matrix-heading')
     expect(within(capabilityMatrix).getByRole('heading', { name: '控制台能力矩阵' })).toHaveAttribute(
       'id',

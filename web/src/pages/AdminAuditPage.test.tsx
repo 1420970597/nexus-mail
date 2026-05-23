@@ -142,7 +142,7 @@ describe('AdminAuditPage', () => {
 
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
 
-    const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(bridge).getByRole('button', { name: /打开 API Keys/ }))
     let apiKeysRouteStub = await screen.findByRole('region', { name: '共享控制台 - API Keys' })
     expect(within(apiKeysRouteStub).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
@@ -150,7 +150,7 @@ describe('AdminAuditPage', () => {
     view.unmount()
     view = renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
-    const refreshedBridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    const refreshedBridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(refreshedBridge).getByRole('button', { name: /继续查看风控/ }))
     const riskRouteStub = await screen.findByRole('region', { name: '共享控制台 - 风控中心' })
     expect(within(riskRouteStub).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('AdminAuditPage', () => {
     view.unmount()
     renderAdminAuditPage()
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
-    const docsBridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    const docsBridge = screen.getByRole('region', { name: '共享接入桥接' })
     await user.click(within(docsBridge).getByRole('button', { name: /查看 API 文档/ }))
     const docsRouteStub = await screen.findByRole('region', { name: '共享控制台 - API 文档' })
     expect(within(docsRouteStub).getByRole('heading', { name: 'API 文档与接入控制台' })).toBeInTheDocument()
@@ -183,12 +183,12 @@ describe('AdminAuditPage', () => {
     expect(within(missionFlow).queryByRole('button', { name: '查看风控中心' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开资金工作台' })).not.toBeInTheDocument()
     expect(within(missionFlow).queryByRole('button', { name: '打开 API Keys' })).not.toBeInTheDocument()
-    const bridge = screen.getByTestId('admin-audit-shared-console-bridge')
+    const bridge = screen.getByRole('region', { name: '共享接入桥接' })
     expect(within(bridge).queryByRole('button', { name: /打开 API Keys/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /继续查看风控/ })).not.toBeInTheDocument()
     expect(within(bridge).queryByRole('button', { name: /查看 API 文档/ })).not.toBeInTheDocument()
-    expect(screen.queryByTestId('admin-audit-capability-matrix')).not.toBeInTheDocument()
-    const fallbackCard = screen.getByTestId('admin-audit-shared-console-fallback')
+    expect(screen.queryByRole('region', { name: '控制台能力矩阵' })).not.toBeInTheDocument()
+    const fallbackCard = screen.getByRole('region', { name: '返回共享工作台' })
     expect(fallbackCard).toBeInTheDocument()
     expect(within(fallbackCard).getByRole('heading', { name: '返回共享工作台' })).toBeInTheDocument()
     expect(within(fallbackCard).getByText('当前菜单未暴露风控、接入或文档入口时，继续回到服务端授予的共享工作台完成后续运营闭环。')).toBeInTheDocument()
@@ -209,7 +209,7 @@ describe('AdminAuditPage', () => {
     renderAdminAuditPage()
 
     expect(await screen.findByRole('heading', { name: '审计日志' })).toBeInTheDocument()
-    expect(screen.queryByTestId('admin-audit-shared-console-fallback')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '返回共享工作台' })).not.toBeInTheDocument()
   })
 
   it('queries audit logs with explicit filters', async () => {
