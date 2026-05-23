@@ -224,23 +224,31 @@ export function OrdersPage() {
                 dataSource={items}
                 empty={
                   <Empty description="当前暂无订单，可先前往项目市场下单。" image={null}>
-                    <Space data-testid="orders-empty-state-actions">
-                      {canOpenProjects ? (
-                        <Button type="primary" theme="solid" onClick={() => navigate(PROJECTS_ROUTE)}>
-                          前往项目市场
-                        </Button>
-                      ) : null}
-                      {canOpenApiKeys ? (
-                        <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
-                          打开 API Keys
-                        </Button>
-                      ) : null}
-                      {fallbackRoute !== '/orders' ? (
-                        <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
-                          返回共享工作台
-                        </Button>
-                      ) : null}
-                    </Space>
+                    <section role="region" aria-labelledby="orders-empty-state-actions-heading" style={{ width: '100%' }}>
+                      <Space vertical align="start" spacing={12} style={{ width: '100%' }}>
+                        <Typography.Title id="orders-empty-state-actions-heading" heading={6} style={{ margin: 0 }}>
+                          订单为空时的下一步
+                        </Typography.Title>
+                        <Typography.Text style={{ color: 'var(--semi-color-text-1)' }}>当前暂无订单，可先前往项目市场下单。</Typography.Text>
+                        <Space>
+                          {canOpenProjects ? (
+                            <Button type="primary" theme="solid" onClick={() => navigate(PROJECTS_ROUTE)}>
+                              前往项目市场
+                            </Button>
+                          ) : null}
+                          {canOpenApiKeys ? (
+                            <Button theme="borderless" type="primary" onClick={() => navigate(API_KEYS_ROUTE)}>
+                              打开 API Keys
+                            </Button>
+                          ) : null}
+                          {fallbackRoute !== '/orders' ? (
+                            <Button theme="borderless" type="tertiary" onClick={() => navigate(fallbackRoute)}>
+                              返回共享工作台
+                            </Button>
+                          ) : null}
+                        </Space>
+                      </Space>
+                    </section>
                   </Empty>
                 }
                 columns={[
@@ -336,7 +344,9 @@ export function OrdersPage() {
               </Space>
             </Card>
             <Card
-              title="履约任务流"
+              title={<Typography.Title heading={6} id="orders-fulfillment-guidance-heading" style={{ margin: 0 }}>履约任务流</Typography.Title>}
+              role="region"
+              aria-labelledby="orders-fulfillment-guidance-heading"
               data-testid="orders-fulfillment-guidance-card"
               style={{ width: '100%', borderRadius: 24 }}
               bodyStyle={{ padding: 20 }}

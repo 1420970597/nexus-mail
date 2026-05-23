@@ -130,7 +130,7 @@ describe('OrdersPage', () => {
     expect(screen.getByText('READY / FINISHED / TIMEOUT 全部来自真实 API 返回')).toBeInTheDocument()
   })
 
-  it('shows shared-console next actions when the order list is empty', async () => {
+  it('shows shared-console next actions inside a named empty-state region when the order list is empty', async () => {
     const user = userEvent.setup()
     mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
 
@@ -158,8 +158,8 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    const emptyActions = screen.getByTestId('orders-empty-state-actions')
+    const emptyActions = await screen.findByRole('region', { name: '订单为空时的下一步' })
+    expect(within(emptyActions).getByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     expect(within(emptyActions).getByRole('button', { name: '前往项目市场' })).toBeInTheDocument()
     expect(within(emptyActions).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 接入准备' })).not.toBeInTheDocument()
@@ -192,7 +192,7 @@ describe('OrdersPage', () => {
     )
 
     expect(await screen.findByRole('heading', { name: '订单中心' })).toBeInTheDocument()
-    const guidanceCard = screen.getByTestId('orders-fulfillment-guidance-card')
+    const guidanceCard = screen.getByRole('region', { name: '履约任务流' })
     const guidanceScope = within(guidanceCard)
     expect(guidanceScope.getByRole('heading', { name: '履约任务流' })).toBeInTheDocument()
     expect(guidanceScope.queryByText('履约说明')).not.toBeInTheDocument()
@@ -202,7 +202,7 @@ describe('OrdersPage', () => {
     expect(guidanceScope.getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(guidanceScope.queryByRole('button', { name: '管理 API Keys' })).not.toBeInTheDocument()
 
-    const continuationLane = screen.getByTestId('orders-continuation-lane')
+    const continuationLane = screen.getByRole('region', { name: '订单结果 → API 接入 → 再次采购' })
     expect(within(continuationLane).getByRole('heading', { name: '订单结果 → API 接入 → 再次采购' })).toBeInTheDocument()
   })
 
@@ -234,8 +234,8 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    const emptyActions = screen.getByTestId('orders-empty-state-actions')
+    const emptyActions = await screen.findByRole('region', { name: '订单为空时的下一步' })
+    expect(within(emptyActions).getByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     expect(within(emptyActions).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(emptyActions).queryByRole('button', { name: '查看 API 接入准备' })).not.toBeInTheDocument()
     await user.click(within(emptyActions).getByRole('button', { name: '打开 API Keys' }))
@@ -400,7 +400,7 @@ describe('OrdersPage', () => {
     expect(within(destinationRegion).getByRole('heading', { name: '项目市场' })).toBeInTheDocument()
   })
 
-  it('shows a return-to-recommended-workspace CTA in the empty state when only the shared dashboard remains available', async () => {
+  it('shows a return-to-recommended-workspace CTA in the named empty-state region when only the shared dashboard remains available', async () => {
     const user = userEvent.setup()
     mockedGetActivationOrders.mockResolvedValueOnce({ items: [] })
     useAuthStore.setState({
@@ -429,8 +429,8 @@ describe('OrdersPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
-    const emptyActions = screen.getByTestId('orders-empty-state-actions')
+    const emptyActions = await screen.findByRole('region', { name: '订单为空时的下一步' })
+    expect(within(emptyActions).getByText('当前暂无订单，可先前往项目市场下单。')).toBeInTheDocument()
     await user.click(within(emptyActions).getByRole('button', { name: '返回共享工作台' }))
     const homeRegion = await screen.findByRole('region', { name: '共享控制台首页' })
     expect(within(homeRegion).getByRole('heading', { name: '控制台总览' })).toBeInTheDocument()
