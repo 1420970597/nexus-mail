@@ -370,8 +370,8 @@ describe('App', () => {
     useAuthStore.setState({ token: null, refreshToken: null, user: null, menu: [] })
     renderApp(['/login'])
 
-    const registerJourney = screen.getByTestId('login-register-journey')
-    const registerJourneyScope = within(registerJourney)
+    const registerJourneyRegion = screen.getByRole('region', { name: '首轮接入路径' })
+    const registerJourneyScope = within(registerJourneyRegion)
 
     expect(registerJourneyScope.getByRole('button', { name: /立即注册，进入共享控制台/ })).toBeInTheDocument()
 

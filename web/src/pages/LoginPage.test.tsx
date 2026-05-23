@@ -99,7 +99,7 @@ function renderLoginPage(initialEntry = '/login') {
 }
 
 function getRegisterJourneyScope() {
-  return within(screen.getByTestId('login-register-journey'))
+  return within(screen.getByRole('region', { name: '首轮接入路径' }))
 }
 
 describe('LoginPage', () => {
