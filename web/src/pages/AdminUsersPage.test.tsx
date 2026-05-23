@@ -184,7 +184,7 @@ describe('AdminUsersPage dispute handling', () => {
     expect(within(heroCard).getByRole('heading', { name: '用户管理' })).toBeInTheDocument()
     expect(within(heroCard).getByText('用户运营中枢')).toBeInTheDocument()
 
-    const missionRegion = await screen.findByRole('heading', { name: '管理员主任务流' }).then((heading) => heading.closest('.semi-card') as HTMLElement)
+    const missionRegion = screen.getByRole('region', { name: '管理员主任务流' })
     expect(within(missionRegion).getByRole('heading', { name: '管理员主任务流' })).toBeInTheDocument()
     expect(within(missionRegion).getByRole('button', { name: '查看风控中心' })).toBeInTheDocument()
     expect(within(missionRegion).getByRole('button', { name: '查看审计日志' })).toBeInTheDocument()
@@ -201,7 +201,7 @@ describe('AdminUsersPage dispute handling', () => {
   it('navigates from named admin mission-control regions into shared-console destinations', async () => {
     renderAdminUsersPage()
 
-    const missionRegion = await screen.findByRole('heading', { name: '管理员主任务流' }).then((heading) => heading.closest('.semi-card') as HTMLElement)
+    const missionRegion = screen.getByRole('region', { name: '管理员主任务流' })
     fireEvent.click(within(missionRegion).getByRole('button', { name: '查看风控中心' }))
     const riskRegion = await screen.findByRole('region', { name: '共享控制台 - 风控中心' })
     expect(within(riskRegion).getByRole('heading', { name: '风控中心' })).toBeInTheDocument()
@@ -211,9 +211,7 @@ describe('AdminUsersPage dispute handling', () => {
     seedAdminMenu(false)
     renderAdminUsersPage()
 
-    const fallbackHeading = await screen.findByRole('heading', { name: '回到共享工作台继续管理员主链路' })
-    const fallbackRegion = fallbackHeading.closest('.semi-card') as HTMLElement
-    expect(fallbackRegion).toBeTruthy()
+    const fallbackRegion = await screen.findByRole('region', { name: '回到共享工作台继续管理员主链路' })
     expect(within(fallbackRegion).getByRole('heading', { name: '回到共享工作台继续管理员主链路' })).toBeInTheDocument()
     expect(within(fallbackRegion).getByRole('button', { name: '返回共享工作台' })).toBeInTheDocument()
     const bridgeRegion = screen.getByRole('region', { name: '共享接入桥接' })
