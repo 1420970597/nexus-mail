@@ -332,17 +332,16 @@ describe('DashboardPage shared-console journey hub', () => {
 
     const view = renderDashboard()
     const lane = await screen.findByRole('region', { name: '推荐下一步' })
-    const integrationButton = within(lane).getByRole('button', { name: '打开 API Keys' })
-    const integrationCard = integrationButton.parentElement?.parentElement?.parentElement as HTMLElement
+    const integrationCard = within(lane).getByTestId('dashboard-next-step-api-keys')
 
     expect(integrationCard).toBeInTheDocument()
-    expect(within(integrationCard).getByText('开发者 API 接入工作台')).toBeInTheDocument()
+    expect(within(integrationCard).getByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     expect(within(integrationCard).getByRole('button', { name: '打开 API Keys' })).toBeInTheDocument()
     expect(within(integrationCard).queryByText('集成与回调')).not.toBeInTheDocument()
     expect(within(lane).queryByRole('button', { name: '前往 开发者 Webhook 接入工作台' })).not.toBeInTheDocument()
     expect(within(lane).queryByRole('button', { name: '查看 API 文档' })).not.toBeInTheDocument()
 
-    await user.click(integrationButton)
+    await user.click(within(integrationCard).getByRole('button', { name: '打开 API Keys' }))
     expect(await screen.findByRole('heading', { name: '开发者 API 接入工作台' })).toBeInTheDocument()
     view.unmount()
   })
