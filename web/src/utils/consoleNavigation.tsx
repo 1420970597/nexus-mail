@@ -1,4 +1,4 @@
-import { IconActivity, IconArticle, IconBolt, IconComponent, IconHome, IconHistogram, IconPriceTag, IconSafe, IconServer, IconSetting, IconUser } from '@douyinfe/semi-icons'
+import { IconActivity, IconArticle, IconBolt, IconComponent, IconHome, IconHistogram, IconPriceTag, IconSafe, IconServer, IconSetting, IconShield, IconUser } from '@douyinfe/semi-icons'
 import type { JSX } from 'react'
 import type { MenuItem, Role } from '../store/authStore'
 
@@ -224,8 +224,8 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     title: '用户管理',
     group: 'admin',
     icon: <IconUser />,
-    landingPriority: 30,
-    quickActionPriority: 40,
+    landingPriority: 0,
+    quickActionPriority: 30,
     allowedRoles: ['admin'],
   },
   {
@@ -235,7 +235,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     title: '供应商管理',
     group: 'admin',
     icon: <IconServer />,
-    landingPriority: 20,
+    landingPriority: 10,
     allowedRoles: ['admin'],
   },
   {
@@ -245,7 +245,7 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     title: '价格策略',
     group: 'admin',
     icon: <IconPriceTag />,
-    landingPriority: 10,
+    landingPriority: 20,
     allowedRoles: ['admin'],
   },
   {
@@ -254,9 +254,9 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     path: ADMIN_RISK_ROUTE,
     title: '风控中心',
     group: 'admin',
-    icon: <IconActivity />,
-    landingPriority: 0,
-    quickActionPriority: 10,
+    icon: <IconShield />,
+    landingPriority: 30,
+    quickActionPriority: 40,
     allowedRoles: ['admin'],
   },
   {
@@ -265,30 +265,33 @@ export const consoleRoutes: ConsoleRouteDefinition[] = [
     path: ADMIN_AUDIT_ROUTE,
     title: '审计日志',
     group: 'admin',
-    icon: <IconSafe />,
+    icon: <IconArticle />,
     landingPriority: 40,
     quickActionPriority: 50,
     allowedRoles: ['admin'],
   },
 ]
 
+export function resolveRouteDefinition(pathname: string) {
+  return consoleRoutes.find((route) => route.path === pathname)
+}
+
+export function resolveRouteTitle(pathname: string, role?: Role) {
+  const route = resolveRouteDefinition(pathname)
+  if (!route) {
+    return pathname === DEFAULT_SHARED_ROUTE ? '共享控制台' : pathname
+  }
+  if (role && route.titleByRole?.[role]) {
+    return route.titleByRole[role] as string
+  }
+  return route.title
+}
+
 function routeMatchesRole(route: ConsoleRouteDefinition, role?: Role) {
   if (!role) {
     return route.group === 'shared'
   }
   return route.allowedRoles.includes(role)
-}
-
-export function resolveRouteDefinition(path: string) {
-  return consoleRoutes.find((route) => route.path === path)
-}
-
-export function resolveRouteTitle(path: string, role?: Role) {
-  const route = resolveRouteDefinition(path)
-  if (!route) {
-    return path === DEFAULT_SHARED_ROUTE ? '控制台' : path
-  }
-  return route.titleByRole?.[role ?? 'user'] ?? route.title
 }
 
 export function getConsoleRoutesForRole(role?: Role) {
@@ -305,18 +308,6 @@ export function getConsoleMenuForRole(role?: Role): MenuItem[] {
   }))
 }
 
-export function allowedLandingPathsForRole(role?: Role) {
-  return getConsoleRoutesForRole(role).map((route) => route.path)
-}
-
-export function visibleQuickActionPaths(menuItems: MenuItem[] = [], currentPath?: string, role?: Role) {
-  const allowedPaths = new Set(menuItems.map((item) => item.path))
-  return consoleRoutes
-    .filter((route) => route.quickActionPriority !== undefined && allowedPaths.has(route.path) && route.path !== currentPath && routeMatchesRole(route, role))
-    .sort((left, right) => (left.quickActionPriority ?? 0) - (right.quickActionPriority ?? 0))
-    .map((route) => route.path)
-}
-
 export function groupedConsolePaths() {
   return {
     shared: consoleRoutes.filter((route) => route.group === 'shared').map((route) => route.path),
@@ -325,128 +316,136 @@ export function groupedConsolePaths() {
   }
 }
 
-export function resolvePostAuthLandingRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
-  const allowedPaths = new Set(menuItems.map((item) => item.path))
-  const candidates = getConsoleRoutesForRole(role).filter((route) => allowedPaths.has(route.path))
-  return candidates[0]?.path ?? DEFAULT_SHARED_ROUTE
+export function allowedLandingPathsForRole(role?: Role) {
+  return getConsoleRoutesForRole(role).map((route) => route.path)
 }
 
-export function resolveBootstrapConsoleRoute(
-  currentPath: string,
-  menuItems: Array<{ path: string }> = [],
-  role?: Role,
-) {
+export function hasMenuPath(menuItems: MenuItem[] = [], path: string) {
+  return menuItems.some((item) => item.path === path)
+}
+
+export function resolvePreferredConsoleRoute(menuItems: MenuItem[] = [], role?: Role) {
+  const allowed = getConsoleRoutesForRole(role)
+    .filter((route) => hasMenuPath(menuItems, route.path))
+  if (allowed.length === 0) {
+    return DEFAULT_SHARED_ROUTE
+  }
+  const sharedHome = allowed.find((route) => route.path === DEFAULT_SHARED_ROUTE)
+  return sharedHome ? sharedHome.path : allowed[0].path
+}
+
+export function resolveBootstrapConsoleRoute(currentPath: string, menuItems: MenuItem[] = [], role?: Role) {
   if (hasMenuPath(menuItems, currentPath)) {
     return currentPath
   }
 
   return hasMenuPath(menuItems, DEFAULT_SHARED_ROUTE)
     ? DEFAULT_SHARED_ROUTE
-    : resolvePostAuthLandingRoute(menuItems, role)
+    : resolvePreferredConsoleRoute(menuItems, role)
 }
 
-export function resolvePreferredConsoleRoute(menuItems: Array<{ path: string }> = [], role?: Role) {
-  return resolvePostAuthLandingRoute(menuItems, role)
+export function visibleQuickActionPaths(menuItems: MenuItem[] = [], currentPath: string, role?: Role) {
+  return getConsoleRoutesForRole(role)
+    .filter((route) => route.quickActionPriority !== undefined)
+    .filter((route) => hasMenuPath(menuItems, route.path))
+    .filter((route) => route.path !== currentPath)
+    .sort((a, b) => (a.quickActionPriority || 0) - (b.quickActionPriority || 0))
+    .map((route) => route.path)
 }
+export function resolveContinueConsoleSteps(menuItems: MenuItem[] = [], role?: Role): ContinueConsoleStep[] {
+  const steps: ContinueConsoleStep[] = []
 
-export function hasMenuPath(menuItems: Array<{ path: string }> = [], path: string) {
-  return menuItems.some((item) => item.path === path)
-}
-
-const continueStepTemplates: Record<Role, Array<Omit<ContinueConsoleStep, 'path' | 'title'>>> = {
-  user: [
-    {
-      key: 'projects',
-      label: '项目市场',
-      description: '从项目市场开始首轮采购，确认真实库存、成功率与当前可售资源。',
-      actionLabel: '前往项目市场',
-      badge: '基础采购',
-      group: 'shared',
-    },
-    {
-      key: 'orders',
-      label: '订单中心',
-      description: '继续回到订单中心跟踪履约结果、邮箱分配与 READY / FINISHED 状态。',
-      actionLabel: '查看订单中心',
-      badge: '订单履约',
-      group: 'shared',
-    },
-    {
-      key: 'api-keys',
-      label: 'API Keys',
-      description: '继续进入 API Keys、Webhook 与文档，完成自动化接入与真实 API 联调。',
-      actionLabel: '打开 API Keys',
-      badge: '共享接入',
-      group: 'shared',
-    },
-  ],
-  supplier: [
-    {
-      key: 'supplier-domains',
-      label: '域名池运营中枢',
-      description: '优先核对域名池、Catch-All 覆盖与入口质量，再展开资源与供货维护。',
-      actionLabel: '前往域名管理',
-      badge: '供应商扩展',
-      group: 'supplier',
-    },
-    {
-      key: 'supplier-resources',
-      label: '供应商资源',
-      description: '继续在同一套控制台里维护资源账号、协议配置与供给健康状态。',
-      actionLabel: '查看供应商资源',
-      badge: '资源维护',
-      group: 'supplier',
-    },
-    {
-      key: 'supplier-settlements',
-      label: '供应商资金与争议指挥台',
-      description: '最后回到供应商结算页观察待结算余额、争议与最终结算链路。',
-      actionLabel: '前往供应商结算',
-      badge: '资金结算',
-      group: 'supplier',
-    },
-  ],
-  admin: [
-    {
-      key: 'admin-suppliers',
-      label: '供应商管理',
-      description: '先进入供应商管理，确认供给表现、待结算余额与经营协同状态。',
-      actionLabel: '前往供应商管理',
-      badge: '经营协同',
-      group: 'admin',
-    },
-    {
-      key: 'admin-risk',
-      label: '风控中心',
-      description: '继续回到风控中心复核高风险信号、限流命中与白名单拒绝轨迹。',
-      actionLabel: '查看风控中心',
-      badge: '风险治理',
-      group: 'admin',
-    },
-    {
-      key: 'admin-audit',
-      label: '审计日志',
-      description: '最后在审计日志中核对高危操作、接入事件与结算复核记录。',
-      actionLabel: '查看审计日志',
-      badge: '审计复核',
-      group: 'admin',
-    },
-  ],
-}
-
-export function resolveContinueConsoleSteps(menuItems: MenuItem[] = [], role: Role = 'user') {
-  const itemsByPath = new Map(menuItems.map((item) => [item.path, item]))
-  return continueStepTemplates[role]
-    .map((template) => {
-      const route = consoleRoutes.find((candidate) => candidate.key === template.key)
-      if (!route || !itemsByPath.has(route.path)) {
-        return null
-      }
-      return {
-        ...template,
-        path: route.path,
-        title: resolveRouteTitle(route.path, role),
-      } satisfies ContinueConsoleStep
+  const maybePush = (path: string, step: Omit<ContinueConsoleStep, 'path' | 'title'>) => {
+    if (!hasMenuPath(menuItems, path)) {
+      return
+    }
+    steps.push({
+      ...step,
+      path,
+      title: resolveRouteTitle(path, role),
     })
-    .filter((step): step is ContinueConsoleStep => Boolean(step))
+  }
+
+  switch (role) {
+    case 'admin':
+      maybePush(ADMIN_USERS_ROUTE, {
+        key: 'admin-users',
+        label: '先核对用户与会话',
+        description: '继续在用户管理工作台核对账号状态、会话信息与后续处理入口，保持管理员动作留在同一壳内。',
+        actionLabel: '查看用户管理',
+        badge: '管理员扩展',
+        group: 'admin',
+      })
+      maybePush(ADMIN_RISK_ROUTE, {
+        key: 'admin-risk',
+        label: '复核高风险信号',
+        description: '继续查看限流、白名单与高危信号，校验规则是否生效。',
+        actionLabel: '查看风控中心',
+        badge: '管理员扩展',
+        group: 'admin',
+      })
+      maybePush(ADMIN_AUDIT_ROUTE, {
+        key: 'admin-audit',
+        label: '回放审计轨迹',
+        description: '把接入、资金与风控动作继续串到同一条共享控制台审计链。',
+        actionLabel: '查看审计日志',
+        badge: '共享审计',
+        group: 'admin',
+      })
+      break
+    case 'supplier':
+      maybePush(SUPPLIER_DOMAINS_ROUTE, {
+        key: 'supplier-domains',
+        label: '维护域名池',
+        description: '回到域名运营中枢，继续准备可售资源与 catch-all 能力。',
+        actionLabel: '前往域名管理',
+        badge: '供应商扩展',
+        group: 'supplier',
+      })
+      maybePush(SUPPLIER_RESOURCES_ROUTE, {
+        key: 'supplier-resources',
+        label: '补齐资源与邮箱池',
+        description: '继续在共享壳内整理供应商资源、账号与邮箱池状态。',
+        actionLabel: '查看供应商资源',
+        badge: '供应商扩展',
+        group: 'supplier',
+      })
+      maybePush(SUPPLIER_SETTLEMENTS_ROUTE, {
+        key: 'supplier-settlements',
+        label: '确认结算与争议',
+        description: '继续处理待结算金额与争议反馈，保持供给闭环在同一控制台完成。',
+        actionLabel: '打开供应商结算',
+        badge: '资金闭环',
+        group: 'supplier',
+      })
+      break
+    default:
+      maybePush(PROJECTS_ROUTE, {
+        key: 'projects',
+        label: '先进入项目市场',
+        description: '完成注册后先确认项目可售资源，为首单采购准备库存与价格。',
+        actionLabel: '前往项目市场',
+        badge: '首轮接入',
+        group: 'shared',
+      })
+      maybePush(ORDERS_ROUTE, {
+        key: 'orders',
+        label: '再追踪订单履约',
+        description: '用同一共享控制台继续查看订单状态、结果与后续履约动作。',
+        actionLabel: '查看订单中心',
+        badge: '首轮接入',
+        group: 'shared',
+      })
+      maybePush(API_KEYS_ROUTE, {
+        key: 'api-keys',
+        label: '最后完成 API 接入',
+        description: '继续进入 API Keys、Webhook 与文档，完成程序化调用、回调联调与真实接口验证准备。',
+        actionLabel: '管理 API Keys',
+        badge: '共享接入桥接',
+        group: 'shared',
+      })
+      break
+  }
+
+  return steps
 }

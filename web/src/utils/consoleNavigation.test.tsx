@@ -17,6 +17,7 @@ import {
   PROFILE_ROUTE,
   PROJECTS_ROUTE,
   resolveBootstrapConsoleRoute,
+  resolveContinueConsoleSteps,
   resolvePreferredConsoleRoute,
   resolveRouteTitle,
   SETTINGS_ROUTE,
@@ -106,13 +107,13 @@ describe('consoleNavigation shared-console contracts', () => {
       BALANCE_ROUTE,
       DOCS_ROUTE,
       SUPPLIER_DOMAINS_ROUTE,
-      ADMIN_RISK_ROUTE,
-      SUPPLIER_RESOURCES_ROUTE,
-      ADMIN_PRICING_ROUTE,
-      SUPPLIER_OFFERINGS_ROUTE,
-      ADMIN_SUPPLIERS_ROUTE,
-      SUPPLIER_SETTLEMENTS_ROUTE,
       ADMIN_USERS_ROUTE,
+      SUPPLIER_RESOURCES_ROUTE,
+      ADMIN_SUPPLIERS_ROUTE,
+      SUPPLIER_OFFERINGS_ROUTE,
+      ADMIN_PRICING_ROUTE,
+      SUPPLIER_SETTLEMENTS_ROUTE,
+      ADMIN_RISK_ROUTE,
       ADMIN_AUDIT_ROUTE,
     ])
   })
@@ -142,9 +143,9 @@ describe('consoleNavigation shared-console contracts', () => {
 
     expect(visibleQuickActionPaths(adminMenu, DASHBOARD_ROUTE, 'admin')).toEqual([
       PROJECTS_ROUTE,
-      ADMIN_RISK_ROUTE,
       BALANCE_ROUTE,
       ADMIN_USERS_ROUTE,
+      ADMIN_RISK_ROUTE,
       ADMIN_AUDIT_ROUTE,
       SUPPLIER_DOMAINS_ROUTE,
       ORDERS_ROUTE,
@@ -171,6 +172,71 @@ describe('consoleNavigation shared-console contracts', () => {
     expect(resolveRouteTitle(SUPPLIER_SETTLEMENTS_ROUTE)).toBe('供应商资金与争议指挥台')
     expect(resolveRouteTitle(ADMIN_AUDIT_ROUTE)).toBe('审计日志')
     expect(resolveRouteTitle('/missing')).toBe('/missing')
+  })
+
+  it('builds role-aware continue-console steps from visible menu truth without drifting route identity', () => {
+    const userSteps = resolveContinueConsoleSteps(
+      [
+        { path: PROJECTS_ROUTE },
+        { path: ORDERS_ROUTE },
+        { path: API_KEYS_ROUTE },
+      ],
+      'user',
+    )
+    expect(userSteps).toEqual([
+      expect.objectContaining({
+        key: 'projects',
+        path: PROJECTS_ROUTE,
+        title: '项目市场',
+        label: '先进入项目市场',
+        actionLabel: '前往项目市场',
+        badge: '首轮接入',
+      }),
+      expect.objectContaining({
+        key: 'orders',
+        path: ORDERS_ROUTE,
+        title: '订单中心',
+        label: '再追踪订单履约',
+        actionLabel: '查看订单中心',
+      }),
+      expect.objectContaining({
+        key: 'api-keys',
+        path: API_KEYS_ROUTE,
+        title: '开发者 API 接入工作台',
+        label: '最后完成 API 接入',
+        actionLabel: '管理 API Keys',
+      }),
+    ])
+
+    const adminSteps = resolveContinueConsoleSteps(
+      [
+        { path: ADMIN_USERS_ROUTE },
+        { path: ADMIN_RISK_ROUTE },
+        { path: ADMIN_AUDIT_ROUTE },
+      ],
+      'admin',
+    )
+    expect(adminSteps).toEqual([
+      expect.objectContaining({
+        key: 'admin-users',
+        path: ADMIN_USERS_ROUTE,
+        title: '用户管理',
+        label: '先核对用户与会话',
+        actionLabel: '查看用户管理',
+      }),
+      expect.objectContaining({
+        key: 'admin-risk',
+        path: ADMIN_RISK_ROUTE,
+        title: '风控中心',
+        label: '复核高风险信号',
+      }),
+      expect.objectContaining({
+        key: 'admin-audit',
+        path: ADMIN_AUDIT_ROUTE,
+        title: '审计日志',
+        label: '回放审计轨迹',
+      }),
+    ])
   })
 
   it('keeps console route definitions unique so menu truth and route truth cannot silently drift', () => {
